@@ -101,6 +101,14 @@ pub struct Settings {
     // Agent timers
     pub timer_dir: Option<String>,
     pub timer_check_interval_ms: Option<u64>,
+
+    // Loop engine (FCT009)
+    #[serde(default)]
+    pub loop_specs_dir: Option<String>,
+    #[serde(default)]
+    pub loop_state_file: Option<String>,
+    #[serde(default)]
+    pub loop_max_concurrent: Option<u32>,
 }
 
 #[derive(Debug, Clone, Deserialize, PartialEq)]
@@ -415,6 +423,14 @@ fn expand_paths(config: &mut Config) {
 
     if let Some(ref dir) = config.settings.timer_dir.clone() {
         config.settings.timer_dir = Some(expand_tilde(dir, &home));
+    }
+
+    if let Some(ref dir) = config.settings.loop_specs_dir.clone() {
+        config.settings.loop_specs_dir = Some(expand_tilde(dir, &home));
+    }
+
+    if let Some(ref f) = config.settings.loop_state_file.clone() {
+        config.settings.loop_state_file = Some(expand_tilde(f, &home));
     }
 }
 

@@ -706,6 +706,11 @@ pub async fn send_to_agent(
 // ============================================================================
 
 /// Build the system prompt from identity files (soul + principles + agents).
+///
+/// When a loop is active for the agent, callers should append the output of
+/// [`build_loop_context`] to the returned string before passing it to
+/// `--append-system-prompt`. This injects loop constraints (frozen/mutable
+/// surfaces, budget, metric state) into the agent's context.
 pub fn build_system_prompt(
     _agent_name: &str,
     config: &AgentConfig,
@@ -722,6 +727,49 @@ pub fn build_system_prompt(
     } else {
         String::new()
     }
+}
+
+/// Build the loop constraint block for --append-system-prompt injection.
+/// Returns None if no active loop exists for the agent.
+pub fn build_loop_context(loop_info: Option<&crate::loop_engine::ActiveLoop>) -> Option<String> {
+    let active = loop_info?;
+    let spec = &active.spec;
+    let best_str = match active.best_metric {
+        Some(v) => format!("{:.4}", v),
+        None => "none yet".to_string(),
+    };
+    let frozen_list = spec
+        .frozen_harness
+        .iter()
+        .map(|p| format!("  - {}", p))
+        .collect::<Vec<_>>()
+        .join("\n");
+    let mutable_list = spec
+        .mutable_surface
+        .iter()
+        .map(|p| format!("  - {}", p))
+        .collect::<Vec<_>>()
+        .join("\n");
+
+    Some(format!(
+        "\n## LOOP CONSTRAINTS (enforced by coordinator)\n\
+        Loop: {} | Iteration: {}/{}\n\
+        Objective: {}\n\
+        Metric: {} (baseline: {:.4}, best so far: {})\n\n\
+        FROZEN — do NOT modify:\n{}\n\n\
+        MUTABLE — you may ONLY modify:\n{}\n\n\
+        Budget: {} per iteration\n",
+        active.loop_id,
+        active.current_iteration,
+        spec.budget.max_iterations,
+        spec.objective,
+        spec.metric.name,
+        spec.metric.baseline,
+        best_str,
+        frozen_list,
+        mutable_list,
+        spec.budget.per_iteration,
+    ))
 }
 
 /// Resolve the working directory for an agent from room config.

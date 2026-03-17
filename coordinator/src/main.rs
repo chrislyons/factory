@@ -13,6 +13,7 @@ mod run_events;
 mod runtime_state;
 mod task_lease;
 mod timer;
+mod loop_engine;
 
 use anyhow::Result;
 use tracing::info;

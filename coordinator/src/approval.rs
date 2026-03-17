@@ -51,6 +51,8 @@ pub enum ApprovalGateType {
     AgentElevation,
     LoopSpecDeploy,
     BudgetOverride,
+    LoopIteration,
+    InfraChange,
 }
 
 impl ApprovalGateType {
@@ -62,6 +64,8 @@ impl ApprovalGateType {
             Self::AgentElevation => 3_600_000,
             Self::LoopSpecDeploy => 3_600_000,
             Self::BudgetOverride => 86_400_000,
+            Self::LoopIteration => 300_000,
+            Self::InfraChange => 3_600_000,
         }
     }
 
@@ -83,6 +87,8 @@ impl ApprovalGateType {
             Self::AgentElevation => "Agent Elevation",
             Self::LoopSpecDeploy => "Loop Spec Deploy",
             Self::BudgetOverride => "Budget Override",
+            Self::LoopIteration => "Loop Iteration",
+            Self::InfraChange => "Infra Change",
         }
     }
 }
@@ -274,6 +280,8 @@ mod tests {
         assert_eq!(ApprovalGateType::AgentElevation.timeout_ms(), 3_600_000);
         assert_eq!(ApprovalGateType::LoopSpecDeploy.timeout_ms(), 3_600_000);
         assert_eq!(ApprovalGateType::BudgetOverride.timeout_ms(), 86_400_000);
+        assert_eq!(ApprovalGateType::LoopIteration.timeout_ms(), 300_000);
+        assert_eq!(ApprovalGateType::InfraChange.timeout_ms(), 3_600_000);
     }
 
     #[test]
@@ -283,6 +291,8 @@ mod tests {
         assert!(!ApprovalGateType::AgentElevation.can_auto_approve());
         assert!(!ApprovalGateType::LoopSpecDeploy.can_auto_approve());
         assert!(!ApprovalGateType::BudgetOverride.can_auto_approve());
+        assert!(!ApprovalGateType::LoopIteration.can_auto_approve());
+        assert!(!ApprovalGateType::InfraChange.can_auto_approve());
     }
 
     #[test]
@@ -292,6 +302,8 @@ mod tests {
         assert!(ApprovalGateType::AgentElevation.is_blocking());
         assert!(ApprovalGateType::LoopSpecDeploy.is_blocking());
         assert!(ApprovalGateType::BudgetOverride.is_blocking());
+        assert!(ApprovalGateType::LoopIteration.is_blocking());
+        assert!(ApprovalGateType::InfraChange.is_blocking());
     }
 
     #[test]
@@ -301,6 +313,8 @@ mod tests {
         assert_eq!(ApprovalGateType::AgentElevation.label(), "Agent Elevation");
         assert_eq!(ApprovalGateType::LoopSpecDeploy.label(), "Loop Spec Deploy");
         assert_eq!(ApprovalGateType::BudgetOverride.label(), "Budget Override");
+        assert_eq!(ApprovalGateType::LoopIteration.label(), "Loop Iteration");
+        assert_eq!(ApprovalGateType::InfraChange.label(), "Infra Change");
         // Display trait uses label()
         assert_eq!(format!("{}", ApprovalGateType::ToolCall), "Tool Call");
     }

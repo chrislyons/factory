@@ -22,6 +22,12 @@ pub enum RunEventType {
     Error,
     SessionStart,
     SessionEnd,
+    LoopStart,
+    IterationStart,
+    IterationEnd,
+    LoopComplete,
+    LoopAborted,
+    FrozenHarnessViolation,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

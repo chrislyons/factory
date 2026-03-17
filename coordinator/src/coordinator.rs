@@ -18,6 +18,10 @@ use crate::agent::{
 use crate::approval::{
     ApprovalDecision, ApprovalRateLimiter, ApprovalRecord, ApprovalTracker, HmacSigner,
 };
+use crate::loop_engine::LoopManager;
+// TODO: wire RunEventLog into CoordinatorState for FrozenHarnessViolation emission
+#[allow(unused_imports)]
+use crate::run_events::{EventLevel, EventStream, RunEvent, RunEventType};
 use crate::config::{self, Config, MatrixEvent};
 use crate::delegate;
 use crate::health::IncidentType;
@@ -224,6 +228,8 @@ struct CoordinatorState {
     last_fs_approval_scan: Instant,
     /// Sync token for the coordinator's own Matrix account (for approval room reactions).
     coord_sync_token: Option<String>,
+    /// Loop engine manager (autoscope — FCT009)
+    loop_manager: LoopManager,
 }
 
 impl CoordinatorState {
@@ -295,6 +301,7 @@ impl CoordinatorState {
             approval_dir,
             last_fs_approval_scan: Instant::now(),
             coord_sync_token: None,
+            loop_manager: LoopManager::new(),
         }
     }
 
@@ -1328,6 +1335,55 @@ async fn process_pending_approvals(state: &mut CoordinatorState) {
             let trust_level = session.config.trust_level.unwrap_or(2);
             let tool_name = req.tool_name.as_deref().unwrap_or("unknown");
 
+            // Frozen harness enforcement (autoscope — FCT009)
+            if !state.loop_manager.get_active_loops_for_agent(&agent_name).is_empty() {
+                let frozen_violation = match tool_name {
+                    "Write" | "Edit" => {
+                        req.tool_input.as_ref().and_then(|input| {
+                            let path = input.get("file_path").or_else(|| input.get("path"))
+                                .and_then(|v| v.as_str());
+                            path.filter(|p| state.loop_manager.is_frozen(&agent_name, p))
+                                .map(|p| p.to_string())
+                        })
+                    }
+                    "Bash" => {
+                        req.tool_input.as_ref().and_then(|input| {
+                            let cmd = input.get("command").and_then(|v| v.as_str()).unwrap_or("");
+                            // Scan for any frozen path substring in the command
+                            let loops = state.loop_manager.get_active_loops_for_agent(&agent_name);
+                            for lp in &loops {
+                                for frozen in &lp.spec.frozen_harness {
+                                    if cmd.contains(frozen.as_str()) {
+                                        return Some(frozen.clone());
+                                    }
+                                }
+                            }
+                            None
+                        })
+                    }
+                    _ => None,
+                };
+
+                if let Some(frozen_path) = frozen_violation {
+                    warn!("[{}] Frozen harness violation: {} attempted on {}", agent_name, tool_name, frozen_path);
+                    if let Some(session) = state.sessions.get(&agent_name) {
+                        let _ = session.approval_tx.try_send((req.request_id.clone(), false, None));
+                    }
+                    state.approval_tracker.record(ApprovalRecord {
+                        agent_name: agent_name.clone(),
+                        tool_name: tool_name.to_string(),
+                        room_id: req.room_id.clone(),
+                        decision: ApprovalDecision::MatrixDenied,
+                        requested_at: now_ms(),
+                        resolved_at: now_ms(),
+                        latency_ms: 0,
+                        gate_type: None,
+                    });
+                    // TODO: emit RunEventType::FrozenHarnessViolation via RunEventLog once wired
+                    continue;
+                }
+            }
+
             // Auto-approve check
             let auto_approved =
                 state.should_auto_approve(tool_name, req.tool_input.as_ref(), trust_level);
@@ -1858,6 +1914,47 @@ async fn scan_filesystem_approvals(state: &mut CoordinatorState) {
             agent_name, tool_name, request_id
         );
 
+        // Frozen harness enforcement (autoscope — FCT009)
+        if !state.loop_manager.get_active_loops_for_agent(&agent_name).is_empty() {
+            let frozen_violation = match tool_name.as_str() {
+                "Write" | "Edit" => {
+                    tool_input.as_ref().and_then(|input| {
+                        let path = input.get("file_path").or_else(|| input.get("path"))
+                            .and_then(|v| v.as_str());
+                        path.filter(|p| state.loop_manager.is_frozen(&agent_name, p))
+                            .map(|p| p.to_string())
+                    })
+                }
+                "Bash" => {
+                    tool_input.as_ref().and_then(|input| {
+                        let cmd = input.get("command").and_then(|v| v.as_str()).unwrap_or("");
+                        let loops = state.loop_manager.get_active_loops_for_agent(&agent_name);
+                        for lp in &loops {
+                            for frozen in &lp.spec.frozen_harness {
+                                if cmd.contains(frozen.as_str()) {
+                                    return Some(frozen.clone());
+                                }
+                            }
+                        }
+                        None
+                    })
+                }
+                _ => None,
+            };
+
+            if let Some(frozen_path) = frozen_violation {
+                warn!("[{}] Frozen harness violation (fs): {} attempted on {}", agent_name, tool_name, frozen_path);
+                if let Some(ref signer) = state.hmac_signer {
+                    let _ = signer.write_approval_response(&state.approval_dir, &request_id, "deny");
+                } else {
+                    let resp_path = format!("{}/{}.response", state.approval_dir, request_id);
+                    let _ = std::fs::write(&resp_path, "deny");
+                }
+                // TODO: emit RunEventType::FrozenHarnessViolation via RunEventLog once wired
+                continue;
+            }
+        }
+
         // Auto-approve check (same logic as stream-json approvals)
         let trust_level = if agent_name != "unknown" {
             state.sessions.get(&agent_name)
@@ -2104,6 +2201,44 @@ async fn handle_command(
         "/delegate" => Some(
             "Usage: `/delegate <repo> <model> <prompt>`".to_string(),
         ),
+        "/loop" if parts.len() >= 3 && parts[1] == "start" => {
+            let spec_path = parts[2];
+            match state.loop_manager.load_and_register(std::path::Path::new(spec_path)) {
+                Ok(loop_id) => {
+                    let _ = state.loop_manager.start_loop(&loop_id);
+                    Some(format!("Loop **{}** started from `{}`", loop_id, spec_path))
+                }
+                Err(e) => Some(format!("Failed to start loop: {}", e)),
+            }
+        }
+        "/loop" if parts.len() >= 3 && parts[1] == "abort" => {
+            let loop_id = parts[2];
+            match state.loop_manager.abort_loop(loop_id) {
+                Ok(()) => Some(format!("Loop **{}** aborted", loop_id)),
+                Err(e) => Some(format!("Failed to abort loop: {}", e)),
+            }
+        }
+        "/loop" if parts.len() >= 2 && parts[1] == "status" => {
+            let mut lines = vec!["**Active Loops**".to_string()];
+            let mut any = false;
+            for lp in state.loop_manager.all_loops() {
+                any = true;
+                lines.push(format!(
+                    "- **{}** ({}) — iter {}/{} | status: {:?} | best: {}",
+                    lp.loop_id,
+                    lp.spec.agent_id,
+                    lp.current_iteration,
+                    lp.spec.budget.max_iterations,
+                    lp.status,
+                    lp.best_metric.map(|v| format!("{:.4}", v)).unwrap_or_else(|| "—".to_string()),
+                ));
+            }
+            if !any {
+                lines.push("No active loops.".to_string());
+            }
+            Some(lines.join("\n"))
+        }
+        "/loop" => Some("Usage: `/loop start <spec-path>` | `/loop status` | `/loop abort <loop-id>`".to_string()),
         _ => None, // Not a coordinator command — pass to agent
     };
 
