@@ -1,0 +1,13 @@
+# Runtime artifacts
+Caddyfile
+.factory-portal.pid
+.env
+
+# Synced at deploy time (not committed)
+pages/
+fonts/
+repos/
+status/
+tasks.json
+index.json
+server.py
