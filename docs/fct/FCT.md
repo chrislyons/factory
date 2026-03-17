@@ -14,6 +14,7 @@ Map of content (MOC) for Factory agent infrastructure documentation.
 | FCT002 | [Factory Agent Architecture — Roles, Models, and Autonomous Loop Design](FCT002%20Factory%20Agent%20Architecture%20%E2%80%94%20Roles%2C%20Models%2C%20and%20Autonomous%20Loop%20Design.md) | 2026-03-16 | Agent roles, model tiers, loop design |
 | FCT003 | [Model Assignment Review — Nemotron 3 Nano 4B and March 2026 Model Landscape](FCT003%20Model%20Assignment%20Review%20%E2%80%94%20Nemotron%203%20Nano%204B%20and%20March%202026%20Model%20Landscape.md) | 2026-03-17 | Boot/IG-88/Kelk/Nan model review; Nemotron-3-Nano-4B corrections; context window table; landscape survey |
 | FCT004 | [Paperclip vs Factory — Architecture Study and Adoption Assessment](FCT004%20Paperclip%20vs%20Factory%20%E2%80%94%20Architecture%20Study%20and%20Adoption%20Assessment.md) | 2026-03-17 | Full 4-agent study; 24-feature parity matrix; ADOPT/BORROW/LEARN/SKIP; 4 Rust implementation sketches; Matrix substrate analysis |
+| FCT005 | [Hermes Agent — Fit Assessment for Paperclip x Factory Workflow](FCT005%20Hermes%20Agent%20%E2%80%94%20Fit%20Assessment%20for%20Paperclip%20x%20Factory%20Workflow.md) | 2026-03-17 | Three-way Hermes vs Paperclip vs Factory matrix; scheduling and memory model comparison; verdict: SKIP runtime, BORROW NL scheduler concept |
 
 ---
 
