@@ -9,10 +9,10 @@ export interface AgentDefinition {
 }
 
 export const AGENTS: AgentDefinition[] = [
-  { id: "boot", label: "Boot", shortLabel: "BT", color: "#74b6f6", accent: "#74b6f6" },
-  { id: "ig88", label: "IG-88", shortLabel: "IG", color: "#f2c86f", accent: "#f2c86f" },
-  { id: "kelk", label: "Kelk", shortLabel: "KE", color: "#58d8a6", accent: "#58d8a6" },
-  { id: "nan", label: "Nan", shortLabel: "NN", color: "#c7bcad", accent: "#c7bcad" }
+  { id: "boot", label: "Boot", shortLabel: "BT", color: "#38bdf8", accent: "#38bdf8" },
+  { id: "ig88", label: "IG-88", shortLabel: "IG", color: "#f97316", accent: "#f97316" },
+  { id: "kelk", label: "Kelk", shortLabel: "KE", color: "#a78bfa", accent: "#a78bfa" },
+  { id: "nan", label: "Nan", shortLabel: "NN", color: "#fb7185", accent: "#fb7185" }
 ];
 
 export const NAV_LINKS = [
