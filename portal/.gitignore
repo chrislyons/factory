@@ -1,13 +1,21 @@
 # Runtime artifacts
 Caddyfile
 .factory-portal.pid
+.gsd-backend.pid
+.gsd-backend.log
 .env
+.DS_Store
+__pycache__/
+*.pyc
 
-# Synced at deploy time (not committed)
-pages/
-fonts/
+# Build artifacts
+dist/
+node_modules/
+coverage/
+.vite/
+
+# Synced/generated at deploy time (not committed)
 repos/
 status/
 tasks.json
 index.json
-server.py

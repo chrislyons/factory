@@ -1,29 +1,31 @@
 #!/bin/bash
-# Factory Portal — Caddy static file server with basicauth + GSD backend proxy
-# Port 41933 | systemd units: factory-portal.service + gsd-backend.service
+# Factory Portal — Caddy static server for dist/ with optional sidecar proxies
 #
 # Usage:
 #   ./serve.sh                  Start Caddy in foreground
-#   ./serve.sh --systemd        Generate Caddyfile + install systemd units (Blackbox)
-#   ./serve.sh --open           Start Caddy + open browser (local dev)
-#   ./serve.sh --status         Check if Caddy is running on port
-#   ./serve.sh --gen-hash       Generate bcrypt password hash (interactive)
+#   ./serve.sh --open           Start Caddy + open browser
+#   ./serve.sh --systemd        Install/update systemd services on Blackbox
+#   ./serve.sh --status         Show local listener status
+#   ./serve.sh --gen-hash       Generate a bcrypt password hash
 #
-# Required env vars (for auth):
-#   PORTAL_USER                  basicauth username (default: admin)
-#   PORTAL_PASSWORD_HASH         bcrypt hash from: caddy hash-password --algorithm bcrypt
+# Required env vars:
+#   PORTAL_PASSWORD_HASH        bcrypt hash from: caddy hash-password --algorithm bcrypt
 #
 # Optional env vars:
-#   PORTAL_PORT                  port (default: 41933)
-#   PORTAL_HOST                  bind host (default: 127.0.0.1)
-#   GSD_BACKEND_PORT             GSD Python backend port (default: 41935)
+#   PORTAL_USER                 basicauth username (default: admin)
+#   PORTAL_PORT                 bind port (default: 41933)
+#   PORTAL_HOST                 bind host (default: 127.0.0.1)
+#   GSD_BACKEND_HOST            task/status sidecar host (default: 127.0.0.1)
+#   GSD_BACKEND_PORT            task/status sidecar port (default: 41935)
+#   COORDINATOR_BACKEND_HOST    coordinator API host (default: 127.0.0.1)
+#   COORDINATOR_BACKEND_PORT    coordinator API port (optional; unset keeps those routes static/404)
+#   PORTAL_START_GSD            auto-start local server.py for task/status routes (default: 1)
 #
 set -euo pipefail
 
-# Load local credentials if present (gitignored)
 SCRIPT_DIR_EARLY="$(cd "$(dirname "$0")" && pwd)"
 if [[ -f "${SCRIPT_DIR_EARLY}/.env" ]]; then
-  set +u  # bcrypt hashes contain $2a which triggers nounset
+  set +u
   set -o allexport
   source "${SCRIPT_DIR_EARLY}/.env"
   set +o allexport
@@ -34,21 +36,26 @@ PORT="${PORTAL_PORT:-41933}"
 HOST="${PORTAL_HOST:-127.0.0.1}"
 USER="${PORTAL_USER:-admin}"
 PASS_HASH="${PORTAL_PASSWORD_HASH:-}"
+GSD_HOST="${GSD_BACKEND_HOST:-127.0.0.1}"
 GSD_PORT="${GSD_BACKEND_PORT:-41935}"
+COORD_HOST="${COORDINATOR_BACKEND_HOST:-127.0.0.1}"
+COORD_PORT="${COORDINATOR_BACKEND_PORT:-}"
+START_GSD="${PORTAL_START_GSD:-1}"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+DIST_DIR="${SCRIPT_DIR}/dist"
+DATA_SERVER="${SCRIPT_DIR}/server.py"
 CADDYFILE="${SCRIPT_DIR}/Caddyfile"
 PID_FILE="${SCRIPT_DIR}/.factory-portal.pid"
+GSD_PID_FILE="${SCRIPT_DIR}/.gsd-backend.pid"
+GSD_LOG_FILE="${SCRIPT_DIR}/.gsd-backend.log"
 SYSTEMD_CADDY="factory-portal.service"
 SYSTEMD_GSD="gsd-backend.service"
 SYSTEMD_PATH_CADDY="/etc/systemd/system/${SYSTEMD_CADDY}"
 SYSTEMD_PATH_GSD="/etc/systemd/system/${SYSTEMD_GSD}"
 REMOTE_ROOT="/home/nesbitt/projects/factory-portal"
+REMOTE_DIST="${REMOTE_ROOT}/dist"
 
 URL="http://${HOST}:${PORT}/"
-
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
 
 check_caddy() {
   if ! command -v caddy > /dev/null 2>&1; then
@@ -64,7 +71,7 @@ check_port() {
     local cmd
     cmd=$(ps -p "$owner" -o comm= 2>/dev/null || echo "unknown")
     if [[ "$cmd" == *"caddy"* ]] && [[ -f "$PID_FILE" ]] && [[ "$(cat "$PID_FILE")" == "$owner" ]]; then
-      return 1  # it's our caddy, already running
+      return 1
     fi
     echo "x Port ${PORT} already in use by PID ${owner} (${cmd})"
     echo "  Override with: PORTAL_PORT=<port> $0"
@@ -73,76 +80,128 @@ check_port() {
   return 0
 }
 
-gen_caddyfile() {
-  local root="${1:-${SCRIPT_DIR}}"
-
+require_password_hash() {
   if [[ -z "$PASS_HASH" ]]; then
     echo "x PORTAL_PASSWORD_HASH is not set."
     echo "  Generate one with: ./serve.sh --gen-hash"
     exit 1
   fi
+}
 
-  # Write Caddyfile — use quoted heredoc to preserve $ in bcrypt hash,
-  # then substitute the 5 variables with sed.
-  cat > "$CADDYFILE" <<'CADDY'
+require_dist() {
+  if [[ ! -f "${DIST_DIR}/portal.html" ]]; then
+    echo "x dist/ is missing. Run: pnpm build"
+    exit 1
+  fi
+}
+
+start_local_gsd_if_needed() {
+  if [[ "$START_GSD" != "1" ]]; then
+    return
+  fi
+  if [[ ! -f "$DATA_SERVER" ]]; then
+    return
+  fi
+  if lsof -i ":${GSD_PORT}" -sTCP:LISTEN > /dev/null 2>&1; then
+    echo "ok Using existing task/status sidecar -> http://${GSD_HOST}:${GSD_PORT}/"
+    return
+  fi
+  if ! command -v python3 > /dev/null 2>&1; then
+    echo "x python3 not found; cannot auto-start server.py"
+    exit 1
+  fi
+
+  GSD_HOST="${GSD_HOST}" GSD_PORT="${GSD_PORT}" GSD_DATA_ROOT="${SCRIPT_DIR}" \
+    python3 "$DATA_SERVER" > "$GSD_LOG_FILE" 2>&1 &
+  local pid=$!
+  echo "$pid" > "$GSD_PID_FILE"
+  sleep 1
+  if ! kill -0 "$pid" 2>/dev/null; then
+    echo "x Failed to start task/status sidecar"
+    [[ -f "$GSD_LOG_FILE" ]] && tail -20 "$GSD_LOG_FILE"
+    exit 1
+  fi
+  echo "ok Started task/status sidecar -> http://${GSD_HOST}:${GSD_PORT}/"
+}
+
+stop_local_gsd_if_needed() {
+  if [[ -f "$GSD_PID_FILE" ]]; then
+    local pid
+    pid=$(cat "$GSD_PID_FILE")
+    if kill -0 "$pid" 2>/dev/null; then
+      kill "$pid" 2>/dev/null || true
+    fi
+    rm -f "$GSD_PID_FILE"
+  fi
+}
+
+gen_caddyfile() {
+  local dist_root="${1:-${DIST_DIR}}"
+  local project_root="${2:-${SCRIPT_DIR}}"
+  local coordinator_block=""
+
+  require_password_hash
+
+  if [[ -n "$COORD_PORT" ]]; then
+    coordinator_block=$(cat <<EOF
+    @coordinator_api {
+        path /approvals/* /budget/* /analytics/* /agents/* /runs/*
+    }
+    reverse_proxy @coordinator_api ${COORD_HOST}:${COORD_PORT}
+
+EOF
+)
+  fi
+
+  cat > "$CADDYFILE" <<EOF
 {
     admin off
 }
 
-http://__HOST__:__PORT__ {
-    root * __ROOT__
+http://${HOST}:${PORT} {
     encode gzip
 
     basic_auth * {
-        __USER__ __PASS__
+        ${USER} ${PASS_HASH}
     }
 
-    @gsd_write {
-        method PUT
+${coordinator_block}    @gsd_api {
         path /tasks.json /status/*
     }
-    reverse_proxy @gsd_write 127.0.0.1:__GSD_PORT__
+    reverse_proxy @gsd_api ${GSD_HOST}:${GSD_PORT}
 
-    @fonts {
-        path /fonts/*.ttf /fonts/*.woff2
+    handle /repos/* {
+        root * ${project_root}
+        file_server
     }
-    header @fonts Cache-Control "public, max-age=31536000, immutable"
 
-    @html {
-        path *.html
-    }
-    header @html Cache-Control "no-cache"
+    handle {
+        root * ${dist_root}
 
-    @json {
-        path /index.json /tasks.json /status/*
-    }
-    header @json Cache-Control "no-store"
+        @fonts {
+            path /fonts/*.ttf /fonts/*.woff2
+        }
+        header @fonts Cache-Control "public, max-age=31536000, immutable"
 
-    file_server {
-        index portal.html
+        @html {
+            path *.html
+        }
+        header @html Cache-Control "no-cache"
+
+        @json {
+            path /index.json
+        }
+        header @json Cache-Control "no-store"
+
+        file_server {
+            index portal.html
+        }
     }
 }
-CADDY
-
-  # Inject variables (use | delimiter to avoid conflicts with / in paths and hashes)
-  sed -i.bak \
-    -e "s|__HOST__|${HOST}|g" \
-    -e "s|__PORT__|${PORT}|g" \
-    -e "s|__ROOT__|${root}|g" \
-    -e "s|__USER__|${USER}|g" \
-    -e "s|__GSD_PORT__|${GSD_PORT}|g" \
-    "$CADDYFILE"
-  # PASS_HASH contains $ and / — use awk for safe substitution
-  awk -v pass="$PASS_HASH" '{gsub(/__PASS__/, pass); print}' "$CADDYFILE" > "${CADDYFILE}.tmp"
-  mv "${CADDYFILE}.tmp" "$CADDYFILE"
-  rm -f "${CADDYFILE}.bak"
+EOF
 
   echo "ok Generated Caddyfile -> ${CADDYFILE}"
 }
-
-# ---------------------------------------------------------------------------
-# Actions
-# ---------------------------------------------------------------------------
 
 gen_hash() {
   check_caddy
@@ -150,22 +209,31 @@ gen_hash() {
   caddy hash-password --algorithm bcrypt
 }
 
+cleanup_local() {
+  rm -f "$PID_FILE" "$CADDYFILE"
+  stop_local_gsd_if_needed
+}
+
 start_foreground() {
   check_caddy
+  require_dist
   check_port || { echo "ok Already running -> ${URL}"; exit 0; }
-  gen_caddyfile "$SCRIPT_DIR"
+  start_local_gsd_if_needed
+  gen_caddyfile "$DIST_DIR" "$SCRIPT_DIR"
   echo "$$" > "$PID_FILE"
-  trap 'rm -f "$PID_FILE" "$CADDYFILE"' EXIT
+  trap cleanup_local EXIT
   echo "ok Starting factory portal -> ${URL}"
   exec caddy run --config "$CADDYFILE"
 }
 
 start_open() {
   check_caddy
+  require_dist
   check_port || { echo "ok Already running"; open "$URL"; exit 0; }
-  gen_caddyfile "$SCRIPT_DIR"
+  start_local_gsd_if_needed
+  gen_caddyfile "$DIST_DIR" "$SCRIPT_DIR"
   echo "$$" > "$PID_FILE"
-  trap 'rm -f "$PID_FILE" "$CADDYFILE"' EXIT
+  trap cleanup_local EXIT
   open "$URL" &
   echo "ok Starting factory portal -> ${URL}"
   exec caddy run --config "$CADDYFILE"
@@ -173,12 +241,12 @@ start_open() {
 
 install_systemd() {
   check_caddy
-  gen_caddyfile "$REMOTE_ROOT"
+  require_password_hash
+  gen_caddyfile "$REMOTE_DIST" "$REMOTE_ROOT"
 
-  # --- Caddy (factory-portal.service) ---
   sudo tee "$SYSTEMD_PATH_CADDY" > /dev/null <<UNIT
 [Unit]
-Description=Factory Portal — Caddy static server + GSD proxy
+Description=Factory Portal — Caddy static server + API proxies
 After=network.target gsd-backend.service
 Wants=gsd-backend.service
 
@@ -194,10 +262,9 @@ RestartSec=5
 WantedBy=multi-user.target
 UNIT
 
-  # --- GSD Python backend (gsd-backend.service) ---
   sudo tee "$SYSTEMD_PATH_GSD" > /dev/null <<UNIT
 [Unit]
-Description=GSD Backend — Python PUT server for agent task/status writes
+Description=Factory Portal task/status sidecar
 After=network.target
 
 [Service]
@@ -206,6 +273,7 @@ User=nesbitt
 WorkingDirectory=${REMOTE_ROOT}
 Environment=GSD_HOST=127.0.0.1
 Environment=GSD_PORT=${GSD_PORT}
+Environment=GSD_DATA_ROOT=${REMOTE_ROOT}
 ExecStart=/usr/bin/python3 ${REMOTE_ROOT}/server.py
 Restart=on-failure
 RestartSec=5
@@ -220,31 +288,33 @@ UNIT
   sudo systemctl restart "${SYSTEMD_CADDY}"
 
   echo "ok Installed: ${SYSTEMD_CADDY} + ${SYSTEMD_GSD}"
-  echo "  Portal  -> ${URL}"
-  echo "  Port    -> ${PORT}"
-  echo "  GSD     -> 127.0.0.1:${GSD_PORT}"
-  echo "  Root    -> ${REMOTE_ROOT}"
-  echo ""
-  echo "  Manage:"
-  echo "    sudo systemctl status ${SYSTEMD_CADDY}"
-  echo "    sudo systemctl status ${SYSTEMD_GSD}"
-  echo "    sudo journalctl -u ${SYSTEMD_CADDY} -f"
+  echo "  Portal       -> ${URL}"
+  echo "  Dist         -> ${REMOTE_DIST}"
+  echo "  Task/status  -> ${GSD_HOST}:${GSD_PORT}"
+  if [[ -n "$COORD_PORT" ]]; then
+    echo "  Coordinator  -> ${COORD_HOST}:${COORD_PORT}"
+  else
+    echo "  Coordinator  -> disabled (unset COORDINATOR_BACKEND_PORT)"
+  fi
 }
 
 show_status() {
   if [[ -f "$PID_FILE" ]] && kill -0 "$(cat "$PID_FILE")" 2>/dev/null; then
-    echo "ok Running (foreground, PID $(cat "$PID_FILE"))"
+    echo "ok Caddy running (foreground, PID $(cat "$PID_FILE"))"
   elif lsof -i ":${PORT}" -sTCP:LISTEN > /dev/null 2>&1; then
     echo "ok Something is listening on port ${PORT}"
   else
-    echo "x Not running"
+    echo "x Caddy not running"
   fi
+
+  if lsof -i ":${GSD_PORT}" -sTCP:LISTEN > /dev/null 2>&1; then
+    echo "ok Task/status sidecar listening on ${GSD_PORT}"
+  else
+    echo "x Task/status sidecar not running on ${GSD_PORT}"
+  fi
+
   echo "  ${URL}"
 }
-
-# ---------------------------------------------------------------------------
-# Dispatch
-# ---------------------------------------------------------------------------
 
 case "${1:-}" in
   --systemd)
@@ -260,7 +330,7 @@ case "${1:-}" in
     gen_hash
     ;;
   -h|--help)
-    head -14 "$0" | tail -12
+    head -18 "$0" | tail -16
     ;;
   *)
     start_foreground

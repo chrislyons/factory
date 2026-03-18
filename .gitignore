@@ -1,2 +1,12 @@
 open-models/
 coordinator/target/
+
+# Portal runtime artifacts
+portal/node_modules/
+portal/dist/
+portal/.pnpm-store/
+portal/repos/
+portal/status/
+portal/tasks.json
+portal/index.json
+portal/.env
