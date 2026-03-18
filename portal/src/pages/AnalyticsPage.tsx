@@ -2,9 +2,33 @@ import { useMemo } from "react";
 import type { ChartConfiguration } from "chart.js";
 import { AppShell, SurfaceCard } from "../components/AppShell";
 import { ChartCanvas } from "../components/charts/ChartCanvas";
-import { EmptyState } from "../components/primitives/EmptyState";
 import { LastUpdatedChip } from "../components/primitives/LastUpdatedChip";
 import { useAnalytics } from "../hooks/usePortalQueries";
+
+function ChartPlaceholder({
+  detail,
+  legend
+}: {
+  detail: string;
+  legend: string[];
+}) {
+  const bars = [42, 68, 56, 84, 63, 91];
+  return (
+    <div className="chart-placeholder">
+      <div className="chart-placeholder__bars" aria-hidden="true">
+        {bars.map((height, index) => (
+          <span key={`${height}-${index}`} className="chart-placeholder__bar" style={{ height: `${height}%` }} />
+        ))}
+      </div>
+      <div className="chart-placeholder__detail">{detail}</div>
+      <div className="chart-placeholder__legend">
+        {legend.map((item) => (
+          <span key={item}>{item}</span>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function barConfig({
   labels,
@@ -113,34 +137,36 @@ export function AnalyticsPage() {
       pageKey="/pages/analytics.html"
       statusSlot={<LastUpdatedChip updatedAt={analytics.dataUpdatedAt} stale={Boolean(analytics.error)} />}
     >
-      {!data ? (
-        <SurfaceCard title="Analytics" subtitle="Waiting for coordinator">
-          <EmptyState title="Waiting for analytics summary" detail="`/analytics/summary?days=14` is not returning data yet." />
-        </SurfaceCard>
-      ) : (
-        <div className="chart-grid">
+      <div className="chart-grid">
+        <SurfaceCard title="Run Activity" subtitle="Succeeded vs failed vs other">
           {runActivityConfig ? (
-            <SurfaceCard title="Run Activity" subtitle="Succeeded vs failed vs other">
-              <div className="chart-wrap"><ChartCanvas config={runActivityConfig} /></div>
-            </SurfaceCard>
-          ) : null}
+            <div className="chart-wrap"><ChartCanvas config={runActivityConfig} /></div>
+          ) : (
+            <ChartPlaceholder detail="Run activity appears here when analytics summary is available." legend={["Succeeded", "Failed", "Other"]} />
+          )}
+        </SurfaceCard>
+        <SurfaceCard title="Tasks by Status" subtitle="Last 14 days">
           {tasksByStatusConfig ? (
-            <SurfaceCard title="Tasks by Status" subtitle="Last 14 days">
-              <div className="chart-wrap"><ChartCanvas config={tasksByStatusConfig} /></div>
-            </SurfaceCard>
-          ) : null}
+            <div className="chart-wrap"><ChartCanvas config={tasksByStatusConfig} /></div>
+          ) : (
+            <ChartPlaceholder detail="Task status movement will render here once the coordinator summary is live." legend={["Todo", "In Progress", "Done", "Blocked"]} />
+          )}
+        </SurfaceCard>
+        <SurfaceCard title="Tasks by Assignee" subtitle="Current allocation">
           {tasksByAssigneeConfig ? (
-            <SurfaceCard title="Tasks by Assignee" subtitle="Current allocation">
-              <div className="chart-wrap"><ChartCanvas config={tasksByAssigneeConfig} /></div>
-            </SurfaceCard>
-          ) : null}
+            <div className="chart-wrap"><ChartCanvas config={tasksByAssigneeConfig} /></div>
+          ) : (
+            <ChartPlaceholder detail="Assignee distribution will render here when current workload data is available." legend={["Boot", "IG-88", "Kelk", "Nan"]} />
+          )}
+        </SurfaceCard>
+        <SurfaceCard title="Approval Rate" subtitle="Approved vs rejected vs timed out">
           {approvalRateConfig ? (
-            <SurfaceCard title="Approval Rate" subtitle="Approved vs rejected vs timed out">
-              <div className="chart-wrap"><ChartCanvas config={approvalRateConfig} /></div>
-            </SurfaceCard>
-          ) : null}
-        </div>
-      )}
+            <div className="chart-wrap"><ChartCanvas config={approvalRateConfig} /></div>
+          ) : (
+            <ChartPlaceholder detail="Approval outcomes will render here once the decision summary endpoint is available." legend={["Approved", "Rejected", "Timed Out"]} />
+          )}
+        </SurfaceCard>
+      </div>
     </AppShell>
   );
 }

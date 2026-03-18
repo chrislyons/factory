@@ -1,13 +1,17 @@
 export function EmptyState({
   title,
-  detail
+  detail,
+  compact = false,
+  className
 }: {
   title: string;
   detail?: string;
+  compact?: boolean;
+  className?: string;
 }) {
   return (
-    <div className="empty-state">
-      <div className="empty-state__icon">✓</div>
+    <div className={`${compact ? "empty-state is-compact" : "empty-state"}${className ? ` ${className}` : ""}`}>
+      <div className="empty-state__icon" aria-hidden="true" />
       <div className="empty-state__title">{title}</div>
       {detail ? <div className="empty-state__detail">{detail}</div> : null}
     </div>

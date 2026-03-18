@@ -101,6 +101,10 @@ export function DashboardPage() {
 
   const latestUpdate = latestDataUpdatedAt([tasks, approvals, budget, ...statuses.results]);
   const document = tasks.data;
+  const hasTasksData = Boolean(document);
+  const hasStatusData = AGENTS.some((agent) => Boolean(statuses.data[agent.id]));
+  const hasApprovalData = Array.isArray(approvals.data);
+  const hasBudgetData = Boolean(budget.data);
   const liveRuns = payloadRuns(statuses.data).slice(0, 4);
   const activeLoopGroups = loopGroups(statuses.data);
   const loopFeedsEnabled = statusFeedsExposeLoops(statuses.data);
@@ -126,7 +130,10 @@ export function DashboardPage() {
   }, [activeFilter, document, taskSearch]);
 
   const inProgressCount = (document?.tasks ?? []).filter((task) => task.status === "in-progress").length;
-  const activeAgentCount = AGENTS.filter((agent) => statuses.data[agent.id]?.status !== "paused").length;
+  const activeAgentCount = AGENTS.filter((agent) => {
+    const status = statuses.data[agent.id];
+    return status && status.status !== "paused";
+  }).length;
   const activeLoopCount = activeLoopGroups.reduce((sum, group) => sum + group.loops.length, 0);
   const totalSpend = (budget.data?.agents ?? []).reduce((sum, entry) => sum + entry.spent_this_month_usd, 0);
 
@@ -217,119 +224,137 @@ export function DashboardPage() {
       }
     >
       <div className="metric-grid">
-        <MetricCard label="Agents Active" value={activeAgentCount} href="/pages/topology.html" detail="Open topology" />
+        <MetricCard
+          label="Agents Active"
+          value={hasStatusData ? activeAgentCount : "—"}
+          href="/pages/topology.html"
+          detail={hasStatusData ? "Open topology" : "Awaiting status feeds"}
+        />
         <MetricCard
           label="Active Loops"
           value={loopFeedsEnabled ? activeLoopCount : "—"}
           href="/pages/loops.html"
-          detail={loopFeedsEnabled ? "Open loop console" : "Waiting for loop status"}
+          detail={loopFeedsEnabled ? "Open loop console" : hasStatusData ? "Waiting for loop field" : "Awaiting status feeds"}
         />
-        <MetricCard label="Tasks In Progress" value={inProgressCount} href="#task-list" detail="Jump to tasks" />
-        <MetricCard label="Month Spend" value={formatUsd(totalSpend)} href="/pages/budget.html" detail="Open budget" />
+        <MetricCard
+          label="Tasks In Progress"
+          value={hasTasksData ? inProgressCount : "—"}
+          href="#task-list"
+          detail={hasTasksData ? "Jump to tasks" : "Awaiting task feed"}
+        />
+        <MetricCard
+          label="Month Spend"
+          value={hasBudgetData ? formatUsd(totalSpend) : "—"}
+          href="/pages/budget.html"
+          detail={hasBudgetData ? "Open budget" : "Awaiting budget feed"}
+        />
         <MetricCard
           label="Pending Approvals"
-          value={approvals.data?.length ?? 0}
+          value={hasApprovalData ? approvals.data?.length ?? 0 : "—"}
           href="/pages/approvals.html"
-          detail="Approval inbox"
-          danger={(approvals.data?.length ?? 0) > 0}
+          detail={hasApprovalData ? "Approval inbox" : "Awaiting approval feed"}
+          danger={Boolean(hasApprovalData && (approvals.data?.length ?? 0) > 0)}
         />
       </div>
 
-      <SurfaceCard title="Active Loops" subtitle="Compact loop strip sourced from status.active_loops">
-        {!loopFeedsEnabled ? (
-          <EmptyState
-            title="Waiting for loop status"
-            detail="Coordinator has not added `active_loops` to the agent status feeds yet."
-          />
-        ) : activeLoopCount === 0 ? (
-          <EmptyState title="No active loops" detail="Loop rows appear here when an agent is running a loop." />
-        ) : (
-          <div className="loop-strip">
-            {activeLoopGroups.map((group) => (
-              <section key={group.agent.id} className="loop-agent-group">
-                <div className="loop-agent-group__header">
-                  <AgentBadge agentId={group.agent.id} status="idle" />
-                  <span className="loop-agent-group__count">{group.loops.length} loop(s)</span>
-                </div>
-                <div className="loop-agent-group__rows">
-                  {group.loops.map((loop) => (
-                    <a
-                      key={`${group.agent.id}-${loop.loop_id}`}
-                      className="loop-row"
-                      href={`/pages/loops.html?loop=${loop.loop_id}`}
-                    >
-                      <div className="loop-row__main">
-                        <div className="loop-row__title">
-                          <strong>{loop.spec.name}</strong>
-                          <LoopStatusPill status={loop.status} />
-                        </div>
-                        <div className="loop-row__meta">
-                          <span>{loopTypeLabel(loop.spec.loop_type)}</span>
-                          <span>{loopApprovalGateLabel(loop.spec.approval_gate)}</span>
-                          <span>
-                            Iter {loop.current_iteration}/{loop.spec.budget.max_iterations}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="loop-row__stats">
-                        <span>Best {formatMetricValue(loop.best_metric)}</span>
-                        <span>Open</span>
-                      </div>
-                    </a>
-                  ))}
-                </div>
-              </section>
-            ))}
-          </div>
-        )}
-      </SurfaceCard>
-
-      <SurfaceCard title="Active Runs" subtitle="Paperclip-style live cards with transcript tails">
-        {liveRuns.length === 0 ? (
-          <EmptyState title="No active or recent runs" detail="Waiting for coordinator run state." />
-        ) : (
-          <div className="live-run-grid">
-            {liveRuns.map((item) => {
-              const isActive = item.run.status === "running" || item.run.status === "queued";
-              return (
-                <div key={`${item.agentId}-${item.run.run_id}`} className={cn("live-run-card", isActive && "is-live")}>
-                  <div className="live-run-card__header">
-                    <div>
-                      <AgentBadge
-                        agentId={item.agentId}
-                        status={agentStatusTone(item.status?.status as string | undefined, item.run)}
-                      />
-                      <div className="live-run-card__meta">
-                        {isActive ? "Live now" : `Finished ${timeAgo(item.run.finished_at ?? item.run.started_at)}`}
-                      </div>
-                    </div>
-                    {isActive ? (
-                      <button
-                        className="danger-button"
-                        type="button"
-                        onClick={() => runCancel.mutate(item.run.run_id)}
-                        disabled={runCancel.isPending}
-                      >
-                        Stop
-                      </button>
-                    ) : null}
+      <div className="dashboard-highlights">
+        <SurfaceCard title="Active Loops" subtitle="Current iteration pressure" className="surface-card--compact">
+          {!loopFeedsEnabled ? (
+            <EmptyState
+              compact
+              title="Waiting for loop status"
+              detail={hasStatusData ? "Loop rows appear once status feeds expose `active_loops`." : "Status feeds are not available yet."}
+            />
+          ) : activeLoopCount === 0 ? (
+            <EmptyState compact title="No active loops" detail="Loop rows appear here when an agent is running a loop." />
+          ) : (
+            <div className="loop-strip">
+              {activeLoopGroups.map((group) => (
+                <section key={group.agent.id} className="loop-agent-group">
+                  <div className="loop-agent-group__header">
+                    <AgentBadge agentId={group.agent.id} status="idle" />
+                    <span className="loop-agent-group__count">{group.loops.length} loop(s)</span>
                   </div>
-                  <TranscriptTail entries={item.run.transcript_tail} />
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </SurfaceCard>
+                  <div className="loop-agent-group__rows">
+                    {group.loops.map((loop) => (
+                      <a
+                        key={`${group.agent.id}-${loop.loop_id}`}
+                        className="loop-row"
+                        href={`/pages/loops.html?loop=${loop.loop_id}`}
+                      >
+                        <div className="loop-row__main">
+                          <div className="loop-row__title">
+                            <strong>{loop.spec.name}</strong>
+                            <LoopStatusPill status={loop.status} />
+                          </div>
+                          <div className="loop-row__meta">
+                            <span>{loopTypeLabel(loop.spec.loop_type)}</span>
+                            <span>{loopApprovalGateLabel(loop.spec.approval_gate)}</span>
+                            <span>
+                              Iter {loop.current_iteration}/{loop.spec.budget.max_iterations}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="loop-row__stats">
+                          <span>Best {formatMetricValue(loop.best_metric)}</span>
+                          <span>Open</span>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                </section>
+              ))}
+            </div>
+          )}
+        </SurfaceCard>
+
+        <SurfaceCard title="Active Runs" subtitle="Transcript tails and operator stop control" className="surface-card--compact">
+          {liveRuns.length === 0 ? (
+            <EmptyState compact title="No active or recent runs" detail="Live run cards appear here when coordinator exposes run state." />
+          ) : (
+            <div className="live-run-grid">
+              {liveRuns.map((item) => {
+                const isActive = item.run.status === "running" || item.run.status === "queued";
+                return (
+                  <div key={`${item.agentId}-${item.run.run_id}`} className={cn("live-run-card", isActive && "is-live")}>
+                    <div className="live-run-card__header">
+                      <div>
+                        <AgentBadge
+                          agentId={item.agentId}
+                          status={agentStatusTone(item.status?.status as string | undefined, item.run)}
+                        />
+                        <div className="live-run-card__meta">
+                          {isActive ? "Live now" : `Finished ${timeAgo(item.run.finished_at ?? item.run.started_at)}`}
+                        </div>
+                      </div>
+                      {isActive ? (
+                        <button
+                          className="danger-button"
+                          type="button"
+                          onClick={() => runCancel.mutate(item.run.run_id)}
+                          disabled={runCancel.isPending}
+                        >
+                          Stop
+                        </button>
+                      ) : null}
+                    </div>
+                    <TranscriptTail entries={item.run.transcript_tail} />
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </SurfaceCard>
+      </div>
 
       <div className="dashboard-grid">
         <div className="stack">
           <SurfaceCard
             title="Tasks"
-            subtitle="CRUD against /tasks.json"
-            action={<a href="#task-list">Task list</a>}
+            subtitle="Dispatch, assign, and resolve work"
+            action={<a className="surface-card__action-link" href="#task-list">Task list</a>}
           >
-            <div className="task-toolbar">
+            <div className="task-toolbar task-toolbar--primary">
               <input
                 className="text-input"
                 value={newTaskTitle}
@@ -342,10 +367,8 @@ export function DashboardPage() {
               <button className="primary-button" type="button" onClick={() => void addTask()}>
                 Add
               </button>
-            </div>
-            <div className="task-toolbar">
               <input
-                className="text-input"
+                className="text-input task-toolbar__search"
                 value={taskSearch}
                 onChange={(event) => setTaskSearch(event.target.value)}
                 placeholder="Search tasks, assignees, blocks..."
@@ -427,7 +450,7 @@ export function DashboardPage() {
         </div>
 
         <div className="stack">
-          <SurfaceCard title="Agents" subtitle="Polled every 5 seconds">
+          <SurfaceCard title="Agents" subtitle="Operator roster and current focus">
             <div className="sidebar-list">
               {AGENTS.map((agent) => {
                 const status = statuses.data[agent.id];
@@ -446,10 +469,10 @@ export function DashboardPage() {
             </div>
           </SurfaceCard>
 
-          <SurfaceCard title="Dependencies" subtitle="Blocked task graph">
+          <SurfaceCard title="Dependencies" subtitle="Blocked work and unresolved chains" className="surface-card--compact">
             <div className="dependency-list">
               {(document?.tasks ?? []).filter((task) => task.blocked_by.length > 0).length === 0 ? (
-                <EmptyState title="No active dependencies" />
+                <EmptyState compact title="No active dependencies" />
               ) : (
                 (document?.tasks ?? [])
                   .filter((task) => task.blocked_by.length > 0)
@@ -463,17 +486,21 @@ export function DashboardPage() {
             </div>
           </SurfaceCard>
 
-          <SurfaceCard title="Activity Log" subtitle="Recent task mutations">
+          <SurfaceCard title="Activity Log" subtitle="Recent task mutations" className="surface-card--compact">
             <div className="activity-log-ui">
-              {(document?.log ?? []).slice().reverse().slice(0, 30).map((entry) => (
-                <div key={`${entry.timestamp}-${entry.actor}-${entry.action}`} className="activity-log-ui__entry">
-                  <span>{new Date(entry.timestamp).toLocaleTimeString()}</span>
-                  <span>{entry.actor}</span>
-                  <span>
-                    {entry.action} {entry.task_id ? <em>{entry.task_id}</em> : null} {entry.detail ?? ""}
-                  </span>
-                </div>
-              ))}
+              {(document?.log ?? []).length === 0 ? (
+                <EmptyState compact title="No recent task mutations" detail="Task activity will accumulate here as operators work." />
+              ) : (
+                (document?.log ?? []).slice().reverse().slice(0, 30).map((entry) => (
+                  <div key={`${entry.timestamp}-${entry.actor}-${entry.action}`} className="activity-log-ui__entry">
+                    <span>{new Date(entry.timestamp).toLocaleTimeString()}</span>
+                    <span>{entry.actor}</span>
+                    <span>
+                      {entry.action} {entry.task_id ? <em>{entry.task_id}</em> : null} {entry.detail ?? ""}
+                    </span>
+                  </div>
+                ))
+              )}
             </div>
           </SurfaceCard>
         </div>

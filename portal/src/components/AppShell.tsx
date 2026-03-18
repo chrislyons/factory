@@ -1,5 +1,5 @@
 import type { PropsWithChildren, ReactNode } from "react";
-import { DOC_LINKS, NAV_LINKS } from "../lib/constants";
+import { DOC_LINKS, NAV_LINKS, PORTAL_HOME } from "../lib/constants";
 import { cn } from "../lib/utils";
 import { CommandPaletteButton } from "./CommandPalette";
 
@@ -24,7 +24,7 @@ export function AppShell({
       <header className="portal-header">
         <div className="portal-header__inner">
           <div>
-            <a className="portal-brand" href="/">
+            <a className="portal-brand" href={PORTAL_HOME}>
               <span className="portal-brand__title">factory</span>
               <span className="portal-brand__sub">portal</span>
             </a>
@@ -76,10 +76,11 @@ export function SurfaceCard({
   title,
   subtitle,
   children,
-  action
-}: PropsWithChildren<{ title: string; subtitle?: string; action?: ReactNode }>) {
+  action,
+  className
+}: PropsWithChildren<{ title: string; subtitle?: string; action?: ReactNode; className?: string }>) {
   return (
-    <section className="surface-card">
+    <section className={cn("surface-card", className)}>
       <div className="surface-card__header">
         <div>
           <h2>{title}</h2>

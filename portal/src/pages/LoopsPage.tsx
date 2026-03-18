@@ -69,7 +69,7 @@ export function LoopsPage() {
       pageKey="/pages/loops.html"
       statusSlot={<LastUpdatedChip updatedAt={Math.max(loops.dataUpdatedAt || 0, loopDetail.dataUpdatedAt || 0)} stale={Boolean(loops.error || loopDetail.error)} />}
     >
-      <SurfaceCard title="Loop Controls" subtitle="Expected coordinator HTTP contract">
+      <SurfaceCard title="Loop Controls" subtitle="Start, filter, and inspect active loops" className="surface-card--compact">
         <div className="task-toolbar">
           <input
             className="text-input"
@@ -90,56 +90,55 @@ export function LoopsPage() {
           </button>
         </div>
         {loopStart.error ? (
-          <div className="alert-banner is-danger">Loop start failed. Waiting for coordinator `/loops/start`.</div>
+          <div className="alert-banner is-danger">Loop start failed. Coordinator loop actions are not available yet.</div>
         ) : (
           <div className="placeholder-copy">
-            Start and abort actions are wired against the expected loop API and stay safe when the coordinator returns 404.
+            Start and abort controls stay visible even when the coordinator loop routes are unavailable.
           </div>
         )}
+        <div className="filter-row-ui">
+          <select className="select-input loop-filter" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
+            <option value="all">All statuses</option>
+            <option value="pending">Pending</option>
+            <option value="running">Running</option>
+            <option value="paused">Paused</option>
+            <option value="completed">Completed</option>
+            <option value="aborted">Aborted</option>
+          </select>
+          <select className="select-input loop-filter" value={agentFilter} onChange={(event) => setAgentFilter(event.target.value)}>
+            <option value="all">All agents</option>
+            {AGENTS.map((agent) => (
+              <option key={agent.id} value={agent.id}>
+                {agent.label}
+              </option>
+            ))}
+          </select>
+          <select className="select-input loop-filter" value={typeFilter} onChange={(event) => setTypeFilter(event.target.value)}>
+            <option value="all">All loop types</option>
+            {["researcher", "narrative", "infra_improve", "coding", "swarm"].map((value) => (
+              <option key={value} value={value}>
+                {loopTypeLabel(value)}
+              </option>
+            ))}
+          </select>
+          <select className="select-input loop-filter" value={approvalFilter} onChange={(event) => setApprovalFilter(event.target.value)}>
+            <option value="all">All approval gates</option>
+            {["none", "propose_then_execute", "human_approval_required"].map((value) => (
+              <option key={value} value={value}>
+                {loopApprovalGateLabel(value)}
+              </option>
+            ))}
+          </select>
+        </div>
       </SurfaceCard>
 
-      <div className="filter-row-ui">
-        <select className="select-input loop-filter" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
-          <option value="all">All statuses</option>
-          <option value="pending">Pending</option>
-          <option value="running">Running</option>
-          <option value="paused">Paused</option>
-          <option value="completed">Completed</option>
-          <option value="aborted">Aborted</option>
-        </select>
-        <select className="select-input loop-filter" value={agentFilter} onChange={(event) => setAgentFilter(event.target.value)}>
-          <option value="all">All agents</option>
-          {AGENTS.map((agent) => (
-            <option key={agent.id} value={agent.id}>
-              {agent.label}
-            </option>
-          ))}
-        </select>
-        <select className="select-input loop-filter" value={typeFilter} onChange={(event) => setTypeFilter(event.target.value)}>
-          <option value="all">All loop types</option>
-          {["researcher", "narrative", "infra_improve", "coding", "swarm"].map((value) => (
-            <option key={value} value={value}>
-              {loopTypeLabel(value)}
-            </option>
-          ))}
-        </select>
-        <select className="select-input loop-filter" value={approvalFilter} onChange={(event) => setApprovalFilter(event.target.value)}>
-          <option value="all">All approval gates</option>
-          {["none", "propose_then_execute", "human_approval_required"].map((value) => (
-            <option key={value} value={value}>
-              {loopApprovalGateLabel(value)}
-            </option>
-          ))}
-        </select>
-      </div>
-
       {loops.error ? (
-        <SurfaceCard title="Loop Inventory" subtitle="Waiting on `/loops`">
-          <EmptyState title="Waiting for coordinator…" detail="`GET /loops` is not returning data yet." />
+        <SurfaceCard title="Loop Inventory" subtitle="Waiting on `/loops`" className="surface-card--compact">
+          <EmptyState compact title="Waiting for coordinator…" detail="`GET /loops` is not returning data yet." />
         </SurfaceCard>
       ) : filteredLoops.length === 0 ? (
-        <SurfaceCard title="Loop Inventory" subtitle="No active loop records">
-          <EmptyState title="No loops yet" detail="`GET /loops` returned an empty array." />
+        <SurfaceCard title="Loop Inventory" subtitle="No active loop records" className="surface-card--compact">
+          <EmptyState compact title="No loops yet" detail="`GET /loops` returned an empty array." />
         </SurfaceCard>
       ) : (
         <div className="loop-console-layout">
@@ -178,9 +177,9 @@ export function LoopsPage() {
             </div>
           </SurfaceCard>
 
-          <SurfaceCard title="Selected Loop" subtitle="Exact loop_engine.rs shape">
+          <SurfaceCard title="Selected Loop" subtitle="Iteration detail and operator control">
             {!selectedLoop ? (
-              <EmptyState title="Select a loop" detail="Choose a loop from the inventory to inspect it." />
+              <EmptyState compact title="Select a loop" detail="Choose a loop from the inventory to inspect it." />
             ) : (
               <LoopDetailPanel
                 loop={selectedLoop}

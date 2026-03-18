@@ -14,7 +14,7 @@ describe("LastUpdatedChip", () => {
 
   it("shows a coordinator waiting state without data", () => {
     render(<LastUpdatedChip />);
-    expect(screen.getByText("Waiting for coordinator…")).toBeInTheDocument();
+    expect(screen.getByText("Awaiting sync")).toBeInTheDocument();
   });
 
   it("marks stale snapshots explicitly", () => {

@@ -8,6 +8,8 @@ export interface AgentDefinition {
   accent: string;
 }
 
+export const PORTAL_HOME = "/portal.html";
+
 export const AGENTS: AgentDefinition[] = [
   { id: "boot", label: "Boot", shortLabel: "BT", color: "#38bdf8", accent: "#38bdf8" },
   { id: "ig88", label: "IG-88", shortLabel: "IG", color: "#f97316", accent: "#f97316" },
@@ -16,7 +18,7 @@ export const AGENTS: AgentDefinition[] = [
 ];
 
 export const NAV_LINKS = [
-  { href: "/", label: "Portal" },
+  { href: PORTAL_HOME, label: "Portal" },
   { href: "/pages/dashboard-v4.html", label: "Mission Control" },
   { href: "/pages/loops.html", label: "Loops" },
   { href: "/pages/approvals.html", label: "Approvals" },

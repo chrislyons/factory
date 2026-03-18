@@ -10,7 +10,7 @@ export function LastUpdatedChip({
 }) {
   useNow(1_000);
   if (!updatedAt) {
-    return <span className="last-updated-chip">Waiting for coordinator…</span>;
+    return <span className="last-updated-chip">Awaiting sync</span>;
   }
 
   return (
