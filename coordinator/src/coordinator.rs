@@ -2192,9 +2192,20 @@ async fn handle_command(
         "/delegate" if parts.len() >= 4 => {
             let repo = parts[1].to_string();
             let model = parts[2].to_string();
-            let prompt = parts[3..].join(" ");
+            let remaining = &parts[3..];
+            // Extract optional loop_spec: token (e.g. loop_spec:researcher-boot-2026-03-19)
+            let loop_spec_path = remaining.iter().find_map(|p| {
+                p.strip_prefix("loop_spec:").map(|name| {
+                    format!("~/dev/autoresearch/loop-specs/{}.md", name)
+                })
+            });
+            let prompt_parts: Vec<&str> = remaining.iter()
+                .filter(|p| !p.starts_with("loop_spec:"))
+                .copied()
+                .collect();
+            let prompt = prompt_parts.join(" ");
             Some(
-                handle_delegate_command(state, _agent_name, room_id, &repo, &model, &prompt, matrix_client)
+                handle_delegate_command(state, _agent_name, room_id, &repo, &model, &prompt, loop_spec_path.as_deref(), matrix_client)
                     .await,
             )
         }
@@ -2980,18 +2991,29 @@ async fn handle_delegate_command(
     repo: &str,
     model: &str,
     prompt: &str,
+    loop_spec_path: Option<&str>,
     matrix_client: &MatrixClient,
 ) -> String {
     let _ = matrix_client
         .send_message(
             room_id,
             &format!(
-                "_(Starting delegate session on {} — repo={} model={})_",
-                state.config.settings.delegate_device, repo, model
+                "_(Starting delegate session on {} — repo={} model={}{})_",
+                state.config.settings.delegate_device, repo, model,
+                loop_spec_path.map(|p| format!(" loop_spec={}", p)).unwrap_or_default()
             ),
             None,
         )
         .await;
+
+    // Build final prompt — prepend Loop Spec path if provided
+    let final_prompt = match loop_spec_path {
+        Some(path) => format!(
+            "Your Loop Spec is at: {}. Read it before executing any iteration.\n\n{}",
+            path, prompt
+        ),
+        None => prompt.to_string(),
+    };
 
     let config = state.config.clone();
     let auto_approve_tools: HashSet<String> = config
@@ -3006,7 +3028,7 @@ async fn handle_delegate_command(
         agent_name,
         repo,
         model,
-        prompt,
+        &final_prompt,
         &|tool_name, _tool_input| {
             // Fallback approval callback — deny everything not auto-approved
             auto_approve_tools.contains(tool_name)
