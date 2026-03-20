@@ -101,12 +101,31 @@ def main():
 
     now = datetime.now(timezone.utc).isoformat()
 
+    # Build registry maps for portal consumption
+    registry_domains = {}
+    for code, info in registry["domains"].items():
+        registry_domains[code] = {
+            "label": info["label"],
+            "description": info.get("description", ""),
+        }
+
+    registry_classes = {}
+    for code, info in registry["classes"].items():
+        registry_classes[code] = {
+            "label": info["label"],
+            "color": info["color"],
+        }
+
     output = {
         "tasks": jobs,
         "blocks": blocks,
         "log": [],
         "updated": now,
         "updated_by": "build-jobs-json.py",
+        "registry": {
+            "domains": registry_domains,
+            "classes": registry_classes,
+        },
     }
 
     # Summary

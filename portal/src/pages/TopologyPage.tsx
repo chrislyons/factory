@@ -1,7 +1,100 @@
+import { useRef, useState } from "react";
 import { LastUpdatedChip } from "../components/primitives/LastUpdatedChip";
-import { useAgentStatuses, latestDataUpdatedAt } from "../hooks/usePortalQueries";
+import { useAgentStatuses, useTasksDocument, latestDataUpdatedAt } from "../hooks/usePortalQueries";
 import { AGENTS } from "../lib/constants";
 import { AppShell, SurfaceCard } from "../components/AppShell";
+import type { RegistryEntry } from "../lib/types";
+
+const DISPLAY_TRIALS = [
+  { id: "", label: "Geist Pixel", detail: "current" },
+  { id: "input-sans", label: "Input Sans", detail: "original" },
+  { id: "departure-mono", label: "Departure Mono", detail: "mono display" },
+  { id: "geist", label: "Geist", detail: "600wt" },
+  { id: "basement", label: "Basement", detail: "600wt" },
+  { id: "clash", label: "Clash Grotesk", detail: "600wt" },
+] as const;
+
+const BODY_TRIALS = [
+  { id: "", label: "Geist Mono", detail: "current, 200wt" },
+  { id: "inter", label: "Inter", detail: "original" },
+  { id: "input-mono", label: "Input Mono", detail: "100wt" },
+  { id: "monaspace", label: "Monaspace Neon", detail: "100wt" },
+] as const;
+
+function FontTrialRow({ label, attr, options }: {
+  label: string;
+  attr: string;
+  options: readonly { id: string; label: string; detail: string }[];
+}) {
+  const [active, setActive] = useState(() => document.documentElement.getAttribute(attr) ?? "");
+
+  function apply(id: string) {
+    if (id) {
+      document.documentElement.setAttribute(attr, id);
+    } else {
+      document.documentElement.removeAttribute(attr);
+    }
+    setActive(id);
+  }
+
+  return (
+    <div className="font-trial-row">
+      <span className="font-trial-bar__label">{label}</span>
+      {options.map((f) => (
+        <button
+          key={f.id}
+          className={`font-trial-btn${active === f.id ? " is-active" : ""}`}
+          onClick={() => apply(f.id)}
+          title={f.detail}
+        >
+          {f.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function FontTrialSwitcher() {
+  return (
+    <div className="font-trial-bar">
+      <FontTrialRow label="Display" attr="data-font-trial" options={DISPLAY_TRIALS} />
+      <FontTrialRow label="Body" attr="data-body-trial" options={BODY_TRIALS} />
+    </div>
+  );
+}
+
+function EditableCell({ value, onSave }: { value: string; onSave: (v: string) => void }) {
+  const [editing, setEditing] = useState(false);
+  const ref = useRef<HTMLInputElement>(null);
+
+  if (!editing) {
+    return (
+      <span className="registry-editable" onClick={() => setEditing(true)}>
+        {value || <span className="registry-editable__empty">—</span>}
+      </span>
+    );
+  }
+
+  const commit = () => {
+    const next = ref.current?.value.trim() ?? "";
+    if (next !== value) onSave(next);
+    setEditing(false);
+  };
+
+  return (
+    <input
+      ref={ref}
+      className="registry-editable__input"
+      defaultValue={value}
+      autoFocus
+      onBlur={commit}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") commit();
+        if (e.key === "Escape") setEditing(false);
+      }}
+    />
+  );
+}
 
 const AGENT_CSS_COLORS: Record<string, string> = {
   boot: "var(--agent-boot)",
@@ -12,13 +105,30 @@ const AGENT_CSS_COLORS: Record<string, string> = {
 
 export function TopologyPage() {
   const statuses = useAgentStatuses();
+  const tasksDoc = useTasksDocument();
+  const registry = tasksDoc.data?.registry;
+
+  function updateRegistry(table: "domains" | "classes", code: string, field: string, value: string) {
+    tasksDoc.updateDocument((doc) => ({
+      ...doc,
+      registry: {
+        ...doc.registry!,
+        [table]: {
+          ...doc.registry![table],
+          [code]: { ...doc.registry![table][code], [field]: value },
+        },
+      },
+    }));
+  }
 
   return (
     <AppShell
-      title="Factory Topology"
+      title="Topology"
       pageKey="/pages/topology.html"
       statusSlot={<LastUpdatedChip updatedAt={latestDataUpdatedAt(statuses.results)} stale={statuses.hasError} />}
     >
+      <FontTrialSwitcher />
+
       {/* Agent Strip */}
       <div className="topology-agent-strip">
         {AGENTS.map((agent) => {
@@ -76,16 +186,18 @@ export function TopologyPage() {
 
       {/* Escalation Chain */}
       <SurfaceCard title="Escalation Chain" subtitle="Approval flow tiers" className="surface-card--compact">
-        <div className="topology-mini-grid">
-          <div className="topology-mini-node">
+        <div className="topology-flow">
+          <div className="topology-flow-node topology-flow-node--low">
             <div className="topology-mini-node__label">Auto-approve</div>
             <div className="topology-mini-node__meta">Low risk actions</div>
           </div>
-          <div className="topology-mini-node">
+          <div className="topology-flow-connector" />
+          <div className="topology-flow-node topology-flow-node--medium">
             <div className="topology-mini-node__label">Propose-then-execute</div>
             <div className="topology-mini-node__meta">Medium risk actions</div>
           </div>
-          <div className="topology-mini-node">
+          <div className="topology-flow-connector" />
+          <div className="topology-flow-node topology-flow-node--high">
             <div className="topology-mini-node__label">Human approval required</div>
             <div className="topology-mini-node__meta">High risk actions</div>
           </div>
@@ -122,6 +234,68 @@ export function TopologyPage() {
           ))}
         </div>
       </SurfaceCard>
+      {/* Domain & Class Registries */}
+      {registry && (
+        <SurfaceCard title="Job Registry" subtitle="Domain and class definitions — click to edit" className="surface-card--compact">
+          <div className="registry-tables">
+            <div>
+              <h4 className="topology-layer-title">Domains</h4>
+              <table className="registry-table">
+                <thead>
+                  <tr><th>Code</th><th>Label</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                  {Object.entries(registry.domains).sort(([a], [b]) => a.localeCompare(b)).map(([code, entry]: [string, RegistryEntry]) => (
+                    <tr key={code}>
+                      <td className="registry-table__code">{code}</td>
+                      <td>
+                        <EditableCell
+                          value={entry.label}
+                          onSave={(v) => updateRegistry("domains", code, "label", v)}
+                        />
+                      </td>
+                      <td className="registry-table__desc">
+                        <EditableCell
+                          value={entry.description ?? ""}
+                          onSave={(v) => updateRegistry("domains", code, "description", v)}
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div>
+              <h4 className="topology-layer-title">Classes</h4>
+              <table className="registry-table">
+                <thead>
+                  <tr><th>Code</th><th>Label</th><th>Color</th></tr>
+                </thead>
+                <tbody>
+                  {Object.entries(registry.classes).sort(([a], [b]) => a.localeCompare(b)).map(([code, entry]: [string, RegistryEntry]) => (
+                    <tr key={code}>
+                      <td className="registry-table__code">{code}</td>
+                      <td>
+                        <EditableCell
+                          value={entry.label}
+                          onSave={(v) => updateRegistry("classes", code, "label", v)}
+                        />
+                      </td>
+                      <td>
+                        <span className="registry-color-swatch" style={{ background: entry.color }} />
+                        <EditableCell
+                          value={entry.color ?? ""}
+                          onSave={(v) => updateRegistry("classes", code, "color", v)}
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </SurfaceCard>
+      )}
     </AppShell>
   );
 }

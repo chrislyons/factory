@@ -11,7 +11,7 @@
 | v5 | — | 2026-03 | — | Retired | GSD-era vanilla JS dashboard |
 | v6 | — | 2026-03-17 | — | Retired | First React port |
 | v7 | — | 2026-03-17 | — | Retired | Pre-indigo palette |
-| v8 | eebcb83 | 2026-03-20 | :41910 | Live | Indigo palette, 3-font stack, dark+light mode |
+| v8 | eebcb83 | 2026-03-20 | :41910 | Live | Indigo palette, Geist Pixel Grid + Geist Mono, dark+light mode |
 
 ---
 

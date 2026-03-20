@@ -1362,6 +1362,64 @@
     }
   },
   "log": [],
-  "updated": "2026-03-20T22:01:25.706957+00:00",
-  "updated_by": "build-jobs-json.py"
+  "updated": "2026-03-20T22:57:24.316728+00:00",
+  "updated_by": "build-jobs-json.py",
+  "registry": {
+    "domains": {
+      "00": {
+        "label": "System",
+        "description": "Factory-wide, human-owned, unassigned"
+      },
+      "10": {
+        "label": "Boot",
+        "description": "placeholder — pending agent roster"
+      },
+      "20": {
+        "label": "IG-88",
+        "description": "placeholder — pending agent roster"
+      },
+      "30": {
+        "label": "Kelk",
+        "description": "placeholder — pending agent roster"
+      },
+      "40": {
+        "label": "Nan",
+        "description": "placeholder — pending agent roster"
+      }
+    },
+    "classes": {
+      "001": {
+        "label": "Infrastructure",
+        "color": "#6366f1"
+      },
+      "002": {
+        "label": "Capabilities",
+        "color": "#38bdf8"
+      },
+      "003": {
+        "label": "Loops",
+        "color": "#f97316"
+      },
+      "004": {
+        "label": "Portal",
+        "color": "#a78bfa"
+      },
+      "005": {
+        "label": "Research",
+        "color": "#fb7185"
+      },
+      "006": {
+        "label": "Coordinator",
+        "color": "#34d399"
+      },
+      "007": {
+        "label": "Legacy",
+        "color": "#71717a"
+      },
+      "008": {
+        "label": "Curriculum",
+        "color": "#fbbf24"
+      }
+    }
+  }
 }

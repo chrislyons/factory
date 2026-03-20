@@ -68,12 +68,22 @@ export interface TaskLogEntry {
   detail?: string;
 }
 
+export interface RegistryEntry {
+  label: string;
+  description?: string;
+  color?: string;
+}
+
 export interface TasksDocument {
   tasks: TaskRecord[];
   blocks: Record<string, TaskBlock>;
   log: TaskLogEntry[];
   updated?: string;
   updated_by?: string;
+  registry?: {
+    domains: Record<string, RegistryEntry>;
+    classes: Record<string, RegistryEntry>;
+  };
 }
 
 export interface CurrentRunTailEntry {

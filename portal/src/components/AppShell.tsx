@@ -15,7 +15,7 @@ interface AppShellProps {
 
 export function AppShell({
   title,
-  eyebrow = "Factory Portal",
+  eyebrow,
   description,
   statusSlot,
   pageKey,
@@ -50,7 +50,7 @@ export function AppShell({
         <div className="portal-header__inner">
           <div>
             <a className="portal-brand" href={PORTAL_HOME}>
-              <span className="portal-brand__title">factory</span>
+              <span className="portal-brand__title">dreamfactory</span>
               <span className="portal-brand__sub">portal</span>
             </a>
           </div>
@@ -77,7 +77,7 @@ export function AppShell({
 
       <main className="portal-main">
         <section className="portal-hero">
-          <div className="portal-hero__eyebrow">{eyebrow}</div>
+          {eyebrow && <div className="portal-hero__eyebrow">{eyebrow}</div>}
           <h1>{title}</h1>
         </section>
         <div className="portal-page-content">{children}</div>
