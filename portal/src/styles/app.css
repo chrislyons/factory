@@ -386,8 +386,8 @@ textarea {
 
 .portal-page-content {
   display: grid;
-  gap: 14px;
-  margin-top: 8px;
+  gap: 16px;
+  margin-top: 12px;
 }
 
 /* ── Surface Cards ────────────────────────────────────────────────── */
@@ -396,7 +396,7 @@ textarea {
   position: relative;
   border: 1px solid var(--border);
   border-radius: 14px;
-  padding: 14px 16px;
+  padding: 18px 20px;
   background: var(--bg-panel);
   box-shadow: var(--shadow);
 }
@@ -413,7 +413,7 @@ textarea {
 }
 
 .surface-card--compact {
-  padding: 12px 14px;
+  padding: 14px 16px;
 }
 
 .surface-card__header {
@@ -421,7 +421,7 @@ textarea {
   justify-content: space-between;
   align-items: flex-start;
   gap: 12px;
-  margin-bottom: 6px;
+  margin-bottom: 14px;
 }
 
 .surface-card__header h2,
@@ -464,7 +464,7 @@ textarea {
 }
 
 .stack {
-  gap: 12px;
+  gap: 14px;
 }
 
 .stack-tight {
@@ -798,6 +798,11 @@ textarea {
 
 .task-toolbar--primary {
   align-items: center;
+  margin-bottom: 10px;
+}
+
+.filter-row-ui {
+  margin-bottom: 12px;
 }
 
 .task-toolbar__search {
@@ -1408,12 +1413,13 @@ textarea {
   display: flex;
   align-items: center;
   gap: 8px;
-  min-height: 48px;
-  padding: 2px 0;
+  min-height: 56px;
+  padding: 6px 0;
 }
 
 .empty-state.is-compact {
-  min-height: 36px;
+  min-height: 44px;
+  padding: 4px 0;
 }
 
 .empty-state__icon {
