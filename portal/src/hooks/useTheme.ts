@@ -6,7 +6,11 @@ const STORAGE_KEY = "factory-portal-theme";
 
 function getSystemTheme(): Theme {
   if (typeof window === "undefined") return "dark";
-  return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+  try {
+    return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+  } catch {
+    return "dark";
+  }
 }
 
 function getStoredTheme(): Theme | null {
@@ -31,15 +35,20 @@ export function useTheme() {
   }, [theme]);
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: light)");
+    let mediaQuery: MediaQueryList | null = null;
+    try {
+      mediaQuery = window.matchMedia("(prefers-color-scheme: light)");
+    } catch {
+      return;
+    }
     const handler = () => {
       if (!getStoredTheme()) {
-        const next = mediaQuery.matches ? "light" : "dark";
+        const next = mediaQuery!.matches ? "light" : "dark";
         setThemeState(next);
       }
     };
     mediaQuery.addEventListener("change", handler);
-    return () => mediaQuery.removeEventListener("change", handler);
+    return () => mediaQuery!.removeEventListener("change", handler);
   }, []);
 
   const setTheme = useCallback((next: Theme) => {

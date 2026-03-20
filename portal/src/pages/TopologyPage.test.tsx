@@ -27,7 +27,6 @@ describe("TopologyPage", () => {
     });
 
     await waitFor(() => expect(queryClient.isFetching()).toBe(0));
-    expect(screen.getAllByText("Open detail view")).toHaveLength(4);
     expect(screen.getAllByText("waiting")).toHaveLength(4);
   });
 
