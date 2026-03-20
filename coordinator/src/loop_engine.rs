@@ -37,8 +37,16 @@ pub struct LoopMetric {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LoopBudget {
-    pub per_iteration: String,
+    /// Machine-readable wall-clock cap per iteration in minutes
+    pub wall_clock_minutes: u64,
     pub max_iterations: u32,
+    /// Human-readable label — display only
+    #[serde(default)]
+    pub per_iteration: Option<String>,
+    #[serde(default)]
+    pub total_budget: Option<String>,
+    #[serde(default)]
+    pub token_target: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -67,8 +75,10 @@ pub enum LoopApprovalGate {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LoopSpec {
+    #[serde(default)]
     pub loop_id: String,
-    pub name: String,
+    #[serde(default)]
+    pub name: Option<String>,
     pub objective: String,
     pub loop_type: LoopType,
     #[serde(alias = "agent")]
@@ -77,26 +87,57 @@ pub struct LoopSpec {
     pub frozen_harness: Vec<String>,
     pub mutable_surface: Vec<String>,
     pub budget: LoopBudget,
+    #[serde(alias = "rollback_mechanism")]
     pub rollback: RollbackMechanism,
     pub approval_gate: LoopApprovalGate,
+    #[serde(default)]
     pub worker_cwd: Option<String>,
+    /// Absorbs non-runtime metadata keys (invocation, approval_rationale, etc.)
+    #[serde(flatten)]
+    pub extras: HashMap<String, serde_yaml::Value>,
 }
 
 impl LoopSpec {
-    /// Load and validate a Loop Spec from a YAML file.
-    /// Validation rules:
-    ///   - metric.machine_readable must be true
-    ///   - frozen_harness must be non-empty
     pub fn load(path: &Path) -> Result<Self> {
         let content = std::fs::read_to_string(path)
             .with_context(|| format!("Failed to read loop spec: {}", path.display()))?;
-        let spec: LoopSpec = serde_yaml::from_str(&content)
+
+        // Extract YAML from markdown code fence if .md file
+        let yaml_content = if path.extension().and_then(|e| e.to_str()) == Some("md") {
+            let start_marker = "```yaml\n";
+            let end_marker = "\n```";
+            let start = content.find(start_marker)
+                .map(|i| i + start_marker.len())
+                .with_context(|| format!("No ```yaml code fence found in {}", path.display()))?;
+            let remaining = &content[start..];
+            let end = remaining.find(end_marker)
+                .with_context(|| format!("No closing ``` found after yaml block in {}", path.display()))?;
+            remaining[..end].to_string()
+        } else {
+            content
+        };
+
+        let mut spec: LoopSpec = serde_yaml::from_str(&yaml_content)
             .with_context(|| format!("Failed to parse loop spec YAML: {}", path.display()))?;
+
+        // Derive loop_id from filename if not set in YAML
+        if spec.loop_id.is_empty() {
+            spec.loop_id = path.file_stem()
+                .and_then(|s| s.to_str())
+                .unwrap_or("unknown")
+                .to_string();
+        }
+
+        // Validation
         if !spec.metric.machine_readable {
             bail!("Loop spec '{}': metric '{}' must be machine_readable: true", spec.loop_id, spec.metric.name);
         }
         if spec.frozen_harness.is_empty() {
             bail!("Loop spec '{}': frozen_harness must be non-empty", spec.loop_id);
+        }
+        if spec.budget.max_iterations != 1 {
+            bail!("Loop spec '{}': max_iterations must be 1 until multi-iteration signaling is implemented (got {})",
+                spec.loop_id, spec.budget.max_iterations);
         }
         Ok(spec)
     }
@@ -154,14 +195,17 @@ impl ActiveLoop {
         }
     }
 
-    /// Parse the per_iteration token budget from strings like "50000 tokens" or "50000".
     fn parse_per_iteration_tokens(&self) -> u64 {
-        let s = self.spec.budget.per_iteration.trim();
-        // Take the first whitespace-delimited token and parse as u64
-        s.split_whitespace()
-            .next()
-            .and_then(|n| n.parse::<u64>().ok())
-            .unwrap_or(u64::MAX)
+        match &self.spec.budget.per_iteration {
+            Some(s) => {
+                let s = s.trim();
+                s.split_whitespace()
+                    .next()
+                    .and_then(|n| n.parse::<u64>().ok())
+                    .unwrap_or(u64::MAX)
+            }
+            None => u64::MAX,
+        }
     }
 
     /// Returns true if iteration_tokens_used has exceeded the per-iteration budget.
@@ -231,10 +275,15 @@ impl LoopManager {
         }
     }
 
-    /// Load a Loop Spec from path, register as a new ActiveLoop, return loop_id.
     pub fn load_and_register(&mut self, spec_path: &Path) -> Result<String> {
         let spec = LoopSpec::load(spec_path)?;
         let loop_id = spec.loop_id.clone();
+        // Block registration if loop_id exists in a nonterminal state
+        if let Some(existing) = self.active_loops.get(&loop_id) {
+            if !matches!(existing.status, LoopStatus::Completed | LoopStatus::Aborted) {
+                bail!("Loop '{}' is already active (status: {:?}). Abort or complete it first.", loop_id, existing.status);
+            }
+        }
         self.active_loops.insert(loop_id.clone(), ActiveLoop::new(spec));
         Ok(loop_id)
     }
@@ -341,8 +390,9 @@ frozen_harness:
 mutable_surface:
   - "src/"
 budget:
+  wall_clock_minutes: 45
   per_iteration: "50000 tokens"
-  max_iterations: 10
+  max_iterations: 1
 rollback:
   method: git_reset
   command: "git reset --hard HEAD~1"
@@ -368,8 +418,9 @@ metric:
 frozen_harness: ["tests/"]
 mutable_surface: ["src/"]
 budget:
+  wall_clock_minutes: 30
   per_iteration: "1000 tokens"
-  max_iterations: 5
+  max_iterations: 1
 rollback:
   method: git_reset
   command: "git reset --hard HEAD"
@@ -397,8 +448,9 @@ metric:
 frozen_harness: []
 mutable_surface: ["src/"]
 budget:
+  wall_clock_minutes: 30
   per_iteration: "1000 tokens"
-  max_iterations: 5
+  max_iterations: 1
 rollback:
   method: git_reset
   command: "git reset --hard HEAD"
@@ -414,7 +466,7 @@ approval_gate: none
         let f = write_temp_spec(&valid_spec_yaml("loop-001"));
         let spec = LoopSpec::load(f.path()).unwrap();
         assert_eq!(spec.loop_id, "loop-001");
-        assert_eq!(spec.budget.max_iterations, 10);
+        assert_eq!(spec.budget.max_iterations, 1);
         assert_eq!(spec.frozen_harness.len(), 2);
     }
 
@@ -491,5 +543,110 @@ approval_gate: none
         active.best_metric = Some(0.4);
         assert!(active.is_metric_improved(0.3));
         assert!(!active.is_metric_improved(0.5));
+    }
+
+    #[test]
+    fn spec_load_from_markdown() {
+        let md_content = r#"# Test Loop Spec
+
+Some markdown description.
+
+## Loop Spec
+
+```yaml
+loop_type: researcher
+agent: boot
+objective: "Test objective"
+metric:
+  name: "recall@10"
+  formula: "correct / total"
+  baseline: 0.0
+  direction: higher_is_better
+  machine_readable: true
+frozen_harness:
+  - "tests/"
+mutable_surface:
+  - "src/"
+budget:
+  wall_clock_minutes: 30
+  max_iterations: 1
+  per_iteration: "30 minutes wall-clock"
+rollback:
+  method: git_reset
+  command: "git reset --hard HEAD~1"
+  scope: "src/"
+approval_gate: none
+```
+
+More markdown after.
+"#;
+        // Write to a .md temp file
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("test-spec.md");
+        std::fs::write(&path, md_content).unwrap();
+        let spec = LoopSpec::load(&path).unwrap();
+        assert_eq!(spec.loop_id, "test-spec"); // derived from filename
+        assert_eq!(spec.agent_id, "boot");
+        assert_eq!(spec.budget.wall_clock_minutes, 30);
+        assert_eq!(spec.budget.max_iterations, 1);
+        assert!(spec.name.is_none());
+    }
+
+    #[test]
+    fn duplicate_loop_rejected() {
+        let yaml = valid_spec_yaml("dup-test");
+        let f = write_temp_spec(&yaml);
+        let mut mgr = LoopManager::new();
+        let id = mgr.load_and_register(f.path()).unwrap();
+        let _ = mgr.start_loop(&id);
+        // Re-registering while Running should fail
+        let result = mgr.load_and_register(f.path());
+        assert!(result.is_err());
+        assert!(result.unwrap_err().to_string().contains("already active"));
+    }
+
+    #[test]
+    fn duplicate_loop_allowed_after_complete() {
+        let yaml = valid_spec_yaml("dup-ok");
+        let f = write_temp_spec(&yaml);
+        let mut mgr = LoopManager::new();
+        let id = mgr.load_and_register(f.path()).unwrap();
+        let _ = mgr.start_loop(&id);
+        let _ = mgr.complete_loop(&id);
+        // Re-registering after Completed should succeed
+        let result = mgr.load_and_register(f.path());
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn spec_load_rejects_multi_iteration() {
+        let yaml = r#"
+loop_id: "multi-test"
+name: "Test"
+objective: "obj"
+loop_type: researcher
+agent_id: "boot"
+metric:
+  name: "recall"
+  formula: "x"
+  baseline: 0.5
+  direction: higher_is_better
+  machine_readable: true
+frozen_harness: ["tests/"]
+mutable_surface: ["src/"]
+budget:
+  wall_clock_minutes: 30
+  per_iteration: "1000 tokens"
+  max_iterations: 5
+rollback:
+  method: git_reset
+  command: "git reset --hard HEAD"
+  scope: "src/"
+approval_gate: none
+"#;
+        let f = write_temp_spec(yaml);
+        let result = LoopSpec::load(f.path());
+        assert!(result.is_err());
+        assert!(result.unwrap_err().to_string().contains("max_iterations must be 1"));
     }
 }

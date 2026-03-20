@@ -434,7 +434,7 @@ fn expand_paths(config: &mut Config) {
     }
 }
 
-fn expand_tilde(s: &str, home: &str) -> String {
+pub fn expand_tilde(s: &str, home: &str) -> String {
     if s == "~" {
         home.to_string()
     } else if let Some(rest) = s.strip_prefix("~/") {

@@ -41,6 +41,7 @@ pub async fn run_delegate_session(
     model: &str,
     prompt: &str,
     loop_spec_path: Option<&str>,
+    timeout_override: Option<Duration>,
     approval_callback: &dyn Fn(&str, Option<&serde_json::Value>) -> bool,
 ) -> Result<DelegateResult> {
     let device_name = &config.settings.delegate_device;
@@ -75,10 +76,8 @@ pub async fn run_delegate_session(
     }
 
     let timeout_ms = config.settings.delegate_timeout_ms;
-    let total_timeout = Duration::from_millis(if timeout_ms > 0 {
-        timeout_ms
-    } else {
-        DEFAULT_TIMEOUT_MS
+    let total_timeout = timeout_override.unwrap_or_else(|| {
+        Duration::from_millis(if timeout_ms > 0 { timeout_ms } else { DEFAULT_TIMEOUT_MS })
     });
 
     info!(

@@ -768,7 +768,7 @@ pub fn build_loop_context(loop_info: Option<&crate::loop_engine::ActiveLoop>) ->
         best_str,
         frozen_list,
         mutable_list,
-        spec.budget.per_iteration,
+        spec.budget.per_iteration.as_deref().unwrap_or("unlimited"),
     ))
 }
 

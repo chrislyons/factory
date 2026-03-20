@@ -2228,21 +2228,50 @@ async fn handle_command(
             let repo = parts[1].to_string();
             let model = parts[2].to_string();
             let remaining = &parts[3..];
-            // Extract optional loop_spec: token (e.g. loop_spec:researcher-boot-2026-03-19)
-            let loop_spec_path = remaining.iter().find_map(|p| {
-                p.strip_prefix("loop_spec:").map(|name| {
-                    format!("~/dev/autoresearch/loop-specs/{}.md", name)
+            // Extract and validate optional loop_spec: token
+            let spec_error: Option<String> = remaining.iter().find_map(|p| {
+                p.strip_prefix("loop_spec:").and_then(|name| {
+                    if name.contains("..") || name.contains('/') || name.contains('\\') {
+                        return Some(format!("Invalid loop spec: name must not contain path separators or '..' (got '{}')", name));
+                    }
+                    let home = std::env::var("HOME").unwrap_or_default();
+                    let specs_dir = format!("{}/dev/autoresearch/loop-specs", home);
+                    let md_path = format!("{}/{}.md", specs_dir, name);
+                    let yaml_path = format!("{}/{}.yaml", specs_dir, name);
+                    let md_exists = std::path::Path::new(&md_path).exists();
+                    let yaml_exists = std::path::Path::new(&yaml_path).exists();
+                    match (md_exists, yaml_exists) {
+                        (true, true) => Some(format!("Invalid loop spec: ambiguous — both .md and .yaml exist for '{}'", name)),
+                        (false, false) => Some(format!("Invalid loop spec: '{}' not found in {}", name, specs_dir)),
+                        _ => None, // valid — one file found
+                    }
                 })
             });
-            let prompt_parts: Vec<&str> = remaining.iter()
-                .filter(|p| !p.starts_with("loop_spec:"))
-                .copied()
-                .collect();
-            let prompt = prompt_parts.join(" ");
-            Some(
-                handle_delegate_command(state, _agent_name, room_id, &repo, &model, &prompt, loop_spec_path.as_deref(), matrix_client)
-                    .await,
-            )
+            if let Some(err) = spec_error {
+                Some(err)
+            } else {
+                let loop_spec_path = remaining.iter().find_map(|p| {
+                    p.strip_prefix("loop_spec:").map(|name| {
+                        let home = std::env::var("HOME").unwrap_or_default();
+                        let specs_dir = format!("{}/dev/autoresearch/loop-specs", home);
+                        let md_path = format!("{}/{}.md", specs_dir, name);
+                        if std::path::Path::new(&md_path).exists() {
+                            md_path
+                        } else {
+                            format!("{}/{}.yaml", specs_dir, name)
+                        }
+                    })
+                });
+                let prompt_parts: Vec<&str> = remaining.iter()
+                    .filter(|p| !p.starts_with("loop_spec:"))
+                    .copied()
+                    .collect();
+                let prompt = prompt_parts.join(" ");
+                Some(
+                    handle_delegate_command(state, _agent_name, room_id, &repo, &model, &prompt, loop_spec_path.as_deref(), matrix_client)
+                        .await,
+                )
+            }
         }
         "/delegate" => Some(
             "Usage: `/delegate <repo> <model> <prompt>`".to_string(),
@@ -3041,6 +3070,36 @@ async fn handle_delegate_command(
         )
         .await;
 
+    // Register loop if spec provided
+    let loop_id = if let Some(spec_path) = loop_spec_path {
+        match state.loop_manager.load_and_register(std::path::Path::new(spec_path)) {
+            Ok(id) => {
+                let _ = state.loop_manager.start_loop(&id);
+                let _ = state.run_event_log.append_event(
+                    &id, RunEventType::LoopStart, EventStream::System, EventLevel::Info,
+                    &format!("Loop started: agent={} repo={}", agent_name, repo), None
+                ).await;
+                let _ = state.run_event_log.append_event(
+                    &id, RunEventType::IterationStart, EventStream::System, EventLevel::Info,
+                    "Iteration 1 started", None
+                ).await;
+                Some(id)
+            }
+            Err(e) => {
+                return format!("Failed to load loop spec: {}", e);
+            }
+        }
+    } else {
+        None
+    };
+
+    // Compute timeout override from loop spec
+    let timeout_override = loop_id.as_ref().and_then(|id| {
+        state.loop_manager.get_loop(id).map(|lp| {
+            Duration::from_secs(lp.spec.budget.wall_clock_minutes * 60)
+        })
+    });
+
     // Build final prompt — prepend Loop Spec path if provided
     let final_prompt = match loop_spec_path {
         Some(path) => format!(
@@ -3065,32 +3124,63 @@ async fn handle_delegate_command(
         model,
         &final_prompt,
         loop_spec_path,
+        timeout_override,
         &|tool_name, _tool_input| {
-            // Fallback approval callback — deny everything not auto-approved
             auto_approve_tools.contains(tool_name)
         },
     )
     .await;
 
+    // Completion signaling
+    if let Some(ref loop_id) = loop_id {
+        match &result {
+            Ok(ref dr) if dr.success => {
+                let _ = state.run_event_log.append_event(
+                    loop_id, RunEventType::IterationEnd, EventStream::System, EventLevel::Info,
+                    "Iteration completed successfully",
+                    dr.cost_usd.map(|c| serde_json::json!({"cost_usd": c}))
+                ).await;
+                let _ = state.loop_manager.complete_loop(loop_id);
+                let _ = state.run_event_log.append_event(
+                    loop_id, RunEventType::LoopComplete, EventStream::System, EventLevel::Info,
+                    "Loop completed", None
+                ).await;
+            }
+            Ok(_) => {
+                let _ = state.run_event_log.append_event(
+                    loop_id, RunEventType::IterationEnd, EventStream::System, EventLevel::Warn,
+                    "Iteration ended with failure", None
+                ).await;
+                let _ = state.loop_manager.abort_loop(loop_id);
+                let _ = state.run_event_log.append_event(
+                    loop_id, RunEventType::LoopAborted, EventStream::System, EventLevel::Warn,
+                    "Loop aborted — delegate failed", None
+                ).await;
+            }
+            Err(ref e) => {
+                let _ = state.run_event_log.append_event(
+                    loop_id, RunEventType::IterationEnd, EventStream::System, EventLevel::Error,
+                    &format!("Iteration error: {}", e), None
+                ).await;
+                let _ = state.loop_manager.abort_loop(loop_id);
+                let _ = state.run_event_log.append_event(
+                    loop_id, RunEventType::LoopAborted, EventStream::System, EventLevel::Error,
+                    &format!("Loop aborted — error: {}", e), None
+                ).await;
+            }
+        }
+    }
+
     match result {
         Ok(delegate_result) => {
-            let status = if delegate_result.success {
-                "completed"
-            } else {
-                "failed"
-            };
-            let cost = delegate_result
-                .cost_usd
+            let status = if delegate_result.success { "completed" } else { "failed" };
+            let cost = delegate_result.cost_usd
                 .map(|c| format!(" (${:.4})", c))
                 .unwrap_or_default();
-
             if delegate_result.output.trim().is_empty() {
                 format!("Delegate session {} {}", status, cost)
             } else {
-                format!(
-                    "**Delegate Result** ({}{})\n\n{}",
-                    status, cost, delegate_result.output
-                )
+                format!("**Delegate Result** ({}{})\n\n{}", status, cost, delegate_result.output)
             }
         }
         Err(e) => format!("Delegate session failed: {}", e),
