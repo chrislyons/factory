@@ -19,9 +19,10 @@ use crate::approval::{
     ApprovalDecision, ApprovalRateLimiter, ApprovalRecord, ApprovalTracker, HmacSigner,
 };
 use crate::loop_engine::LoopManager;
-// TODO: wire RunEventLog into CoordinatorState for FrozenHarnessViolation emission
-#[allow(unused_imports)]
-use crate::run_events::{EventLevel, EventStream, RunEvent, RunEventType};
+use crate::run_events::{EventLevel, EventStream, RunEventLog, RunEventType};
+use crate::budget::BudgetTracker;
+use crate::runtime_state::RuntimeStateManager;
+use crate::task_lease::TaskLeaseManager;
 use crate::config::{self, Config, MatrixEvent};
 use crate::delegate;
 use crate::health::IncidentType;
@@ -230,6 +231,14 @@ struct CoordinatorState {
     coord_sync_token: Option<String>,
     /// Loop engine manager (autoscope — FCT009)
     loop_manager: LoopManager,
+    /// Per-agent budget tracking with soft/hard thresholds
+    budget_tracker: BudgetTracker,
+    /// Cumulative runtime state per agent
+    runtime_state: RuntimeStateManager,
+    /// Heartbeat event log for run observability
+    run_event_log: RunEventLog,
+    /// Atomic task checkout with TTL leases
+    task_lease: TaskLeaseManager,
 }
 
 impl CoordinatorState {
@@ -302,6 +311,10 @@ impl CoordinatorState {
             last_fs_approval_scan: Instant::now(),
             coord_sync_token: None,
             loop_manager: LoopManager::new(),
+            budget_tracker: BudgetTracker::new(PathBuf::from(format!("{}/budget.json", state_dir))),
+            runtime_state: RuntimeStateManager::new(PathBuf::from(format!("{}/runtime-state.json", state_dir))),
+            run_event_log: RunEventLog::new(PathBuf::from(format!("{}/runs", state_dir))),
+            task_lease: TaskLeaseManager::new(std::time::Duration::from_secs(300)),
         }
     }
 
@@ -1379,7 +1392,18 @@ async fn process_pending_approvals(state: &mut CoordinatorState) {
                         latency_ms: 0,
                         gate_type: None,
                     });
-                    // TODO: emit RunEventType::FrozenHarnessViolation via RunEventLog once wired
+                    let _ = state.run_event_log.append_event(
+                        &agent_name,
+                        RunEventType::FrozenHarnessViolation,
+                        EventStream::System,
+                        EventLevel::Warn,
+                        &format!("frozen harness violation: {} attempted on {}", tool_name, frozen_path),
+                        Some(serde_json::json!({
+                            "tool": tool_name,
+                            "path": frozen_path,
+                            "request_id": req.request_id,
+                        })),
+                    ).await;
                     continue;
                 }
             }
@@ -1950,7 +1974,18 @@ async fn scan_filesystem_approvals(state: &mut CoordinatorState) {
                     let resp_path = format!("{}/{}.response", state.approval_dir, request_id);
                     let _ = std::fs::write(&resp_path, "deny");
                 }
-                // TODO: emit RunEventType::FrozenHarnessViolation via RunEventLog once wired
+                let _ = state.run_event_log.append_event(
+                    &agent_name,
+                    RunEventType::FrozenHarnessViolation,
+                    EventStream::System,
+                    EventLevel::Warn,
+                    &format!("frozen harness violation (fs): {} attempted on {}", tool_name, frozen_path),
+                    Some(serde_json::json!({
+                        "tool": tool_name,
+                        "path": frozen_path,
+                        "request_id": request_id,
+                    })),
+                ).await;
                 continue;
             }
         }
@@ -3029,6 +3064,7 @@ async fn handle_delegate_command(
         repo,
         model,
         &final_prompt,
+        loop_spec_path,
         &|tool_name, _tool_input| {
             // Fallback approval callback — deny everything not auto-approved
             auto_approve_tools.contains(tool_name)

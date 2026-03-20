@@ -40,6 +40,7 @@ pub async fn run_delegate_session(
     repo: &str,
     model: &str,
     prompt: &str,
+    loop_spec_path: Option<&str>,
     approval_callback: &dyn Fn(&str, Option<&serde_json::Value>) -> bool,
 ) -> Result<DelegateResult> {
     let device_name = &config.settings.delegate_device;
@@ -86,12 +87,14 @@ pub async fn run_delegate_session(
     );
 
     // Spawn SSH process running session-relay.sh
+    let relay_cmd = if let Some(spec_path) = loop_spec_path {
+        format!("LOOP_SPEC_PATH='{}' ~/dev/scripts/session-relay.sh {} {}", spec_path, repo, model)
+    } else {
+        format!("~/dev/scripts/session-relay.sh {} {}", repo, model)
+    };
     let mut child = Command::new("ssh")
         .arg(ssh_alias)
-        .arg(format!(
-            "~/dev/scripts/session-relay.sh {} {}",
-            repo, model
-        ))
+        .arg(relay_cmd)
         .stdin(std::process::Stdio::piped())
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::piped())

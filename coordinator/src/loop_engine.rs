@@ -71,6 +71,7 @@ pub struct LoopSpec {
     pub name: String,
     pub objective: String,
     pub loop_type: LoopType,
+    #[serde(alias = "agent")]
     pub agent_id: String,
     pub metric: LoopMetric,
     pub frozen_harness: Vec<String>,
