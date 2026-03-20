@@ -444,7 +444,8 @@ textarea {
   text-transform: uppercase;
 }
 
-.surface-card__header p {
+.surface-card__header p,
+.placeholder-copy {
   margin: 3px 0 0;
   color: var(--text-muted);
   font-size: 11px;
@@ -599,7 +600,6 @@ textarea {
 }
 
 .landing-card p,
-.placeholder-copy,
 .compact-list,
 .budget-card-ui__meta,
 .approval-card__meta,
