@@ -355,7 +355,7 @@ textarea {
 .portal-main {
   width: min(var(--shell-max), var(--shell-width));
   flex: 1;
-  padding: 16px 0 28px;
+  padding: 16px 0 16px;
 }
 
 .portal-hero {
@@ -387,7 +387,7 @@ textarea {
 .portal-page-content {
   display: grid;
   gap: 14px;
-  margin-top: 16px;
+  margin-top: 8px;
 }
 
 /* ── Surface Cards ────────────────────────────────────────────────── */
@@ -421,7 +421,7 @@ textarea {
   justify-content: space-between;
   align-items: flex-start;
   gap: 12px;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 
 .surface-card__header h2,
@@ -645,9 +645,9 @@ textarea {
 .metric-card {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  min-height: 96px;
-  padding: 12px 14px;
+  gap: 4px;
+  min-height: 56px;
+  padding: 8px 12px;
   border-radius: var(--radius);
   border: 1px solid var(--border);
   background: var(--bg-panel);
@@ -657,7 +657,7 @@ textarea {
 }
 
 .metric-card__value {
-  font-size: 19px;
+  font-size: 16px;
   line-height: 1.1;
   font-weight: 700;
   font-family: var(--font-mono);
@@ -681,6 +681,33 @@ textarea {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.dashboard-status-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg-panel);
+  font-size: 11px;
+  color: var(--fg-muted);
+  font-family: var(--font-mono);
+}
+
+.dashboard-status-bar__item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dashboard-status-bar__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--fg-muted);
+  opacity: 0.5;
+}
+
 .dashboard-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.42fr) minmax(280px, 0.88fr);
@@ -694,7 +721,7 @@ textarea {
 .live-run-card {
   display: flex;
   flex-direction: column;
-  min-height: 180px;
+  min-height: 140px;
   border-radius: var(--radius);
   border: 1px solid var(--border);
   background: var(--bg-deep);
@@ -1197,7 +1224,7 @@ textarea {
 
 .chart-wrap {
   position: relative;
-  min-height: 210px;
+  min-height: 160px;
 }
 
 .chart-canvas {
@@ -1208,7 +1235,7 @@ textarea {
 .chart-placeholder {
   display: grid;
   gap: 10px;
-  min-height: 210px;
+  min-height: 160px;
   align-content: end;
 }
 
@@ -1426,16 +1453,15 @@ textarea {
 /* ── Empty State ──────────────────────────────────────────────────── */
 
 .empty-state {
-  display: grid;
-  justify-items: flex-start;
-  align-content: center;
-  gap: 6px;
-  min-height: 112px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
   padding: 2px 0;
 }
 
 .empty-state.is-compact {
-  min-height: 74px;
+  min-height: 36px;
 }
 
 .empty-state__icon {

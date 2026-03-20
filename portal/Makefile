@@ -97,10 +97,10 @@ uninstall:  ## Stop, disable, and remove the Blackbox services
 .PHONY: verify
 verify:  ## Smoke-test the live portal via Tailnet
 	@echo "Testing live server..."
-	@ssh $(BLACKBOX) 'curl -sf -u admin:$$PORTAL_PASSWORD http://100.87.53.109:41933/ > /dev/null' && echo "ok / (portal.html) OK"
-	@ssh $(BLACKBOX) 'curl -sf -u admin:$$PORTAL_PASSWORD http://100.87.53.109:41933/pages/dashboard-v4.html > /dev/null' && echo "ok dashboard-v4.html OK"
-	@ssh $(BLACKBOX) 'curl -sf -u admin:$$PORTAL_PASSWORD http://100.87.53.109:41933/index.json | python3 -m json.tool > /dev/null' && echo "ok index.json OK"
-	@ssh $(BLACKBOX) 'curl -sf -u admin:$$PORTAL_PASSWORD http://100.87.53.109:41933/tasks.json | python3 -m json.tool > /dev/null' && echo "ok tasks.json OK"
+	@ssh $(BLACKBOX) 'curl -sf -u admin:$$PORTAL_PASSWORD http://100.87.53.109:41910/ > /dev/null' && echo "ok / (portal.html) OK"
+	@ssh $(BLACKBOX) 'curl -sf -u admin:$$PORTAL_PASSWORD http://100.87.53.109:41910/pages/dashboard-v4.html > /dev/null' && echo "ok dashboard-v4.html OK"
+	@ssh $(BLACKBOX) 'curl -sf -u admin:$$PORTAL_PASSWORD http://100.87.53.109:41910/index.json | python3 -m json.tool > /dev/null' && echo "ok index.json OK"
+	@ssh $(BLACKBOX) 'curl -sf -u admin:$$PORTAL_PASSWORD http://100.87.53.109:41910/tasks.json | python3 -m json.tool > /dev/null' && echo "ok tasks.json OK"
 	@echo "Done."
 
 # ---------------------------------------------------------------------------
