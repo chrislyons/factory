@@ -102,9 +102,11 @@ export function PortalPage() {
         {cards.map((card) => (
           <a key={card.href} className={`landing-card is-${card.priority}`} href={card.href}>
             <div className="landing-card__topline">
-              <span className="landing-card__eyebrow">
-                {card.priority === "primary" ? "Primary Surface" : "Operator Surface"}
-              </span>
+              <div className="landing-card__eyebrow-wrap">
+                <span className="landing-card__eyebrow">
+                  {card.priority === "primary" ? "Primary Surface" : "Operator Surface"}
+                </span>
+              </div>
               {card.key === "mission" && statusFeedsLoaded ? (
                 <span className="landing-card__badge">{activeAgents} active agents</span>
               ) : null}

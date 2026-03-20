@@ -49,18 +49,18 @@ function barConfig({
       scales: {
         x: {
           stacked: !horizontal,
-          ticks: { color: "#c7bcad" },
+          ticks: { color: "#94a3b8" },
           grid: { color: "rgba(255,255,255,0.08)" }
         },
         y: {
           stacked: !horizontal,
-          ticks: { color: "#c7bcad" },
+          ticks: { color: "#94a3b8" },
           grid: { color: "rgba(255,255,255,0.08)" }
         }
       },
       plugins: {
         legend: {
-          labels: { color: "#ebe4d8" }
+          labels: { color: "#e4eaf1" }
         }
       }
     }
@@ -76,9 +76,9 @@ export function AnalyticsPage() {
     return barConfig({
       labels: data.run_activity.map((point) => point.label),
       datasets: [
-        { label: "Succeeded", data: data.run_activity.map((point) => point.succeeded ?? 0), backgroundColor: "#58d8a6" },
-        { label: "Failed", data: data.run_activity.map((point) => point.failed ?? 0), backgroundColor: "#f08a74" },
-        { label: "Other", data: data.run_activity.map((point) => point.other ?? 0), backgroundColor: "#8b8174" }
+        { label: "Succeeded", data: data.run_activity.map((point) => point.succeeded ?? 0), backgroundColor: "#34d399" },
+        { label: "Failed", data: data.run_activity.map((point) => point.failed ?? 0), backgroundColor: "#f87171" },
+        { label: "Other", data: data.run_activity.map((point) => point.other ?? 0), backgroundColor: "#fbbf24" }
       ]
     });
   }, [data]);
@@ -88,10 +88,10 @@ export function AnalyticsPage() {
     return barConfig({
       labels: data.tasks_by_status.map((point) => point.label),
       datasets: [
-        { label: "Todo", data: data.tasks_by_status.map((point) => point.todo ?? 0), backgroundColor: "#74b6f6" },
-        { label: "In Progress", data: data.tasks_by_status.map((point) => point.in_progress ?? 0), backgroundColor: "#2dd4bf" },
-        { label: "Done", data: data.tasks_by_status.map((point) => point.done ?? 0), backgroundColor: "#58d8a6" },
-        { label: "Blocked", data: data.tasks_by_status.map((point) => point.blocked ?? 0), backgroundColor: "#b79af8" }
+        { label: "Todo", data: data.tasks_by_status.map((point) => point.todo ?? 0), backgroundColor: "#60a5fa" },
+        { label: "In Progress", data: data.tasks_by_status.map((point) => point.in_progress ?? 0), backgroundColor: "#6366f1" },
+        { label: "Done", data: data.tasks_by_status.map((point) => point.done ?? 0), backgroundColor: "#34d399" },
+        { label: "Blocked", data: data.tasks_by_status.map((point) => point.blocked ?? 0), backgroundColor: "#a78bfa" }
       ]
     });
   }, [data]);
@@ -101,7 +101,7 @@ export function AnalyticsPage() {
     return barConfig({
       labels: data.tasks_by_assignee.map((point) => point.label),
       datasets: [
-        { label: "Tasks", data: data.tasks_by_assignee.map((point) => point.value), backgroundColor: "#74b6f6" }
+        { label: "Tasks", data: data.tasks_by_assignee.map((point) => point.value), backgroundColor: "#60a5fa" }
       ],
       horizontal: true
     });
@@ -116,7 +116,7 @@ export function AnalyticsPage() {
         datasets: [
           {
             data: [data.approval_rate.approved, data.approval_rate.rejected, data.approval_rate.timed_out],
-            backgroundColor: ["#58d8a6", "#f08a74", "#f2c86f"]
+            backgroundColor: ["#34d399", "#f87171", "#fbbf24"]
           }
         ]
       },
@@ -124,7 +124,7 @@ export function AnalyticsPage() {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { labels: { color: "#ebe4d8" } }
+          legend: { labels: { color: "#e4eaf1" } }
         }
       }
     };

@@ -1,5 +1,7 @@
+import { useEffect } from "react";
 import type { PropsWithChildren, ReactNode } from "react";
 import { DOC_LINKS, NAV_LINKS, PORTAL_HOME } from "../lib/constants";
+import { useTheme } from "../hooks/useTheme";
 import { cn } from "../lib/utils";
 import { CommandPaletteButton } from "./CommandPalette";
 
@@ -19,6 +21,29 @@ export function AppShell({
   pageKey,
   children
 }: PropsWithChildren<AppShellProps>) {
+  const { theme, toggle } = useTheme();
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+
+      if (e.key === "\\") {
+        e.preventDefault();
+        toggle();
+        return;
+      }
+
+      const idx = parseInt(e.key, 10) - 1;
+      if (idx >= 0 && idx < NAV_LINKS.length) {
+        e.preventDefault();
+        window.location.href = NAV_LINKS[idx].href;
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [toggle]);
+
   return (
     <div className="portal-app-shell">
       <header className="portal-header">
@@ -41,6 +66,9 @@ export function AppShell({
             ))}
           </nav>
           <div className="portal-header__actions">
+            <button className="theme-toggle" type="button" onClick={toggle} aria-label="Toggle theme">
+              {theme === "dark" ? "\u263E" : "\u2600"}
+            </button>
             {statusSlot}
             <CommandPaletteButton />
           </div>
