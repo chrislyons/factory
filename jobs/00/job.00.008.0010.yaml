@@ -1,0 +1,13 @@
+id: job.00.008.0010
+title: Estimate monthly token cost and identify optimization levers
+status: pending
+priority: p3
+effort: low
+assignee: chris
+blocked_by: []
+description: |-
+  Source: BKX114. Model tiering (FCT001 §2.2 already covers quantization), open-weight fallback (LiteLLM config), prompt caching (FCT-070). Produce a cost estimate spreadsheet covering: coordinator dispatch, inference per agent, portal polling.
+tags: []
+created: '2026-03-20'
+updated: '2026-03-20'
+legacy_id: fct-078

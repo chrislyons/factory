@@ -1,0 +1,13 @@
+id: job.10.006.0013
+title: 'Implement goal ancestry context injection (Paperclip pattern #12)'
+status: pending
+priority: p2
+effort: medium
+assignee: boot
+blocked_by: []
+description: |-
+  Inject 4-level goal hierarchy (Mission → Project → Agent → Task) into every task dispatch. Factory does not currently have a formal goal model. Adopt as Loop Spec `[goal]` block convention. FCT004 §LEARN section.
+tags: []
+created: '2026-03-20'
+updated: '2026-03-20'
+legacy_id: fct-067

@@ -1,0 +1,13 @@
+id: job.00.008.0009
+title: Map current skill distribution across agents
+status: pending
+priority: p3
+effort: low
+assignee: chris
+blocked_by: []
+description: |-
+  Source: BKX112. List every skill across Boot, IG-88, Kelk. Identify consolidation and split opportunities. Question: could Boot and Kelk share skills, with identity files as the differentiator?
+tags: []
+created: '2026-03-20'
+updated: '2026-03-20'
+legacy_id: fct-077

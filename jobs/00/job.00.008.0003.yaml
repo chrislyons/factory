@@ -1,0 +1,13 @@
+id: job.00.008.0003
+title: Implement compiled tool use for high-frequency agent workflows
+status: pending
+priority: p2
+effort: medium
+assignee: chris
+blocked_by: []
+description: |-
+  Source: BKX113. Agents that write code to orchestrate tools outperform step-by-step tool calling (NickADobos, 245K views). Identify 2–3 recurring Boot workflows and pre-bake as compiled decision trees.
+tags: []
+created: '2026-03-20'
+updated: '2026-03-20'
+legacy_id: fct-071

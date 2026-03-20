@@ -1,0 +1,13 @@
+id: job.10.004.0004
+title: Build budget status page (FCT006 P1.3)
+status: pending
+priority: p2
+effort: medium
+assignee: boot
+blocked_by: []
+description: |-
+  Per-agent budget card, utilization progress bar, color-coded status (green/amber/red), pause indicator, override button. Polls `GET /budget/status`.
+tags: []
+created: '2026-03-20'
+updated: '2026-03-20'
+legacy_id: fct-033

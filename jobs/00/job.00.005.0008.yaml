@@ -1,0 +1,13 @@
+id: job.00.005.0008
+title: Obsidian tutorials — structured learning path
+status: pending
+priority: p2
+effort: medium
+assignee: chris
+blocked_by: []
+description: |-
+  Develop a structured learning path for Obsidian advanced features (Dataview, Templater, Canvas, plugins). Relevant to vault usage as agent knowledge substrate.
+tags: []
+created: '2026-03-20'
+updated: '2026-03-20'
+legacy_id: fct-052

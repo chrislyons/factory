@@ -1,0 +1,13 @@
+id: job.10.007.0001
+title: Stress-test relay loop fix with rapid multi-agent message bursts
+status: pending
+priority: p3
+effort: low
+assignee: boot
+blocked_by: []
+description: |-
+  Verify the 3-bug relay loop fix from GSD003 holds under high-frequency concurrent message delivery across all three agents in shared rooms.
+tags: []
+created: '2026-03-20'
+updated: '2026-03-20'
+legacy_id: fct-084

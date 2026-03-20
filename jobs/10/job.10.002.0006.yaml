@@ -1,0 +1,13 @@
+id: job.10.002.0006
+title: Implement audit trail — approval history queryability
+status: pending
+priority: p2
+effort: medium
+assignee: boot
+blocked_by: []
+description: |-
+  Paperclip pattern #14. Current approval files are HMAC-signed flat files. Add structured JSONL index for queryable approval history (agent, gate type, decision, timestamp). Needed for compliance and capacity planning.
+tags: []
+created: '2026-03-20'
+updated: '2026-03-20'
+legacy_id: fct-017

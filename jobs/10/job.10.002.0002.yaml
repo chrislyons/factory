@@ -1,0 +1,14 @@
+id: job.10.002.0002
+title: Give agents email tools
+status: pending
+priority: p2
+effort: medium
+assignee: boot
+blocked_by:
+- job.00.001.0001
+description: |-
+  Email read/send capability. Candidate: memex-mcp email archive (already referenced in FCT001 as shared memory source). Requires credential isolation — agent email access should be scoped, not full inbox.
+tags: []
+created: '2026-03-20'
+updated: '2026-03-20'
+legacy_id: fct-012

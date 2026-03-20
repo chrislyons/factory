@@ -1,0 +1,14 @@
+id: job.00.005.0007
+title: Research Obsidian in Chainly
+status: deferred
+priority: p3
+effort: low
+assignee: chris
+blocked_by: []
+description: |-
+  Whether Obsidian vault can be surfaced or integrated inside Chainly workflow tooling. Assess integration surface.
+tags:
+- needs-scoping
+created: '2026-03-20'
+updated: '2026-03-20'
+legacy_id: fct-051

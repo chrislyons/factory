@@ -41,11 +41,11 @@ export async function fetchJson<T>(input: string, init?: RequestInit) {
 }
 
 export async function fetchTasks() {
-  return fetchJson<TasksDocument>("/tasks.json");
+  return fetchJson<TasksDocument>("/jobs.json");
 }
 
 export async function saveTasks(document: TasksDocument) {
-  return fetchJson<TasksDocument>("/tasks.json", {
+  return fetchJson<TasksDocument>("/jobs.json", {
     method: "PUT",
     body: JSON.stringify(document, null, 2)
   });

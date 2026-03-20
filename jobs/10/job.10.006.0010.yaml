@@ -1,0 +1,13 @@
+id: job.10.006.0010
+title: Add coordinator-rs HTTP REST control API
+status: pending
+priority: p1
+effort: high
+assignee: boot
+blocked_by: []
+description: |-
+  Scaffold REST API endpoints needed by portal (FCT006): `/approvals/pending`, `/approvals/{id}/decide`, `/budget/status`, `/agents/{id}/pause`, `/agents/{id}/resume`, `/analytics/summary`. Prerequisite for portal data wiring (FCT-030).
+tags: []
+created: '2026-03-20'
+updated: '2026-03-20'
+legacy_id: fct-064

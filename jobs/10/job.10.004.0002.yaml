@@ -1,0 +1,13 @@
+id: job.10.004.0002
+title: Build approval inbox page (FCT006 P1.1)
+status: pending
+priority: p2
+effort: medium
+assignee: boot
+blocked_by: []
+description: |-
+  Pending approvals list, gate type badge, approve/reject buttons, resolved history. Polls `GET /approvals/pending`. Detailed spec in FCT006 §4 Phase 1.
+tags: []
+created: '2026-03-20'
+updated: '2026-03-20'
+legacy_id: fct-031

@@ -57,7 +57,7 @@ export function CommandPaletteProvider({ children }: PropsWithChildren) {
       const nextItems: CommandItem[] = [];
 
       try {
-        const taskResponse = await fetch("/tasks.json", { cache: "no-store" });
+        const taskResponse = await fetch("/jobs.json", { cache: "no-store" });
         if (taskResponse.ok) {
           const document = (await taskResponse.json()) as {
             tasks?: Array<{ id: string; title: string; assignee?: string | null }>;

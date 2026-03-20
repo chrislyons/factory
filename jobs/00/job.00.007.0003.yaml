@@ -1,0 +1,13 @@
+id: job.00.007.0003
+title: Add System Status room to agent-config.yaml
+status: pending
+priority: p3
+effort: low
+assignee: chris
+blocked_by: []
+description: |-
+  !jPovIiHiRrKTQWCOrp:matrix.org` — agents should either be configured for it or leave it. Currently unmanaged. GSD003.
+tags: []
+created: '2026-03-20'
+updated: '2026-03-20'
+legacy_id: fct-083

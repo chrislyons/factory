@@ -1,0 +1,13 @@
+id: job.00.007.0002
+title: Update systemd unit description to "Blackbox Matrix Coordinator"
+status: pending
+priority: p3
+effort: low
+assignee: chris
+blocked_by: []
+description: |-
+  Cosmetic. `/etc/systemd/system/matrix-coordinator.service` still says "IG-88 Matrix Coordinator". Requires sudo on Blackbox. GSD002/GSD003.
+tags: []
+created: '2026-03-20'
+updated: '2026-03-20'
+legacy_id: fct-082

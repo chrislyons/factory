@@ -1,0 +1,13 @@
+id: job.10.002.0001
+title: Give agents browser tools
+status: pending
+priority: p2
+effort: medium
+assignee: boot
+blocked_by: []
+description: |-
+  Integrate Claudezilla Firefox MCP or equivalent into agent configs. Required for: daily apartment/job search loops, Twitter ingest, general web research. Security boundary: browser tool scope must be constrained per agent — Kelk gets general web, IG-88 gets trading/data sites only.
+tags: []
+created: '2026-03-20'
+updated: '2026-03-20'
+legacy_id: fct-011

@@ -1,3 +1,7 @@
+# DEPRECATED — 2026-03-20
+# This script parsed FCT012 markdown into tasks.json. The task tracking system
+# has migrated to individual YAML job files in jobs/. Use build-jobs-json.py instead.
+# Retained for historical reference only.
 #!/usr/bin/env python3
 """Parse FCT012 markdown tables into tasks.json for the Factory portal GSD sidecar.
 

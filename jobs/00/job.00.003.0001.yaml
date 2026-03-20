@@ -1,0 +1,13 @@
+id: job.00.003.0001
+title: Write first real Loop Spec (researcher type)
+status: pending
+priority: p3
+effort: low
+assignee: chris
+blocked_by: []
+description: |-
+  FCT010 explicitly deferred this: "Write a researcher loop spec in `~/dev/autoresearch/loop-specs/` and run it end-to-end." Prerequisite for proving loop_engine.rs works in production.
+tags: []
+created: '2026-03-20'
+updated: '2026-03-20'
+legacy_id: fct-027

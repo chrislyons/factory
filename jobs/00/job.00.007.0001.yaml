@@ -1,0 +1,14 @@
+id: job.00.007.0001
+title: GSD dashboard deployed to Blackbox (systemd, :41933)
+status: done
+priority: p3
+effort: low
+assignee: chris
+blocked_by: []
+description: Closed by GSD001
+tags: []
+created: '2026-03-20'
+updated: '2026-03-20'
+legacy_id: fct-done-020
+completed: '2026-03-20'
+closed_by: GSD001

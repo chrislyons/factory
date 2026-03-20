@@ -26,7 +26,7 @@ describe("DashboardPage", () => {
       "fetch",
       vi.fn(async (input: RequestInfo | URL) => {
         const url = input.toString();
-        if (url.endsWith("/tasks.json")) {
+        if (url.endsWith("/jobs.json")) {
           return new Response(JSON.stringify(tasksDocument()), { status: 200, headers: { "Content-Type": "application/json" } });
         }
         if (url.includes("/approvals/pending")) {
@@ -88,7 +88,7 @@ describe("DashboardPage", () => {
       "fetch",
       vi.fn(async (input: RequestInfo | URL) => {
         const url = input.toString();
-        if (url.endsWith("/tasks.json")) {
+        if (url.endsWith("/jobs.json")) {
           return new Response(JSON.stringify(tasksDocument()), { status: 200, headers: { "Content-Type": "application/json" } });
         }
         if (url.includes("/approvals/pending")) {

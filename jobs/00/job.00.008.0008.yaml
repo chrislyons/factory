@@ -1,0 +1,13 @@
+id: job.00.008.0008
+title: Agent coordination protocol document
+status: pending
+priority: p3
+effort: low
+assignee: chris
+blocked_by: []
+description: |-
+  Source: BKX116. Draft explicit protocol for agent-to-agent state sharing, task handoff, conflict resolution. Currently informal. Maps to Common Ground Core pattern. Matrix messages + shared vault artifacts are the substrate.
+tags: []
+created: '2026-03-20'
+updated: '2026-03-20'
+legacy_id: fct-076

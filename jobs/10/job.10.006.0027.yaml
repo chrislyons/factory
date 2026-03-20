@@ -1,0 +1,14 @@
+id: job.10.006.0027
+title: Add build_loop_context() to agent.rs
+status: done
+priority: p3
+effort: low
+assignee: chris
+blocked_by: []
+description: Closed by FCT010
+tags: []
+created: '2026-03-20'
+updated: '2026-03-20'
+legacy_id: fct-done-014
+completed: '2026-03-20'
+closed_by: FCT010

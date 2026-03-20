@@ -1,0 +1,14 @@
+id: job.10.006.0015
+title: coordinator-rs migration to `factory/coordinator/
+status: done
+priority: p3
+effort: low
+assignee: chris
+blocked_by: []
+description: Closed by FCT008
+tags: []
+created: '2026-03-20'
+updated: '2026-03-20'
+legacy_id: fct-done-001
+completed: '2026-03-20'
+closed_by: FCT008

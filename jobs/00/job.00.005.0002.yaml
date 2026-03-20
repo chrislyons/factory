@@ -1,0 +1,13 @@
+id: job.00.005.0002
+title: Research Tooltime
+status: deferred
+priority: p3
+effort: low
+assignee: chris
+blocked_by: []
+description: Unknown scope. Likely a tool management / skill registry concept. Assess.
+tags:
+- needs-scoping
+created: '2026-03-20'
+updated: '2026-03-20'
+legacy_id: fct-046

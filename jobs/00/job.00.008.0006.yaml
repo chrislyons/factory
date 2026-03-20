@@ -1,0 +1,13 @@
+id: job.00.008.0006
+title: Design observability dashboard — 5 key agent health metrics
+status: pending
+priority: p3
+effort: low
+assignee: chris
+blocked_by: []
+description: |-
+  Source: BKX114. What to log: tool calls, token usage, error rates, task completion, approval latency. Minimum viable: markdown status page surfacing 5 signals. Full: portal analytics page (FCT-035).
+tags: []
+created: '2026-03-20'
+updated: '2026-03-20'
+legacy_id: fct-074

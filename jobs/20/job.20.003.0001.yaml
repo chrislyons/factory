@@ -1,0 +1,13 @@
+id: job.20.003.0001
+title: IG-88 narrative loop (market narrative accuracy)
+status: pending
+priority: p2
+effort: medium
+assignee: ig88
+blocked_by: []
+description: |-
+  Narrative-type Loop Spec. 15-minute cadence. Frozen: Governor risk limits, KuCoin MCP config. Metric: narrative accuracy rate (7-day rolling). Designed in FCT009 but no spec file exists yet.
+tags: []
+created: '2026-03-20'
+updated: '2026-03-20'
+legacy_id: fct-028

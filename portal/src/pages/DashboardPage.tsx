@@ -135,7 +135,17 @@ export function DashboardPage() {
     if (!title) return;
     await withTasksUpdate((current) => {
       const nextOrder = current.tasks.reduce((max, task) => Math.max(max, task.order), 0) + 1;
-      const taskId = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+      // Find max address in system domain, first available class
+      const domain = "00";
+      const jobClass = Object.keys(current.blocks)[0] === "infrastructure" ? "001" : "001";
+      const prefix = `job.${domain}.${jobClass}.`;
+      const maxAddr = current.tasks
+        .filter(t => t.id.startsWith(prefix))
+        .reduce((max, t) => {
+          const addr = parseInt(t.id.split(".").pop() || "0", 10);
+          return Math.max(max, addr);
+        }, 0);
+      const taskId = `job.${domain}.${jobClass}.${String(maxAddr + 1).padStart(4, "0")}`;
       current.tasks.push({
         id: taskId,
         title,
@@ -303,10 +313,11 @@ export function DashboardPage() {
         </div>
       )}
 
+      <div className="dashboard-columns">
       <SurfaceCard
-        title="Tasks"
+        title="Jobs"
         subtitle="Dispatch, assign, and resolve work"
-        action={<a className="surface-card__action-link" href="#task-list">Task list</a>}
+        action={<a className="surface-card__action-link" href="#task-list">Job list</a>}
       >
         <div className="task-toolbar task-toolbar--primary">
           <input
@@ -316,7 +327,7 @@ export function DashboardPage() {
             onKeyDown={(event) => {
               if (event.key === "Enter") void addTask();
             }}
-            placeholder="Add a task..."
+            placeholder="Add a job..."
           />
           <button className="primary-button" type="button" onClick={() => void addTask()}>
             Add
@@ -325,7 +336,7 @@ export function DashboardPage() {
             className="text-input task-toolbar__search"
             value={taskSearch}
             onChange={(event) => setTaskSearch(event.target.value)}
-            placeholder="Search tasks, assignees, blocks..."
+            placeholder="Search jobs, assignees, blocks..."
           />
         </div>
         <div className="filter-row-ui">
@@ -354,7 +365,7 @@ export function DashboardPage() {
 
         <div id="task-list" className="task-list">
           {visibleTasks.length === 0 ? (
-            <EmptyState title="No tasks match the current view" detail="Adjust the filter or wait for tasks.json." />
+            <EmptyState title="No jobs match the current view" detail="Adjust the filter or wait for jobs.json." />
           ) : (
             visibleTasks.map((task) => (
               <div key={task.id} className="task-card-ui">
@@ -373,7 +384,7 @@ export function DashboardPage() {
                     {task.description ? <p>{task.description}</p> : null}
                     <div className="task-card-ui__meta">
                       <span className={`task-status-chip is-${task.status}`}>{task.status}</span>
-                      <span className="task-meta-mono">#{task.order}</span>
+                      <span className="task-meta-mono job-address">{task.id.replace("job.", "")}</span>
                       <span className="task-meta-mono">{task.effort ?? "unknown"}</span>
                       <span className="task-meta-mono">{document?.blocks[task.block]?.label ?? task.block}</span>
                     </div>
@@ -402,7 +413,7 @@ export function DashboardPage() {
         </div>
       </SurfaceCard>
 
-      <SurfaceCard title="Dependencies" subtitle="Blocked work and unresolved chains" className="surface-card--compact">
+      <SurfaceCard title="Dependencies" subtitle="Blocked work and unresolved chains" className="surface-card--compact dashboard-sidebar">
         <div className="dependency-list">
           {(document?.tasks ?? []).filter((task) => task.blocked_by.length > 0).length === 0 ? (
             <EmptyState compact title="No active dependencies" />
@@ -418,11 +429,12 @@ export function DashboardPage() {
           )}
         </div>
       </SurfaceCard>
+      </div>
 
-      <SurfaceCard title="Activity Log" subtitle="Recent task mutations" className="surface-card--compact">
+      <SurfaceCard title="Activity Log" subtitle="Recent job mutations" className="surface-card--compact">
         <div className="activity-log-ui">
           {(document?.log ?? []).length === 0 ? (
-            <EmptyState compact title="No recent task mutations" detail="Task activity will accumulate here as operators work." />
+            <EmptyState compact title="No recent job mutations" detail="Job activity will accumulate here as operators work." />
           ) : (
             (document?.log ?? []).slice().reverse().slice(0, 30).map((entry) => (
               <div key={`${entry.timestamp}-${entry.actor}-${entry.action}`} className="activity-log-ui__entry">

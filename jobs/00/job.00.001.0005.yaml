@@ -1,0 +1,13 @@
+id: job.00.001.0005
+title: Rename coordinator project directory on Blackbox
+status: pending
+priority: p3
+effort: low
+assignee: chris
+blocked_by: []
+description: |-
+  /home/nesbitt/projects/ig88/` → `/home/nesbitt/projects/coordinator/` or `blackbox/`. Breaking change: systemd service files, token paths in `.config/ig88/`, agent-config.yaml. Needs coordinated cutover session. Tracked as tech debt in GSD002/GSD003.
+tags: []
+created: '2026-03-20'
+updated: '2026-03-20'
+legacy_id: fct-005

@@ -1,0 +1,14 @@
+id: job.10.006.0018
+title: Implement budget.rs (per-agent monthly tracking, soft/hard thresholds)
+status: done
+priority: p3
+effort: low
+assignee: chris
+blocked_by: []
+description: Closed by FCT008
+tags: []
+created: '2026-03-20'
+updated: '2026-03-20'
+legacy_id: fct-done-004
+completed: '2026-03-20'
+closed_by: FCT008

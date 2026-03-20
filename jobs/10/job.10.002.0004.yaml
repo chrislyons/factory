@@ -1,0 +1,13 @@
+id: job.10.002.0004
+title: Implement MemSkill feedback loop for agent memory
+status: pending
+priority: p2
+effort: medium
+assignee: boot
+blocked_by: []
+description: |-
+  Agents learn what to remember based on task outcome feedback. From BKX115/MemSkill framework. Would improve Graphiti/Qdrant retrieval quality over time for Boot and Kelk.
+tags: []
+created: '2026-03-20'
+updated: '2026-03-20'
+legacy_id: fct-015

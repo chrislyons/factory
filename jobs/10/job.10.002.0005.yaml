@@ -1,0 +1,13 @@
+id: job.10.002.0005
+title: Implement calibration loop for agent autonomy scoring
+status: pending
+priority: p2
+effort: medium
+assignee: boot
+blocked_by: []
+description: |-
+  Dynamic per-task autonomy scoring with time decay (BKX112 — ericosiu pattern). Agents earn autonomy through demonstrated competence. Maps to existing L1–L4 trust level system in lifecycle.rs but adds per-task granularity.
+tags: []
+created: '2026-03-20'
+updated: '2026-03-20'
+legacy_id: fct-016

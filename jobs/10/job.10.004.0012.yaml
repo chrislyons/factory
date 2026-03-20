@@ -1,0 +1,14 @@
+id: job.10.004.0012
+title: Portal v8 — useTheme hook with localStorage + prefers-color-scheme
+status: done
+priority: p3
+effort: low
+assignee: chris
+blocked_by: []
+description: Closed by FCT011
+tags: []
+created: '2026-03-20'
+updated: '2026-03-20'
+legacy_id: fct-done-016
+completed: '2026-03-20'
+closed_by: FCT011

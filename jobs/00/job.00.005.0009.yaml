@@ -1,0 +1,13 @@
+id: job.00.005.0009
+title: Evaluate local model / agent planning documentation
+status: pending
+priority: p2
+effort: medium
+assignee: chris
+blocked_by: []
+description: |-
+  Originally listed as "local model/agent planning (docs/fct/)". Scope: document the complete MLX model lineup (Qwen3.5, LFM2.5, Nanbeige), per-agent model assignment rationale, and upgrade path. FCT001 has initial architecture; this would be a living update.
+tags: []
+created: '2026-03-20'
+updated: '2026-03-20'
+legacy_id: fct-053

@@ -1,0 +1,13 @@
+id: job.00.005.0004
+title: Research Mirofish
+status: deferred
+priority: p3
+effort: low
+assignee: chris
+blocked_by: []
+description: Unknown. Capture and assess.
+tags:
+- needs-scoping
+created: '2026-03-20'
+updated: '2026-03-20'
+legacy_id: fct-048

@@ -1,0 +1,13 @@
+id: job.00.008.0011
+title: Design test suite as control system for autonomous Boot operation
+status: pending
+priority: p2
+effort: medium
+assignee: chris
+blocked_by: []
+description: |-
+  Source: BKX115. "What test could you write that would let Boot run unsupervised for 24 hours?" — BKX115 discussion question. Define machine-readable success/failure criteria for a representative Boot task category.
+tags: []
+created: '2026-03-20'
+updated: '2026-03-20'
+legacy_id: fct-079

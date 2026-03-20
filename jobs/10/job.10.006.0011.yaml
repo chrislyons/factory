@@ -1,0 +1,13 @@
+id: job.10.006.0011
+title: Wire budget composition (deduct_iteration_tokens into BudgetTracker)
+status: pending
+priority: p3
+effort: low
+assignee: boot
+blocked_by: []
+description: |-
+  FCT010 deferred item. `deduct_iteration_tokens()` API exists in loop_engine.rs but is not connected to BudgetTracker. Required for loop budget enforcement to be active.
+tags: []
+created: '2026-03-20'
+updated: '2026-03-20'
+legacy_id: fct-065

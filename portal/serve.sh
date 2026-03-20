@@ -184,6 +184,10 @@ ${coordinator_block}    handle /tasks.json {
         reverse_proxy ${GSD_HOST}:${GSD_PORT}
     }
 
+    handle /jobs.json {
+        reverse_proxy ${GSD_HOST}:${GSD_PORT}
+    }
+
     handle /status/* {
         reverse_proxy ${GSD_HOST}:${GSD_PORT}
     }

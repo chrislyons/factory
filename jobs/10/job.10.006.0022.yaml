@@ -1,0 +1,14 @@
+id: job.10.006.0022
+title: Implement loop_engine.rs (LoopSpec, ActiveLoop, LoopManager)
+status: done
+priority: p3
+effort: low
+assignee: chris
+blocked_by: []
+description: Closed by FCT010
+tags: []
+created: '2026-03-20'
+updated: '2026-03-20'
+legacy_id: fct-done-009
+completed: '2026-03-20'
+closed_by: FCT010

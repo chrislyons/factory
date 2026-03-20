@@ -1,0 +1,14 @@
+id: job.10.004.0008
+title: Build agent control panel (FCT006 P3.2)
+status: pending
+priority: p2
+effort: medium
+assignee: boot
+blocked_by:
+- job.10.004.0007
+description: |-
+  Pause/resume/heartbeat/cancel actions from portal. Requires coordinator-rs HTTP control API. FCT006 Phase 3.
+tags: []
+created: '2026-03-20'
+updated: '2026-03-20'
+legacy_id: fct-037

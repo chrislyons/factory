@@ -50,6 +50,9 @@ export interface TaskRecord {
   assignee?: string | null;
   created?: string;
   updated?: string;
+  domain?: string;
+  job_class?: string;
+  legacy_id?: string;
 }
 
 export interface TaskBlock {

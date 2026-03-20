@@ -1,0 +1,13 @@
+id: job.00.008.0004
+title: Write/review SOUL.md for each active agent
+status: pending
+priority: p2
+effort: medium
+assignee: chris
+blocked_by: []
+description: |-
+  Source: BKX112. soul-first design thesis (tolibear_): agents need identity before capability. Review existing `soul/` files in `~/dev/blackbox/src/`. Apply Westworld principle — ruthless pruning to only directives that change behavior. Target: 40% token reduction.
+tags: []
+created: '2026-03-20'
+updated: '2026-03-20'
+legacy_id: fct-072

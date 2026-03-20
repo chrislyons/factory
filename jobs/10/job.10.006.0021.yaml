@@ -1,0 +1,14 @@
+id: job.10.006.0021
+title: Implement run_events.rs (append-only JSONL event streaming)
+status: done
+priority: p3
+effort: low
+assignee: chris
+blocked_by: []
+description: Closed by FCT008
+tags: []
+created: '2026-03-20'
+updated: '2026-03-20'
+legacy_id: fct-done-007
+completed: '2026-03-20'
+closed_by: FCT008

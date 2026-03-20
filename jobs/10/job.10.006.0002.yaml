@@ -1,0 +1,13 @@
+id: job.10.006.0002
+title: Implement loop state persistence to `loop_state_file
+status: pending
+priority: p3
+effort: low
+assignee: boot
+blocked_by: []
+description: |-
+  FCT010 deferred item. Serialize active loops to `loop_state_file` on change; reload on startup. Enables loop recovery across coordinator restarts.
+tags: []
+created: '2026-03-20'
+updated: '2026-03-20'
+legacy_id: fct-056

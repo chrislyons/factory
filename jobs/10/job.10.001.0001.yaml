@@ -1,0 +1,14 @@
+id: job.10.001.0001
+title: Agent trust level corrections (IG-88 L3→L2, Kelk L2→L3)
+status: done
+priority: p3
+effort: low
+assignee: chris
+blocked_by: []
+description: Closed by GSD002
+tags: []
+created: '2026-03-20'
+updated: '2026-03-20'
+legacy_id: fct-done-021
+completed: '2026-03-20'
+closed_by: GSD002

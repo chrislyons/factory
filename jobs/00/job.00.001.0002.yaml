@@ -1,0 +1,13 @@
+id: job.00.001.0002
+title: Security audit — Matrix MCP
+status: pending
+priority: p3
+effort: low
+assignee: chris
+blocked_by: []
+description: |-
+  Evaluate attack surface of matrix-boot and matrix-coord MCP servers. Threat model: prompt injection via Matrix events, token leakage, event namespace spoofing (`dev.ig88.*`). Core audit complete (BKX029, BKX071). Two MEDIUM items deferred: qdrant-mcp bridge caller auth, LLM failover context sanitization.
+tags: []
+created: '2026-03-20'
+updated: '2026-03-20'
+legacy_id: fct-002

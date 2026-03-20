@@ -37,8 +37,8 @@ sync-runtime:  ## Sync local runtime helpers needed by serve.sh and the index ge
 	ssh $(BLACKBOX) 'chmod +x $(REMOTE)/serve.sh $(REMOTE)/server.py'
 
 .PHONY: sync-gsd
-sync-gsd:  ## Seed live tasks.json + status/ into the task/status sidecar data root
-	rsync -avz $(LOCAL_DEV)/factory/tasks.json $(BLACKBOX):$(REMOTE)/tasks.json
+sync-gsd:  ## Seed live jobs.json + status/ into the task/status sidecar data root
+	rsync -avz $(LOCAL_DEV)/factory/jobs.json $(BLACKBOX):$(REMOTE)/jobs.json
 	rsync -avz $(LOCAL_DEV)/get-shit-done/status/ $(BLACKBOX):$(REMOTE)/status/
 
 .PHONY: sync-repos
@@ -100,19 +100,23 @@ verify:  ## Smoke-test the live portal via Tailnet
 	@ssh $(BLACKBOX) 'curl -sf -u admin:$$PORTAL_PASSWORD http://100.87.53.109:41910/ > /dev/null' && echo "ok / (portal.html) OK"
 	@ssh $(BLACKBOX) 'curl -sf -u admin:$$PORTAL_PASSWORD http://100.87.53.109:41910/pages/dashboard-v4.html > /dev/null' && echo "ok dashboard-v4.html OK"
 	@ssh $(BLACKBOX) 'curl -sf -u admin:$$PORTAL_PASSWORD http://100.87.53.109:41910/index.json | python3 -m json.tool > /dev/null' && echo "ok index.json OK"
-	@ssh $(BLACKBOX) 'curl -sf -u admin:$$PORTAL_PASSWORD http://100.87.53.109:41910/tasks.json | python3 -m json.tool > /dev/null' && echo "ok tasks.json OK"
+	@ssh $(BLACKBOX) 'curl -sf -u admin:$$PORTAL_PASSWORD http://100.87.53.109:41910/jobs.json | python3 -m json.tool > /dev/null' && echo "ok jobs.json OK"
 	@echo "Done."
 
 # ---------------------------------------------------------------------------
 # Local dev
 # ---------------------------------------------------------------------------
 
+.PHONY: build-jobs
+build-jobs:  ## Build jobs.json from the factory task registry
+	python3 $(LOCAL_DEV)/factory/scripts/build-jobs-json.py -o $(LOCAL_DEV)/factory/jobs.json
+
 .PHONY: dev
 dev: build dev-sync-gsd dev-sync-repos dev-normalize dev-generate-index dev-server  ## Build dist/, sync local data, and preview via Caddy
 
 .PHONY: dev-sync-gsd
-dev-sync-gsd:  ## Copy current tasks.json + status/ into the local sidecar data root
-	rsync -avz $(LOCAL_DEV)/factory/tasks.json ./tasks.json
+dev-sync-gsd:  ## Copy current jobs.json + status/ into the local sidecar data root
+	rsync -avz $(LOCAL_DEV)/factory/jobs.json ./jobs.json
 	rsync -avz $(LOCAL_DEV)/get-shit-done/status/ ./status/
 
 .PHONY: dev-sync-repos

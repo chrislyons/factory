@@ -1,0 +1,15 @@
+id: job.10.004.0007
+title: Build per-agent detail pages (FCT006 P3.1)
+status: pending
+priority: p1
+effort: high
+assignee: boot
+blocked_by:
+- job.10.004.0003
+- job.10.004.0004
+description: |-
+  Per-agent config, run history, full transcript viewer, budget card. FCT006 Phase 3.
+tags: []
+created: '2026-03-20'
+updated: '2026-03-20'
+legacy_id: fct-036

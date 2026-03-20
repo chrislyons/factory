@@ -1,0 +1,14 @@
+id: job.00.005.0005
+title: Evaluate JSX in Obsidian
+status: deferred
+priority: p3
+effort: low
+assignee: chris
+blocked_by: []
+description: |-
+  Obsidian doesn't natively render React/JSX. Assess whether a plugin enables it and whether the use case (budget tracker, kanban) justifies the complexity vs. native Obsidian views.
+tags:
+- needs-scoping
+created: '2026-03-20'
+updated: '2026-03-20'
+legacy_id: fct-049

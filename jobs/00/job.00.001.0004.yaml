@@ -1,0 +1,14 @@
+id: job.00.001.0004
+title: Implement comprehensive backup system
+status: pending
+priority: p2
+effort: medium
+assignee: chris
+blocked_by:
+- job.00.001.0001
+description: |-
+  Scope: coordinator config, agent soul/principles files, Graphiti graph, Qdrant collections, tasks.json, loop specs. Target: automated daily backup to Cloudkicker + off-site (Bitwarden or R2).
+tags: []
+created: '2026-03-20'
+updated: '2026-03-20'
+legacy_id: fct-004

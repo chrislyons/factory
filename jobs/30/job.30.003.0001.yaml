@@ -1,0 +1,14 @@
+id: job.30.003.0001
+title: Daily apartment search loop
+status: pending
+priority: p2
+effort: medium
+assignee: kelk
+blocked_by:
+- job.10.002.0001
+description: |-
+  Kelk-domain autonomous loop. Browser tool required. Loop Spec: researcher-type, metric = listings matching criteria, daily cadence. Output: digest to Matrix room.
+tags: []
+created: '2026-03-20'
+updated: '2026-03-20'
+legacy_id: fct-020

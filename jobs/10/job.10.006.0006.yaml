@@ -1,0 +1,13 @@
+id: job.10.006.0006
+title: 'Implement context snapshots (Paperclip pattern #10)'
+status: pending
+priority: p3
+effort: low
+assignee: boot
+blocked_by: []
+description: |-
+  Persist agent context snapshot to disk at each heartbeat. Enables debugging of "what did the agent know at the time." JSONB-equivalent via serde_json to file. FCT007 §Pattern #10.
+tags: []
+created: '2026-03-20'
+updated: '2026-03-20'
+legacy_id: fct-060

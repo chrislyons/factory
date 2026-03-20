@@ -1,0 +1,13 @@
+id: job.10.006.0008
+title: 'Implement approval comments / threaded discussion (Paperclip pattern #14)'
+status: pending
+priority: p3
+effort: low
+assignee: boot
+blocked_by: []
+description: |-
+  Replace binary emoji reactions with threaded Matrix message discussion on approval requests. Enables operator to ask clarifying questions before approving. FCT007 §Pattern #14.
+tags: []
+created: '2026-03-20'
+updated: '2026-03-20'
+legacy_id: fct-062

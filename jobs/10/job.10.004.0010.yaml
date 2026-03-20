@@ -1,0 +1,14 @@
+id: job.10.004.0010
+title: Add WebSocket streaming to portal (FCT006 P4.3)
+status: pending
+priority: p2
+effort: medium
+assignee: boot
+blocked_by:
+- job.10.004.0008
+description: |-
+  Replace 5s polling with WebSocket push from coordinator-rs. Reduces approval inbox latency. FCT006 Phase 4. Low engineering priority — polling adequate at current scale.
+tags: []
+created: '2026-03-20'
+updated: '2026-03-20'
+legacy_id: fct-039

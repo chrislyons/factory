@@ -1,0 +1,13 @@
+id: job.10.006.0014
+title: Add token metering to budget.rs (replace invocation-count proxy)
+status: pending
+priority: p2
+effort: medium
+assignee: boot
+blocked_by: []
+description: |-
+  Budget.rs currently tracks invocation count as proxy. When MLX-LM exposes per-request token counts, replace with actual token consumption. Monitor MLX-LM releases. FCT008 architecture decision.
+tags: []
+created: '2026-03-20'
+updated: '2026-03-20'
+legacy_id: fct-068

@@ -17,7 +17,7 @@ from pathlib import Path
 HOST = os.environ.get("GSD_HOST", "127.0.0.1")
 PORT = int(os.environ.get("GSD_PORT", 41935))
 DATA_ROOT = Path(os.environ.get("GSD_DATA_ROOT", Path(__file__).resolve().parent))
-ALLOWED_WRITE_PATHS = {"tasks.json"}
+ALLOWED_WRITE_PATHS = {"tasks.json", "jobs.json"}
 ALLOWED_WRITE_DIRS = {"status"}
 
 
@@ -106,7 +106,7 @@ def main() -> None:
     server = HTTPServer((HOST, PORT), PortalDataHandler)
     print(f"Factory Portal sidecar -> http://{HOST}:{PORT}/")
     print(f"  Serving: {DATA_ROOT}")
-    print("  Writable: tasks.json, status/*.json")
+    print("  Writable: tasks.json, jobs.json, status/*.json")
     sys.stdout.flush()
     try:
         server.serve_forever()
