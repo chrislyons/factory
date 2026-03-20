@@ -416,12 +416,20 @@ textarea {
   padding: 14px 16px;
 }
 
+.surface-card > * + * {
+  margin-top: 12px;
+}
+
 .surface-card__header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   gap: 12px;
   margin-bottom: 14px;
+}
+
+.surface-card__header + * {
+  margin-top: 0;
 }
 
 .surface-card__header h2,
