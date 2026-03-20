@@ -38,7 +38,7 @@ sync-runtime:  ## Sync local runtime helpers needed by serve.sh and the index ge
 
 .PHONY: sync-gsd
 sync-gsd:  ## Seed live tasks.json + status/ into the task/status sidecar data root
-	rsync -avz $(LOCAL_DEV)/get-shit-done/tasks.json $(BLACKBOX):$(REMOTE)/tasks.json
+	rsync -avz $(LOCAL_DEV)/factory/tasks.json $(BLACKBOX):$(REMOTE)/tasks.json
 	rsync -avz $(LOCAL_DEV)/get-shit-done/status/ $(BLACKBOX):$(REMOTE)/status/
 
 .PHONY: sync-repos
@@ -112,7 +112,7 @@ dev: build dev-sync-gsd dev-sync-repos dev-normalize dev-generate-index dev-serv
 
 .PHONY: dev-sync-gsd
 dev-sync-gsd:  ## Copy current tasks.json + status/ into the local sidecar data root
-	rsync -avz $(LOCAL_DEV)/get-shit-done/tasks.json ./tasks.json
+	rsync -avz $(LOCAL_DEV)/factory/tasks.json ./tasks.json
 	rsync -avz $(LOCAL_DEV)/get-shit-done/status/ ./status/
 
 .PHONY: dev-sync-repos
