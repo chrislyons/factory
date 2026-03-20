@@ -144,10 +144,25 @@ gen_caddyfile() {
 
   if [[ -n "$COORD_PORT" ]]; then
     coordinator_block=$(cat <<EOF
-    @coordinator_api {
-        path /approvals/* /budget/* /analytics/* /agents/* /runs/*
+    handle /approvals/* {
+        reverse_proxy ${COORD_HOST}:${COORD_PORT}
     }
-    reverse_proxy @coordinator_api ${COORD_HOST}:${COORD_PORT}
+
+    handle /budget/* {
+        reverse_proxy ${COORD_HOST}:${COORD_PORT}
+    }
+
+    handle /analytics/* {
+        reverse_proxy ${COORD_HOST}:${COORD_PORT}
+    }
+
+    handle /agents/* {
+        reverse_proxy ${COORD_HOST}:${COORD_PORT}
+    }
+
+    handle /runs/* {
+        reverse_proxy ${COORD_HOST}:${COORD_PORT}
+    }
 
 EOF
 )
@@ -165,10 +180,13 @@ http://${HOST}:${PORT} {
         ${USER} ${PASS_HASH}
     }
 
-${coordinator_block}    @gsd_api {
-        path /tasks.json /status/*
+${coordinator_block}    handle /tasks.json {
+        reverse_proxy ${GSD_HOST}:${GSD_PORT}
     }
-    reverse_proxy @gsd_api ${GSD_HOST}:${GSD_PORT}
+
+    handle /status/* {
+        reverse_proxy ${GSD_HOST}:${GSD_PORT}
+    }
 
     handle /repos/* {
         root * ${project_root}
