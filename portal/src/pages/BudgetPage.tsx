@@ -3,7 +3,7 @@ import { AgentBadge } from "../components/primitives/AgentBadge";
 import { BudgetBar } from "../components/primitives/BudgetBar";
 import { EmptyState } from "../components/primitives/EmptyState";
 import { LastUpdatedChip } from "../components/primitives/LastUpdatedChip";
-import { MetricCard } from "../components/primitives/MetricCard";
+
 import { useBudgetOverride, useBudgetStatus } from "../hooks/usePortalQueries";
 import type { AgentId } from "../lib/types";
 import { budgetStatusKind, formatUsd, relativeTimestamp } from "../lib/utils";
@@ -13,33 +13,13 @@ export function BudgetPage() {
   const override = useBudgetOverride();
   const agents = budget.data?.agents ?? [];
   const hasBudgetData = Boolean(budget.data);
-  const totalSpend = agents.reduce((sum, agent) => sum + agent.spent_this_month_usd, 0);
-  const totalLimit = agents.reduce((sum, agent) => sum + agent.monthly_limit_usd, 0);
-  const pausedCount = agents.filter((agent) => budgetStatusKind(agent.status) === "paused").length;
-  const incidents = agents.flatMap((agent) => agent.incidents);
 
   return (
     <AppShell
       title="Budget"
-      description="Per-agent budget enforcement, incidents, and override surfaces."
       pageKey="/pages/budget.html"
       statusSlot={<LastUpdatedChip updatedAt={budget.dataUpdatedAt} stale={Boolean(budget.error)} />}
     >
-      <div className="metric-grid">
-        <MetricCard
-          label="Month Spend"
-          value={hasBudgetData ? formatUsd(totalSpend) : "—"}
-          detail={hasBudgetData ? (totalLimit > 0 ? `of ${formatUsd(totalLimit)}` : "No company cap") : "Awaiting budget feed"}
-        />
-        <MetricCard label="Tracked Agents" value={hasBudgetData ? agents.length : "—"} />
-        <MetricCard label="Paused Agents" value={hasBudgetData ? pausedCount : "—"} danger={pausedCount > 0} />
-        <MetricCard
-          label="Active Incidents"
-          value={hasBudgetData ? incidents.filter((incident) => incident.status === "open").length : "—"}
-          danger={incidents.some((incident) => incident.status === "open")}
-        />
-      </div>
-
       <SurfaceCard title="Budget Policies" subtitle="Company and per-agent guardrails">
         {agents.length === 0 ? (
           <EmptyState compact title="Waiting for coordinator budget status" detail="No budget data yet." />

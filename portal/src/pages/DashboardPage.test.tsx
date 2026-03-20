@@ -113,6 +113,6 @@ describe("DashboardPage", () => {
     });
 
     await waitFor(() => expect(queryClient.isFetching()).toBe(0));
-    expect(screen.getAllByText("Loops: awaiting status").length).toBeGreaterThan(0);
+    expect(screen.queryByText("Loops: awaiting status")).not.toBeInTheDocument();
   });
 });

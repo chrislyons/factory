@@ -4,7 +4,6 @@ import { LoopStatusPill } from "../components/loops/LoopStatusPill";
 import { AgentBadge } from "../components/primitives/AgentBadge";
 import { EmptyState } from "../components/primitives/EmptyState";
 import { LastUpdatedChip } from "../components/primitives/LastUpdatedChip";
-import { MetricCard } from "../components/primitives/MetricCard";
 import { TranscriptTail } from "../components/primitives/TranscriptTail";
 import {
   latestDataUpdatedAt,
@@ -19,7 +18,6 @@ import type { CurrentRunSummary, StatusActiveLoop, TaskRecord, TasksDocument } f
 import {
   cn,
   formatMetricValue,
-  formatUsd,
   loopApprovalGateLabel,
   loopTypeLabel,
   timeAgo
@@ -101,10 +99,7 @@ export function DashboardPage() {
 
   const latestUpdate = latestDataUpdatedAt([tasks, approvals, budget, ...statuses.results]);
   const document = tasks.data;
-  const hasTasksData = Boolean(document);
   const hasStatusData = AGENTS.some((agent) => Boolean(statuses.data[agent.id]));
-  const hasApprovalData = Array.isArray(approvals.data);
-  const hasBudgetData = Boolean(budget.data);
   const liveRuns = payloadRuns(statuses.data).slice(0, 4);
   const activeLoopGroups = loopGroups(statuses.data);
   const loopFeedsEnabled = statusFeedsExposeLoops(statuses.data);
@@ -129,13 +124,7 @@ export function DashboardPage() {
     });
   }, [activeFilter, document, taskSearch]);
 
-  const inProgressCount = (document?.tasks ?? []).filter((task) => task.status === "in-progress").length;
-  const activeAgentCount = AGENTS.filter((agent) => {
-    const status = statuses.data[agent.id];
-    return status && status.status !== "paused";
-  }).length;
   const activeLoopCount = activeLoopGroups.reduce((sum, group) => sum + group.loops.length, 0);
-  const totalSpend = (budget.data?.agents ?? []).reduce((sum, entry) => sum + entry.spent_this_month_usd, 0);
 
   async function withTasksUpdate(updater: (current: TasksDocument) => TasksDocument) {
     await tasks.updateDocument((current) => updater(structuredClone(current)));
@@ -214,7 +203,6 @@ export function DashboardPage() {
   return (
     <AppShell
       title="Mission Control"
-      description="Tasks, live agent runs, and operator metrics in one surface."
       pageKey="/pages/dashboard-v4.html"
       statusSlot={
         <LastUpdatedChip
@@ -223,52 +211,7 @@ export function DashboardPage() {
         />
       }
     >
-      <div className="metric-grid">
-        <MetricCard
-          label="Agents Active"
-          value={hasStatusData ? activeAgentCount : "—"}
-          href="/pages/topology.html"
-          detail={hasStatusData ? "Open topology" : "Awaiting status feeds"}
-        />
-        <MetricCard
-          label="Active Loops"
-          value={loopFeedsEnabled ? activeLoopCount : "—"}
-          href="/pages/loops.html"
-          detail={loopFeedsEnabled ? "Open loop console" : hasStatusData ? "Waiting for loop field" : "Awaiting status feeds"}
-        />
-        <MetricCard
-          label="Tasks In Progress"
-          value={hasTasksData ? inProgressCount : "—"}
-          href="#task-list"
-          detail={hasTasksData ? "Jump to tasks" : "Awaiting task feed"}
-        />
-        <MetricCard
-          label="Month Spend"
-          value={hasBudgetData ? formatUsd(totalSpend) : "—"}
-          href="/pages/budget.html"
-          detail={hasBudgetData ? "Open budget" : "Awaiting budget feed"}
-        />
-        <MetricCard
-          label="Pending Approvals"
-          value={hasApprovalData ? approvals.data?.length ?? 0 : "—"}
-          href="/pages/approvals.html"
-          detail={hasApprovalData ? "Approval inbox" : "Awaiting approval feed"}
-          danger={Boolean(hasApprovalData && (approvals.data?.length ?? 0) > 0)}
-        />
-      </div>
-
-      {!loopFeedsEnabled && liveRuns.length === 0 ? (
-        <div className="dashboard-status-bar">
-          <span className="dashboard-status-bar__item">
-            <span className="dashboard-status-bar__dot" />
-            Loops: awaiting status
-          </span>
-          <span className="dashboard-status-bar__item">
-            <span className="dashboard-status-bar__dot" />
-            Runs: no active runs
-          </span>
-        </div>
-      ) : (
+      {!loopFeedsEnabled && liveRuns.length === 0 ? null : (
         <div className="dashboard-highlights">
           <SurfaceCard title="Active Loops" subtitle="Current iteration pressure" className="surface-card--compact">
             {!loopFeedsEnabled ? (
@@ -360,164 +303,139 @@ export function DashboardPage() {
         </div>
       )}
 
-      <div className="dashboard-grid">
-        <div className="stack">
-          <SurfaceCard
-            title="Tasks"
-            subtitle="Dispatch, assign, and resolve work"
-            action={<a className="surface-card__action-link" href="#task-list">Task list</a>}
+      <SurfaceCard
+        title="Tasks"
+        subtitle="Dispatch, assign, and resolve work"
+        action={<a className="surface-card__action-link" href="#task-list">Task list</a>}
+      >
+        <div className="task-toolbar task-toolbar--primary">
+          <input
+            className="text-input"
+            value={newTaskTitle}
+            onChange={(event) => setNewTaskTitle(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") void addTask();
+            }}
+            placeholder="Add a task..."
+          />
+          <button className="primary-button" type="button" onClick={() => void addTask()}>
+            Add
+          </button>
+          <input
+            className="text-input task-toolbar__search"
+            value={taskSearch}
+            onChange={(event) => setTaskSearch(event.target.value)}
+            placeholder="Search tasks, assignees, blocks..."
+          />
+        </div>
+        <div className="filter-row-ui">
+          <button
+            className={cn("filter-chip-ui", activeFilter === "all" && "is-active")}
+            type="button"
+            onClick={() => setActiveFilter("all")}
           >
-            <div className="task-toolbar task-toolbar--primary">
-              <input
-                className="text-input"
-                value={newTaskTitle}
-                onChange={(event) => setNewTaskTitle(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") void addTask();
-                }}
-                placeholder="Add a task..."
-              />
-              <button className="primary-button" type="button" onClick={() => void addTask()}>
-                Add
-              </button>
-              <input
-                className="text-input task-toolbar__search"
-                value={taskSearch}
-                onChange={(event) => setTaskSearch(event.target.value)}
-                placeholder="Search tasks, assignees, blocks..."
-              />
-            </div>
-            <div className="filter-row-ui">
+            All ({document?.tasks.length ?? 0})
+          </button>
+          {Object.entries(document?.blocks ?? {}).map(([blockId, block]) => {
+            const count = (document?.tasks ?? []).filter((task) => task.block === blockId).length;
+            return (
               <button
-                className={cn("filter-chip-ui", activeFilter === "all" && "is-active")}
+                key={blockId}
+                className={cn("filter-chip-ui", activeFilter === blockId && "is-active")}
                 type="button"
-                onClick={() => setActiveFilter("all")}
+                onClick={() => setActiveFilter(blockId)}
+                style={{ ["--chip-color" as string]: block.color }}
               >
-                All ({document?.tasks.length ?? 0})
+                {block.label} ({count})
               </button>
-              {Object.entries(document?.blocks ?? {}).map(([blockId, block]) => {
-                const count = (document?.tasks ?? []).filter((task) => task.block === blockId).length;
-                return (
-                  <button
-                    key={blockId}
-                    className={cn("filter-chip-ui", activeFilter === blockId && "is-active")}
-                    type="button"
-                    onClick={() => setActiveFilter(blockId)}
-                    style={{ ["--chip-color" as string]: block.color }}
-                  >
-                    {block.label} ({count})
-                  </button>
-                );
-              })}
-            </div>
-
-            <div id="task-list" className="task-list">
-              {visibleTasks.length === 0 ? (
-                <EmptyState title="No tasks match the current view" detail="Adjust the filter or wait for tasks.json." />
-              ) : (
-                visibleTasks.map((task) => (
-                  <div key={task.id} className="task-card-ui">
-                    <div className="task-card-ui__main">
-                      <label className="checkbox-wrap">
-                        <input
-                          checked={task.status === "done"}
-                          disabled={task.status === "blocked"}
-                          type="checkbox"
-                          onChange={() => void toggleTask(task.id)}
-                        />
-                        <span />
-                      </label>
-                      <div className="task-card-ui__body">
-                        <div className="task-card-ui__title">{task.title}</div>
-                        {task.description ? <p>{task.description}</p> : null}
-                        <div className="task-card-ui__meta">
-                          <span className={`task-status-chip is-${task.status}`}>{task.status}</span>
-                          <span className="task-meta-mono">#{task.order}</span>
-                          <span className="task-meta-mono">{task.effort ?? "unknown"}</span>
-                          <span className="task-meta-mono">{document?.blocks[task.block]?.label ?? task.block}</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="task-card-ui__actions">
-                      <select
-                        className="select-input"
-                        value={task.assignee ?? "unassigned"}
-                        onChange={(event) => void assignTask(task.id, event.target.value)}
-                      >
-                        <option value="unassigned">Unassigned</option>
-                        {AGENTS.map((agent) => (
-                          <option key={agent.id} value={agent.id}>
-                            {agent.label}
-                          </option>
-                        ))}
-                      </select>
-                      <button className="secondary-button" type="button" onClick={() => void cycleTask(task.id)}>
-                        Cycle
-                      </button>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </SurfaceCard>
+            );
+          })}
         </div>
 
-        <div className="stack">
-          <SurfaceCard title="Agents" subtitle="Operator roster and current focus">
-            <div className="sidebar-list">
-              {AGENTS.map((agent) => {
-                const status = statuses.data[agent.id];
-                return (
-                  <a key={agent.id} className="sidebar-row" href={`/pages/agents/${agent.id}.html`}>
-                    <AgentBadge
-                      agentId={agent.id}
-                      status={agentStatusTone(status?.status as string | undefined, status?.current_run ?? null)}
+        <div id="task-list" className="task-list">
+          {visibleTasks.length === 0 ? (
+            <EmptyState title="No tasks match the current view" detail="Adjust the filter or wait for tasks.json." />
+          ) : (
+            visibleTasks.map((task) => (
+              <div key={task.id} className="task-card-ui">
+                <div className="task-card-ui__main">
+                  <label className="checkbox-wrap">
+                    <input
+                      checked={task.status === "done"}
+                      disabled={task.status === "blocked"}
+                      type="checkbox"
+                      onChange={() => void toggleTask(task.id)}
                     />
-                    <span className="sidebar-row__detail">
-                      {status?.current_task || status?.notes || status?.status || "Waiting for coordinator…"}
-                    </span>
-                  </a>
-                );
-              })}
-            </div>
-          </SurfaceCard>
-
-          <SurfaceCard title="Dependencies" subtitle="Blocked work and unresolved chains" className="surface-card--compact">
-            <div className="dependency-list">
-              {(document?.tasks ?? []).filter((task) => task.blocked_by.length > 0).length === 0 ? (
-                <EmptyState compact title="No active dependencies" />
-              ) : (
-                (document?.tasks ?? [])
-                  .filter((task) => task.blocked_by.length > 0)
-                  .map((task) => (
-                    <div key={task.id} className="dependency-card">
-                      <strong>{task.title}</strong>
-                      <span>Blocked by {task.blocked_by.join(", ")}</span>
+                    <span />
+                  </label>
+                  <div className="task-card-ui__body">
+                    <div className="task-card-ui__title">{task.title}</div>
+                    {task.description ? <p>{task.description}</p> : null}
+                    <div className="task-card-ui__meta">
+                      <span className={`task-status-chip is-${task.status}`}>{task.status}</span>
+                      <span className="task-meta-mono">#{task.order}</span>
+                      <span className="task-meta-mono">{task.effort ?? "unknown"}</span>
+                      <span className="task-meta-mono">{document?.blocks[task.block]?.label ?? task.block}</span>
                     </div>
-                  ))
-              )}
-            </div>
-          </SurfaceCard>
-
-          <SurfaceCard title="Activity Log" subtitle="Recent task mutations" className="surface-card--compact">
-            <div className="activity-log-ui">
-              {(document?.log ?? []).length === 0 ? (
-                <EmptyState compact title="No recent task mutations" detail="Task activity will accumulate here as operators work." />
-              ) : (
-                (document?.log ?? []).slice().reverse().slice(0, 30).map((entry) => (
-                  <div key={`${entry.timestamp}-${entry.actor}-${entry.action}`} className="activity-log-ui__entry">
-                    <span>{new Date(entry.timestamp).toLocaleTimeString()}</span>
-                    <span>{entry.actor}</span>
-                    <span>
-                      {entry.action} {entry.task_id ? <em>{entry.task_id}</em> : null} {entry.detail ?? ""}
-                    </span>
                   </div>
-                ))
-              )}
-            </div>
-          </SurfaceCard>
+                </div>
+                <div className="task-card-ui__actions">
+                  <select
+                    className="select-input"
+                    value={task.assignee ?? "unassigned"}
+                    onChange={(event) => void assignTask(task.id, event.target.value)}
+                  >
+                    <option value="unassigned">Unassigned</option>
+                    {AGENTS.map((agent) => (
+                      <option key={agent.id} value={agent.id}>
+                        {agent.label}
+                      </option>
+                    ))}
+                  </select>
+                  <button className="secondary-button" type="button" onClick={() => void cycleTask(task.id)}>
+                    Cycle
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
         </div>
-      </div>
+      </SurfaceCard>
+
+      <SurfaceCard title="Dependencies" subtitle="Blocked work and unresolved chains" className="surface-card--compact">
+        <div className="dependency-list">
+          {(document?.tasks ?? []).filter((task) => task.blocked_by.length > 0).length === 0 ? (
+            <EmptyState compact title="No active dependencies" />
+          ) : (
+            (document?.tasks ?? [])
+              .filter((task) => task.blocked_by.length > 0)
+              .map((task) => (
+                <div key={task.id} className="dependency-card">
+                  <strong>{task.title}</strong>
+                  <span>Blocked by {task.blocked_by.join(", ")}</span>
+                </div>
+              ))
+          )}
+        </div>
+      </SurfaceCard>
+
+      <SurfaceCard title="Activity Log" subtitle="Recent task mutations" className="surface-card--compact">
+        <div className="activity-log-ui">
+          {(document?.log ?? []).length === 0 ? (
+            <EmptyState compact title="No recent task mutations" detail="Task activity will accumulate here as operators work." />
+          ) : (
+            (document?.log ?? []).slice().reverse().slice(0, 30).map((entry) => (
+              <div key={`${entry.timestamp}-${entry.actor}-${entry.action}`} className="activity-log-ui__entry">
+                <span>{new Date(entry.timestamp).toLocaleTimeString()}</span>
+                <span>{entry.actor}</span>
+                <span>
+                  {entry.action} {entry.task_id ? <em>{entry.task_id}</em> : null} {entry.detail ?? ""}
+                </span>
+              </div>
+            ))
+          )}
+        </div>
+      </SurfaceCard>
     </AppShell>
   );
 }

@@ -27,7 +27,6 @@ describe("BudgetPage", () => {
     });
 
     await waitFor(() => expect(queryClient.isFetching()).toBe(0));
-    expect(screen.getByText("Awaiting budget feed")).toBeInTheDocument();
     expect(screen.getByText("Waiting for coordinator budget status")).toBeInTheDocument();
   });
 

@@ -2,7 +2,6 @@ import { LastUpdatedChip } from "../components/primitives/LastUpdatedChip";
 import { useAgentStatuses, latestDataUpdatedAt } from "../hooks/usePortalQueries";
 import { AGENTS } from "../lib/constants";
 import { AppShell, SurfaceCard } from "../components/AppShell";
-import { timeAgo } from "../lib/utils";
 
 const AGENT_CSS_COLORS: Record<string, string> = {
   boot: "var(--agent-boot)",
@@ -14,85 +13,43 @@ const AGENT_CSS_COLORS: Record<string, string> = {
 export function TopologyPage() {
   const statuses = useAgentStatuses();
 
-  const activeAgentCount = AGENTS.filter((agent) => {
-    const s = statuses.data[agent.id];
-    return s && s.status !== "paused" && s.status !== "waiting";
-  }).length;
-
-  const totalActiveLoops = AGENTS.reduce((sum, agent) => {
-    return sum + (statuses.data[agent.id]?.active_loops?.length ?? 0);
-  }, 0);
-
-  const activeRunCount = AGENTS.filter((agent) => {
-    return statuses.data[agent.id]?.current_run != null;
-  }).length;
-
   return (
     <AppShell
       title="Factory Topology"
-      description="Agent network, infrastructure layers, and system overview."
       pageKey="/pages/topology.html"
       statusSlot={<LastUpdatedChip updatedAt={latestDataUpdatedAt(statuses.results)} stale={statuses.hasError} />}
     >
-      {/* Summary Stats */}
-      <div className="topology-summary-row">
-        <div className="topology-summary-card">
-          <div className="topology-summary-card__value">{AGENTS.length}</div>
-          <div className="topology-summary-card__label">Total Agents</div>
-        </div>
-        <div className="topology-summary-card">
-          <div className="topology-summary-card__value">{activeAgentCount}</div>
-          <div className="topology-summary-card__label">Active Agents</div>
-        </div>
-        <div className="topology-summary-card">
-          <div className="topology-summary-card__value">{totalActiveLoops}</div>
-          <div className="topology-summary-card__label">Active Loops</div>
-        </div>
-        <div className="topology-summary-card">
-          <div className="topology-summary-card__value">{activeRunCount}</div>
-          <div className="topology-summary-card__label">Active Runs</div>
-        </div>
+      {/* Agent Strip */}
+      <div className="topology-agent-strip">
+        {AGENTS.map((agent) => {
+          const status = statuses.data[agent.id];
+          const currentTask = status?.current_task as string | undefined;
+          const agentStatus = status?.status ?? "waiting";
+          return (
+            <a
+              key={agent.id}
+              className="topology-agent-card"
+              href={`/pages/agents/${agent.id}.html`}
+              style={{ ["--node-accent" as string]: AGENT_CSS_COLORS[agent.id] ?? agent.color }}
+            >
+              <div className="topology-agent-card__header">
+                <span className="topology-agent-card__name">{agent.label}</span>
+                <div className={`topology-node__status is-${agentStatus}`}>
+                  {agentStatus}
+                </div>
+              </div>
+              <div className="topology-agent-card__model">
+                <span className="topology-agent-card__model-dot" style={{ background: agent.color }} />
+                {agent.model}
+              </div>
+              <div className="topology-agent-card__trust">{agent.trust}</div>
+              <div className="topology-agent-card__task">
+                {currentTask || "idle"}
+              </div>
+            </a>
+          );
+        })}
       </div>
-
-      {/* Agent Network */}
-      <SurfaceCard title="Agent Network" subtitle="Status and detail entry points" className="surface-card--compact">
-        <div className="topology-grid">
-          {AGENTS.map((agent) => {
-            const status = statuses.data[agent.id];
-            const loopCount = status?.active_loops?.length ?? 0;
-            const currentTask = status?.current_task as string | undefined;
-            return (
-              <a
-                key={agent.id}
-                className="topology-node"
-                href={`/pages/agents/${agent.id}.html`}
-                style={{ ["--node-accent" as string]: AGENT_CSS_COLORS[agent.id] ?? agent.color }}
-              >
-                <div className="topology-node__header">
-                  <div className="topology-node__label">{agent.label}</div>
-                  <div className={`topology-node__status is-${status?.status ?? "waiting"}`}>
-                    {status?.status ?? "waiting"}
-                  </div>
-                </div>
-                <div className="topology-stat-row">
-                  <div className="topology-stat">
-                    <span className="topology-stat__value">{loopCount}</span>
-                    <span className="topology-stat__label">loops</span>
-                  </div>
-                  {currentTask ? (
-                    <div className="topology-stat">
-                      <span className="topology-stat__label">{currentTask.length > 40 ? `${currentTask.slice(0, 40)}...` : currentTask}</span>
-                    </div>
-                  ) : null}
-                </div>
-                <div className="topology-node__meta">
-                  {timeAgo(status?.last_updated as string | undefined)}
-                </div>
-              </a>
-            );
-          })}
-        </div>
-      </SurfaceCard>
 
       {/* System Infrastructure */}
       <SurfaceCard title="System Infrastructure" subtitle="Core services and hardware" className="surface-card--compact">
@@ -135,18 +92,34 @@ export function TopologyPage() {
         </div>
       </SurfaceCard>
 
-      {/* Autonomous Loops */}
-      <SurfaceCard title="Autonomous Loops" subtitle="Per-agent loop capacity" className="surface-card--compact">
-        <div className="topology-mini-grid">
-          {AGENTS.map((agent) => {
-            const loopCount = statuses.data[agent.id]?.active_loops?.length ?? 0;
-            return (
-              <div key={agent.id} className="topology-mini-node" style={{ ["--node-accent" as string]: AGENT_CSS_COLORS[agent.id] ?? agent.color }}>
-                <div className="topology-mini-node__label">{agent.label}</div>
-                <div className="topology-mini-node__meta">{loopCount} active loop{loopCount !== 1 ? "s" : ""}</div>
+      {/* Reasoning Escalation */}
+      <SurfaceCard title="Reasoning Escalation" subtitle="Model tier routing — Nan dispatches" className="surface-card--compact">
+        <div className="topology-tier-list">
+          {[
+            { tier: 0, label: "coordinator-rs — deterministic, no LLM", color: "#22c55e", trigger: "all routing" },
+            { tier: 1, label: "Permanent Agents", color: "var(--text)", model: "Nanbeige 3B / Qwen3.5-4B / LFM2.5-1.2B", trigger: "routine tasks" },
+            { tier: 2, label: "On-Demand Reasoning", color: "var(--yellow)", model: "Qwen3.5-9B-Opus-Distilled", trigger: "Nan escalation" },
+            { tier: 3, label: "Anthropic API", color: "var(--purple)", model: "Claude Sonnet 4.6 / Opus 4.6", trigger: "Tier 2 insufficient" },
+            { tier: 4, label: "Solo Intensive", color: "var(--red)", model: "Qwen3.5-27B-Opus-Distilled", trigger: "explicit user request" },
+          ].map((row) => (
+            <div key={row.tier} className="topology-tier-row">
+              <div
+                className="topology-tier-badge"
+                style={{
+                  background: `color-mix(in srgb, ${row.color} 15%, transparent)`,
+                  border: `1px solid color-mix(in srgb, ${row.color} 40%, transparent)`,
+                  color: row.color,
+                }}
+              >
+                T{row.tier}
               </div>
-            );
-          })}
+              <div className="topology-tier-row__body">
+                <div className="topology-tier-row__label" style={{ color: row.color }}>{row.label}</div>
+                {row.model ? <div className="topology-tier-row__model">{row.model}</div> : null}
+              </div>
+              {row.trigger ? <div className="topology-tier-row__trigger">{row.trigger}</div> : null}
+            </div>
+          ))}
         </div>
       </SurfaceCard>
     </AppShell>

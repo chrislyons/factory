@@ -79,7 +79,6 @@ export function AppShell({
         <section className="portal-hero">
           <div className="portal-hero__eyebrow">{eyebrow}</div>
           <h1>{title}</h1>
-          {description ? <p className="portal-hero__desc">{description}</p> : null}
         </section>
         <div className="portal-page-content">{children}</div>
       </main>
