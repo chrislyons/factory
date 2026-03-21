@@ -2717,7 +2717,9 @@ textarea {
     grid-column: 1;
     grid-row: auto;
     width: 100%;
+    height: 30px;
     min-height: 30px;
+    border-radius: 8px;
   }
 
   .task-card-ui__cycle {
