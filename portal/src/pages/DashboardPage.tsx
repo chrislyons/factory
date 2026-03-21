@@ -351,7 +351,6 @@ export function DashboardPage() {
                 className={cn("filter-chip-ui", activeFilter === blockId && "is-active")}
                 type="button"
                 onClick={() => setActiveFilter(blockId)}
-                style={{ ["--chip-color" as string]: block.color }}
               >
                 {block.label} ({count})
               </button>

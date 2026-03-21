@@ -1135,7 +1135,7 @@ textarea {
   min-height: 26px;
   padding: 0 9px;
   border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--chip-color, var(--border-strong)) 45%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border-strong) 45%, transparent);
   background: var(--accent-soft);
   color: var(--text-dim);
   font-size: 11px;
@@ -1144,8 +1144,8 @@ textarea {
 }
 
 .filter-chip-ui.is-active {
-  border-color: color-mix(in srgb, var(--chip-color, var(--accent)) 78%, white 4%);
-  background: color-mix(in srgb, var(--chip-color, var(--accent)) 12%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 78%, white 4%);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
   color: var(--text);
 }
 
