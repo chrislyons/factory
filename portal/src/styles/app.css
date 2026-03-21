@@ -555,6 +555,10 @@ textarea {
   background: var(--accent-soft);
 }
 
+.command-trigger {
+  max-width: 380px;
+}
+
 .command-trigger kbd {
   padding: 2px 5px;
   border-radius: 4px;
