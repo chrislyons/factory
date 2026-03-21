@@ -406,7 +406,7 @@ textarea {
   padding-bottom: 2px;
 }
 
-.portal-nav-mobile {
+.portal-hero__title-mobile {
   display: none;
 }
 
@@ -2515,7 +2515,7 @@ textarea {
 
 @media (max-width: 980px) {
   .portal-header__inner {
-    grid-template-columns: auto 1fr auto;
+    grid-template-columns: auto 1fr;
     gap: 10px;
   }
 
@@ -2523,27 +2523,28 @@ textarea {
     display: none;
   }
 
-  .portal-nav-mobile {
+  .portal-header__actions {
+    justify-content: flex-end;
+  }
+
+  .portal-hero__title-desktop {
+    display: none;
+  }
+
+  .portal-hero__title-mobile {
     display: block;
-    min-height: 30px;
-    padding: 0 8px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--surface-soft);
+    font-family: var(--font-display);
+    font-size: clamp(18px, 2.2vw, 24px);
+    font-weight: 400;
+    letter-spacing: -0.03em;
     color: var(--text);
-    font-family: var(--font-body);
-    font-size: 11px;
+    background: transparent;
+    border: none;
+    padding: 0;
     cursor: pointer;
     appearance: none;
     -webkit-appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2394a3b8'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 8px center;
-    padding-right: 24px;
-  }
-
-  .portal-header__actions {
-    justify-content: flex-end;
+    width: auto;
   }
 
   .portal-footer__inner {

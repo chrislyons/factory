@@ -65,16 +65,6 @@ export function AppShell({
               </a>
             ))}
           </nav>
-          <select
-            className="portal-nav-mobile"
-            value={pageKey ?? ""}
-            onChange={(e) => { window.location.href = e.target.value; }}
-            aria-label="Navigate"
-          >
-            {NAV_LINKS.map((link) => (
-              <option key={link.href} value={link.href}>{link.label}</option>
-            ))}
-          </select>
           <div className="portal-header__actions">
             <CommandPaletteButton />
             {statusSlot}
@@ -88,7 +78,17 @@ export function AppShell({
       <main className="portal-main">
         <section className="portal-hero">
           {eyebrow && <div className="portal-hero__eyebrow">{eyebrow}</div>}
-          <h1>{title}</h1>
+          <h1 className="portal-hero__title-desktop">{title}</h1>
+          <select
+            className="portal-hero__title-mobile"
+            value={pageKey ?? ""}
+            onChange={(e) => { window.location.href = e.target.value; }}
+            aria-label="Navigate"
+          >
+            {NAV_LINKS.map((link) => (
+              <option key={link.href} value={link.href}>{link.label}</option>
+            ))}
+          </select>
         </section>
         <div className="portal-page-content">{children}</div>
       </main>
