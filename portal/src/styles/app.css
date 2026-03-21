@@ -2695,7 +2695,7 @@ textarea {
 
   .task-card-ui__actions .select-input,
   .task-card-ui__actions .secondary-button {
-    min-height: 34px;
+    min-height: 30px;
   }
 
   .topology-flow {
