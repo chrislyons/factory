@@ -31,6 +31,20 @@ const CommandsIcon = () => (
 );
 
 
+const HAS_GALLERY = new Set([
+  "2110-audio-io","aes70","autoresearch","chainly","claudezilla",
+  "claudezilla-docs","git-av","grafana","hotbox","listmaker",
+  "max4live-mcp","memex-mcp","narwhal","nmos","ondina",
+  "orpheus-sdk","osd-v2","research-vault","strudel","tooltime","vmotes",
+]);
+
+const HAS_COMMANDS = new Set([
+  "2110-audio-io","aes70","autoresearch","carbon-acx","cbc-schedule-sync",
+  "chainly","chrislyons-website","freqfinder","git-av","hotbox",
+  "listmaker","max4live-mcp","memex-mcp","nmos","ondina",
+  "orpheus-sdk","osd-v2","strudel","undone","vmotes",
+]);
+
 function galleryHref(repoName: string): string {
   return `/galleries/${repoName}_architecture-gallery.html`;
 }
@@ -155,10 +169,10 @@ export function RepoExplorer() {
           if (focusedIndex >= 0 && focusedIndex < filtered.length) {
             e.preventDefault();
             const repo = filtered[focusedIndex];
-            if (focusedCell === "gallery" && repo.gallery) {
-              window.open(galleryHref(repo.name), "_blank");
-            } else if (focusedCell === "commands" && repo.commands) {
-              window.open(commandsHref(repo.name), "_blank");
+            if (focusedCell === "gallery" && HAS_GALLERY.has(repo.name)) {
+              window.location.assign(galleryHref(repo.name));
+            } else if (focusedCell === "commands" && HAS_COMMANDS.has(repo.name)) {
+              window.location.assign(commandsHref(repo.name));
             }
           }
           break;
@@ -166,14 +180,14 @@ export function RepoExplorer() {
         case "g": {
           if (!e.metaKey && !e.ctrlKey && focusedIndex >= 0) {
             const repo = filtered[focusedIndex];
-            if (repo.gallery) window.open(galleryHref(repo.name), "_blank");
+            if (HAS_GALLERY.has(repo.name)) window.location.assign(galleryHref(repo.name));
           }
           break;
         }
         case "c": {
           if (!e.metaKey && !e.ctrlKey && focusedIndex >= 0) {
             const repo = filtered[focusedIndex];
-            if (repo.commands) window.open(commandsHref(repo.name), "_blank");
+            if (HAS_COMMANDS.has(repo.name)) window.location.assign(commandsHref(repo.name));
           }
           break;
         }
@@ -309,12 +323,10 @@ export function RepoExplorer() {
                     <td>{i + 1}</td>
                     <td><span className="docs-repo-name">{repo.name}</span></td>
                     <td>
-                      {repo.gallery ? (
+                      {HAS_GALLERY.has(repo.name) ? (
                         <a
                           className={`docs-repo-link docs-cell-link${focusedIndex === i && focusedCell === "gallery" ? " is-cell-focused" : ""}`}
                           href={galleryHref(repo.name)}
-                          target="_blank"
-                          rel="noopener noreferrer"
                         >
                           <GalleryIcon />
                           <span className="docs-repo-link__label">Gallery</span>
@@ -324,12 +336,10 @@ export function RepoExplorer() {
                       )}
                     </td>
                     <td>
-                      {repo.commands ? (
+                      {HAS_COMMANDS.has(repo.name) ? (
                         <a
                           className={`docs-repo-link docs-cell-link${focusedIndex === i && focusedCell === "commands" ? " is-cell-focused" : ""}`}
                           href={commandsHref(repo.name)}
-                          target="_blank"
-                          rel="noopener noreferrer"
                         >
                           <CommandsIcon />
                           <span className="docs-repo-link__label">Commands</span>
