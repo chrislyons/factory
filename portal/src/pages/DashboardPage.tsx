@@ -365,7 +365,7 @@ export function DashboardPage() {
           ) : (
             visibleTasks.map((task) => (
               <div key={task.id} className="task-card-ui">
-                <div className="task-card-ui__top">
+                <div className="task-card-ui__main">
                   <label className="checkbox-wrap">
                     <input
                       checked={task.status === "done"}
@@ -375,7 +375,18 @@ export function DashboardPage() {
                     />
                     <span />
                   </label>
-                  <div className="task-card-ui__title">{task.title}</div>
+                  <div className="task-card-ui__body">
+                    <div className="task-card-ui__title">{task.title}</div>
+                    {task.description ? <p>{task.description}</p> : null}
+                    <div className="task-card-ui__meta">
+                      <span className={`task-status-chip is-${task.status}`}>{task.status}</span>
+                      <span className="task-meta-mono job-address">{task.id.replace("job.", "")}</span>
+                      <span className="task-meta-mono">{task.effort ?? "unknown"}</span>
+                      <span className="task-meta-mono">{document?.blocks[task.block]?.label ?? task.block}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="task-card-ui__actions">
                   <select
                     className="select-input"
                     value={task.assignee ?? "unassigned"}
@@ -388,20 +399,9 @@ export function DashboardPage() {
                       </option>
                     ))}
                   </select>
-                </div>
-                <div className="task-card-ui__bottom">
-                  {task.description ? <p>{task.description}</p> : null}
-                  <div className="task-card-ui__meta-row">
-                    <div className="task-card-ui__meta">
-                      <span className={`task-status-chip is-${task.status}`}>{task.status}</span>
-                      <span className="task-meta-mono job-address">{task.id.replace("job.", "")}</span>
-                      <span className="task-meta-mono">{task.effort ?? "unknown"}</span>
-                      <span className="task-meta-mono">{document?.blocks[task.block]?.label ?? task.block}</span>
-                    </div>
-                    <button className="secondary-button" type="button" onClick={() => void cycleTask(task.id)}>
-                      Cycle
-                    </button>
-                  </div>
+                  <button className="secondary-button" type="button" onClick={() => void cycleTask(task.id)}>
+                    Cycle
+                  </button>
                 </div>
               </div>
             ))
