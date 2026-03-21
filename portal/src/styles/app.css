@@ -196,6 +196,7 @@ html,
 body,
 #root {
   min-height: 100%;
+  overflow-x: hidden;
 }
 
 body {
@@ -345,6 +346,7 @@ textarea {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
 }
 
 .portal-header {
@@ -380,7 +382,7 @@ textarea {
 
 .portal-brand__title {
   font-family: var(--font-display);
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1;
   font-weight: 700;
   letter-spacing: -0.02em;
@@ -389,7 +391,7 @@ textarea {
 .portal-brand__sub,
 .portal-hero__eyebrow {
   font-family: var(--font-display);
-  font-size: 9px;
+  font-size: 10px;
   line-height: 1.2;
   font-weight: 700;
   letter-spacing: 0.18em;
