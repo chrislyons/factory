@@ -65,6 +65,16 @@ export function AppShell({
               </a>
             ))}
           </nav>
+          <select
+            className="portal-nav-mobile"
+            value={pageKey ?? ""}
+            onChange={(e) => { window.location.href = e.target.value; }}
+            aria-label="Navigate"
+          >
+            {NAV_LINKS.map((link) => (
+              <option key={link.href} value={link.href}>{link.label}</option>
+            ))}
+          </select>
           <div className="portal-header__actions">
             <CommandPaletteButton />
             {statusSlot}
