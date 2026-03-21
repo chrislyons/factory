@@ -78,9 +78,6 @@ export function ObjectIndexPage() {
   return (
     <AppShell title="Object Index" pageKey="/pages/object-index.html">
       <div className="obj-hero-row">
-        <p className="obj-hero-desc">
-          All CSS classes, components, hooks, types, constants, API functions and design tokens. Click any name to copy.
-        </p>
         <button
           className={`obj-export-btn${exported ? " is-exported" : ""}`}
           type="button"
