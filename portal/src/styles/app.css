@@ -1647,9 +1647,9 @@ textarea {
   gap: 5px;
 }
 
-.dependency-card {
-  padding-left: 8px;
-  padding-right: 8px;
+.dependency-list {
+  margin-left: -16px;
+  margin-right: -16px;
 }
 
 .activity-log-ui__entry,
