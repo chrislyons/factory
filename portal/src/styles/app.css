@@ -1647,6 +1647,11 @@ textarea {
   gap: 5px;
 }
 
+.dependency-card {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
 .activity-log-ui__entry,
 .run-events__row,
 .run-table__row {
