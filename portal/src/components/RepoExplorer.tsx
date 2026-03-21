@@ -30,18 +30,6 @@ const CommandsIcon = () => (
   </svg>
 );
 
-function extractFilename(href: string): string {
-  return href.split("/").pop() ?? href;
-}
-
-function rewriteGalleryHref(href: string): string {
-  const name = extractFilename(href).replace(/_wireframes/, "");
-  return `/galleries/${name}`;
-}
-
-function rewriteCommandsHref(href: string): string {
-  return `/commands/${extractFilename(href)}`;
-}
 
 function relativeTime(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
@@ -160,9 +148,9 @@ export function RepoExplorer() {
             e.preventDefault();
             const repo = filtered[focusedIndex];
             if (focusedCell === "gallery" && repo.gallery) {
-              window.open(rewriteGalleryHref(repo.gallery), "_blank");
+              window.open(repo.gallery!, "_blank");
             } else if (focusedCell === "commands" && repo.commands) {
-              window.open(rewriteCommandsHref(repo.commands), "_blank");
+              window.open(repo.commands!, "_blank");
             }
           }
           break;
@@ -170,14 +158,14 @@ export function RepoExplorer() {
         case "g": {
           if (!e.metaKey && !e.ctrlKey && focusedIndex >= 0) {
             const repo = filtered[focusedIndex];
-            if (repo.gallery) window.open(rewriteGalleryHref(repo.gallery), "_blank");
+            if (repo.gallery) window.open(repo.gallery!, "_blank");
           }
           break;
         }
         case "c": {
           if (!e.metaKey && !e.ctrlKey && focusedIndex >= 0) {
             const repo = filtered[focusedIndex];
-            if (repo.commands) window.open(rewriteCommandsHref(repo.commands), "_blank");
+            if (repo.commands) window.open(repo.commands!, "_blank");
           }
           break;
         }
@@ -316,7 +304,7 @@ export function RepoExplorer() {
                       {repo.gallery ? (
                         <a
                           className={`docs-repo-link docs-cell-link${focusedIndex === i && focusedCell === "gallery" ? " is-cell-focused" : ""}`}
-                          href={rewriteGalleryHref(repo.gallery)}
+                          href={repo.gallery!}
                           target="_blank"
                           rel="noopener noreferrer"
                         >
@@ -331,7 +319,7 @@ export function RepoExplorer() {
                       {repo.commands ? (
                         <a
                           className={`docs-repo-link docs-cell-link${focusedIndex === i && focusedCell === "commands" ? " is-cell-focused" : ""}`}
-                          href={rewriteCommandsHref(repo.commands)}
+                          href={repo.commands!}
                           target="_blank"
                           rel="noopener noreferrer"
                         >
