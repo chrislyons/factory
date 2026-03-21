@@ -1062,9 +1062,6 @@ textarea {
   padding: 0 11px;
 }
 
-.task-card-ui__actions .select-input {
-  min-height: 30px;
-}
 
 /* ── Buttons ──────────────────────────────────────────────────────── */
 
@@ -1164,19 +1161,28 @@ textarea {
 
 .task-card-ui {
   display: flex;
-  justify-content: space-between;
-  gap: 12px;
+  flex-direction: column;
+  gap: 6px;
   padding: 10px 12px;
 }
 
-.task-card-ui__main {
+.task-card-ui__top {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 10px;
-  min-width: 0;
 }
 
-.task-card-ui__body {
+.task-card-ui__top .select-input {
+  min-height: 30px;
+  width: auto;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.task-card-ui__bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
   min-width: 0;
 }
 
@@ -1185,7 +1191,16 @@ textarea {
   font-size: 13px;
   font-weight: 700;
   line-height: 18px;
-  margin-bottom: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.task-card-ui__meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .task-card-ui__meta,
@@ -1534,13 +1549,6 @@ textarea {
   }
 }
 
-.task-card-ui__actions {
-  display: grid;
-  gap: 6px;
-  align-content: start;
-  align-self: flex-start;
-  min-width: 150px;
-}
 
 /* ── Status Chips & Pills ─────────────────────────────────────────── */
 
@@ -2673,23 +2681,11 @@ textarea {
     grid-template-columns: 1fr;
   }
 
-  .task-card-ui {
-    flex-direction: column;
+  .task-card-ui__top .select-input {
+    min-height: 34px;
   }
 
-  .task-card-ui p,
-  .task-card-ui__meta {
-    margin-left: -28px;
-  }
-
-  .task-card-ui__actions {
-    min-width: 0;
-    grid-auto-flow: column;
-    grid-auto-columns: 1fr;
-  }
-
-  .task-card-ui__actions .select-input,
-  .task-card-ui__actions .secondary-button {
+  .task-card-ui__meta-row .secondary-button {
     min-height: 34px;
   }
 
