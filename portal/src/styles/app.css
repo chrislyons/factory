@@ -2584,7 +2584,7 @@ textarea {
 
 @media (max-width: 760px) {
   :root {
-    --shell-width: 98.3%;
+    --shell-width: 98vw;
   }
 
   .landing-grid,
