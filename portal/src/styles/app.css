@@ -1648,8 +1648,8 @@ textarea {
 }
 
 .dependency-list {
-  margin-left: -16px;
-  margin-right: -16px;
+  margin-left: -4px;
+  margin-right: -4px;
 }
 
 .activity-log-ui__entry,
