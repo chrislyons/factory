@@ -1133,6 +1133,9 @@ function exportToMarkdown() {
   if (q) md += `> Filtered: "${searchInput.value.trim()}"\n\n`;
 
   sections.forEach(section => {
+    const header = section.querySelector(".section-header");
+    const isCollapsed = header?.classList.contains("collapsed");
+    if (!q && isCollapsed) return;
     const title = section.querySelector(".section-title")?.textContent || "";
     const rows = section.querySelectorAll("tbody tr");
     const visibleRows = [];
