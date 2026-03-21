@@ -1159,28 +1159,55 @@ textarea {
 }
 
 .task-card-ui {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto auto;
+  gap: 4px 12px;
   padding: 10px 12px;
+  align-items: center;
 }
 
-.task-card-ui__main {
+.task-card-ui__title-row {
+  grid-column: 1;
+  grid-row: 1;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 10px;
   min-width: 0;
 }
 
-.task-card-ui__body {
+.task-card-ui__desc {
+  grid-column: 1;
+  grid-row: 2;
+  margin: 0;
   min-width: 0;
+}
+
+.task-card-ui__meta {
+  grid-column: 1;
+  grid-row: 3;
+}
+
+.task-card-ui__assign {
+  grid-column: 2;
+  grid-row: 1;
+  width: auto;
+  min-height: 30px;
+  align-self: center;
+}
+
+.task-card-ui__cycle {
+  grid-column: 2;
+  grid-row: 2;
+  min-height: 30px;
+  align-self: start;
 }
 
 .task-card-ui__title {
   font-family: var(--font-display);
   font-size: 13px;
   font-weight: 700;
-  margin-bottom: 4px;
+  min-width: 0;
 }
 
 .task-card-ui__meta,
@@ -1529,18 +1556,6 @@ textarea {
   }
 }
 
-.task-card-ui__actions {
-  display: grid;
-  gap: 6px;
-  align-content: start;
-  align-self: flex-start;
-  min-width: 150px;
-}
-
-.task-card-ui__actions .select-input,
-.task-card-ui__actions .secondary-button {
-  min-height: 30px;
-}
 
 /* ── Status Chips & Pills ─────────────────────────────────────────── */
 
@@ -1599,9 +1614,6 @@ textarea {
   flex-shrink: 0;
 }
 
-.task-card-ui__main > .checkbox-wrap {
-  margin-top: 2px;
-}
 
 .checkbox-wrap input {
   position: absolute;
@@ -2679,23 +2691,34 @@ textarea {
   }
 
   .task-card-ui {
-    flex-direction: column;
+    grid-template-columns: 1fr;
   }
 
-  .task-card-ui p,
+  .task-card-ui__title-row {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .task-card-ui__desc {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
   .task-card-ui__meta {
-    margin-left: -28px;
+    grid-column: 1;
+    grid-row: auto;
   }
 
-  .task-card-ui__actions {
-    min-width: 0;
-    grid-auto-flow: column;
-    grid-auto-columns: 1fr;
+  .task-card-ui__assign {
+    grid-column: 1;
+    grid-row: auto;
+    width: 100%;
   }
 
-  .task-card-ui__actions .select-input,
-  .task-card-ui__actions .secondary-button {
-    min-height: 30px;
+  .task-card-ui__cycle {
+    grid-column: 1;
+    grid-row: auto;
+    width: 100%;
   }
 
   .topology-flow {
