@@ -2713,6 +2713,7 @@ textarea {
     grid-column: 1;
     grid-row: auto;
     width: 100%;
+    min-height: 30px;
   }
 
   .task-card-ui__cycle {
