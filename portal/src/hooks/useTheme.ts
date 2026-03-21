@@ -1,22 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
 
-type Theme = "dark" | "light";
+type Theme = "dark" | "light" | "ember";
 
 const STORAGE_KEY = "factory-portal-theme";
-
-function getSystemTheme(): Theme {
-  if (typeof window === "undefined") return "dark";
-  try {
-    return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
-  } catch {
-    return "dark";
-  }
-}
+const CYCLE: Theme[] = ["ember", "dark", "light"];
 
 function getStoredTheme(): Theme | null {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored === "dark" || stored === "light") return stored;
+    if (stored === "dark" || stored === "light" || stored === "ember") return stored as Theme;
   } catch {
     // localStorage unavailable
   }
@@ -28,28 +20,11 @@ function applyTheme(theme: Theme) {
 }
 
 export function useTheme() {
-  const [theme, setThemeState] = useState<Theme>(() => getStoredTheme() ?? getSystemTheme());
+  const [theme, setThemeState] = useState<Theme>(() => getStoredTheme() ?? "ember");
 
   useEffect(() => {
     applyTheme(theme);
   }, [theme]);
-
-  useEffect(() => {
-    let mediaQuery: MediaQueryList | null = null;
-    try {
-      mediaQuery = window.matchMedia("(prefers-color-scheme: light)");
-    } catch {
-      return;
-    }
-    const handler = () => {
-      if (!getStoredTheme()) {
-        const next = mediaQuery!.matches ? "light" : "dark";
-        setThemeState(next);
-      }
-    };
-    mediaQuery.addEventListener("change", handler);
-    return () => mediaQuery!.removeEventListener("change", handler);
-  }, []);
 
   const setTheme = useCallback((next: Theme) => {
     setThemeState(next);
@@ -61,7 +36,8 @@ export function useTheme() {
   }, []);
 
   const toggle = useCallback(() => {
-    setTheme(theme === "dark" ? "light" : "dark");
+    const next = CYCLE[(CYCLE.indexOf(theme) + 1) % CYCLE.length];
+    setTheme(next);
   }, [theme, setTheme]);
 
   return { theme, setTheme, toggle } as const;
