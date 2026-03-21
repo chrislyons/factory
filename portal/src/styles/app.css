@@ -1205,6 +1205,11 @@ textarea {
   grid-row: 3;
 }
 
+.task-card-ui > .task-card-ui__meta {
+  min-height: 30px;
+  align-items: center;
+}
+
 .task-card-ui__assign {
   grid-column: 2;
   grid-row: 1;
@@ -2739,6 +2744,13 @@ textarea {
     grid-column: 1;
     grid-row: auto;
     width: 100%;
+  }
+
+  .filter-row-ui {
+    flex-wrap: wrap;
+    overflow-x: visible;
+    -webkit-mask-image: none;
+    mask-image: none;
   }
 
   .topology-flow {
