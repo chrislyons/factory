@@ -581,6 +581,13 @@ textarea {
   gap: 6px;
 }
 
+.portal-hero__title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .portal-hero__eyebrow {
   margin-bottom: 2px;
 }
@@ -1445,6 +1452,11 @@ textarea {
 
 .obj-section-header:hover {
   background: var(--bg-panel-hover);
+}
+
+.obj-section-header:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 1px var(--accent-border), 0 0 0 1px var(--accent-border);
 }
 
 .obj-section-arrow {

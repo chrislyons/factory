@@ -10,6 +10,7 @@ interface AppShellProps {
   eyebrow?: string;
   description?: string;
   statusSlot?: ReactNode;
+  headerAction?: ReactNode;
   pageKey?: string;
 }
 
@@ -18,6 +19,7 @@ export function AppShell({
   eyebrow,
   description,
   statusSlot,
+  headerAction,
   pageKey,
   children
 }: PropsWithChildren<AppShellProps>) {
@@ -78,7 +80,10 @@ export function AppShell({
       <main className="portal-main">
         <section className="portal-hero">
           {eyebrow && <div className="portal-hero__eyebrow">{eyebrow}</div>}
-          <h1 className="portal-hero__title-desktop">{title}</h1>
+          <div className="portal-hero__title-row">
+            <h1 className="portal-hero__title-desktop">{title}</h1>
+            {headerAction}
+          </div>
           <div className="portal-hero__title-mobile-wrap">
             <select
               className="portal-hero__title-mobile"

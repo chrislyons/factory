@@ -8,6 +8,7 @@ export function ObjectIndexPage() {
   const [copiedName, setCopiedName] = useState<string | null>(null);
   const [exported, setExported] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
+  const sectionRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
 
   const filtered = useMemo(() => {
     if (!query.trim()) return OBJECT_INDEX;
@@ -24,25 +25,6 @@ export function ObjectIndexPage() {
 
   const totalMatches = filtered.reduce((sum, s) => sum + s.items.length, 0);
   const isSearching = query.trim().length > 0;
-
-  useEffect(() => {
-    function handleKey(e: KeyboardEvent) {
-      const tag = (e.target as HTMLElement)?.tagName;
-      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") {
-        if (e.key === "Escape") {
-          setQuery("");
-          searchRef.current?.blur();
-        }
-        return;
-      }
-      if (e.key === "/") {
-        e.preventDefault();
-        searchRef.current?.focus();
-      }
-    }
-    window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
-  }, []);
 
   const copyName = useCallback(async (name: string) => {
     await navigator.clipboard.writeText(name);
@@ -66,6 +48,113 @@ export function ObjectIndexPage() {
     setTimeout(() => setExported(false), 1200);
   }, [filtered]);
 
+  const setAllSections = useCallback((collapsed: boolean) => {
+    const next: Record<string, boolean> = {};
+    for (const s of OBJECT_INDEX) next[s.id] = !collapsed;
+    setExpanded(next);
+  }, []);
+
+  const getVisibleSectionIds = useCallback(() => {
+    return filtered.map(s => s.id);
+  }, [filtered]);
+
+  useEffect(() => {
+    function handleKey(e: KeyboardEvent) {
+      const inSearch = document.activeElement === searchRef.current;
+
+      // Cmd/Ctrl+Shift+E → export
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && !e.altKey && e.key.toLowerCase() === "e") {
+        e.preventDefault();
+        void exportMarkdown();
+        return;
+      }
+
+      if (e.key === "Escape") {
+        e.preventDefault();
+        setAllSections(true);
+        if (inSearch) {
+          setQuery("");
+          searchRef.current?.blur();
+        }
+        return;
+      }
+
+      if (e.key === "Tab" && searchRef.current) {
+        e.preventDefault();
+        if (inSearch) {
+          searchRef.current.blur();
+        } else {
+          searchRef.current.focus();
+          searchRef.current.select();
+        }
+        return;
+      }
+
+      if (inSearch) {
+        if (e.key === "ArrowDown") {
+          e.preventDefault();
+          const ids = getVisibleSectionIds();
+          if (ids.length) sectionRefs.current.get(ids[0])?.focus();
+        }
+        return;
+      }
+
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+
+      if (!e.metaKey && !e.ctrlKey && !e.altKey && e.key.toLowerCase() === "a") {
+        e.preventDefault();
+        setAllSections(false);
+        return;
+      }
+
+      if (e.key === "/") {
+        e.preventDefault();
+        searchRef.current?.focus();
+        return;
+      }
+
+      // Arrow navigation between section headers
+      const ids = getVisibleSectionIds();
+      const focused = document.activeElement;
+      const currentId = ids.find(id => sectionRefs.current.get(id) === focused);
+      const idx = currentId ? ids.indexOf(currentId) : -1;
+
+      switch (e.key) {
+        case "ArrowDown":
+          e.preventDefault();
+          if (ids.length) {
+            const next = idx < 0 ? 0 : Math.min(idx + 1, ids.length - 1);
+            sectionRefs.current.get(ids[next])?.focus();
+          }
+          break;
+        case "ArrowUp":
+          e.preventDefault();
+          if (idx <= 0) {
+            searchRef.current?.focus();
+            searchRef.current?.select();
+          } else {
+            sectionRefs.current.get(ids[idx - 1])?.focus();
+          }
+          break;
+        case "ArrowRight":
+          if (currentId) {
+            e.preventDefault();
+            setExpanded(prev => ({ ...prev, [currentId]: true }));
+          }
+          break;
+        case "ArrowLeft":
+          if (currentId) {
+            e.preventDefault();
+            setExpanded(prev => ({ ...prev, [currentId]: false }));
+          }
+          break;
+      }
+    }
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [filtered, setAllSections, getVisibleSectionIds, exportMarkdown]);
+
   function toggleSection(id: string) {
     setExpanded(prev => ({ ...prev, [id]: !prev[id] }));
   }
@@ -76,8 +165,10 @@ export function ObjectIndexPage() {
   }
 
   return (
-    <AppShell title="Object Index" pageKey="/pages/object-index.html">
-      <div className="obj-hero-row">
+    <AppShell
+      title="Object Index"
+      pageKey="/pages/object-index.html"
+      headerAction={
         <button
           className={`obj-export-btn${exported ? " is-exported" : ""}`}
           type="button"
@@ -85,7 +176,8 @@ export function ObjectIndexPage() {
         >
           {exported ? "Copied!" : "Export to Markdown"}
         </button>
-      </div>
+      }
+    >
 
       <div className="obj-search-wrap">
         <span className="obj-search-icon">&#x2315;</span>
@@ -119,6 +211,7 @@ export function ObjectIndexPage() {
         return (
           <div key={section.id} className="obj-section-card">
             <button
+              ref={el => { if (el) sectionRefs.current.set(section.id, el); }}
               className={`obj-section-header${open ? "" : " is-collapsed"}`}
               type="button"
               onClick={() => toggleSection(section.id)}
