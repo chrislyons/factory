@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import type { PropsWithChildren, ReactNode } from "react";
 import { DOC_LINKS, NAV_LINKS, PORTAL_HOME } from "../lib/constants";
 import { useTheme } from "../hooks/useTheme";
@@ -22,7 +22,6 @@ export function AppShell({
   children
 }: PropsWithChildren<AppShellProps>) {
   const { theme, toggle } = useTheme();
-  const [navOpen, setNavOpen] = useState(false);
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -85,8 +84,6 @@ export function AppShell({
               className="portal-hero__title-mobile"
               value={pageKey ?? ""}
               onChange={(e) => { window.location.href = e.target.value; }}
-              onFocus={() => setNavOpen(true)}
-              onBlur={() => setNavOpen(false)}
               aria-label="Navigate"
             >
               {NAV_LINKS.map((link) => (
@@ -95,7 +92,7 @@ export function AppShell({
                 </option>
               ))}
             </select>
-            <span className={`portal-hero__title-mobile-arrow${navOpen ? " is-open" : ""}`} aria-hidden="true">▾</span>
+            <span className="portal-hero__title-mobile-arrow" aria-hidden="true">▾</span>
           </div>
         </section>
         <div className="portal-page-content">{children}</div>

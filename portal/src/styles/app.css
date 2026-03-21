@@ -2622,12 +2622,7 @@ textarea {
     color: var(--text-muted);
     line-height: 1;
     pointer-events: none;
-    transition: transform 200ms ease;
-    margin-right: 8px;
-  }
-
-  .portal-hero__title-mobile-arrow.is-open {
-    transform: rotate(180deg);
+    margin-left: 8px;
   }
 
   .portal-footer__inner {
