@@ -2714,6 +2714,7 @@ textarea {
 
   .task-card-ui {
     grid-template-columns: 1fr;
+    align-items: start;
   }
 
   .task-card-ui__title-row {
