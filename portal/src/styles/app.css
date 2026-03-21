@@ -1062,10 +1062,6 @@ textarea {
   padding: 0 11px;
 }
 
-.task-card-ui__actions .select-input {
-  min-height: 30px;
-}
-
 /* ── Buttons ──────────────────────────────────────────────────────── */
 
 .primary-button,
@@ -1184,7 +1180,6 @@ textarea {
   font-family: var(--font-display);
   font-size: 13px;
   font-weight: 700;
-  line-height: 18px;
   margin-bottom: 4px;
 }
 
@@ -1538,7 +1533,6 @@ textarea {
   display: grid;
   gap: 6px;
   align-content: start;
-  align-self: flex-start;
   min-width: 150px;
 }
 
