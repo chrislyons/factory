@@ -1042,6 +1042,15 @@ textarea {
 
 .filter-row-ui {
   margin-bottom: 12px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(to right, black calc(100% - 32px), transparent);
+  mask-image: linear-gradient(to right, black calc(100% - 32px), transparent);
+}
+
+.filter-row-ui::-webkit-scrollbar {
+  display: none;
 }
 
 .task-toolbar__search {
