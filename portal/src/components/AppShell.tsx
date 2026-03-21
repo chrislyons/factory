@@ -69,10 +69,10 @@ export function AppShell({
           </nav>
           <div className="portal-header__actions">
             <CommandPaletteButton />
-            {statusSlot}
             <button className="theme-toggle" type="button" onClick={toggle} aria-label="Toggle theme">
               {({ ember: "\u25C6", dark: "\u263E", light: "\u2600" } as Record<string, string>)[theme] ?? "\u25C6"}
             </button>
+            {statusSlot}
           </div>
         </div>
       </header>

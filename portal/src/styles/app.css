@@ -510,6 +510,7 @@ textarea {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  margin-right: 4px;
   min-height: 30px;
   min-width: 70px;
   padding: 0 10px;
@@ -556,7 +557,7 @@ textarea {
 }
 
 .command-trigger {
-  max-width: 380px;
+  min-width: 380px;
 }
 
 .command-trigger kbd {
@@ -2678,6 +2679,15 @@ textarea {
     justify-content: flex-end;
   }
 
+  .command-trigger {
+    padding-inline: 10px;
+    min-width: 170px;
+  }
+
+  .command-trigger span { font-size: 0; }
+  .command-trigger span::after { content: "Commands"; font-size: 11px; }
+  .command-trigger kbd { display: none; }
+
   .portal-hero__title-desktop {
     display: none;
   }
@@ -3011,9 +3021,6 @@ textarea {
     padding: 8px 10px;
   }
 
-  .command-trigger {
-    padding-inline: 10px;
-  }
 }
 
 /* ── Animations ───────────────────────────────────────────────────── */
