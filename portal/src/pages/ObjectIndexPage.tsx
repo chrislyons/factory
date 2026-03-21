@@ -113,10 +113,6 @@ export function ObjectIndexPage() {
         )}
       </div>
 
-      <div className="obj-kbd-hints">
-        <kbd>/</kbd> search
-        <kbd>Esc</kbd> clear
-      </div>
 
       {filtered.map(section => {
         const open = isSectionExpanded(section.id);
