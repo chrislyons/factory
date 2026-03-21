@@ -11,7 +11,8 @@
 | v5 | — | 2026-03 | — | Retired | GSD-era vanilla JS dashboard |
 | v6 | — | 2026-03-17 | — | Retired | First React port |
 | v7 | — | 2026-03-17 | — | Retired | Pre-indigo palette |
-| v8 | eebcb83 | 2026-03-20 | :41910 | Live | Indigo palette, Geist Pixel Grid + Geist Mono, dark+light mode |
+| v8 | eebcb83 | 2026-03-20 | :41910 | Retired | Indigo palette, Geist Pixel Grid + Geist Mono, dark+light mode |
+| v9 | 875f1b9 | 2026-03-21 | :41910 | Live | Tab restructure: 5 tabs (Jobs/Loops/Objects/Analytics/System), SyncClock, mobile dropdown nav, merged Approvals→Loops + Budget→Analytics, Objects page (334 items), shell width 1410px/93.3vw |
 
 ---
 

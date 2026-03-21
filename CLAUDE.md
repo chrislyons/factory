@@ -20,11 +20,19 @@ factory/
 ## Portal
 
 - **Stack:** Vite + React + TypeScript, pnpm
-- **Fonts:** Geist Pixel Grid (display), Geist Mono UltraLight (body/mono)
+- **Fonts:** Geist Pixel Square (display), Geist Mono UltraLight (body/mono)
 - **Deploy:** `make sync` from `portal/` — rsyncs to Blackbox :41910
-- **Tests:** `pnpm test` (vitest, 25 tests across 13 files)
+- **Tests:** `pnpm test` (vitest, 17 tests across 9 files)
 - **Build:** `pnpm build` — outputs to `portal/dist/`
-- **Brand:** "dreamfactory" (hero header)
+- **Brand:** "dreamfactory" (hero header, 16px/10px)
+- **Nav tabs (5):** Jobs, Loops, Objects, Analytics, System (hotkeys 1-5)
+- **Landing page:** Jobs (`jobs.html`, aliases `dashboard-v4.html`)
+- **Shell width:** min(1410px, 93.3vw) desktop, min(1410px, 98.3vw) mobile
+- **Mobile (<980px):** Nav hidden, page title h1 becomes nav dropdown
+- **Header order:** [Command Palette] [SyncClock] [Theme Toggle]
+- **Merged pages:** Approvals→Loops, Budget→Analytics
+- **Objects page:** 334-item searchable index from `objectIndex.ts`
+- **Retired:** Portal landing (redirects to Jobs), ApprovalsPage, BudgetPage
 
 ## Job Registry
 
@@ -45,7 +53,7 @@ factory/
 - Commit format: `type(scope): description`
 - Documentation: `docs/fct/FCT### Title.md`
 - Never read: `node_modules/`, `dist/`, `target/`, `.DS_Store`
-- Font trial system available on Topology page for design experimentation
+- Font trial system available on System page for design experimentation
 
 ## Port Scheme
 
