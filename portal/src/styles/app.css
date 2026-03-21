@@ -1042,6 +1042,19 @@ textarea {
 
 .filter-row-ui {
   margin-bottom: 12px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(to right, black calc(100% - 32px), transparent);
+  mask-image: linear-gradient(to right, black calc(100% - 32px), transparent);
+}
+
+.filter-row-ui::-webkit-scrollbar {
+  display: none;
+}
+
+.filter-chip-ui {
+  flex-shrink: 0;
 }
 
 .task-toolbar__search {
@@ -1190,6 +1203,8 @@ textarea {
 .task-card-ui__meta {
   grid-column: 1;
   grid-row: 3;
+  align-items: center;
+  min-height: 30px;
 }
 
 .task-card-ui__assign {
