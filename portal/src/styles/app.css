@@ -361,7 +361,8 @@ textarea {
 .portal-header__inner,
 .portal-main,
 .portal-footer__inner {
-  width: min(var(--shell-max), var(--shell-width));
+  max-width: min(var(--shell-max), var(--shell-width));
+  width: 100%;
   margin: 0 auto;
 }
 
@@ -538,7 +539,6 @@ textarea {
 /* ── Main Content ─────────────────────────────────────────────────── */
 
 .portal-main {
-  width: min(var(--shell-max), var(--shell-width));
   flex: 1;
   padding: 16px 0 16px;
 }
@@ -573,6 +573,7 @@ textarea {
   display: grid;
   gap: 16px;
   margin-top: 12px;
+  min-width: 0;
 }
 
 /* ── Surface Cards ────────────────────────────────────────────────── */
@@ -1000,6 +1001,7 @@ textarea {
 
 .task-toolbar__search {
   flex: 1 1 240px;
+  min-width: 0;
 }
 
 .text-input,
@@ -2582,7 +2584,7 @@ textarea {
 
 @media (max-width: 760px) {
   :root {
-    --shell-width: 98.3vw;
+    --shell-width: 98.3%;
   }
 
   .landing-grid,
