@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OSD v2 - Command Reference</title>
+<style>
+@font-face {
+  font-family: "Geist Pixel Square";
+  src: url("../../shared-fonts/geist/geist-pixel/GeistPixel-Square.woff2") format("woff2");
+  font-display: swap;
+  font-weight: 400;
+}
+@font-face {
+  font-family: "Geist Mono UltraLight";
+  src: url("../../shared-fonts/geist/geist-mono/GeistMono-UltraLight.woff2") format("woff2");
+  font-display: swap;
+  font-weight: 200;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0a1016;
+  --bg-gradient-top: #070e15;
+  --bg-gradient-bottom: #0d1520;
+  --bg-deep: #060b10;
+  --bg-panel: #111824;
+  --bg-panel-strong: #172131;
+  --bg-panel-hover: #1d2840;
+  --surface-strong: rgba(18, 25, 37, 0.95);
+  --text: #e5edf6;
+  --text-dim: #9bb0c8;
+  --text-muted: #677a92;
+  --accent: #58a6ff;
+  --accent-soft: rgba(88, 166, 255, 0.10);
+  --accent-border: rgba(88, 166, 255, 0.36);
+  --border: rgba(255,255,255,0.08);
+  --border-strong: rgba(255,255,255,0.13);
+  --grid-size-primary: 37px 37px;
+  --grid-size-secondary: 29px 29px;
+  --grid-mask-top: rgba(0, 0, 0, 1);
+  --grid-mask-bottom: rgba(0, 0, 0, 0.82);
+  --dust-dot: rgba(103,122,146,0.24);
+  --dust-accent-dot: rgba(88,166,255,0.16);
+  --search-focus-shadow: 0 0 12px rgba(88, 166, 255, 0.14), 0 0 4px rgba(88, 166, 255, 0.1);
+  --callout-info-ring: inset 0 0 0 1px rgba(88, 166, 255, 0.12);
+  --section-card-focus-shadow: 0 0 0 1px rgba(88, 166, 255, 0.16), 0 0 24px rgba(88, 166, 255, 0.12);
+  --section-header-focus-bg: linear-gradient(180deg, rgba(88, 166, 255, 0.14), rgba(88, 166, 255, 0.06));
+  --section-header-focus-shadow: inset 0 0 0 1px var(--accent-border), inset 0 0 18px rgba(88, 166, 255, 0.08);
+  --section-title-focus-shadow: 0 0 12px rgba(88, 166, 255, 0.16);
+  --section-count-focus-bg: rgba(88, 166, 255, 0.08);
+  --row-divider: rgba(255,255,255,0.04);
+  --osc-text: #7dd3fc;
+  --green: #34d399;
+  --yellow: #fbbf24;
+  --red: #f87171;
+  --radius: 14px;
+  --transition: 160ms cubic-bezier(0.2, 0.65, 0.2, 1);
+  --font-display: "Geist Pixel Square", ui-sans-serif, sans-serif;
+  --font-body: "Geist Mono UltraLight", ui-monospace, monospace;
+  --shell-width: min(1400px, 92vw);
+}
+
+[data-theme="light"] {
+  --bg: #f4f7fb;
+  --bg-gradient-top: #eef3f8;
+  --bg-gradient-bottom: #fbfdff;
+  --bg-deep: #e9eef5;
+  --bg-panel: #ffffff;
+  --bg-panel-strong: #f6f9fd;
+  --bg-panel-hover: #eef4fb;
+  --surface-strong: rgba(248, 251, 255, 0.94);
+  --text: #122033;
+  --text-dim: #4c5f78;
+  --text-muted: #7d8da3;
+  --accent: #006adc;
+  --accent-soft: rgba(0, 106, 220, 0.08);
+  --accent-border: rgba(0, 106, 220, 0.24);
+  --border: rgba(10, 21, 39, 0.08);
+  --border-strong: rgba(10, 21, 39, 0.14);
+  color-scheme: light;
+}
+
+[data-theme="ember"] {
+  --bg: #352619;
+  --bg-gradient-top: #312217;
+  --bg-gradient-bottom: #38281C;
+  --bg-deep: rgba(48, 38, 29, 0.93);
+  --bg-panel: rgba(73, 56, 44, 0.95);
+  --bg-panel-strong: rgba(105, 83, 62, 0.95);
+  --bg-panel-hover: rgba(137, 110, 82, 0.95);
+  --surface-strong: rgba(73, 56, 44, 0.95);
+  --text: #FFFDF9;
+  --text-dim: #F8EDDE;
+  --text-muted: #E0CAAA;
+  --accent: #FFB800;
+  --accent-soft: rgba(255, 184, 0, 0.2);
+  --accent-border: rgba(210, 160, 105, 0.7);
+  --border: rgba(210, 160, 105, 0.42);
+  --border-strong: rgba(210, 160, 105, 0.7);
+  --dust-dot: rgba(232, 206, 171, 0.22);
+  --dust-accent-dot: rgba(255, 184, 0, 0.16);
+  --search-focus-shadow: 0 0 12px rgba(255, 184, 0, 0.18), 0 0 4px rgba(255, 107, 53, 0.18);
+  --callout-info-ring: inset 0 0 0 1px rgba(210, 160, 105, 0.28);
+  --section-card-focus-shadow: 0 0 0 1px rgba(210, 160, 105, 0.34), 0 0 24px rgba(255, 107, 53, 0.14);
+  --section-header-focus-bg: linear-gradient(180deg, rgba(255, 184, 0, 0.16), rgba(255, 107, 53, 0.12));
+  --section-header-focus-shadow: inset 0 0 0 1px var(--accent-border), inset 0 0 18px rgba(255, 107, 53, 0.14);
+  --section-title-focus-shadow: 0 0 12px rgba(255, 107, 53, 0.18);
+  --section-count-focus-bg: rgba(255, 184, 0, 0.12);
+  --row-divider: rgba(210, 160, 105, 0.18);
+  --osc-text: #FF6B35;
+  color-scheme: dark;
+}
+
+html, body { min-height: 100%; }
+
+body {
+  font-family: var(--font-body);
+  font-weight: 200;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text);
+  background: linear-gradient(180deg, var(--bg-gradient-top), var(--bg-gradient-bottom));
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle, var(--dust-dot) 0.8px, transparent 0.8px),
+    radial-gradient(circle, var(--dust-accent-dot) 0.6px, transparent 0.6px);
+  background-size: var(--grid-size-primary), var(--grid-size-secondary);
+  background-position: 0 0, 17px 19px;
+  -webkit-mask-image: linear-gradient(180deg, var(--grid-mask-top), var(--grid-mask-bottom));
+  mask-image: linear-gradient(180deg, var(--grid-mask-top), var(--grid-mask-bottom));
+  animation: dust-drift 90s linear infinite;
+}
+
+body > * { position: relative; z-index: 1; }
+
+@keyframes dust-drift {
+  0% { background-position: 0 0, 11px 13px; }
+  100% { background-position: 24px 48px, 35px 61px; }
+}
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  border-bottom: 1px solid var(--border-strong);
+  background: var(--surface-strong);
+  backdrop-filter: blur(14px);
+}
+
+.site-header__inner,
+main,
+footer .inner {
+  width: var(--shell-width);
+  margin: 0 auto;
+}
+
+.site-header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  min-height: 38px;
+  text-decoration: none;
+}
+
+.brand__title {
+  font-family: var(--font-display);
+  font-size: 14px;
+  color: var(--text);
+}
+
+.header-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex: 1;
+}
+
+.hero-meta {
+  display: grid;
+  gap: 8px;
+  justify-items: end;
+  align-content: start;
+  flex: 0 1 520px;
+  min-width: 0;
+}
+
+main {
+  padding: 22px 0 42px;
+  display: grid;
+  gap: 16px;
+  flex: 1 0 auto;
+  align-content: start;
+}
+
+.hero-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.hero {
+  display: grid;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+  max-width: 72ch;
+}
+
+.hero-eyebrow {
+  font-family: var(--font-display);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(18px, 2.2vw, 24px);
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  margin-left: 4px;
+}
+
+.hero p {
+  color: var(--text-dim);
+  font-size: 12px;
+  margin-left: 4px;
+}
+
+.export-btn {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-muted);
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-right: 4px;
+  padding: 7px 14px;
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition), color var(--transition), box-shadow var(--transition), transform var(--transition);
+}
+
+.export-btn:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent-border);
+  color: var(--text);
+}
+
+.export-btn.is-confirmed {
+  background: rgba(52, 211, 153, 0.12);
+  border-color: rgba(52, 211, 153, 0.4);
+  color: var(--text);
+  box-shadow: 0 0 0 1px rgba(52, 211, 153, 0.12), 0 0 18px rgba(52, 211, 153, 0.18);
+  animation: export-confirm 420ms cubic-bezier(0.2, 0.65, 0.2, 1);
+}
+
+.export-btn.is-error {
+  background: rgba(248, 113, 113, 0.12);
+  border-color: rgba(248, 113, 113, 0.38);
+  color: var(--text);
+  box-shadow: 0 0 0 1px rgba(248, 113, 113, 0.1), 0 0 18px rgba(248, 113, 113, 0.14);
+}
+
+@keyframes export-confirm {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  40% {
+    transform: translateY(-1px) scale(1.03);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+.surface-card {
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+  overflow: hidden;
+}
+
+.surface-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 18px;
+  right: 18px;
+  height: 1px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, var(--border-strong), transparent);
+}
+
+.meta-chip {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: 100%;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+}
+
+.meta-chip__label {
+  color: var(--text-muted);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.meta-chip__value {
+  color: var(--text-dim);
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.search-wrap {
+  position: relative;
+}
+
+.search-input {
+  width: 100%;
+  height: 38px;
+  padding: 0 68px 0 36px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-deep);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 13px;
+  outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.search-input:focus {
+  border-color: var(--accent-border);
+  box-shadow: var(--search-focus-shadow);
+}
+
+.search-icon,
+.search-count {
+  position: absolute;
+  top: 0;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  color: var(--text-muted);
+}
+
+.search-icon { left: 11px; }
+.search-count { right: 34px; font-size: 11px; }
+
+.search-clear {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-muted);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.search-clear.visible { display: flex; }
+
+.search-clear:hover {
+  background: var(--accent-soft);
+  color: var(--text);
+}
+
+.callout-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.callout {
+  padding: 16px 18px;
+  display: grid;
+  gap: 8px;
+}
+
+.callout h2 {
+  font-family: var(--font-display);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.callout p {
+  color: var(--text-dim);
+  font-size: 11px;
+  white-space: pre-wrap;
+}
+
+.callout--info {
+  box-shadow: var(--callout-info-ring);
+}
+
+.callout--warning {
+  box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.16);
+}
+
+.callout--success {
+  box-shadow: inset 0 0 0 1px rgba(52, 211, 153, 0.16);
+}
+
+.section-card {
+  overflow: hidden;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.section-card.is-focused {
+  border-color: var(--accent-border);
+  box-shadow: var(--section-card-focus-shadow);
+}
+
+.section-card.is-hidden {
+  display: none;
+}
+
+.section-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-panel-strong);
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+  border-radius: calc(var(--radius) - 1px) calc(var(--radius) - 1px) 0 0;
+  transition: background var(--transition), border-radius var(--transition), box-shadow var(--transition);
+}
+
+.section-header:hover {
+  background: var(--bg-panel-hover);
+}
+
+.section-header:focus,
+.section-header:focus-visible {
+  outline: none;
+  background: var(--section-header-focus-bg);
+  box-shadow: var(--section-header-focus-shadow);
+}
+
+.section-header.collapsed {
+  border-radius: calc(var(--radius) - 1px);
+  border-bottom-color: transparent;
+}
+
+.section-arrow {
+  font-size: 9px;
+  color: var(--text-muted);
+  transition: transform var(--transition);
+}
+
+.section-header.collapsed .section-arrow {
+  transform: rotate(-90deg);
+}
+
+.section-header:focus .section-arrow,
+.section-header:focus-visible .section-arrow {
+  color: var(--accent);
+}
+
+.section-title {
+  flex: 1;
+  font-family: var(--font-display);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+}
+
+.section-header:focus .section-title,
+.section-header:focus-visible .section-title {
+  color: var(--text);
+  text-shadow: var(--section-title-focus-shadow);
+}
+
+.section-count {
+  padding: 1px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-deep);
+  color: var(--text-muted);
+  font-size: 10px;
+}
+
+.section-header:focus .section-count,
+.section-header:focus-visible .section-count {
+  border-color: var(--accent-border);
+  background: var(--section-count-focus-bg);
+  color: var(--text);
+}
+
+.section-body {
+  display: block;
+}
+
+.section-body.collapsed {
+  display: none;
+}
+
+.command-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.command-table th {
+  padding: 8px 12px;
+  text-align: left;
+  font-size: 10px;
+  font-weight: 200;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border);
+}
+
+.command-table th:nth-child(1) { width: 24%; }
+.command-table th:nth-child(2) { width: 38%; }
+.command-table th:nth-child(3) { width: 38%; }
+
+.command-row {
+  border-bottom: 1px solid var(--row-divider);
+}
+
+.command-row:last-child {
+  border-bottom: none;
+}
+
+.command-row.hidden {
+  display: none;
+}
+
+.command-row td {
+  padding: 10px 12px;
+  vertical-align: middle;
+  font-size: 11px;
+}
+
+.command-row td:first-child {
+  padding-left: 40px;
+}
+
+.task-text {
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+.row-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 7px;
+}
+
+.row-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid var(--accent-border);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 10px;
+  line-height: 1.2;
+}
+
+.value-block {
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--border);
+  background: var(--bg-deep);
+  color: var(--text);
+  border-radius: 10px;
+  padding: 8px 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  transition: border-color var(--transition), background var(--transition), transform var(--transition);
+}
+
+.value-block:hover {
+  border-color: var(--accent-border);
+  background: var(--accent-soft);
+}
+
+.value-block.copied {
+  border-color: rgba(52, 211, 153, 0.4);
+  background: rgba(52, 211, 153, 0.12);
+}
+
+.value-text {
+  font-family: var(--font-body);
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--accent);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.value-block--keys .value-text {
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.value-block--osc .value-text {
+  color: var(--osc-text);
+}
+
+.inline-key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  padding: 2px 7px;
+  border-radius: 6px;
+  border: 1px solid var(--accent-border);
+  background: var(--accent-soft);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 11px;
+}
+
+.key-combo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.key-join,
+.key-note {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.desc-text {
+  color: var(--text-dim);
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.empty-state {
+  padding: 22px 20px;
+  display: grid;
+  gap: 8px;
+}
+
+.empty-state h2 {
+  font-family: var(--font-display);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+}
+
+.empty-state p {
+  color: var(--text-dim);
+  max-width: 70ch;
+}
+
+footer {
+  border-top: 1px solid var(--border-strong);
+  background: var(--surface-strong);
+  backdrop-filter: blur(14px);
+  padding: 12px 0 14px;
+}
+
+footer .inner {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.footer-notes {
+  width: var(--shell-width);
+  margin: 10px auto 0;
+  display: grid;
+  gap: 6px;
+  color: var(--text-dim);
+  font-size: 11px;
+}
+
+@media (max-width: 900px) {
+  .hero-row {
+    flex-direction: column;
+  }
+
+  .site-header__inner {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .header-actions {
+    justify-content: flex-start;
+    align-items: flex-start;
+  }
+
+  .hero-meta {
+    width: 100%;
+    justify-items: start;
+  }
+
+  .command-table,
+  .command-table thead,
+  .command-table tbody,
+  .command-table tr,
+  .command-table th,
+  .command-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .command-table thead {
+    display: none;
+  }
+
+  .command-row td {
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+
+  .command-row td:first-child {
+    padding-left: 12px;
+  }
+
+  .command-row td:first-child {
+    padding-bottom: 0;
+  }
+
+  .command-row td:nth-child(2) {
+    padding-top: 8px;
+    padding-bottom: 0;
+  }
+
+  footer .inner {
+    flex-direction: column;
+  }
+}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="site-header__inner">
+    <div class="brand">
+      <span class="brand__title">codex-commandsheets</span>
+    </div>
+    <div class="header-actions"><button class="export-btn" id="export-btn" title="Copy visible results to clipboard as markdown">Export to Markdown</button></div>
+  </div>
+</header>
+
+<main>
+  <div class="hero-row">
+    <div class="hero">
+      <span class="hero-eyebrow">COMMAND REFERENCE</span>
+      <h1>OSD v2</h1>
+      <p>Quick reference for Open Source Directory v2 development</p>
+    </div>
+    <div class="hero-meta"><div class="meta-chip"><span class="meta-chip__label">UPDATED</span><span class="meta-chip__value">Last updated: 2026-01-25</span></div><div class="meta-chip"><span class="meta-chip__label">REPO</span><span class="meta-chip__value">~/dev/osd-v2</span></div></div>
+  </div>
+  <div class="search-wrap"><span class="search-icon">⌕</span><input class="search-input" type="text" placeholder="Search commands, snippets, or notes…" id="search" autocomplete="off" spellcheck="false"><span class="search-count" id="search-count"></span><button class="search-clear" id="search-clear" title="Clear search">×</button></div>
+  <section class="surface-card section-card" data-section="setup"><button class="section-header" type="button" aria-expanded="true"><span class="section-arrow">▼</span><span class="section-title">📦 Setup &amp; Installation</span><span class="section-count">3</span></button><div class="section-body"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="install dependencies pnpm install install all workspace dependencies"><td><div class="task-text">Install dependencies</div></td><td><button class="value-block value-block--shell" data-copy="pnpm install" title="Copy value"><code class="value-text">pnpm install</code></button></td><td class="desc-text">Install all workspace dependencies</td></tr><tr class="command-row" data-search="setup workspace pnpm run setup full workspace setup (dependencies + configuration)"><td><div class="task-text">Setup workspace</div></td><td><button class="value-block value-block--shell" data-copy="pnpm run setup" title="Copy value"><code class="value-text">pnpm run setup</code></button></td><td class="desc-text">Full workspace setup (dependencies + configuration)</td></tr><tr class="command-row" data-search="check environment node --version &amp;&amp; pnpm --version &amp;&amp; git --version verify node.js (&gt;=18), pnpm (&gt;=8), and git are installed"><td><div class="task-text">Check environment</div></td><td><button class="value-block value-block--shell" data-copy="node --version &amp;&amp; pnpm --version &amp;&amp; git --version" title="Copy value"><code class="value-text">node --version &amp;&amp; pnpm --version &amp;&amp; git --version</code></button></td><td class="desc-text">Verify Node.js (&gt;=18), pnpm (&gt;=8), and Git are installed</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="dev"><button class="section-header" type="button" aria-expanded="true"><span class="section-arrow">▼</span><span class="section-title">🚀 Development Servers</span><span class="section-count">4</span></button><div class="section-body"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="web app (recommended) pnpm --filter @osd/mobile web start web dev server (http://localhost:8081) - best for full app testing"><td><div class="task-text">Web app (Recommended)</div></td><td><button class="value-block value-block--shell" data-copy="pnpm --filter @osd/mobile web" title="Copy value"><code class="value-text">pnpm --filter @osd/mobile web</code></button></td><td class="desc-text">Start web dev server (http://localhost:8081) - best for full app testing</td></tr><tr class="command-row" data-search="mobile expo pnpm run dev:mobile start expo dev server for ios/android (scan qr with expo go app) mobile"><td><div class="task-text">Mobile Expo</div><div class="row-badges"><span class="row-badge">MOBILE</span></div></td><td><button class="value-block value-block--shell" data-copy="pnpm run dev:mobile" title="Copy value"><code class="value-text">pnpm run dev:mobile</code></button></td><td class="desc-text">Start Expo dev server for iOS/Android (scan QR with Expo Go app)</td></tr><tr class="command-row" data-search="worker dev cd apps/worker &amp;&amp; wrangler dev start cloudflare worker dev server (http://localhost:8787) backend"><td><div class="task-text">Worker dev</div><div class="row-badges"><span class="row-badge">BACKEND</span></div></td><td><button class="value-block value-block--shell" data-copy="cd apps/worker &amp;&amp; wrangler dev" title="Copy value"><code class="value-text">cd apps/worker &amp;&amp; wrangler dev</code></button></td><td class="desc-text">Start Cloudflare Worker dev server (http://localhost:8787)</td></tr><tr class="command-row" data-search="all servers pnpm run dev start web, worker, and all services in parallel"><td><div class="task-text">All servers</div></td><td><button class="value-block value-block--shell" data-copy="pnpm run dev" title="Copy value"><code class="value-text">pnpm run dev</code></button></td><td class="desc-text">Start web, worker, and all services in parallel</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="build"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">🔨 Building</span><span class="section-count">4</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="build mobile app pnpm --filter @osd/mobile build build production mobile/web bundle mobile"><td><div class="task-text">Build mobile app</div><div class="row-badges"><span class="row-badge">MOBILE</span></div></td><td><button class="value-block value-block--shell" data-copy="pnpm --filter @osd/mobile build" title="Copy value"><code class="value-text">pnpm --filter @osd/mobile build</code></button></td><td class="desc-text">Build production mobile/web bundle</td></tr><tr class="command-row" data-search="build worker cd apps/worker &amp;&amp; wrangler build build worker for production (generates dist/index.js) worker"><td><div class="task-text">Build Worker</div><div class="row-badges"><span class="row-badge">WORKER</span></div></td><td><button class="value-block value-block--shell" data-copy="cd apps/worker &amp;&amp; wrangler build" title="Copy value"><code class="value-text">cd apps/worker &amp;&amp; wrangler build</code></button></td><td class="desc-text">Build Worker for production (generates dist/index.js)</td></tr><tr class="command-row" data-search="build all pnpm build build all packages in the monorepo"><td><div class="task-text">Build all</div></td><td><button class="value-block value-block--shell" data-copy="pnpm build" title="Copy value"><code class="value-text">pnpm build</code></button></td><td class="desc-text">Build all packages in the monorepo</td></tr><tr class="command-row" data-search="type check pnpm typecheck run typescript type checking across all packages"><td><div class="task-text">Type check</div></td><td><button class="value-block value-block--shell" data-copy="pnpm typecheck" title="Copy value"><code class="value-text">pnpm typecheck</code></button></td><td class="desc-text">Run TypeScript type checking across all packages</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="worker-deploy"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">🚢 Worker Deployment (CRITICAL)</span><span class="section-count">4</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="deploy worker cd apps/worker &amp;&amp; wrangler deploy deploy worker to production - must run after any schema/resolver changes required"><td><div class="task-text">Deploy Worker</div><div class="row-badges"><span class="row-badge">REQUIRED</span></div></td><td><button class="value-block value-block--shell" data-copy="cd apps/worker &amp;&amp; wrangler deploy" title="Copy value"><code class="value-text">cd apps/worker &amp;&amp; wrangler deploy</code></button></td><td class="desc-text">Deploy Worker to production - MUST RUN after any schema/resolver changes</td></tr><tr class="command-row" data-search="verify deployment curl -i https://osd-events.chrislyons.workers.dev/graphql verify worker deployed successfully (should return 200, not 503) required"><td><div class="task-text">Verify deployment</div><div class="row-badges"><span class="row-badge">REQUIRED</span></div></td><td><button class="value-block value-block--shell" data-copy="curl -I https://osd-events.chrislyons.workers.dev/graphql" title="Copy value"><code class="value-text">curl -I https://osd-events.chrislyons.workers.dev/graphql</code></button></td><td class="desc-text">Verify Worker deployed successfully (should return 200, not 503)</td></tr><tr class="command-row" data-search="view deployment logs wrangler tail osd-events stream real-time logs from deployed worker"><td><div class="task-text">View deployment logs</div></td><td><button class="value-block value-block--shell" data-copy="wrangler tail osd-events" title="Copy value"><code class="value-text">wrangler tail osd-events</code></button></td><td class="desc-text">Stream real-time logs from deployed Worker</td></tr><tr class="command-row" data-search="check worker status wrangler deployments list --name osd-events view recent worker deployment history"><td><div class="task-text">Check Worker status</div></td><td><button class="value-block value-block--shell" data-copy="wrangler deployments list --name osd-events" title="Copy value"><code class="value-text">wrangler deployments list --name osd-events</code></button></td><td class="desc-text">View recent Worker deployment history</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="database"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">🗄️ Database (D1) - Production: osd-events | Test: osd-events-test</span><span class="section-count">12</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="backup production to r2 ./scripts/backup-db-to-r2.sh export production database to r2 bucket (always run before migrations) backup"><td><div class="task-text">Backup production to R2</div><div class="row-badges"><span class="row-badge">BACKUP</span></div></td><td><button class="value-block value-block--shell" data-copy="./scripts/backup-db-to-r2.sh" title="Copy value"><code class="value-text">./scripts/backup-db-to-r2.sh</code></button></td><td class="desc-text">Export production database to R2 bucket (ALWAYS run before migrations)</td></tr><tr class="command-row" data-search="backup (typescript api) export d1_rest_api_token=&quot;your-token&quot; &amp;&amp; npx tsx scripts/backup-d1-to-r2.ts pre-migration advanced backup using rest api (saves to ./backups/ with custom reason)"><td><div class="task-text">Backup (TypeScript API)</div></td><td><button class="value-block value-block--shell" data-copy="export D1_REST_API_TOKEN=&quot;your-token&quot; &amp;&amp; npx tsx scripts/backup-d1-to-r2.ts pre-migration" title="Copy value"><code class="value-text">export D1_REST_API_TOKEN="your-token" &amp;&amp; npx tsx scripts/backup-d1-to-r2.ts pre-migration</code></button></td><td class="desc-text">Advanced backup using REST API (saves to ./backups/ with custom reason)</td></tr><tr class="command-row" data-search="list r2 backups wrangler r2 object list osd-backups view all available database backups in r2"><td><div class="task-text">List R2 backups</div></td><td><button class="value-block value-block--shell" data-copy="wrangler r2 object list osd-backups" title="Copy value"><code class="value-text">wrangler r2 object list osd-backups</code></button></td><td class="desc-text">View all available database backups in R2</td></tr><tr class="command-row" data-search="restore from r2 backup wrangler r2 object get osd-backups/osd-db-backup-timestamp.sql --file=restore.sql &amp;&amp; wrangler d1 execute osd-events --file=restore.sql ⚠️ overwrites production database - test on osd-events-test first! destructive"><td><div class="task-text">Restore from R2 backup</div><div class="row-badges"><span class="row-badge">DESTRUCTIVE</span></div></td><td><button class="value-block value-block--shell" data-copy="wrangler r2 object get osd-backups/osd-db-backup-TIMESTAMP.sql --file=restore.sql &amp;&amp; wrangler d1 execute osd-events --file=restore.sql" title="Copy value"><code class="value-text">wrangler r2 object get osd-backups/osd-db-backup-TIMESTAMP.sql --file=restore.sql &amp;&amp; wrangler d1 execute osd-events --file=restore.sql</code></button></td><td class="desc-text">⚠️ OVERWRITES production database - test on osd-events-test first!</td></tr><tr class="command-row" data-search="query production db wrangler d1 execute osd-events --command=&quot;select count(*) from events;&quot; run sql query on production database (osd-events)"><td><div class="task-text">Query production DB</div></td><td><button class="value-block value-block--shell" data-copy="wrangler d1 execute osd-events --command=&quot;SELECT COUNT(*) FROM events;&quot;" title="Copy value"><code class="value-text">wrangler d1 execute osd-events --command="SELECT COUNT(*) FROM events;"</code></button></td><td class="desc-text">Run SQL query on production database (osd-events)</td></tr><tr class="command-row" data-search="query test db wrangler d1 execute osd-events-test --command=&quot;select count(*) from events;&quot; run sql query on test database (osd-events-test)"><td><div class="task-text">Query test DB</div></td><td><button class="value-block value-block--shell" data-copy="wrangler d1 execute osd-events-test --command=&quot;SELECT COUNT(*) FROM events;&quot;" title="Copy value"><code class="value-text">wrangler d1 execute osd-events-test --command="SELECT COUNT(*) FROM events;"</code></button></td><td class="desc-text">Run SQL query on test database (osd-events-test)</td></tr><tr class="command-row" data-search="apply migration (production) wrangler d1 execute osd-events --file=migrations/0020_example.sql apply migration to production (always backup first!)"><td><div class="task-text">Apply migration (production)</div></td><td><button class="value-block value-block--shell" data-copy="wrangler d1 execute osd-events --file=migrations/0020_example.sql" title="Copy value"><code class="value-text">wrangler d1 execute osd-events --file=migrations/0020_example.sql</code></button></td><td class="desc-text">Apply migration to PRODUCTION (always backup first!)</td></tr><tr class="command-row" data-search="apply migration (test) wrangler d1 execute osd-events-test --file=migrations/0020_example.sql apply migration to test database (safe for testing)"><td><div class="task-text">Apply migration (test)</div></td><td><button class="value-block value-block--shell" data-copy="wrangler d1 execute osd-events-test --file=migrations/0020_example.sql" title="Copy value"><code class="value-text">wrangler d1 execute osd-events-test --file=migrations/0020_example.sql</code></button></td><td class="desc-text">Apply migration to TEST database (safe for testing)</td></tr><tr class="command-row" data-search="list all tables wrangler d1 execute osd-events --command=&quot;select name from sqlite_master where type=&#x27;table&#x27; order by name;&quot; view all database tables"><td><div class="task-text">List all tables</div></td><td><button class="value-block value-block--shell" data-copy="wrangler d1 execute osd-events --command=&quot;SELECT name FROM sqlite_master WHERE type=&#x27;table&#x27; ORDER BY name;&quot;" title="Copy value"><code class="value-text">wrangler d1 execute osd-events --command="SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;"</code></button></td><td class="desc-text">View all database tables</td></tr><tr class="command-row" data-search="check table schema wrangler d1 execute osd-events --command=&quot;pragma table_info(events);&quot; view columns and types for a specific table"><td><div class="task-text">Check table schema</div></td><td><button class="value-block value-block--shell" data-copy="wrangler d1 execute osd-events --command=&quot;PRAGMA table_info(events);&quot;" title="Copy value"><code class="value-text">wrangler d1 execute osd-events --command="PRAGMA table_info(events);"</code></button></td><td class="desc-text">View columns and types for a specific table</td></tr><tr class="command-row" data-search="export database (local file) wrangler d1 export osd-events --remote --output=osd-events-backup.sql export production database to local sql file"><td><div class="task-text">Export database (local file)</div></td><td><button class="value-block value-block--shell" data-copy="wrangler d1 export osd-events --remote --output=osd-events-backup.sql" title="Copy value"><code class="value-text">wrangler d1 export osd-events --remote --output=osd-events-backup.sql</code></button></td><td class="desc-text">Export production database to local SQL file</td></tr><tr class="command-row" data-search="database info wrangler d1 info osd-events show database size, row counts, and storage usage"><td><div class="task-text">Database info</div></td><td><button class="value-block value-block--shell" data-copy="wrangler d1 info osd-events" title="Copy value"><code class="value-text">wrangler d1 info osd-events</code></button></td><td class="desc-text">Show database size, row counts, and storage usage</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="admin"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">👑 Admin &amp; Moderation System</span><span class="section-count">4</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="check migration 0016 wrangler d1 execute osd-events --remote --command &quot;select name from sqlite_master where type=&#x27;table&#x27; and name=&#x27;moderation_queue&#x27;;&quot; verify admin system tables exist (moderation_queue, audit_log, etc.)"><td><div class="task-text">Check migration 0016</div></td><td><button class="value-block value-block--shell" data-copy="wrangler d1 execute osd-events --remote --command &quot;SELECT name FROM sqlite_master WHERE type=&#x27;table&#x27; AND name=&#x27;moderation_queue&#x27;;&quot;" title="Copy value"><code class="value-text">wrangler d1 execute osd-events --remote --command "SELECT name FROM sqlite_master WHERE type='table' AND name='moderation_queue';"</code></button></td><td class="desc-text">Verify admin system tables exist (moderation_queue, audit_log, etc.)</td></tr><tr class="command-row" data-search="graphql: queue metrics curl -x post https://osd-events.chrislyons.workers.dev/graphql -h &quot;content-type: application/json&quot; -d &#x27;{&quot;query&quot;: &quot;{ queuemetrics { total_pending total_approved total_rejected } }&quot;}&#x27; test admin api: get moderation queue metrics (requires admin token)"><td><div class="task-text">GraphQL: Queue metrics</div></td><td><button class="value-block value-block--shell" data-copy="curl -X POST https://osd-events.chrislyons.workers.dev/graphql -H &quot;Content-Type: application/json&quot; -d &#x27;{&quot;query&quot;: &quot;{ queueMetrics { total_pending total_approved total_rejected } }&quot;}&#x27;" title="Copy value"><code class="value-text">curl -X POST https://osd-events.chrislyons.workers.dev/graphql -H "Content-Type: application/json" -d '{"query": "{ queueMetrics { total_pending total_approved total_rejected } }"}'</code></button></td><td class="desc-text">Test admin API: get moderation queue metrics (requires admin token)</td></tr><tr class="command-row" data-search="graphql: dashboard stats curl -x post https://osd-events.chrislyons.workers.dev/graphql -h &quot;content-type: application/json&quot; -d &#x27;{&quot;query&quot;: &quot;{ dashboardstats(days: 7) { total_events pending_reviews active_moderators } }&quot;}&#x27; test admin api: get dashboard statistics"><td><div class="task-text">GraphQL: Dashboard stats</div></td><td><button class="value-block value-block--shell" data-copy="curl -X POST https://osd-events.chrislyons.workers.dev/graphql -H &quot;Content-Type: application/json&quot; -d &#x27;{&quot;query&quot;: &quot;{ dashboardStats(days: 7) { total_events pending_reviews active_moderators } }&quot;}&#x27;" title="Copy value"><code class="value-text">curl -X POST https://osd-events.chrislyons.workers.dev/graphql -H "Content-Type: application/json" -d '{"query": "{ dashboardStats(days: 7) { total_events pending_reviews active_moderators } }"}'</code></button></td><td class="desc-text">Test admin API: get dashboard statistics</td></tr><tr class="command-row" data-search="graphql: moderation queue curl -x post https://osd-events.chrislyons.workers.dev/graphql -h &quot;content-type: application/json&quot; -d &#x27;{&quot;query&quot;: &quot;{ moderationqueue(status: \&quot;pending\&quot;, limit: 20) { queue_id event_id event_name status submitted_at } }&quot;}&#x27; test admin api: get pending events in moderation queue"><td><div class="task-text">GraphQL: Moderation queue</div></td><td><button class="value-block value-block--shell" data-copy="curl -X POST https://osd-events.chrislyons.workers.dev/graphql -H &quot;Content-Type: application/json&quot; -d &#x27;{&quot;query&quot;: &quot;{ moderationQueue(status: \&quot;pending\&quot;, limit: 20) { queue_id event_id event_name status submitted_at } }&quot;}&#x27;" title="Copy value"><code class="value-text">curl -X POST https://osd-events.chrislyons.workers.dev/graphql -H "Content-Type: application/json" -d '{"query": "{ moderationQueue(status: \"pending\", limit: 20) { queue_id event_id event_name status submitted_at } }"}'</code></button></td><td class="desc-text">Test admin API: get pending events in moderation queue</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="admin-sql"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">🔐 SQL: Admin &amp; Moderation Functions</span><span class="section-count">10</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="create first admin wrangler d1 execute osd-events --remote --command &quot;update agents set roles = &#x27;[\&quot;user\&quot;, \&quot;admin:full\&quot;]&#x27; where email = &#x27;your@email.com&#x27;;&quot; bootstrap first admin user by email (sql version)"><td><div class="task-text">Create first admin</div></td><td><button class="value-block value-block--shell" data-copy="wrangler d1 execute osd-events --remote --command &quot;UPDATE agents SET roles = &#x27;[\&quot;user\&quot;, \&quot;admin:full\&quot;]&#x27; WHERE email = &#x27;your@email.com&#x27;;&quot;" title="Copy value"><code class="value-text">wrangler d1 execute osd-events --remote --command "UPDATE agents SET roles = '[\"user\", \"admin:full\"]' WHERE email = 'your@email.com';"</code></button></td><td class="desc-text">Bootstrap first admin user by email (SQL version)</td></tr><tr class="command-row" data-search="list all admin roles wrangler d1 execute osd-events --remote --command &quot;select agent_id, email, roles from agents where roles like &#x27;%admin%&#x27;;&quot; find all users with admin or moderator roles"><td><div class="task-text">List all admin roles</div></td><td><button class="value-block value-block--shell" data-copy="wrangler d1 execute osd-events --remote --command &quot;SELECT agent_id, email, roles FROM agents WHERE roles LIKE &#x27;%admin%&#x27;;&quot;" title="Copy value"><code class="value-text">wrangler d1 execute osd-events --remote --command "SELECT agent_id, email, roles FROM agents WHERE roles LIKE '%admin%';"</code></button></td><td class="desc-text">Find all users with admin or moderator roles</td></tr><tr class="command-row" data-search="assign moderator by id wrangler d1 execute osd-events --remote --command &quot;insert into moderators (moderator_id, agent_id, cities, categories, max_queue_size) values (hex(randomblob(16)), &#x27;agent_id&#x27;, &#x27;[\&quot;toronto\&quot;, \&quot;montreal\&quot;]&#x27;, null, 50); update agents set roles = json_array_insert(coalesce(roles, &#x27;[]&#x27;), &#x27;$[0]&#x27;, &#x27;moderator&#x27;) where agent_id = &#x27;agent_id&#x27;;&quot; assign moderator role with city scope (replace agent_id)"><td><div class="task-text">Assign moderator by ID</div></td><td><button class="value-block value-block--shell" data-copy="wrangler d1 execute osd-events --remote --command &quot;INSERT INTO moderators (moderator_id, agent_id, cities, categories, max_queue_size) VALUES (hex(randomblob(16)), &#x27;AGENT_ID&#x27;, &#x27;[\&quot;Toronto\&quot;, \&quot;Montreal\&quot;]&#x27;, NULL, 50); UPDATE agents SET roles = json_array_insert(COALESCE(roles, &#x27;[]&#x27;), &#x27;$[0]&#x27;, &#x27;moderator&#x27;) WHERE agent_id = &#x27;AGENT_ID&#x27;;&quot;" title="Copy value"><code class="value-text">wrangler d1 execute osd-events --remote --command "INSERT INTO moderators (moderator_id, agent_id, cities, categories, max_queue_size) VALUES (hex(randomblob(16)), 'AGENT_ID', '[\"Toronto\", \"Montreal\"]', NULL, 50); UPDATE agents SET roles = json_array_insert(COALESCE(roles, '[]'), '$[0]', 'moderator') WHERE agent_id = 'AGENT_ID';"</code></button></td><td class="desc-text">Assign moderator role with city scope (replace AGENT_ID)</td></tr><tr class="command-row" data-search="view moderation queue status wrangler d1 execute osd-events --remote --command &quot;select status, count(*) as count from moderation_queue group by status;&quot; count pending/approved/rejected events in queue"><td><div class="task-text">View moderation queue status</div></td><td><button class="value-block value-block--shell" data-copy="wrangler d1 execute osd-events --remote --command &quot;SELECT status, COUNT(*) as count FROM moderation_queue GROUP BY status;&quot;" title="Copy value"><code class="value-text">wrangler d1 execute osd-events --remote --command "SELECT status, COUNT(*) as count FROM moderation_queue GROUP BY status;"</code></button></td><td class="desc-text">Count pending/approved/rejected events in queue</td></tr><tr class="command-row" data-search="view queue age distribution wrangler d1 execute osd-events --remote --command &quot;select case when (julianday(&#x27;now&#x27;) - julianday(submitted_at)) &lt; (1.0/24) then &#x27;under 1h&#x27; when (julianday(&#x27;now&#x27;) - julianday(submitted_at)) &lt; (4.0/24) then &#x27;1-4h&#x27; when (julianday(&#x27;now&#x27;) - julianday(submitted_at)) &lt; 1 then &#x27;4-24h&#x27; else &#x27;24h+&#x27; end as age_bucket, count(*) as count from moderation_queue where status = &#x27;pending&#x27; group by age_bucket;&quot; show pending events by age (helps identify sla breaches)"><td><div class="task-text">View queue age distribution</div></td><td><button class="value-block value-block--shell" data-copy="wrangler d1 execute osd-events --remote --command &quot;SELECT CASE WHEN (julianday(&#x27;now&#x27;) - julianday(submitted_at)) &lt; (1.0/24) THEN &#x27;Under 1h&#x27; WHEN (julianday(&#x27;now&#x27;) - julianday(submitted_at)) &lt; (4.0/24) THEN &#x27;1-4h&#x27; WHEN (julianday(&#x27;now&#x27;) - julianday(submitted_at)) &lt; 1 THEN &#x27;4-24h&#x27; ELSE &#x27;24h+&#x27; END as age_bucket, COUNT(*) as count FROM moderation_queue WHERE status = &#x27;pending&#x27; GROUP BY age_bucket;&quot;" title="Copy value"><code class="value-text">wrangler d1 execute osd-events --remote --command "SELECT CASE WHEN (julianday('now') - julianday(submitted_at)) &lt; (1.0/24) THEN 'Under 1h' WHEN (julianday('now') - julianday(submitted_at)) &lt; (4.0/24) THEN '1-4h' WHEN (julianday('now') - julianday(submitted_at)) &lt; 1 THEN '4-24h' ELSE '24h+' END as age_bucket, COUNT(*) as count FROM moderation_queue WHERE status = 'pending' GROUP BY age_bucket;"</code></button></td><td class="desc-text">Show pending events by age (helps identify SLA breaches)</td></tr><tr class="command-row" data-search="view audit trail for event wrangler d1 execute osd-events --remote --command &quot;select timestamp, action, agent_id, details from audit_log where resource_id = &#x27;event_id&#x27; order by timestamp desc;&quot; view all admin actions for a specific event (replace event_id)"><td><div class="task-text">View audit trail for event</div></td><td><button class="value-block value-block--shell" data-copy="wrangler d1 execute osd-events --remote --command &quot;SELECT timestamp, action, agent_id, details FROM audit_log WHERE resource_id = &#x27;EVENT_ID&#x27; ORDER BY timestamp DESC;&quot;" title="Copy value"><code class="value-text">wrangler d1 execute osd-events --remote --command "SELECT timestamp, action, agent_id, details FROM audit_log WHERE resource_id = 'EVENT_ID' ORDER BY timestamp DESC;"</code></button></td><td class="desc-text">View all admin actions for a specific event (replace EVENT_ID)</td></tr><tr class="command-row" data-search="moderator performance stats wrangler d1 execute osd-events --remote --command &quot;select m.agent_id, a.email, count(d.decision_id) as decisions, sum(case when d.decision = &#x27;approved&#x27; then 1 else 0 end) as approved from moderators m left join agents a on m.agent_id = a.agent_id left join moderation_decisions d on m.agent_id = d.moderator_id group by m.agent_id order by decisions desc;&quot; show each moderator&#x27;s approval/rejection counts"><td><div class="task-text">Moderator performance stats</div></td><td><button class="value-block value-block--shell" data-copy="wrangler d1 execute osd-events --remote --command &quot;SELECT m.agent_id, a.email, COUNT(d.decision_id) as decisions, SUM(CASE WHEN d.decision = &#x27;approved&#x27; THEN 1 ELSE 0 END) as approved FROM moderators m LEFT JOIN agents a ON m.agent_id = a.agent_id LEFT JOIN moderation_decisions d ON m.agent_id = d.moderator_id GROUP BY m.agent_id ORDER BY decisions DESC;&quot;" title="Copy value"><code class="value-text">wrangler d1 execute osd-events --remote --command "SELECT m.agent_id, a.email, COUNT(d.decision_id) as decisions, SUM(CASE WHEN d.decision = 'approved' THEN 1 ELSE 0 END) as approved FROM moderators m LEFT JOIN agents a ON m.agent_id = a.agent_id LEFT JOIN moderation_decisions d ON m.agent_id = d.moderator_id GROUP BY m.agent_id ORDER BY decisions DESC;"</code></button></td><td class="desc-text">Show each moderator's approval/rejection counts</td></tr><tr class="command-row" data-search="check sla breaches wrangler d1 execute osd-events --remote --command &quot;select queue_id, event_id, submitted_at, sla_deadline, status from moderation_queue where status = &#x27;pending&#x27; and sla_deadline &lt; datetime(&#x27;now&#x27;);&quot; find pending events that missed sla deadline"><td><div class="task-text">Check SLA breaches</div></td><td><button class="value-block value-block--shell" data-copy="wrangler d1 execute osd-events --remote --command &quot;SELECT queue_id, event_id, submitted_at, sla_deadline, status FROM moderation_queue WHERE status = &#x27;pending&#x27; AND sla_deadline &lt; datetime(&#x27;now&#x27;);&quot;" title="Copy value"><code class="value-text">wrangler d1 execute osd-events --remote --command "SELECT queue_id, event_id, submitted_at, sla_deadline, status FROM moderation_queue WHERE status = 'pending' AND sla_deadline &lt; datetime('now');"</code></button></td><td class="desc-text">Find pending events that missed SLA deadline</td></tr><tr class="command-row" data-search="rule effectiveness metrics wrangler d1 execute osd-events --remote --command &quot;select rule_id, count(*) as executions, sum(case when result = &#x27;pass&#x27; then 1 else 0 end) as passes, sum(case when result = &#x27;fail&#x27; then 1 else 0 end) as failures, round(avg(execution_time_ms), 2) as avg_ms from rule_execution_log group by rule_id order by executions desc;&quot; show rule execution stats and effectiveness rates"><td><div class="task-text">Rule effectiveness metrics</div></td><td><button class="value-block value-block--shell" data-copy="wrangler d1 execute osd-events --remote --command &quot;SELECT rule_id, COUNT(*) as executions, SUM(CASE WHEN result = &#x27;pass&#x27; THEN 1 ELSE 0 END) as passes, SUM(CASE WHEN result = &#x27;fail&#x27; THEN 1 ELSE 0 END) as failures, ROUND(AVG(execution_time_ms), 2) as avg_ms FROM rule_execution_log GROUP BY rule_id ORDER BY executions DESC;&quot;" title="Copy value"><code class="value-text">wrangler d1 execute osd-events --remote --command "SELECT rule_id, COUNT(*) as executions, SUM(CASE WHEN result = 'pass' THEN 1 ELSE 0 END) as passes, SUM(CASE WHEN result = 'fail' THEN 1 ELSE 0 END) as failures, ROUND(AVG(execution_time_ms), 2) as avg_ms FROM rule_execution_log GROUP BY rule_id ORDER BY executions DESC;"</code></button></td><td class="desc-text">Show rule execution stats and effectiveness rates</td></tr><tr class="command-row" data-search="clear completed queue items wrangler d1 execute osd-events --remote --command &quot;delete from moderation_queue where status != &#x27;pending&#x27; and reviewed_at &lt; datetime(&#x27;now&#x27;, &#x27;-90 days&#x27;);&quot; archive completed (non-pending) items older than 90 days"><td><div class="task-text">Clear completed queue items</div></td><td><button class="value-block value-block--shell" data-copy="wrangler d1 execute osd-events --remote --command &quot;DELETE FROM moderation_queue WHERE status != &#x27;pending&#x27; AND reviewed_at &lt; datetime(&#x27;now&#x27;, &#x27;-90 days&#x27;);&quot;" title="Copy value"><code class="value-text">wrangler d1 execute osd-events --remote --command "DELETE FROM moderation_queue WHERE status != 'pending' AND reviewed_at &lt; datetime('now', '-90 days');"</code></button></td><td class="desc-text">Archive completed (non-pending) items older than 90 days</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="ingestion"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">🔄 Event Ingestion (OSD073)</span><span class="section-count">10</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="apply ingestion migrations wrangler d1 execute osd-events --remote --file=migrations/0018_add_event_ingestion_schema.sql &amp;&amp; wrangler d1 execute osd-events --remote --file=migrations/0019_add_ingestion_moderation_rules.sql apply event ingestion schema (event_sources, venue_sources, duplicates) and moderation rules to production worker"><td><div class="task-text">Apply ingestion migrations</div><div class="row-badges"><span class="row-badge">WORKER</span></div></td><td><button class="value-block value-block--shell" data-copy="wrangler d1 execute osd-events --remote --file=migrations/0018_add_event_ingestion_schema.sql &amp;&amp; wrangler d1 execute osd-events --remote --file=migrations/0019_add_ingestion_moderation_rules.sql" title="Copy value"><code class="value-text">wrangler d1 execute osd-events --remote --file=migrations/0018_add_event_ingestion_schema.sql &amp;&amp; wrangler d1 execute osd-events --remote --file=migrations/0019_add_ingestion_moderation_rules.sql</code></button></td><td class="desc-text">Apply event ingestion schema (event_sources, venue_sources, duplicates) and moderation rules to production</td></tr><tr class="command-row" data-search="check ingestion tables wrangler d1 execute osd-events --remote --command &quot;select name from sqlite_master where type=&#x27;table&#x27; and name like &#x27;%source%&#x27; or name like &#x27;%duplicate%&#x27;;&quot; verify event_sources, venue_sources, and duplicate tables exist"><td><div class="task-text">Check ingestion tables</div></td><td><button class="value-block value-block--shell" data-copy="wrangler d1 execute osd-events --remote --command &quot;SELECT name FROM sqlite_master WHERE type=&#x27;table&#x27; AND name LIKE &#x27;%source%&#x27; OR name LIKE &#x27;%duplicate%&#x27;;&quot;" title="Copy value"><code class="value-text">wrangler d1 execute osd-events --remote --command "SELECT name FROM sqlite_master WHERE type='table' AND name LIKE '%source%' OR name LIKE '%duplicate%';"</code></button></td><td class="desc-text">Verify event_sources, venue_sources, and duplicate tables exist</td></tr><tr class="command-row" data-search="check ingestion rules wrangler d1 execute osd-events --remote --command &quot;select rule_id, rule_name, enabled from moderation_rules where rule_name like &#x27;%trusted%&#x27; or rule_name like &#x27;%duplicate%&#x27;;&quot; view ingestion-related moderation rules (trusted_sources, duplicate_detection, etc.)"><td><div class="task-text">Check ingestion rules</div></td><td><button class="value-block value-block--shell" data-copy="wrangler d1 execute osd-events --remote --command &quot;SELECT rule_id, rule_name, enabled FROM moderation_rules WHERE rule_name LIKE &#x27;%trusted%&#x27; OR rule_name LIKE &#x27;%duplicate%&#x27;;&quot;" title="Copy value"><code class="value-text">wrangler d1 execute osd-events --remote --command "SELECT rule_id, rule_name, enabled FROM moderation_rules WHERE rule_name LIKE '%trusted%' OR rule_name LIKE '%duplicate%';"</code></button></td><td class="desc-text">View ingestion-related moderation rules (trusted_sources, duplicate_detection, etc.)</td></tr><tr class="command-row" data-search="test ingestion mutation (ticketmaster) curl -x post https://osd-events.chrislyons.workers.dev/graphql -h &quot;content-type: application/json&quot; -h &quot;authorization: bearer admin_token&quot; -d &#x27;{&quot;query&quot;: &quot;mutation { ingesteventsfromsource(source: \&quot;ticketmaster\&quot;, events: [{event_name: \&quot;test event\&quot;, event_date: \&quot;2025-12-25t18:00:00z\&quot;, city: \&quot;toronto\&quot;, venue: \&quot;venue name\&quot;, source_event_id: \&quot;tm_test_001\&quot;}]) { success ingested queued stats { autoapprovedcount queuedcount } } }&quot;}&#x27; test ticketmaster ingestion mutation (requires admin token) graphql"><td><div class="task-text">Test ingestion mutation (Ticketmaster)</div><div class="row-badges"><span class="row-badge">GRAPHQL</span></div></td><td><button class="value-block value-block--shell" data-copy="curl -X POST https://osd-events.chrislyons.workers.dev/graphql -H &quot;Content-Type: application/json&quot; -H &quot;Authorization: Bearer ADMIN_TOKEN&quot; -d &#x27;{&quot;query&quot;: &quot;mutation { ingestEventsFromSource(source: \&quot;ticketmaster\&quot;, events: [{event_name: \&quot;Test Event\&quot;, event_date: \&quot;2025-12-25T18:00:00Z\&quot;, city: \&quot;Toronto\&quot;, venue: \&quot;Venue Name\&quot;, source_event_id: \&quot;tm_test_001\&quot;}]) { success ingested queued stats { autoApprovedCount queuedCount } } }&quot;}&#x27;" title="Copy value"><code class="value-text">curl -X POST https://osd-events.chrislyons.workers.dev/graphql -H "Content-Type: application/json" -H "Authorization: Bearer ADMIN_TOKEN" -d '{"query": "mutation { ingestEventsFromSource(source: \"ticketmaster\", events: [{event_name: \"Test Event\", event_date: \"2025-12-25T18:00:00Z\", city: \"Toronto\", venue: \"Venue Name\", source_event_id: \"tm_test_001\"}]) { success ingested queued stats { autoApprovedCount queuedCount } } }"}'</code></button></td><td class="desc-text">Test Ticketmaster ingestion mutation (requires admin token)</td></tr><tr class="command-row" data-search="view ingested events wrangler d1 execute osd-events --remote --command &quot;select e.event_id, e.event_name, es.source_name, es.source_event_id from events e join event_sources es on e.event_id = es.event_id limit 20;&quot; view recently ingested events and their source mappings"><td><div class="task-text">View ingested events</div></td><td><button class="value-block value-block--shell" data-copy="wrangler d1 execute osd-events --remote --command &quot;SELECT e.event_id, e.event_name, es.source_name, es.source_event_id FROM events e JOIN event_sources es ON e.event_id = es.event_id LIMIT 20;&quot;" title="Copy value"><code class="value-text">wrangler d1 execute osd-events --remote --command "SELECT e.event_id, e.event_name, es.source_name, es.source_event_id FROM events e JOIN event_sources es ON e.event_id = es.event_id LIMIT 20;"</code></button></td><td class="desc-text">View recently ingested events and their source mappings</td></tr><tr class="command-row" data-search="check dedup detection wrangler d1 execute osd-events --remote --command &quot;select * from event_duplicates limit 20;&quot; view detected event duplicates from ingestion"><td><div class="task-text">Check dedup detection</div></td><td><button class="value-block value-block--shell" data-copy="wrangler d1 execute osd-events --remote --command &quot;SELECT * FROM event_duplicates LIMIT 20;&quot;" title="Copy value"><code class="value-text">wrangler d1 execute osd-events --remote --command "SELECT * FROM event_duplicates LIMIT 20;"</code></button></td><td class="desc-text">View detected event duplicates from ingestion</td></tr><tr class="command-row" data-search="swap to test database edit wrangler.toml: change d1_database_id to test db id (97a11ffc-2aea-4d31-bbb5-6b505651b2e0) &amp;&amp; cd apps/worker &amp;&amp; wrangler deploy --env test switch worker to test database for ingestion testing (must apply migrations 0001-0019 first)"><td><div class="task-text">Swap to test database</div></td><td><button class="value-block value-block--shell" data-copy="Edit wrangler.toml: Change d1_database_id to test DB ID (97a11ffc-2aea-4d31-bbb5-6b505651b2e0) &amp;&amp; cd apps/worker &amp;&amp; wrangler deploy --env test" title="Copy value"><code class="value-text">Edit wrangler.toml: Change d1_database_id to test DB ID (97a11ffc-2aea-4d31-bbb5-6b505651b2e0) &amp;&amp; cd apps/worker &amp;&amp; wrangler deploy --env test</code></button></td><td class="desc-text">Switch Worker to test database for ingestion testing (must apply migrations 0001-0019 first)</td></tr><tr class="command-row" data-search="swap back to production edit wrangler.toml: revert d1_database_id to production db id &amp;&amp; cd apps/worker &amp;&amp; wrangler deploy restore worker to production database"><td><div class="task-text">Swap back to production</div></td><td><button class="value-block value-block--shell" data-copy="Edit wrangler.toml: Revert d1_database_id to production DB ID &amp;&amp; cd apps/worker &amp;&amp; wrangler deploy" title="Copy value"><code class="value-text">Edit wrangler.toml: Revert d1_database_id to production DB ID &amp;&amp; cd apps/worker &amp;&amp; wrangler deploy</code></button></td><td class="desc-text">Restore Worker to production database</td></tr><tr class="command-row" data-search="view ingestion queue status wrangler d1 execute osd-events --remote --command &quot;select source_name, count(*) as ingested_count from event_sources group by source_name;&quot; show count of events ingested per source (ticketmaster, toronto, edmonton, quebec sit)"><td><div class="task-text">View ingestion queue status</div></td><td><button class="value-block value-block--shell" data-copy="wrangler d1 execute osd-events --remote --command &quot;SELECT source_name, COUNT(*) as ingested_count FROM event_sources GROUP BY source_name;&quot;" title="Copy value"><code class="value-text">wrangler d1 execute osd-events --remote --command "SELECT source_name, COUNT(*) as ingested_count FROM event_sources GROUP BY source_name;"</code></button></td><td class="desc-text">Show count of events ingested per source (Ticketmaster, Toronto, Edmonton, Quebec SIT)</td></tr><tr class="command-row" data-search="venue dedup analysis wrangler d1 execute osd-events --remote --command &quot;select vs.source_venue_id, vs.venue_id, v.venue_name from venue_sources vs join venues v on vs.venue_id = v.venue_id limit 20;&quot; check venue deduplication mappings (matched existing venues vs newly created)"><td><div class="task-text">Venue dedup analysis</div></td><td><button class="value-block value-block--shell" data-copy="wrangler d1 execute osd-events --remote --command &quot;SELECT vs.source_venue_id, vs.venue_id, v.venue_name FROM venue_sources vs JOIN venues v ON vs.venue_id = v.venue_id LIMIT 20;&quot;" title="Copy value"><code class="value-text">wrangler d1 execute osd-events --remote --command "SELECT vs.source_venue_id, vs.venue_id, v.venue_name FROM venue_sources vs JOIN venues v ON vs.venue_id = v.venue_id LIMIT 20;"</code></button></td><td class="desc-text">Check venue deduplication mappings (matched existing venues vs newly created)</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="feed-sync"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">🔄 Universal Feed Sync (Automated Cron)</span><span class="section-count">10</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="list registered feeds cd apps/worker &amp;&amp; node sync-feeds.js --list show all registered feed sources with sync status, refresh schedule, and event counts cron"><td><div class="task-text">List registered feeds</div><div class="row-badges"><span class="row-badge">CRON</span></div></td><td><button class="value-block value-block--shell" data-copy="cd apps/worker &amp;&amp; node sync-feeds.js --list" title="Copy value"><code class="value-text">cd apps/worker &amp;&amp; node sync-feeds.js --list</code></button></td><td class="desc-text">Show all registered feed sources with sync status, refresh schedule, and event counts</td></tr><tr class="command-row" data-search="sync due feeds cd apps/worker &amp;&amp; node sync-feeds.js sync feeds that are due (respects refresh_hours schedule)"><td><div class="task-text">Sync due feeds</div></td><td><button class="value-block value-block--shell" data-copy="cd apps/worker &amp;&amp; node sync-feeds.js" title="Copy value"><code class="value-text">cd apps/worker &amp;&amp; node sync-feeds.js</code></button></td><td class="desc-text">Sync feeds that are due (respects refresh_hours schedule)</td></tr><tr class="command-row" data-search="force sync all feeds cd apps/worker &amp;&amp; node sync-feeds.js --all force sync all enabled feeds regardless of schedule"><td><div class="task-text">Force sync all feeds</div></td><td><button class="value-block value-block--shell" data-copy="cd apps/worker &amp;&amp; node sync-feeds.js --all" title="Copy value"><code class="value-text">cd apps/worker &amp;&amp; node sync-feeds.js --all</code></button></td><td class="desc-text">Force sync ALL enabled feeds regardless of schedule</td></tr><tr class="command-row" data-search="sync specific feed cd apps/worker &amp;&amp; node sync-feeds.js --feed songkick_toronto sync a single feed by id (e.g., songkick_toronto, songkick_montreal)"><td><div class="task-text">Sync specific feed</div></td><td><button class="value-block value-block--shell" data-copy="cd apps/worker &amp;&amp; node sync-feeds.js --feed songkick_toronto" title="Copy value"><code class="value-text">cd apps/worker &amp;&amp; node sync-feeds.js --feed songkick_toronto</code></button></td><td class="desc-text">Sync a single feed by ID (e.g., songkick_toronto, songkick_montreal)</td></tr><tr class="command-row" data-search="add new feed source cd apps/worker &amp;&amp; node sync-feeds.js --add https://example.com/events register a new url as feed source (auto-detects schema.org support)"><td><div class="task-text">Add new feed source</div></td><td><button class="value-block value-block--shell" data-copy="cd apps/worker &amp;&amp; node sync-feeds.js --add https://example.com/events" title="Copy value"><code class="value-text">cd apps/worker &amp;&amp; node sync-feeds.js --add https://example.com/events</code></button></td><td class="desc-text">Register a new URL as feed source (auto-detects Schema.org support)</td></tr><tr class="command-row" data-search="dry run (preview) cd apps/worker &amp;&amp; node sync-feeds.js --dry-run preview extraction without database changes"><td><div class="task-text">Dry run (preview)</div></td><td><button class="value-block value-block--shell" data-copy="cd apps/worker &amp;&amp; node sync-feeds.js --dry-run" title="Copy value"><code class="value-text">cd apps/worker &amp;&amp; node sync-feeds.js --dry-run</code></button></td><td class="desc-text">Preview extraction without database changes</td></tr><tr class="command-row" data-search="sync on test database cd apps/worker &amp;&amp; d1_database=osd-ticketmaster-test node sync-feeds.js --list run sync commands against test database instead of production"><td><div class="task-text">Sync on test database</div></td><td><button class="value-block value-block--shell" data-copy="cd apps/worker &amp;&amp; D1_DATABASE=osd-ticketmaster-test node sync-feeds.js --list" title="Copy value"><code class="value-text">cd apps/worker &amp;&amp; D1_DATABASE=osd-ticketmaster-test node sync-feeds.js --list</code></button></td><td class="desc-text">Run sync commands against test database instead of production</td></tr><tr class="command-row" data-search="apply feed registry migration wrangler d1 execute osd-events --remote --file migrations/0024_feed_sources_registry.sql create feed_sources and feed_sync_history tables with initial songkick sources"><td><div class="task-text">Apply feed registry migration</div></td><td><button class="value-block value-block--shell" data-copy="wrangler d1 execute osd-events --remote --file migrations/0024_feed_sources_registry.sql" title="Copy value"><code class="value-text">wrangler d1 execute osd-events --remote --file migrations/0024_feed_sources_registry.sql</code></button></td><td class="desc-text">Create feed_sources and feed_sync_history tables with initial Songkick sources</td></tr><tr class="command-row" data-search="view feed sync history wrangler d1 execute osd-events --remote --command &quot;select fs.name, fsh.status, fsh.events_created, fsh.duration_ms, fsh.completed_at from feed_sync_history fsh join feed_sources fs on fsh.feed_source_id = fs.id order by fsh.completed_at desc limit 20;&quot; view recent sync history with success/error status"><td><div class="task-text">View feed sync history</div></td><td><button class="value-block value-block--shell" data-copy="wrangler d1 execute osd-events --remote --command &quot;SELECT fs.name, fsh.status, fsh.events_created, fsh.duration_ms, fsh.completed_at FROM feed_sync_history fsh JOIN feed_sources fs ON fsh.feed_source_id = fs.id ORDER BY fsh.completed_at DESC LIMIT 20;&quot;" title="Copy value"><code class="value-text">wrangler d1 execute osd-events --remote --command "SELECT fs.name, fsh.status, fsh.events_created, fsh.duration_ms, fsh.completed_at FROM feed_sync_history fsh JOIN feed_sources fs ON fsh.feed_source_id = fs.id ORDER BY fsh.completed_at DESC LIMIT 20;"</code></button></td><td class="desc-text">View recent sync history with success/error status</td></tr><tr class="command-row" data-search="check cron schedule grep -a2 &#x27;\\[triggers\\]&#x27; wrangler.toml view configured cron schedule (default: daily 6am utc / 1am est)"><td><div class="task-text">Check cron schedule</div></td><td><button class="value-block value-block--shell" data-copy="grep -A2 &#x27;\\[triggers\\]&#x27; wrangler.toml" title="Copy value"><code class="value-text">grep -A2 '\\[triggers\\]' wrangler.toml</code></button></td><td class="desc-text">View configured cron schedule (default: daily 6am UTC / 1am EST)</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="movie-ingest"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">🎬 Movie Ingestion (Gracenote)</span><span class="section-count">5</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="ingest movies (single city) cd apps/worker &amp;&amp; node ingest-movies.js --city toronto ingest movie showtimes for a single city from gracenote cron"><td><div class="task-text">Ingest movies (single city)</div><div class="row-badges"><span class="row-badge">CRON</span></div></td><td><button class="value-block value-block--shell" data-copy="cd apps/worker &amp;&amp; node ingest-movies.js --city toronto" title="Copy value"><code class="value-text">cd apps/worker &amp;&amp; node ingest-movies.js --city toronto</code></button></td><td class="desc-text">Ingest movie showtimes for a single city from Gracenote</td></tr><tr class="command-row" data-search="ingest movies (all cities) cd apps/worker &amp;&amp; node ingest-movies.js --city all ingest movie showtimes for all supported cities"><td><div class="task-text">Ingest movies (all cities)</div></td><td><button class="value-block value-block--shell" data-copy="cd apps/worker &amp;&amp; node ingest-movies.js --city all" title="Copy value"><code class="value-text">cd apps/worker &amp;&amp; node ingest-movies.js --city all</code></button></td><td class="desc-text">Ingest movie showtimes for all supported cities</td></tr><tr class="command-row" data-search="dry run (preview) cd apps/worker &amp;&amp; node ingest-movies.js --city toronto --dry-run preview movie extraction without database changes"><td><div class="task-text">Dry run (preview)</div></td><td><button class="value-block value-block--shell" data-copy="cd apps/worker &amp;&amp; node ingest-movies.js --city toronto --dry-run" title="Copy value"><code class="value-text">cd apps/worker &amp;&amp; node ingest-movies.js --city toronto --dry-run</code></button></td><td class="desc-text">Preview movie extraction without database changes</td></tr><tr class="command-row" data-search="view movie events wrangler d1 execute osd-events --remote --command &quot;select event_id, event_name, city from events where tags like &#x27;%movie%&#x27; limit 20;&quot; view recently ingested movie events"><td><div class="task-text">View movie events</div></td><td><button class="value-block value-block--shell" data-copy="wrangler d1 execute osd-events --remote --command &quot;SELECT event_id, event_name, city FROM events WHERE tags LIKE &#x27;%movie%&#x27; LIMIT 20;&quot;" title="Copy value"><code class="value-text">wrangler d1 execute osd-events --remote --command "SELECT event_id, event_name, city FROM events WHERE tags LIKE '%movie%' LIMIT 20;"</code></button></td><td class="desc-text">View recently ingested movie events</td></tr><tr class="command-row" data-search="apply movie schema migration wrangler d1 execute osd-events --remote --file migrations/0023_add_movie_fields.sql add movie-specific fields (runtime, rating, genres) to events table"><td><div class="task-text">Apply movie schema migration</div></td><td><button class="value-block value-block--shell" data-copy="wrangler d1 execute osd-events --remote --file migrations/0023_add_movie_fields.sql" title="Copy value"><code class="value-text">wrangler d1 execute osd-events --remote --file migrations/0023_add_movie_fields.sql</code></button></td><td class="desc-text">Add movie-specific fields (runtime, rating, genres) to events table</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="dedup-audit"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">🔍 Deduplication &amp; Audit</span><span class="section-count">4</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="audit duplicates cd apps/worker &amp;&amp; node audit-duplicates.js run duplicate audit across all events and generate report"><td><div class="task-text">Audit duplicates</div></td><td><button class="value-block value-block--shell" data-copy="cd apps/worker &amp;&amp; node audit-duplicates.js" title="Copy value"><code class="value-text">cd apps/worker &amp;&amp; node audit-duplicates.js</code></button></td><td class="desc-text">Run duplicate audit across all events and generate report</td></tr><tr class="command-row" data-search="soft delete duplicates cd apps/worker &amp;&amp; node deduplication-soft-delete.js --dry-run preview duplicate removal (use without --dry-run to apply)"><td><div class="task-text">Soft delete duplicates</div></td><td><button class="value-block value-block--shell" data-copy="cd apps/worker &amp;&amp; node deduplication-soft-delete.js --dry-run" title="Copy value"><code class="value-text">cd apps/worker &amp;&amp; node deduplication-soft-delete.js --dry-run</code></button></td><td class="desc-text">Preview duplicate removal (use without --dry-run to apply)</td></tr><tr class="command-row" data-search="view skipped duplicates wrangler d1 execute osd-events --remote --command &quot;select source_name, match_type, count(*) as count from skipped_duplicates group by source_name, match_type;&quot; show deduplication statistics by source and match type"><td><div class="task-text">View skipped duplicates</div></td><td><button class="value-block value-block--shell" data-copy="wrangler d1 execute osd-events --remote --command &quot;SELECT source_name, match_type, COUNT(*) as count FROM skipped_duplicates GROUP BY source_name, match_type;&quot;" title="Copy value"><code class="value-text">wrangler d1 execute osd-events --remote --command "SELECT source_name, match_type, COUNT(*) as count FROM skipped_duplicates GROUP BY source_name, match_type;"</code></button></td><td class="desc-text">Show deduplication statistics by source and match type</td></tr><tr class="command-row" data-search="view recent skip decisions wrangler d1 execute osd-events --remote --command &quot;select event_name, source_name, match_type, confidence_score, created_at from skipped_duplicates order by created_at desc limit 20;&quot; view most recent duplicate skip decisions with confidence scores"><td><div class="task-text">View recent skip decisions</div></td><td><button class="value-block value-block--shell" data-copy="wrangler d1 execute osd-events --remote --command &quot;SELECT event_name, source_name, match_type, confidence_score, created_at FROM skipped_duplicates ORDER BY created_at DESC LIMIT 20;&quot;" title="Copy value"><code class="value-text">wrangler d1 execute osd-events --remote --command "SELECT event_name, source_name, match_type, confidence_score, created_at FROM skipped_duplicates ORDER BY created_at DESC LIMIT 20;"</code></button></td><td class="desc-text">View most recent duplicate skip decisions with confidence scores</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="db-maint"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">⚙️ SQL: Database Maintenance</span><span class="section-count">9</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="vacuum &amp; optimize wrangler d1 execute osd-events --remote --command &quot;vacuum; analyze;&quot; defragment database and update statistics (improves query performance)"><td><div class="task-text">Vacuum &amp; optimize</div></td><td><button class="value-block value-block--shell" data-copy="wrangler d1 execute osd-events --remote --command &quot;VACUUM; ANALYZE;&quot;" title="Copy value"><code class="value-text">wrangler d1 execute osd-events --remote --command "VACUUM; ANALYZE;"</code></button></td><td class="desc-text">Defragment database and update statistics (improves query performance)</td></tr><tr class="command-row" data-search="check database integrity wrangler d1 execute osd-events --remote --command &quot;pragma integrity_check;&quot; verify database file is not corrupted"><td><div class="task-text">Check database integrity</div></td><td><button class="value-block value-block--shell" data-copy="wrangler d1 execute osd-events --remote --command &quot;PRAGMA integrity_check;&quot;" title="Copy value"><code class="value-text">wrangler d1 execute osd-events --remote --command "PRAGMA integrity_check;"</code></button></td><td class="desc-text">Verify database file is not corrupted</td></tr><tr class="command-row" data-search="list all indexes wrangler d1 execute osd-events --remote --command &quot;select name, tbl_name, sql from sqlite_master where type=&#x27;index&#x27; and tbl_name not like &#x27;sqlite_%&#x27;;&quot; view all table indexes and their definitions"><td><div class="task-text">List all indexes</div></td><td><button class="value-block value-block--shell" data-copy="wrangler d1 execute osd-events --remote --command &quot;SELECT name, tbl_name, sql FROM sqlite_master WHERE type=&#x27;index&#x27; AND tbl_name NOT LIKE &#x27;sqlite_%&#x27;;&quot;" title="Copy value"><code class="value-text">wrangler d1 execute osd-events --remote --command "SELECT name, tbl_name, sql FROM sqlite_master WHERE type='index' AND tbl_name NOT LIKE 'sqlite_%';"</code></button></td><td class="desc-text">View all table indexes and their definitions</td></tr><tr class="command-row" data-search="show database size info wrangler d1 execute osd-events --remote --command &quot;select name, sum(pgsize) as size_bytes from (select name, pgsize from pragma_page_count, pragma_page_size, sqlite_master where type=&#x27;table&#x27;) group by name order by size_bytes desc;&quot; view storage used by each table (largest first)"><td><div class="task-text">Show database size info</div></td><td><button class="value-block value-block--shell" data-copy="wrangler d1 execute osd-events --remote --command &quot;SELECT name, SUM(pgsize) as size_bytes FROM (SELECT name, pgsize FROM pragma_page_count, pragma_page_size, sqlite_master WHERE type=&#x27;table&#x27;) GROUP BY name ORDER BY size_bytes DESC;&quot;" title="Copy value"><code class="value-text">wrangler d1 execute osd-events --remote --command "SELECT name, SUM(pgsize) as size_bytes FROM (SELECT name, pgsize FROM pragma_page_count, pragma_page_size, sqlite_master WHERE type='table') GROUP BY name ORDER BY size_bytes DESC;"</code></button></td><td class="desc-text">View storage used by each table (largest first)</td></tr><tr class="command-row" data-search="row count per table wrangler d1 execute osd-events --remote --command &quot;select name, (select count(*) from sqlite_master m where m.type=&#x27;table&#x27; and m.name=t.name) as rows from (select distinct name from sqlite_master where type=&#x27;table&#x27; and name not like &#x27;sqlite_%&#x27;) t;&quot; count total rows in each table"><td><div class="task-text">Row count per table</div></td><td><button class="value-block value-block--shell" data-copy="wrangler d1 execute osd-events --remote --command &quot;SELECT name, (SELECT COUNT(*) FROM sqlite_master m WHERE m.type=&#x27;table&#x27; AND m.name=t.name) as rows FROM (SELECT DISTINCT name FROM sqlite_master WHERE type=&#x27;table&#x27; AND name NOT LIKE &#x27;sqlite_%&#x27;) t;&quot;" title="Copy value"><code class="value-text">wrangler d1 execute osd-events --remote --command "SELECT name, (SELECT COUNT(*) FROM sqlite_master m WHERE m.type='table' AND m.name=t.name) as rows FROM (SELECT DISTINCT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%') t;"</code></button></td><td class="desc-text">Count total rows in each table</td></tr><tr class="command-row" data-search="archive old audit logs wrangler d1 execute osd-events --remote --command &quot;delete from audit_log where timestamp &lt; datetime(&#x27;now&#x27;, &#x27;-1 year&#x27;);&quot; remove audit logs older than 1 year (compliance: keep &gt;1 year)"><td><div class="task-text">Archive old audit logs</div></td><td><button class="value-block value-block--shell" data-copy="wrangler d1 execute osd-events --remote --command &quot;DELETE FROM audit_log WHERE timestamp &lt; datetime(&#x27;now&#x27;, &#x27;-1 year&#x27;);&quot;" title="Copy value"><code class="value-text">wrangler d1 execute osd-events --remote --command "DELETE FROM audit_log WHERE timestamp &lt; datetime('now', '-1 year');"</code></button></td><td class="desc-text">Remove audit logs older than 1 year (compliance: keep &gt;1 year)</td></tr><tr class="command-row" data-search="clean stale rate limits wrangler d1 execute osd-events --remote --command &quot;delete from rate_limit_tracking where window_end &lt; datetime(&#x27;now&#x27;, &#x27;-1 hour&#x27;);&quot; remove expired rate limit windows (cleanup old entries)"><td><div class="task-text">Clean stale rate limits</div></td><td><button class="value-block value-block--shell" data-copy="wrangler d1 execute osd-events --remote --command &quot;DELETE FROM rate_limit_tracking WHERE window_end &lt; datetime(&#x27;now&#x27;, &#x27;-1 hour&#x27;);&quot;" title="Copy value"><code class="value-text">wrangler d1 execute osd-events --remote --command "DELETE FROM rate_limit_tracking WHERE window_end &lt; datetime('now', '-1 hour');"</code></button></td><td class="desc-text">Remove expired rate limit windows (cleanup old entries)</td></tr><tr class="command-row" data-search="check foreign key constraints wrangler d1 execute osd-events --remote --command &quot;pragma foreign_keys=on; pragma foreign_key_list(moderation_queue);&quot; verify foreign key relationships for a table"><td><div class="task-text">Check foreign key constraints</div></td><td><button class="value-block value-block--shell" data-copy="wrangler d1 execute osd-events --remote --command &quot;PRAGMA foreign_keys=ON; PRAGMA foreign_key_list(moderation_queue);&quot;" title="Copy value"><code class="value-text">wrangler d1 execute osd-events --remote --command "PRAGMA foreign_keys=ON; PRAGMA foreign_key_list(moderation_queue);"</code></button></td><td class="desc-text">Verify foreign key relationships for a table</td></tr><tr class="command-row" data-search="view slow query candidates wrangler d1 execute osd-events --remote --command &quot;select rule_id, count(*) as executions, avg(execution_time_ms) as avg_ms, max(execution_time_ms) as max_ms from rule_execution_log group by rule_id having avg_ms &gt; 100 order by avg_ms desc;&quot; find rules with slow execution times (&gt;100ms average)"><td><div class="task-text">View slow query candidates</div></td><td><button class="value-block value-block--shell" data-copy="wrangler d1 execute osd-events --remote --command &quot;SELECT rule_id, COUNT(*) as executions, AVG(execution_time_ms) as avg_ms, MAX(execution_time_ms) as max_ms FROM rule_execution_log GROUP BY rule_id HAVING avg_ms &gt; 100 ORDER BY avg_ms DESC;&quot;" title="Copy value"><code class="value-text">wrangler d1 execute osd-events --remote --command "SELECT rule_id, COUNT(*) as executions, AVG(execution_time_ms) as avg_ms, MAX(execution_time_ms) as max_ms FROM rule_execution_log GROUP BY rule_id HAVING avg_ms &gt; 100 ORDER BY avg_ms DESC;"</code></button></td><td class="desc-text">Find rules with slow execution times (&gt;100ms average)</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="git"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">🔀 Git &amp; Branching</span><span class="section-count">6</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="check status git status -sb show short status with branch name before every commit"><td><div class="task-text">Check status</div></td><td><button class="value-block value-block--shell" data-copy="git status -sb" title="Copy value"><code class="value-text">git status -sb</code></button></td><td class="desc-text">Show short status with branch name before every commit</td></tr><tr class="command-row" data-search="create feature branch git checkout -b feat/descriptive-name create and switch to new feature branch from main"><td><div class="task-text">Create feature branch</div></td><td><button class="value-block value-block--shell" data-copy="git checkout -b feat/descriptive-name" title="Copy value"><code class="value-text">git checkout -b feat/descriptive-name</code></button></td><td class="desc-text">Create and switch to new feature branch from main</td></tr><tr class="command-row" data-search="sync with main git fetch origin &amp;&amp; git rebase origin/main update feature branch with latest main commits"><td><div class="task-text">Sync with main</div></td><td><button class="value-block value-block--shell" data-copy="git fetch origin &amp;&amp; git rebase origin/main" title="Copy value"><code class="value-text">git fetch origin &amp;&amp; git rebase origin/main</code></button></td><td class="desc-text">Update feature branch with latest main commits</td></tr><tr class="command-row" data-search="push branch git push -u origin feat/descriptive-name push feature branch to remote and set tracking"><td><div class="task-text">Push branch</div></td><td><button class="value-block value-block--shell" data-copy="git push -u origin feat/descriptive-name" title="Copy value"><code class="value-text">git push -u origin feat/descriptive-name</code></button></td><td class="desc-text">Push feature branch to remote and set tracking</td></tr><tr class="command-row" data-search="view commit history git log --oneline -10 show recent 10 commits with short format"><td><div class="task-text">View commit history</div></td><td><button class="value-block value-block--shell" data-copy="git log --oneline -10" title="Copy value"><code class="value-text">git log --oneline -10</code></button></td><td class="desc-text">Show recent 10 commits with short format</td></tr><tr class="command-row" data-search="create pr via cli gh pr create --title &quot;short summary&quot; --body &quot;details&quot; create pull request from current branch to main"><td><div class="task-text">Create PR via CLI</div></td><td><button class="value-block value-block--shell" data-copy="gh pr create --title &quot;short summary&quot; --body &quot;details&quot;" title="Copy value"><code class="value-text">gh pr create --title "short summary" --body "details"</code></button></td><td class="desc-text">Create pull request from current branch to main</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="quality"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">✨ Code Quality</span><span class="section-count">4</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="format code pnpm format auto-format all code with prettier"><td><div class="task-text">Format code</div></td><td><button class="value-block value-block--shell" data-copy="pnpm format" title="Copy value"><code class="value-text">pnpm format</code></button></td><td class="desc-text">Auto-format all code with Prettier</td></tr><tr class="command-row" data-search="check formatting pnpm format:check verify code formatting without modifying"><td><div class="task-text">Check formatting</div></td><td><button class="value-block value-block--shell" data-copy="pnpm format:check" title="Copy value"><code class="value-text">pnpm format:check</code></button></td><td class="desc-text">Verify code formatting without modifying</td></tr><tr class="command-row" data-search="lint code pnpm lint check linting rules across all packages"><td><div class="task-text">Lint code</div></td><td><button class="value-block value-block--shell" data-copy="pnpm lint" title="Copy value"><code class="value-text">pnpm lint</code></button></td><td class="desc-text">Check linting rules across all packages</td></tr><tr class="command-row" data-search="fix linting issues pnpm lint:fix auto-fix linting issues where possible"><td><div class="task-text">Fix linting issues</div></td><td><button class="value-block value-block--shell" data-copy="pnpm lint:fix" title="Copy value"><code class="value-text">pnpm lint:fix</code></button></td><td class="desc-text">Auto-fix linting issues where possible</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="cleanup"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">🧹 Cleanup &amp; Maintenance</span><span class="section-count">4</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="full clean pnpm run clean &amp;&amp; pnpm install remove node_modules, dist, cache and reinstall (use when dependencies corrupt)"><td><div class="task-text">Full clean</div></td><td><button class="value-block value-block--shell" data-copy="pnpm run clean &amp;&amp; pnpm install" title="Copy value"><code class="value-text">pnpm run clean &amp;&amp; pnpm install</code></button></td><td class="desc-text">Remove node_modules, dist, cache and reinstall (use when dependencies corrupt)</td></tr><tr class="command-row" data-search="clean build artifacts pnpm -r exec rm -rf dist build .cache remove build artifacts from all packages (preserves node_modules)"><td><div class="task-text">Clean build artifacts</div></td><td><button class="value-block value-block--shell" data-copy="pnpm -r exec rm -rf dist build .cache" title="Copy value"><code class="value-text">pnpm -r exec rm -rf dist build .cache</code></button></td><td class="desc-text">Remove build artifacts from all packages (preserves node_modules)</td></tr><tr class="command-row" data-search="prune pnpm store pnpm store prune clean up unused packages from pnpm global store"><td><div class="task-text">Prune pnpm store</div></td><td><button class="value-block value-block--shell" data-copy="pnpm store prune" title="Copy value"><code class="value-text">pnpm store prune</code></button></td><td class="desc-text">Clean up unused packages from pnpm global store</td></tr><tr class="command-row" data-search="clear apollo cache localstorage.clear(); apolloclient.cache.reset(); reset apollo graphql cache in browser console (test only)"><td><div class="task-text">Clear Apollo cache</div></td><td><button class="value-block value-block--shell" data-copy="localStorage.clear(); apolloClient.cache.reset();" title="Copy value"><code class="value-text">localStorage.clear(); apolloClient.cache.reset();</code></button></td><td class="desc-text">Reset Apollo GraphQL cache in browser console (test only)</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="troubleshoot"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">🔧 Troubleshooting</span><span class="section-count">4</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="worker not deploying cd apps/worker &amp;&amp; wrangler publish --dry-run validate worker before deployment (shows errors without deploying)"><td><div class="task-text">Worker not deploying</div></td><td><button class="value-block value-block--shell" data-copy="cd apps/worker &amp;&amp; wrangler publish --dry-run" title="Copy value"><code class="value-text">cd apps/worker &amp;&amp; wrangler publish --dry-run</code></button></td><td class="desc-text">Validate Worker before deployment (shows errors without deploying)</td></tr><tr class="command-row" data-search="typescript errors after schema change pnpm run codegen regenerate typescript types from graphql schema"><td><div class="task-text">TypeScript errors after schema change</div></td><td><button class="value-block value-block--shell" data-copy="pnpm run codegen" title="Copy value"><code class="value-text">pnpm run codegen</code></button></td><td class="desc-text">Regenerate TypeScript types from GraphQL schema</td></tr><tr class="command-row" data-search="code changes not visible rm -rf apps/mobile/dist apps/mobile/.cache &amp;&amp; pnpm --filter @osd/mobile build clear build caches and rebuild (fixes stale code issues)"><td><div class="task-text">Code changes not visible</div></td><td><button class="value-block value-block--shell" data-copy="rm -rf apps/mobile/dist apps/mobile/.cache &amp;&amp; pnpm --filter @osd/mobile build" title="Copy value"><code class="value-text">rm -rf apps/mobile/dist apps/mobile/.cache &amp;&amp; pnpm --filter @osd/mobile build</code></button></td><td class="desc-text">Clear build caches and rebuild (fixes stale code issues)</td></tr><tr class="command-row" data-search="app won&#x27;t connect to worker curl -i https://osd-events.chrislyons.workers.dev/graphql test if worker is responding (should return 200, check cors headers)"><td><div class="task-text">App won't connect to Worker</div></td><td><button class="value-block value-block--shell" data-copy="curl -I https://osd-events.chrislyons.workers.dev/graphql" title="Copy value"><code class="value-text">curl -I https://osd-events.chrislyons.workers.dev/graphql</code></button></td><td class="desc-text">Test if Worker is responding (should return 200, check CORS headers)</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="docs"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">📚 Documentation</span><span class="section-count">4</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="find osd docs ls -1 docs/osd/ | grep -e &#x27;^osd[0-9]{3,4}\s+&#x27; | sort list all osd documentation files"><td><div class="task-text">Find OSD docs</div></td><td><button class="value-block value-block--shell" data-copy="ls -1 docs/osd/ | grep -E &#x27;^OSD[0-9]{3,4}\s+&#x27; | sort" title="Copy value"><code class="value-text">ls -1 docs/osd/ | grep -E '^OSD[0-9]{3,4}\s+' | sort</code></button></td><td class="desc-text">List all OSD documentation files</td></tr><tr class="command-row" data-search="next doc number last=$(ls -1 docs/osd/ | grep -e &#x27;^osd[0-9]+&#x27; | sed -e &#x27;s/osd([0-9]+).*/\1/&#x27; | sort -n | tail -1); next=$((last + 1)); echo &quot;osd${next}&quot; find next sequential osd document number"><td><div class="task-text">Next doc number</div></td><td><button class="value-block value-block--shell" data-copy="last=$(ls -1 docs/osd/ | grep -E &#x27;^OSD[0-9]+&#x27; | sed -E &#x27;s/OSD([0-9]+).*/\1/&#x27; | sort -n | tail -1); next=$((last + 1)); echo &quot;OSD${next}&quot;" title="Copy value"><code class="value-text">last=$(ls -1 docs/osd/ | grep -E '^OSD[0-9]+' | sed -E 's/OSD([0-9]+).*/\1/' | sort -n | tail -1); next=$((last + 1)); echo "OSD${next}"</code></button></td><td class="desc-text">Find next sequential OSD document number</td></tr><tr class="command-row" data-search="view claude.md cat claude.md | less read repo configuration and conventions"><td><div class="task-text">View CLAUDE.md</div></td><td><button class="value-block value-block--shell" data-copy="cat CLAUDE.md | less" title="Copy value"><code class="value-text">cat CLAUDE.md | less</code></button></td><td class="desc-text">Read repo configuration and conventions</td></tr><tr class="command-row" data-search="view recent docs ls -lt docs/osd/osd*.md | head -10 show 10 most recently modified osd documents"><td><div class="task-text">View recent docs</div></td><td><button class="value-block value-block--shell" data-copy="ls -lt docs/osd/OSD*.md | head -10" title="Copy value"><code class="value-text">ls -lt docs/osd/OSD*.md | head -10</code></button></td><td class="desc-text">Show 10 most recently modified OSD documents</td></tr></tbody></table></div></section>
+  <section class="callout-grid"><article class="surface-card callout callout--warning"><h2>⚠️ Critical: Worker Deployment Protocol</h2><p>Backend schema or resolver changes require immediate Worker redeployment. See Worker Deployment section below.</p></article><article class="surface-card callout callout--info"><h2>📦 Environment &amp; Stack</h2><p>Monorepo: pnpm workspaces | Frontend: React Native/Expo | Backend: Cloudflare Workers + D1 (SQLite)</p></article></section>
+</main>
+
+<footer>
+  <div class="inner">
+    <span>Local command sheet generated from source content in <code>to-fix/</code>.</span>
+    <span>osd-v2_docs_repo-commands.html</span>
+  </div>
+  <div class="footer-notes"><p>Quick Links: CLAUDE.md (repo config) | docs/osd/ (documentation) | .claude/ (tools)</p></div>
+</footer>
+
+<script>
+const THEME_KEY = "commandsheets-theme";
+const THEME_ORDER = ["light", "dark", "ember"];
+
+function getDefaultTheme() {
+  return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+}
+
+function getSavedTheme() {
+  const saved = localStorage.getItem(THEME_KEY);
+  return THEME_ORDER.includes(saved) ? saved : null;
+}
+
+function getCurrentTheme() {
+  const current = document.documentElement.getAttribute("data-theme");
+  return THEME_ORDER.includes(current) ? current : getDefaultTheme();
+}
+
+function applyTheme(theme, persist = true) {
+  const nextTheme = THEME_ORDER.includes(theme) ? theme : getDefaultTheme();
+  document.documentElement.setAttribute("data-theme", nextTheme);
+  if (persist) {
+    localStorage.setItem(THEME_KEY, nextTheme);
+  }
+}
+
+(function initTheme() {
+  applyTheme(getSavedTheme() || getDefaultTheme(), false);
+})();
+
+const sectionHeaders = Array.from(document.querySelectorAll(".section-header"));
+const headerArray = Array.from(sectionHeaders);
+let currentHeaderIndex = -1;
+
+function getVisibleHeaders() {
+  return headerArray.filter((header) => !header.closest(".section-card")?.classList.contains("is-hidden"));
+}
+
+function setFocusedSectionCard(header) {
+  document.querySelectorAll(".section-card.is-focused").forEach((card) => {
+    card.classList.remove("is-focused");
+  });
+  if (!header) return;
+  header.closest(".section-card")?.classList.add("is-focused");
+}
+
+function toggleSection(header, force) {
+  const body = header.nextElementSibling;
+  const shouldCollapse = force !== undefined ? force : !header.classList.contains("collapsed");
+  header.classList.toggle("collapsed", shouldCollapse);
+  body.classList.toggle("collapsed", shouldCollapse);
+  header.setAttribute("aria-expanded", String(!shouldCollapse));
+}
+
+function setAllSections(collapsed) {
+  headerArray.forEach((header) => {
+    toggleSection(header, collapsed);
+  });
+}
+
+function focusHeaderElement(header) {
+  if (!header) return;
+  currentHeaderIndex = headerArray.indexOf(header);
+  header.focus();
+  header.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+function focusVisibleHeader(index) {
+  const visibleHeaders = getVisibleHeaders();
+  if (index >= 0 && index < visibleHeaders.length) {
+    focusHeaderElement(visibleHeaders[index]);
+  }
+}
+
+document.querySelectorAll(".value-block").forEach((el) => {
+  el.addEventListener("click", async () => {
+    const text = el.dataset.copy || el.textContent || "";
+    try {
+      await navigator.clipboard.writeText(text);
+      el.classList.add("copied");
+      setTimeout(() => el.classList.remove("copied"), 420);
+    } catch (error) {
+      const area = document.createElement("textarea");
+      area.value = text;
+      document.body.appendChild(area);
+      area.select();
+      document.execCommand("copy");
+      document.body.removeChild(area);
+      el.classList.add("copied");
+      setTimeout(() => el.classList.remove("copied"), 420);
+    }
+  });
+});
+
+sectionHeaders.forEach((header, index) => {
+  header.addEventListener("click", () => toggleSection(header));
+  header.addEventListener("keydown", (event) => {
+    if (event.key === " " || event.key === "Enter") {
+      event.preventDefault();
+      toggleSection(header);
+    }
+  });
+  header.addEventListener("focus", () => {
+    currentHeaderIndex = index;
+  });
+});
+
+document.addEventListener("focusin", (event) => {
+  const target = event.target;
+  const header = target instanceof Element ? target.closest(".section-header") : null;
+  setFocusedSectionCard(header);
+});
+
+const searchInput = document.getElementById("search");
+const countEl = document.getElementById("search-count");
+const clearBtn = document.getElementById("search-clear");
+
+function applySearch() {
+  if (!searchInput) return;
+  const q = searchInput.value.trim().toLowerCase();
+  const rows = Array.from(document.querySelectorAll(".command-row"));
+  let visible = 0;
+  rows.forEach((row) => {
+    const match = !q || (row.dataset.search || "").includes(q);
+    row.classList.toggle("hidden", !match);
+    if (match) {
+      visible += 1;
+      if (q) {
+        const card = row.closest(".section-card");
+        const header = card?.querySelector(".section-header");
+        if (header && header.classList.contains("collapsed")) {
+          toggleSection(header, false);
+        }
+      }
+    }
+  });
+
+  document.querySelectorAll(".section-card").forEach((card) => {
+    const totalVisible = card.querySelectorAll(".command-row:not(.hidden)").length;
+    card.classList.toggle("is-hidden", q && totalVisible === 0);
+    const badge = card.querySelector(".section-count");
+    if (badge) {
+      const total = card.querySelectorAll(".command-row").length;
+      badge.textContent = q ? `${totalVisible}/${total}` : String(total);
+    }
+  });
+
+  countEl.textContent = q ? `${visible} match${visible === 1 ? "" : "es"}` : "";
+  clearBtn.classList.toggle("visible", !!q);
+}
+
+if (searchInput) {
+  searchInput.addEventListener("input", applySearch);
+  clearBtn.addEventListener("click", () => {
+    searchInput.value = "";
+    applySearch();
+    searchInput.focus();
+  });
+}
+
+function exportToMarkdown() {
+  const btn = document.getElementById("export-btn");
+  const resetExportButton = () => {
+    if (!btn) return;
+    btn.textContent = btn.dataset.defaultLabel || "Export to Markdown";
+    btn.classList.remove("is-confirmed", "is-error");
+  };
+
+  const flashExportButton = (label, stateClass) => {
+    if (!btn) return;
+    btn.dataset.defaultLabel = btn.dataset.defaultLabel || btn.textContent;
+    btn.textContent = label;
+    btn.classList.remove("is-confirmed", "is-error");
+    void btn.offsetWidth;
+    btn.classList.add(stateClass);
+    if (btn._resetTimer) {
+      window.clearTimeout(btn._resetTimer);
+    }
+    btn._resetTimer = window.setTimeout(resetExportButton, 1200);
+  };
+
+  const copyMarkdown = async (value) => {
+    try {
+      await navigator.clipboard.writeText(value);
+      return true;
+    } catch (error) {
+      try {
+        const area = document.createElement("textarea");
+        area.value = value;
+        document.body.appendChild(area);
+        area.select();
+        document.execCommand("copy");
+        document.body.removeChild(area);
+        return true;
+      } catch (fallbackError) {
+        return false;
+      }
+    }
+  };
+
+  const sections = Array.from(document.querySelectorAll(".section-card"))
+    .filter((card) => !card.classList.contains("is-hidden"))
+    .map((card) => {
+      const header = card.querySelector(".section-header");
+      if (header?.classList.contains("collapsed")) {
+        return null;
+      }
+      const title = card.querySelector(".section-title")?.textContent?.trim() || "";
+      const rows = Array.from(card.querySelectorAll(".command-row"))
+        .filter((row) => !row.classList.contains("hidden"))
+        .map((row) => {
+          const task = (row.querySelector(".task-text")?.textContent || "").trim();
+          const command = ((row.querySelector(".value-block")?.dataset.copy) || "").trim();
+          const desc = (row.querySelector(".desc-text")?.textContent || "").trim();
+          if (!(task || command || desc)) {
+            return null;
+          }
+          return {
+            task: task.replace(/\|/g, "\\|"),
+            command: command.replace(/\n/g, "<br>").replace(/\|/g, "\\|"),
+            desc: desc.replace(/\n/g, "<br>").replace(/\|/g, "\\|"),
+          };
+        })
+        .filter(Boolean);
+      if (!rows.length) {
+        return null;
+      }
+      return { title, rows };
+    })
+    .filter(Boolean);
+
+  if (!sections.length) {
+    flashExportButton("No visible rows", "is-error");
+    return;
+  }
+
+  let md = `# OSD v2 - Command Reference\n\n`;
+  sections.forEach((card) => {
+    md += `## ${card.title}\n\n`;
+    md += "| Task | Command / Snippet | Description |\n";
+    md += "| --- | --- | --- |\n";
+    card.rows.forEach((row) => {
+      md += `| ${row.task} | \`${row.command}\` | ${row.desc} |\n`;
+    });
+    md += "\n";
+  });
+  copyMarkdown(md).then((success) => {
+    flashExportButton(success ? "✓ Copied Markdown" : "Copy failed", success ? "is-confirmed" : "is-error");
+  });
+}
+
+const exportBtn = document.getElementById("export-btn");
+if (exportBtn) {
+  exportBtn.addEventListener("click", exportToMarkdown);
+}
+
+document.addEventListener("keydown", (event) => {
+  const inSearch = searchInput && document.activeElement === searchInput;
+  const isExportShortcut =
+    (event.metaKey || event.ctrlKey) &&
+    event.shiftKey &&
+    !event.altKey &&
+    event.key.toLowerCase() === "e";
+
+  if (isExportShortcut) {
+    event.preventDefault();
+    exportToMarkdown();
+    return;
+  }
+
+  if (event.key === "\\") {
+    event.preventDefault();
+    const current = getCurrentTheme();
+    const next = THEME_ORDER[(THEME_ORDER.indexOf(current) + 1) % THEME_ORDER.length];
+    applyTheme(next);
+    return;
+  }
+
+  if (event.key === "Escape") {
+    event.preventDefault();
+    setAllSections(true);
+    if (inSearch) {
+      searchInput.value = "";
+      applySearch();
+      searchInput.blur();
+    }
+    return;
+  }
+
+  if (event.key === "Tab" && searchInput) {
+    event.preventDefault();
+    if (inSearch) {
+      searchInput.blur();
+    } else {
+      searchInput.focus();
+      searchInput.select();
+    }
+    return;
+  }
+
+  if (inSearch) {
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      focusVisibleHeader(0);
+    }
+    return;
+  }
+
+  if (!event.metaKey && !event.ctrlKey && !event.altKey && event.key.toLowerCase() === "a") {
+    event.preventDefault();
+    setAllSections(false);
+    return;
+  }
+
+  const focused = document.activeElement;
+  if (focused && focused.classList.contains("section-header")) {
+    currentHeaderIndex = headerArray.indexOf(focused);
+  }
+  const visibleHeaders = getVisibleHeaders();
+  const visibleIndex = focused && focused.classList.contains("section-header")
+    ? visibleHeaders.indexOf(focused)
+    : -1;
+
+  switch (event.key) {
+    case "ArrowDown":
+      event.preventDefault();
+      if (visibleHeaders.length) {
+        focusHeaderElement(
+          visibleHeaders[
+            visibleIndex < 0 ? 0 : Math.min(visibleIndex + 1, visibleHeaders.length - 1)
+          ]
+        );
+      }
+      break;
+    case "ArrowUp":
+      event.preventDefault();
+      if (visibleIndex <= 0) {
+        if (searchInput) {
+          searchInput.focus();
+          searchInput.select();
+        } else if (visibleHeaders.length) {
+          focusHeaderElement(visibleHeaders[0]);
+        }
+      } else {
+        focusHeaderElement(visibleHeaders[visibleIndex - 1]);
+      }
+      break;
+    case "ArrowRight":
+      if (focused && focused.classList.contains("section-header") && focused.classList.contains("collapsed")) {
+        event.preventDefault();
+        toggleSection(focused, false);
+      }
+      break;
+    case "ArrowLeft":
+      if (focused && focused.classList.contains("section-header") && !focused.classList.contains("collapsed")) {
+        event.preventDefault();
+        toggleSection(focused, true);
+      }
+      break;
+    case "Enter":
+    case " ":
+      if (focused && focused.classList.contains("section-header")) {
+        event.preventDefault();
+        toggleSection(focused);
+      }
+      break;
+  }
+});
+</script>
+</body>
+</html>

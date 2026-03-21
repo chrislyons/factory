@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2110-audio-io</title>
+<style>
+@font-face {
+  font-family: "Geist Pixel Square";
+  src: url("../../shared-fonts/geist/geist-pixel/GeistPixel-Square.woff2") format("woff2");
+  font-display: swap;
+  font-weight: 400;
+}
+@font-face {
+  font-family: "Geist Mono UltraLight";
+  src: url("../../shared-fonts/geist/geist-mono/GeistMono-UltraLight.woff2") format("woff2");
+  font-display: swap;
+  font-weight: 200;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0a1016;
+  --bg-gradient-top: #070e15;
+  --bg-gradient-bottom: #0d1520;
+  --bg-deep: #060b10;
+  --bg-panel: #111824;
+  --bg-panel-strong: #172131;
+  --bg-panel-hover: #1d2840;
+  --surface-strong: rgba(18, 25, 37, 0.95);
+  --text: #e5edf6;
+  --text-dim: #9bb0c8;
+  --text-muted: #677a92;
+  --accent: #58a6ff;
+  --accent-soft: rgba(88, 166, 255, 0.10);
+  --accent-border: rgba(88, 166, 255, 0.36);
+  --border: rgba(255,255,255,0.08);
+  --border-strong: rgba(255,255,255,0.13);
+  --mermaid-neutral-fill: #151d29;
+  --mermaid-neutral-border: #46556c;
+  --mermaid-neutral-text: #e5edf6;
+  --mermaid-blue-fill: #22364c;
+  --mermaid-blue-border: #67aefc;
+  --mermaid-blue-text: #edf6ff;
+  --mermaid-green-fill: #233d32;
+  --mermaid-green-border: #6dc08d;
+  --mermaid-green-text: #effdf4;
+  --mermaid-amber-fill: #493523;
+  --mermaid-amber-border: #ffbf63;
+  --mermaid-amber-text: #fff8eb;
+  --mermaid-red-fill: #4a2b31;
+  --mermaid-red-border: #f18f9e;
+  --mermaid-red-text: #fff1f4;
+  --mermaid-violet-fill: #393048;
+  --mermaid-violet-border: #bc9af6;
+  --mermaid-violet-text: #f7f1ff;
+  --mermaid-line: #7fc0ff;
+  --mermaid-line-muted: rgba(127, 192, 255, 0.42);
+  --mermaid-label-fill: #0f1721;
+  --mermaid-label-text: #eef5fd;
+  --grid-size-primary: 37px 37px;
+  --grid-size-secondary: 29px 29px;
+  --grid-mask-top: rgba(0, 0, 0, 1);
+  --grid-mask-bottom: rgba(0, 0, 0, 0.82);
+  --dust-dot: rgba(103,122,146,0.24);
+  --dust-accent-dot: rgba(88,166,255,0.16);
+  --search-focus-shadow: 0 0 12px rgba(88, 166, 255, 0.14), 0 0 4px rgba(88, 166, 255, 0.1);
+  --callout-info-ring: inset 0 0 0 1px rgba(88, 166, 255, 0.12);
+  --section-card-focus-shadow: 0 0 0 1px rgba(88, 166, 255, 0.16), 0 0 24px rgba(88, 166, 255, 0.12);
+  --section-header-focus-bg: linear-gradient(180deg, rgba(88, 166, 255, 0.14), rgba(88, 166, 255, 0.06));
+  --section-header-focus-shadow: inset 0 0 0 1px var(--accent-border), inset 0 0 18px rgba(88, 166, 255, 0.08);
+  --section-title-focus-shadow: 0 0 12px rgba(88, 166, 255, 0.16);
+  --section-count-focus-bg: rgba(88, 166, 255, 0.08);
+  --row-divider: rgba(255,255,255,0.04);
+  --shell-width: min(1400px, 92vw);
+  --radius: 14px;
+  --transition: 160ms cubic-bezier(0.2, 0.65, 0.2, 1);
+  --font-display: "Geist Pixel Square", ui-sans-serif, sans-serif;
+  --font-body: "Geist Mono UltraLight", ui-monospace, monospace;
+}
+
+[data-theme="light"] {
+  --bg: #f4f7fb;
+  --bg-gradient-top: #eef3f8;
+  --bg-gradient-bottom: #fbfdff;
+  --bg-deep: #e9eef5;
+  --bg-panel: #ffffff;
+  --bg-panel-strong: #f6f9fd;
+  --bg-panel-hover: #eef4fb;
+  --surface-strong: rgba(248, 251, 255, 0.94);
+  --text: #122033;
+  --text-dim: #4c5f78;
+  --text-muted: #7d8da3;
+  --accent: #006adc;
+  --accent-soft: rgba(0, 106, 220, 0.08);
+  --accent-border: rgba(0, 106, 220, 0.24);
+  --border: rgba(10, 21, 39, 0.08);
+  --border-strong: rgba(10, 21, 39, 0.14);
+  --mermaid-neutral-fill: #ffffff;
+  --mermaid-neutral-border: #cbd6e3;
+  --mermaid-neutral-text: #122033;
+  --mermaid-blue-fill: #dcebff;
+  --mermaid-blue-border: #4f88d7;
+  --mermaid-blue-text: #16304f;
+  --mermaid-green-fill: #def4e7;
+  --mermaid-green-border: #59a173;
+  --mermaid-green-text: #183727;
+  --mermaid-amber-fill: #f8ead3;
+  --mermaid-amber-border: #d09a3b;
+  --mermaid-amber-text: #47311a;
+  --mermaid-red-fill: #f8dfe3;
+  --mermaid-red-border: #d27082;
+  --mermaid-red-text: #532330;
+  --mermaid-violet-fill: #ebe2fb;
+  --mermaid-violet-border: #8f74d1;
+  --mermaid-violet-text: #36234f;
+  --mermaid-line: #0057b8;
+  --mermaid-line-muted: rgba(0, 87, 184, 0.32);
+  --mermaid-label-fill: #ffffff;
+  --mermaid-label-text: #122033;
+  color-scheme: light;
+}
+
+[data-theme="ember"] {
+  --bg: #352619;
+  --bg-gradient-top: #312217;
+  --bg-gradient-bottom: #38281c;
+  --bg-deep: rgba(48, 38, 29, 0.93);
+  --bg-panel: rgba(73, 56, 44, 0.95);
+  --bg-panel-strong: rgba(105, 83, 62, 0.95);
+  --bg-panel-hover: rgba(137, 110, 82, 0.95);
+  --surface-strong: rgba(73, 56, 44, 0.95);
+  --text: #FFFDF9;
+  --text-dim: #F8EDDE;
+  --text-muted: #E0CAAA;
+  --accent: #FFB800;
+  --accent-soft: rgba(255, 184, 0, 0.2);
+  --accent-border: rgba(210, 160, 105, 0.7);
+  --border: rgba(210, 160, 105, 0.42);
+  --border-strong: rgba(210, 160, 105, 0.7);
+  --mermaid-neutral-fill: #5a4433;
+  --mermaid-neutral-border: #d0a26c;
+  --mermaid-neutral-text: #fff8ef;
+  --mermaid-blue-fill: #3d5470;
+  --mermaid-blue-border: #91b8e5;
+  --mermaid-blue-text: #fffaf4;
+  --mermaid-green-fill: #465947;
+  --mermaid-green-border: #8fc59a;
+  --mermaid-green-text: #fffaf1;
+  --mermaid-amber-fill: #70543b;
+  --mermaid-amber-border: #f0bf6a;
+  --mermaid-amber-text: #fffaf3;
+  --mermaid-red-fill: #70464a;
+  --mermaid-red-border: #e8a4ab;
+  --mermaid-red-text: #fff7f3;
+  --mermaid-violet-fill: #5a4b68;
+  --mermaid-violet-border: #bea3dc;
+  --mermaid-violet-text: #fff9f7;
+  --mermaid-line: #ffd36b;
+  --mermaid-line-muted: rgba(255, 211, 107, 0.42);
+  --mermaid-label-fill: #594434;
+  --mermaid-label-text: #fffaf2;
+  --dust-dot: rgba(232, 206, 171, 0.22);
+  --dust-accent-dot: rgba(255, 184, 0, 0.16);
+  --callout-info-ring: inset 0 0 0 1px rgba(210, 160, 105, 0.28);
+  --section-card-focus-shadow: 0 0 0 1px rgba(210, 160, 105, 0.34), 0 0 24px rgba(255, 107, 53, 0.14);
+  --section-header-focus-bg: linear-gradient(180deg, rgba(255, 184, 0, 0.16), rgba(255, 107, 53, 0.12));
+  --section-header-focus-shadow: inset 0 0 0 1px var(--accent-border), inset 0 0 18px rgba(255, 107, 53, 0.14);
+  --section-title-focus-shadow: 0 0 12px rgba(255, 107, 53, 0.18);
+  --section-count-focus-bg: rgba(255, 184, 0, 0.12);
+  --row-divider: rgba(210, 160, 105, 0.18);
+  color-scheme: dark;
+}
+
+html, body { min-height: 100%; }
+
+body {
+  font-family: var(--font-body);
+  font-weight: 200;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text);
+  background: linear-gradient(180deg, var(--bg-gradient-top), var(--bg-gradient-bottom));
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle, var(--dust-dot) 0.8px, transparent 0.8px),
+    radial-gradient(circle, var(--dust-accent-dot) 0.6px, transparent 0.6px);
+  background-size: var(--grid-size-primary), var(--grid-size-secondary);
+  background-position: 0 0, 17px 19px;
+  -webkit-mask-image: linear-gradient(180deg, var(--grid-mask-top), var(--grid-mask-bottom));
+  mask-image: linear-gradient(180deg, var(--grid-mask-top), var(--grid-mask-bottom));
+  animation: dust-drift 90s linear infinite;
+}
+
+body > * { position: relative; z-index: 1; }
+
+@keyframes dust-drift {
+  0% { background-position: 0 0, 11px 13px; }
+  100% { background-position: 24px 48px, 35px 61px; }
+}
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  border-bottom: 1px solid var(--border-strong);
+  background: var(--surface-strong);
+  backdrop-filter: blur(14px);
+}
+
+.site-header__inner,
+main,
+footer .inner {
+  width: var(--shell-width);
+  margin: 0 auto;
+}
+
+.site-header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  min-height: 38px;
+  text-decoration: none;
+}
+
+.brand__title {
+  font-family: var(--font-display);
+  font-size: 14px;
+  color: var(--text);
+}
+
+main {
+  padding: 22px 0 42px;
+  display: grid;
+  gap: 16px;
+  flex: 1 0 auto;
+  align-content: start;
+}
+
+.hero-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.hero {
+  display: grid;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+  max-width: 72ch;
+}
+
+.hero-eyebrow {
+  font-family: var(--font-display);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(18px, 2.2vw, 24px);
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  margin-left: 4px;
+}
+
+.hero p {
+  color: var(--text-dim);
+  font-size: 12px;
+  margin-left: 4px;
+}
+
+.hero-meta {
+  display: grid;
+  gap: 8px;
+  justify-items: end;
+  align-content: start;
+  flex: 0 1 540px;
+  min-width: 0;
+}
+
+.meta-chip {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: 100%;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+}
+
+.meta-chip__label {
+  color: var(--text-muted);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.meta-chip__value {
+  color: var(--text-dim);
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.surface-card {
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+  overflow: hidden;
+}
+
+.surface-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 18px;
+  right: 18px;
+  height: 1px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, var(--border-strong), transparent);
+}
+
+.gallery-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.nav-group {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--bg-panel);
+}
+
+.nav-group__label {
+  color: var(--text-muted);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.nav-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--accent-border);
+  background: var(--accent-soft);
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 11px;
+  transition: background var(--transition), border-color var(--transition), color var(--transition), box-shadow var(--transition);
+}
+
+.nav-chip:hover,
+.nav-chip:focus-visible {
+  outline: none;
+  color: var(--text);
+  box-shadow: inset 0 0 0 1px var(--accent-border), 0 0 18px rgba(88, 166, 255, 0.12);
+}
+
+.callout h2,
+.empty-state h2 {
+  font-family: var(--font-display);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+}
+
+.callout-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.callout {
+  padding: 16px 18px;
+  display: grid;
+  gap: 8px;
+}
+
+.callout p {
+  color: var(--text-dim);
+  font-size: 11px;
+  white-space: pre-wrap;
+}
+
+.callout--info {
+  box-shadow: var(--callout-info-ring);
+}
+
+.callout--warning {
+  box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.16);
+}
+
+.callout--success {
+  box-shadow: inset 0 0 0 1px rgba(52, 211, 153, 0.16);
+}
+
+.section-block {
+  display: grid;
+  gap: 10px;
+}
+
+.section-heading {
+  padding: 0 4px;
+}
+
+.section-heading span {
+  font-family: var(--font-display);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+}
+
+.diagram-stack {
+  display: grid;
+  gap: 14px;
+}
+
+.diagram-card {
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.diagram-card.is-focused {
+  border-color: var(--accent-border);
+  box-shadow: var(--section-card-focus-shadow);
+}
+
+.diagram-header {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-panel-strong);
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+  border-radius: calc(var(--radius) - 1px) calc(var(--radius) - 1px) 0 0;
+  transition: background var(--transition), border-radius var(--transition), box-shadow var(--transition);
+}
+
+.diagram-header:hover {
+  background: var(--bg-panel-hover);
+}
+
+.diagram-header:focus,
+.diagram-header:focus-visible {
+  outline: none;
+  background: var(--section-header-focus-bg);
+  box-shadow: var(--section-header-focus-shadow);
+}
+
+.diagram-header.collapsed {
+  border-radius: calc(var(--radius) - 1px);
+  border-bottom-color: transparent;
+}
+
+.diagram-arrow {
+  color: var(--text-muted);
+  font-size: 10px;
+  transition: transform var(--transition), color var(--transition);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.diagram-header.collapsed .diagram-arrow {
+  transform: rotate(-90deg);
+}
+
+.diagram-header__copy {
+  display: grid;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+.diagram-title {
+  font-family: var(--font-display);
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--text);
+}
+
+.diagram-header:focus .diagram-title,
+.diagram-header:focus-visible .diagram-title {
+  text-shadow: var(--section-title-focus-shadow);
+}
+
+.diagram-description {
+  color: var(--text-dim);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.diagram-kind {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--accent-border);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 10px;
+  line-height: 1.2;
+  flex-shrink: 0;
+}
+
+.diagram-content {
+  display: block;
+  padding: 0 0 16px;
+}
+
+.diagram-content.collapsed {
+  display: none;
+}
+
+.diagram-canvas {
+  margin: 14px 16px 16px;
+  padding: clamp(16px, 2vw, 22px);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--bg-deep);
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.diagram-canvas svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+.diagram-canvas svg text,
+.diagram-canvas svg tspan,
+.diagram-canvas .nodeLabel,
+.diagram-canvas .label {
+  font-family: "Geist Mono UltraLight", ui-monospace, monospace !important;
+  font-weight: 200 !important;
+}
+
+.diagram-loading,
+.diagram-error {
+  color: var(--text-dim);
+  font-size: 11px;
+  white-space: pre-wrap;
+}
+
+.empty-state {
+  padding: 22px 20px;
+  display: grid;
+  gap: 8px;
+}
+
+.empty-state p {
+  color: var(--text-dim);
+  max-width: 70ch;
+}
+
+footer {
+  border-top: 1px solid var(--border-strong);
+  background: var(--surface-strong);
+  backdrop-filter: blur(14px);
+  padding: 12px 0 14px;
+}
+
+.footer-notes {
+  width: var(--shell-width);
+  margin: 0 auto;
+  display: grid;
+  gap: 6px;
+  color: var(--text-dim);
+  font-size: 11px;
+}
+
+.footer-notes a {
+  color: var(--accent);
+}
+
+.footer-notes code {
+  font-family: var(--font-body);
+}
+
+@media (max-width: 900px) {
+  .hero-row {
+    flex-direction: column;
+  }
+
+  .hero-meta {
+    width: 100%;
+    justify-items: start;
+  }
+
+  .site-header__inner {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero h1 {
+    font-size: 20px;
+  }
+
+  .gallery-nav {
+    gap: 8px;
+  }
+
+  .nav-group {
+    width: 100%;
+  }
+
+  .diagram-header {
+    padding: 12px 14px;
+  }
+
+  .diagram-canvas {
+    margin: 12px 12px 12px;
+    padding: 14px;
+  }
+}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="site-header__inner">
+    <div class="brand">
+      <span class="brand__title">codex-commandsheets</span>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="hero-row">
+    <div class="hero">
+      <span class="hero-eyebrow">ARCHITECTURE GALLERY</span>
+      <h1>2110-audio-io</h1>
+      <p>SMPTE ST2110 Audio I/O Topology for CBC Milan-Cortina 2026</p>
+    </div>
+    <div class="hero-meta"><div class="meta-chip"><span class="meta-chip__label">UPDATED</span><span class="meta-chip__value">2026-01-18</span></div><div class="meta-chip"><span class="meta-chip__label">VERSION</span><span class="meta-chip__value">1.2.0</span></div><div class="meta-chip"><span class="meta-chip__label">SOURCE</span><span class="meta-chip__value">wireframes/v1.0.0/*.mermaid.md</span></div></div>
+  </div>
+  <section class="gallery-nav"><div class="nav-group"><span class="nav-group__label">Standards:</span><a class="nav-chip" href="#st2110" data-target="st2110">ST2110</a><a class="nav-chip" href="#nmos" data-target="nmos">NMOS</a><a class="nav-chip" href="#impulse" data-target="impulse">Impulse Core</a><a class="nav-chip" href="#cards" data-target="cards">I/O Cards</a><a class="nav-chip" href="#gateway" data-target="gateway">Gateway Ports</a><a class="nav-chip" href="#acr" data-target="acr">ACR Topology</a><a class="nav-chip" href="#architecture" data-target="architecture">Architecture</a><a class="nav-chip" href="#repo" data-target="repo">Repository</a><a class="nav-chip" href="#components" data-target="components">Components</a><a class="nav-chip" href="#dataflow" data-target="dataflow">Data Flow</a><a class="nav-chip" href="#entry" data-target="entry">Entry Points</a><a class="nav-chip" href="#tooling" data-target="tooling">Claude Code</a><a class="nav-chip" href="#scripts" data-target="scripts">Automation</a></div></section>
+  <section class="callout-grid"><article class="surface-card callout callout--info"><h2>Diagram Collection</h2><p>13 architectural diagrams covering ST2110/NMOS protocols, Calrec infrastructure, vault structure, and development tooling.</p><p>Click headers to expand/collapse. Diagrams render via Mermaid.js. Press a to expand all, Esc to collapse all.</p></article></section>
+  <section class="section-block" data-section="smpte-st2110-nmos-standards"><div class="section-heading"><span>SMPTE ST2110 &amp; NMOS Standards</span></div><div class="diagram-stack"><article class="surface-card diagram-card" id="st2110" data-diagram-id="st2110"><button class="diagram-header" type="button" aria-expanded="true"><span class="diagram-arrow">▼</span><span class="diagram-header__copy"><span class="diagram-title">SMPTE ST2110 Protocol Stack</span><p class="diagram-description">Professional media over IP essence types</p></span><span class="diagram-kind">FLOWCHART</span></button><div class="diagram-content"><div class="diagram-canvas"><div class="diagram-loading">Rendering diagram…</div></div><script type="application/json" class="mermaid-source">"graph TB\nsubgraph ST2110[\"SMPTE ST2110 Suite\"]\ndirection TB\n\nsubgraph TIMING[\"ST 2110-10: System Timing\"]\nPTP[\"IEEE 1588-2008 PTP\nPrecision Time Protocol\"]\nSMPTE2059[\"SMPTE 2059\nMedia Sync\"]\nend\n\nsubgraph ESSENCE[\"Essence Streams\"]\nsubgraph VIDEO[\"ST 2110-20: Video\"]\nV_UNCOMP[\"Uncompressed Video\nBased on RFC 4175\"]\nend\n\nsubgraph VIDEO_COMP[\"ST 2110-22: Compressed Video\"]\nJPEGXS[\"JPEG-XS\nConstant Bit Rate\"]\nend\n\nsubgraph AUDIO[\"ST 2110-30: Audio\"]\nAES67[\"AES67 Compatible\nUncompressed PCM\"]\nCHANNELS[\"1-8 channels per stream\n24-bit @ 48kHz\"]\nend\n\nsubgraph ANC[\"ST 2110-40: Ancillary Data\"]\nCAPTIONS[\"Captions/Subtitles\"]\nTIMECODE[\"Timecode\"]\nMETA[\"Metadata\"]\nend\nend\n\nsubgraph EXTENSIONS[\"Extensions\"]\nST2110_41[\"ST 2110-41\nFast Metadata\"]\nST2110_43[\"ST 2110-43\nTimed Text (TTML)\"]\nend\n\nsubgraph TRANSPORT[\"Transport Layer\"]\nRTP[\"RTP/UDP/IP\nReal-time Transport\"]\nSDP[\"SDP\nSession Description\"]\nend\nend\n\nsubgraph THIS_SYSTEM[\"This System (Audio Focus)\"]\nSTREAMS[\"272 ST2110-30 Streams\n8 channels each\n2,176 total channels\"]\nend\n\nPTP --> ESSENCE\nESSENCE --> TRANSPORT\nAUDIO --> STREAMS\n\nstyle AUDIO fill:#2E4A2E,stroke:#4CAF50\nstyle STREAMS fill:#2E4A2E,stroke:#4CAF50"</script></div></article><article class="surface-card diagram-card" id="nmos" data-diagram-id="nmos"><button class="diagram-header" type="button" aria-expanded="true"><span class="diagram-arrow">▼</span><span class="diagram-header__copy"><span class="diagram-title">NMOS Control Plane</span><p class="diagram-description">AMWA IS-04, IS-05, IS-08 specifications</p></span><span class="diagram-kind">SEQUENCE</span></button><div class="diagram-content"><div class="diagram-canvas"><div class="diagram-loading">Rendering diagram…</div></div><script type="application/json" class="mermaid-source">"sequenceDiagram\nparticipant Node as NMOS Node\n(Audio Gateway)\nparticipant Registry as NMOS Registry\n(IS-04)\nparticipant Controller as Broadcast Controller\n(Lawo VSM)\nparticipant Receiver as Receiving Device\n\nNote over Node,Receiver: IS-04: Discovery & Registration\n\nNode->>Node: DNS-SD Query\n_nmos-register._tcp\nNode->>Registry: POST /x-nmos/registration/v1.3\nRegister Node, Device, Senders, Receivers\nRegistry-->>Node: 201 Created\n\nNote over Node,Receiver: IS-05: Connection Management\n\nController->>Registry: GET /x-nmos/query/v1.3/senders\nRegistry-->>Controller: List of available senders\n\nController->>Node: PATCH /x-nmos/connection/v1.1/single/receivers/{id}/staged\nNote right of Controller: Set transport_file (SDP)\nSet master_enable: true\nNode-->>Controller: 200 OK\n\nController->>Node: POST /x-nmos/connection/v1.1/single/receivers/{id}/active\nNode->>Receiver: Subscribe to ST2110 multicast\nReceiver-->>Node: Audio stream active\n\nNote over Node,Receiver: IS-08: Audio Channel Mapping\n\nController->>Node: PATCH /x-nmos/channelmapping/v1.0/map/activations\nNote right of Controller: Remap channels:\nInput 1-8 → Output 1-8\nNode-->>Controller: 200 OK\nNode->>Node: Apply channel routing"</script></div></article></div></section><section class="section-block" data-section="calrec-infrastructure"><div class="section-heading"><span>Calrec Infrastructure</span></div><div class="diagram-stack"><article class="surface-card diagram-card" id="impulse" data-diagram-id="impulse"><button class="diagram-header" type="button" aria-expanded="true"><span class="diagram-arrow">▼</span><span class="diagram-header__copy"><span class="diagram-title">Calrec Impulse Core Router</span><p class="diagram-description">IP-based audio routing architecture</p></span><span class="diagram-kind">FLOWCHART</span></button><div class="diagram-content"><div class="diagram-canvas"><div class="diagram-loading">Rendering diagram…</div></div><script type="application/json" class="mermaid-source">"graph TB\nsubgraph CONSOLE[\"Calrec Apollo Console\"]\nSURFACE[\"Control Surface\nFaders, Meters, Displays\"]\nDSP[\"DSP Engine\nEQ, Dynamics, Routing\"]\nend\n\nsubgraph IMPULSE[\"Calrec Impulse Core\"]\ndirection TB\n\nsubgraph ROUTER_FABRIC[\"Router Fabric\"]\nMATRIX[\"Audio Matrix\nNon-blocking crosspoint\"]\nend\n\nsubgraph ROUTER_CARDS[\"Router Cards (AMX)\"]\nAMX101[\"AMX101\nACR40 Primary\n145 streams\n1,160 channels\"]\nAMX102[\"AMX102\nACR42 Primary\n127 streams\n1,016 channels\"]\nAMX103[\"AMX103\nACR40 Secondary\"]\nAMX104[\"AMX104\nACR42 Secondary\"]\nend\n\nsubgraph NETWORK_IO[\"Network I/O\"]\nST2110_TX[\"ST2110 Transmitters\nRTP/UDP Multicast\"]\nST2110_RX[\"ST2110 Receivers\nIGMP Join/Leave\"]\nend\n\nsubgraph SYNC[\"Synchronization\"]\nPTP_GM[\"PTP Grandmaster\nor Boundary Clock\"]\nend\nend\n\nsubgraph CONTROL[\"Control Systems\"]\nHYDRA_CTRL[\"Calrec Hydra\nLegacy Control\"]\nNMOS_REG[\"NMOS Registry\nIS-04/IS-05\"]\nVSM[\"Lawo VSM\nBroadcast Control\"]\nend\n\nsubgraph TRANSPORT[\"Network Transport\"]\nSPINE[\"Spine Switches\n100GbE\"]\nLEAF[\"Leaf Switches\n25GbE\"]\nend\n\nSURFACE <--> DSP\nDSP <--> MATRIX\nMATRIX <--> ROUTER_CARDS\nROUTER_CARDS <--> NETWORK_IO\nPTP_GM --> NETWORK_IO\n\nNETWORK_IO <--> LEAF\nLEAF <--> SPINE\n\nVSM --> NMOS_REG\nNMOS_REG --> IMPULSE\nHYDRA_CTRL -.-> IMPULSE\n\nstyle ROUTER_CARDS fill:#4A2A2A,stroke:#DC143C"</script></div></article><article class="surface-card diagram-card" id="cards" data-diagram-id="cards"><button class="diagram-header" type="button" aria-expanded="true"><span class="diagram-arrow">▼</span><span class="diagram-header__copy"><span class="diagram-title">I/O Card Types</span><p class="diagram-description">Audio Gateway card variants and protocols</p></span><span class="diagram-kind">CLASS</span></button><div class="diagram-content"><div class="diagram-canvas"><div class="diagram-loading">Rendering diagram…</div></div><script type="application/json" class="mermaid-source">"classDiagram\ndirection LR\n\nclass IOCard {\n<>\n+String slot: A-Z\n+Number inputs\n+Number outputs\n+Array streams\n}\n\nclass AES {\nType: AES3/EBU Digital\nChannels: Variable\nFormat: 24-bit @ 48kHz\nConnector: XLR or BNC\nCards: 40 AES, 42 AES\n}\n\nclass Dante {\nType: Audinate Dante\nChannels: 64 in/out\nFormat: 24-bit @ 48kHz\nTransport: Layer 3 IP\nCards: 40 Dante 1, 40 Dante 2\n}\n\nclass SDI {\nType: Embedded Audio\nChannels: 64 in/out\nFormat: 16 channels per SDI\nStandard: SMPTE 299M\nCards: 40 SDI, 42 SDI\n}\n\nclass MADI {\nType: AES10 MADI\nChannels: 64 in/out\nFormat: 24-bit @ 48kHz\nTransport: Coax or Fiber\nCards: 40 ProTools, 40 UTL MADI 01-06\n}\n\nclass MicLine {\nType: Analog I/O\nChannels: 48 in/16 out\nFormat: +4dBu/-10dBV\nPreamps: Remote controlled\nCards: Stagebox cards\n}\n\nclass Waves {\nType: Waves SoundGrid\nChannels: 64 in/out\nFormat: 24-bit @ 48/96kHz\nTransport: Ethernet\nCards: 40 Waves, 42 Waves\n}\n\nclass Studer {\nType: Studer D21m\nChannels: 64 in/out\nFormat: Proprietary\nTransport: MADI bridge\nCards: 40 StuderA, 40 StuderB\n}\n\nIOCard <|-- AES\nIOCard <|-- Dante\nIOCard <|-- SDI\nIOCard <|-- MADI\nIOCard <|-- MicLine\nIOCard <|-- Waves\nIOCard <|-- Studer"</script></div></article><article class="surface-card diagram-card" id="gateway" data-diagram-id="gateway"><button class="diagram-header" type="button" aria-expanded="true"><span class="diagram-arrow">▼</span><span class="diagram-header__copy"><span class="diagram-title">Gateway Port Mapping</span><p class="diagram-description">TORMPXAGW port-to-stream architecture</p></span><span class="diagram-kind">FLOWCHART</span></button><div class="diagram-content"><div class="diagram-canvas"><div class="diagram-loading">Rendering diagram…</div></div><script type="application/json" class="mermaid-source">"graph LR\nsubgraph AGW[\"Audio Gateway (TORMPXAGW005)\"]\ndirection TB\n\nsubgraph PORTS[\"64 Bidirectional Ports\"]\nP1[\"Port 01\"]\nP2[\"Port 02\"]\nP3[\"...\"]\nP64[\"Port 64\"]\nend\n\nsubgraph SLOTS[\"Physical Slots A-Z\"]\nSA[\"Slot A\n40 AES\"]\nSB[\"Slot B\n40 X-75\"]\nSC[\"Slot C\n40 RTW\"]\nSD[\"...\"]\nSZ[\"Slot Z\n40 StuderA\"]\nend\nend\n\nsubgraph STREAMS_SEND[\"Send Streams (to Console)\"]\nSS1[\"Stream-AMX101-71\n8 channels\"]\nSS2[\"Stream-AMX101-72\n8 channels\"]\nSS3[\"...\"]\nend\n\nsubgraph STREAMS_RCV[\"Receive Streams (from Console)\"]\nSR1[\"Stream-AMX101-23\n8 channels\"]\nSR2[\"Stream-AMX101-24\n8 channels\"]\nSR3[\"...\"]\nend\n\nsubgraph ROUTING[\"Port-Stream Mapping\"]\nMAP[\"Port 01:\nSend → Stream-71\nReceive → Stream-23\"]\nend\n\nP1 --> SS1\nSR1 --> P1\nP2 --> SS2\nSR2 --> P2\n\nSA --> P1\nSA --> P2\n\nstyle PORTS fill:#2A3A4A,stroke:#1E90FF\nstyle SLOTS fill:#2A4A3A,stroke:#2E8B57\nstyle STREAMS_SEND fill:#4A3A2A,stroke:#FFA500\nstyle STREAMS_RCV fill:#4A3A2A,stroke:#FFA500"</script></div></article><article class="surface-card diagram-card" id="acr" data-diagram-id="acr"><button class="diagram-header" type="button" aria-expanded="true"><span class="diagram-arrow">▼</span><span class="diagram-header__copy"><span class="diagram-title">ACR40 vs ACR42 Topology</span><p class="diagram-description">Audio Control Room equipment comparison</p></span><span class="diagram-kind">FLOWCHART</span></button><div class="diagram-content"><div class="diagram-canvas"><div class="diagram-loading">Rendering diagram…</div></div><script type="application/json" class="mermaid-source">"graph TB\nsubgraph ACR40[\"ACR40 - Audio Control Room 40\"]\ndirection TB\n\nCONSOLE40[\"Calrec Apollo\nMain Console\"]\n\nsubgraph ROUTERS40[\"Router Cards\"]\nAMX101_40[\"AMX101\nPrimary\n145 streams\"]\nAMX103_40[\"AMX103\nSecondary\"]\nend\n\nsubgraph GATEWAYS40[\"Audio Gateways\"]\nAGW005[\"TORMPXAGW005\n64 ports\"]\nAGW006[\"TORMPXAGW006\n64 ports\"]\nend\n\nsubgraph EQUIPMENT40[\"I/O Equipment\"]\nRACK40[\"40 AUDIO RACK\nAD5780\"]\nDANTE40[\"40 Dante 1, 2\"]\nSDI40[\"40 SDI\"]\nPROTOOLS40[\"40 ProTools\"]\nWAVES40[\"40 Waves\"]\nSTUDER40[\"40 Studer A, B\"]\nend\nend\n\nsubgraph ACR42[\"ACR42 - Audio Control Room 42\"]\ndirection TB\n\nCONSOLE42[\"Calrec Apollo\nMain Console\"]\n\nsubgraph ROUTERS42[\"Router Cards\"]\nAMX102_42[\"AMX102\nPrimary\n127 streams\"]\nAMX104_42[\"AMX104\nSecondary\"]\nend\n\nsubgraph GATEWAYS42[\"Audio Gateways\"]\nAGW007[\"TORMPXAGW007\n64 ports\"]\nAGW008[\"TORMPXAGW008\n64 ports\"]\nend\n\nsubgraph EQUIPMENT42[\"I/O Equipment\"]\nRACK42[\"42 AUDIO RACK\nAD5780\"]\nDANTE42[\"42 Dante 1, 2\"]\nSDI42[\"42 SDI\"]\nPROTOOLS42[\"42 ProTools\"]\nWAVES42[\"42 Waves\"]\nend\nend\n\nsubgraph SHARED[\"Shared Resources\"]\nAGW009[\"TORMPXAGW009\"]\nAGW010[\"TORMPXAGW010\"]\nAGW011[\"TORMPXAGW011\"]\nAGW012[\"TORMPXAGW012\"]\nSTAGEBOXES[\"Box 01-12\nPortable Stageboxes\"]\nend\n\nsubgraph CONTROL[\"Central Control\"]\nVSM[\"Lawo VSM\"]\nNMOS[\"NMOS Registry\"]\nend\n\nCONSOLE40 --> ROUTERS40\nROUTERS40 --> GATEWAYS40\nGATEWAYS40 --> EQUIPMENT40\n\nCONSOLE42 --> ROUTERS42\nROUTERS42 --> GATEWAYS42\nGATEWAYS42 --> EQUIPMENT42\n\nGATEWAYS40 --> SHARED\nGATEWAYS42 --> SHARED\nSHARED --> STAGEBOXES\n\nVSM --> ACR40\nVSM --> ACR42\nNMOS --> SHARED\n\nstyle ACR40 fill:#1A2A2A,stroke:#4CAF50\nstyle ACR42 fill:#1A2A2A,stroke:#2196F3"</script></div></article></div></section><section class="section-block" data-section="vault-structure"><div class="section-heading"><span>Vault Structure</span></div><div class="diagram-stack"><article class="surface-card diagram-card" id="architecture" data-diagram-id="architecture"><button class="diagram-header" type="button" aria-expanded="true"><span class="diagram-arrow">▼</span><span class="diagram-header__copy"><span class="diagram-title">System Architecture</span><p class="diagram-description">SMPTE ST2110 layers and Calrec infrastructure</p></span><span class="diagram-kind">FLOWCHART</span></button><div class="diagram-content"><div class="diagram-canvas"><div class="diagram-loading">Rendering diagram…</div></div><script type="application/json" class="mermaid-source">"graph TB\nsubgraph FACILITIES[\"Broadcast Facilities\"]\nsubgraph ACR40[\"ACR40 - Audio Control Room 40\"]\nAPOLLO40[\"Calrec Apollo\nConsole\"]\nend\nsubgraph ACR42[\"ACR42 - Audio Control Room 42\"]\nAPOLLO42[\"Calrec Apollo\nConsole\"]\nend\nend\n\nsubgraph CORE[\"Calrec Impulse Core\"]\ndirection TB\nROUTER[\"IP-Based Audio Router\n272 streams x 8ch = 2,176 channels\"]\n\nsubgraph CARDS_CORE[\"Router Cards\"]\nAMX101[\"AMX101\nACR40 Primary\n145 streams\"]\nAMX102[\"AMX102\nACR42 Primary\n127 streams\"]\nAMX103[\"AMX103\nACR40 Secondary\"]\nAMX104[\"AMX104\nACR42 Secondary\"]\nend\nend\n\nsubgraph NETWORK[\"ST2110 Network Layer\"]\nIP[\"SMPTE ST2110\nProfessional Media over IP\"]\nHYDRA[\"Calrec Hydra\nEmergency Fallback\"]\nend\n\nsubgraph GATEWAYS[\"Audio Gateways (AGW)\"]\nAGW005[\"TORMPXAGW005\nACR40 Main\"]\nAGW006[\"TORMPXAGW006\nACR40\"]\nAGW007[\"TORMPXAGW007\nACR42 Main\"]\nAGW008[\"TORMPXAGW008\nACR42\"]\nAGW011[\"TORMPXAGW011\nShared\"]\nAGW012[\"TORMPXAGW012\nShared\"]\nend\n\nsubgraph IO[\"Physical I/O Layer\"]\nsubgraph RACKS[\"Audio Racks\"]\nRACK40[\"40 AUDIO RACK\nAD5780\"]\nRACK42[\"42 AUDIO RACK\nAD5780\"]\nend\nsubgraph STAGEBOXES[\"Portable Stageboxes\"]\nSTB[\"Box 01-12\n48x16 analog\"]\nend\nsubgraph CARDTYPES[\"I/O Card Types\"]\nAES[\"AES Digital\"]\nDANTE[\"Dante Network\"]\nSDI[\"SDI Embedded\"]\nMADI[\"MADI\"]\nMIC[\"Mic/Line Analog\"]\nend\nend\n\nsubgraph EXTERNAL[\"External Systems\"]\nVSM[\"Lawo VSM\nBroadcast Control\"]\nPROTOOLS[\"Pro Tools\nDAW\"]\nWAVES[\"Waves SoundGrid\nProcessing\"]\nSTUDER[\"Studer\nLegacy\"]\nend\n\nAPOLLO40 --> AMX101\nAPOLLO40 --> AMX103\nAPOLLO42 --> AMX102\nAPOLLO42 --> AMX104\n\nCARDS_CORE --> IP\nIP -.-> HYDRA\n\nIP --> GATEWAYS\n\nAGW005 --> RACK40\nAGW005 --> CARDTYPES\nAGW007 --> RACK42\nAGW007 --> CARDTYPES\nGATEWAYS --> STB\n\nCARDTYPES --> PROTOOLS\nCARDTYPES --> WAVES\nCARDTYPES --> STUDER\n\nVSM --> CORE"</script></div></article><article class="surface-card diagram-card" id="repo" data-diagram-id="repo"><button class="diagram-header" type="button" aria-expanded="true"><span class="diagram-arrow">▼</span><span class="diagram-header__copy"><span class="diagram-title">Repository Structure</span><p class="diagram-description">Vault directory tree and file organization</p></span><span class="diagram-kind">FLOWCHART</span></button><div class="diagram-content"><div class="diagram-canvas"><div class="diagram-loading">Rendering diagram…</div></div><script type="application/json" class="mermaid-source">"graph TB\nsubgraph ROOT[\"2110-audio-io/\"]\nINDEX[\"INDEX.md\nNavigation Hub\"]\nREADME[\"README.md\nProject Overview\"]\nCLAUDE[\"CLAUDE.md\nDev Config\"]\nend\n\nsubgraph ENTRY[\"router-cards/\"]\nAMX101[\"AMX101.md\nACR40 Primary\"]\nAMX102[\"AMX102.md\nACR42 Primary\"]\nAMX103[\"AMX103.md\nACR40 Secondary\"]\nAMX104[\"AMX104.md\nACR42 Secondary\"]\nend\n\nsubgraph STREAMS[\"streams/ (272 files)\"]\nS1[\"Stream-AMX101-*.md\nACR40 streams\"]\nS2[\"Stream-AMX102-*.md\nACR42 streams\"]\nS3[\"Stream-AMX103-*.md\nACR40 streams\"]\nS4[\"Stream-AMX104-*.md\nACR42 streams\"]\nend\n\nsubgraph GATEWAYS[\"gateways/ (8 files)\"]\nAGW5[\"TORMPXAGW005.md\"]\nAGW6[\"TORMPXAGW006.md\"]\nAGW7[\"TORMPXAGW007.md\"]\nAGW8[\"TORMPXAGW008.md\"]\nAGW9[\"TORMPXAGW009-012.md\"]\nend\n\nsubgraph BOXES[\"boxes/ (14 files)\"]\nRACK40[\"40 AUDIO RACK.md\"]\nRACK42[\"42 AUDIO RACK.md\"]\nBOX01[\"Box 01-12.md\nPortable Stageboxes\"]\nend\n\nsubgraph CARDS[\"cards/ (56 files)\"]\nCARD40[\"40 *.md\nACR40 cards\"]\nCARD42[\"42 *.md\nACR42 cards\"]\nend\n\nsubgraph SCRIPTS[\"scripts/ (8 files)\"]\nPY1[\"rebuild_*.py\nContent generators\"]\nPY2[\"create_*.py\nEntity creators\"]\nend\n\nsubgraph OBSIDIAN[\".obsidian/\"]\nGRAPH[\"graph.json\nColor config\"]\nWORKSPACE[\"workspace.json\"]\nPLUGINS[\"plugins/\"]\nend\n\nsubgraph DOCS[\"docs/\"]\nAUDIT[\"audit_findings.md\"]\nMCO[\"21io/\nImplementation docs\"]\nend\n\nROOT --> ENTRY\nROOT --> STREAMS\nROOT --> GATEWAYS\nROOT --> BOXES\nROOT --> CARDS\nROOT --> SCRIPTS\nROOT --> OBSIDIAN\nROOT --> DOCS"</script></div></article><article class="surface-card diagram-card" id="components" data-diagram-id="components"><button class="diagram-header" type="button" aria-expanded="true"><span class="diagram-arrow">▼</span><span class="diagram-header__copy"><span class="diagram-title">Component Map</span><p class="diagram-description">Entity types and relationships</p></span><span class="diagram-kind">CLASS</span></button><div class="diagram-content"><div class="diagram-canvas"><div class="diagram-loading">Rendering diagram…</div></div><script type="application/json" class="mermaid-source">"classDiagram\ndirection TB\n\nclass RouterCard {\n+String type: router-card\n+String acr: ACR40|ACR42\n+Array~String~ tags\n+Array~Device~ children\nExamples: AMX101-104\n}\n\nclass Stream {\n+String type: stream\n+String router: AMX###\n+Number physical_output\n+String acr: ACR40|ACR42\n+Route route\n8 channels per stream\n}\n\nclass AudioGateway {\n+String type: agw\n+String hostname\n+Array~Slot~ slots\n+Array~Port~ ports\nExamples: TORMPXAGW005-012\n}\n\nclass Box {\n+String type: box\n+String acr: ACR40|ACR42\n+Number boxId\n+String model\n+String location\n+NetworkInfo network\nExamples: 40 AUDIO RACK\n}\n\nclass Card {\n+String type: card\n+String parent: gateway\n+String cardType\n+Number inputs\n+Number outputs\n+String slot\n+Array~Stream~ streams\n}\n\nclass Slot {\n+String label: A-Z\n+Card card\nPhysical position in AGW\n}\n\nclass Port {\n+Number portNum: 1-64\n+Stream send\n+Stream receive\n}\n\nclass Route {\n+String direction: IN|OUT\n+Device device\n+Number port\n+String slot\n+String cardType\n+String channels\n}\n\nRouterCard \"1\" --> \"*\" Stream : produces\nStream \"*\" --> \"1\" AudioGateway : routes to\nAudioGateway \"1\" --> \"*\" Slot : contains\nAudioGateway \"1\" --> \"*\" Port : has\nSlot \"1\" --> \"1\" Card : holds\nPort \"1\" --> \"2\" Stream : send/receive\nCard \"1\" --> \"*\" Stream : streams\nAudioGateway \"*\" --> \"*\" Box : manages\nStream \"1\" --> \"1\" Route : defines"</script></div></article><article class="surface-card diagram-card" id="dataflow" data-diagram-id="dataflow"><button class="diagram-header" type="button" aria-expanded="true"><span class="diagram-arrow">▼</span><span class="diagram-header__copy"><span class="diagram-title">Data Flow</span><p class="diagram-description">Audio signal paths (send/receive)</p></span><span class="diagram-kind">SEQUENCE</span></button><div class="diagram-content"><div class="diagram-canvas"><div class="diagram-loading">Rendering diagram…</div></div><script type="application/json" class="mermaid-source">"sequenceDiagram\nparticipant Console as Calrec Apollo Console\nparticipant Core as Impulse Core Router\nparticipant Router as Router Card (AMX###)\nparticipant Stream as ST2110 Stream\nparticipant AGW as Audio Gateway\nparticipant Card as I/O Card\nparticipant IO as Physical I/O\n\nNote over Console,IO: SEND PATH (Console to External)\n\nConsole->>Core: Audio bus output\nCore->>Router: Route decision\nRouter->>Stream: Assign to stream (8ch)\nStream->>AGW: ST2110 transport\nAGW->>Card: Port mapping\nCard->>IO: D/A conversion\nIO-->>IO: To external device\n\nNote over Console,IO: RECEIVE PATH (External to Console)\n\nIO->>Card: Analog/digital input\nCard->>AGW: A/D conversion\nAGW->>Stream: ST2110 transport\nStream->>Router: Stream assignment\nRouter->>Core: Route decision\nCore->>Console: Audio bus input"</script></div></article><article class="surface-card diagram-card" id="entry" data-diagram-id="entry"><button class="diagram-header" type="button" aria-expanded="true"><span class="diagram-arrow">▼</span><span class="diagram-header__copy"><span class="diagram-title">Entry Points</span><p class="diagram-description">Vault navigation methods</p></span><span class="diagram-kind">FLOWCHART</span></button><div class="diagram-content"><div class="diagram-canvas"><div class="diagram-loading">Rendering diagram…</div></div><script type="application/json" class="mermaid-source">"graph TB\nsubgraph PRIMARY[\"Primary Entry Points\"]\nINDEX[\"INDEX.md\nNavigation hub\nStart here\"]\nREADME[\"README.md\nProject overview\nArchitecture summary\"]\nend\n\nsubgraph ROUTERS[\"Router Card Entry\"]\nAMX101[\"AMX101\nACR40 Primary\"]\nAMX102[\"AMX102\nACR42 Primary\"]\nAMX103[\"AMX103\nACR40 Secondary\"]\nAMX104[\"AMX104\nACR42 Secondary\"]\nend\n\nsubgraph GRAPH[\"Obsidian Graph View\"]\nGLOBAL[\"Global Graph\nFull topology\"]\nLOCAL[\"Local Graph\nSingle entity focus\"]\nFILTERED[\"Filtered Views\n[acr:ACR40], [type:stream]\"]\nend\n\nsubgraph TAGS[\"Tag Navigation\"]\nACR40TAG[\"#ACR40\nACR40 equipment\"]\nACR42TAG[\"#ACR42\nACR42 equipment\"]\nend\n\nsubgraph SEARCH[\"Search Entry\"]\nOBSEARCH[\"Obsidian Search\nFull-text query\"]\nFILTER[\"Property Filter\ntype:stream, acr:ACR40\"]\nend\n\nsubgraph BOOKMARKS[\"Quick Access\"]\nBM[\"Bookmarks\nSaved views\"]\nend\n\nINDEX --> ROUTERS\nINDEX --> GRAPH\nREADME --> INDEX\n\nROUTERS --> GLOBAL\nGLOBAL --> FILTERED\nFILTERED --> TAGS\n\nSEARCH --> OBSEARCH\nSEARCH --> FILTER"</script></div></article></div></section><section class="section-block" data-section="development-tooling"><div class="section-heading"><span>Development Tooling</span></div><div class="diagram-stack"><article class="surface-card diagram-card" id="tooling" data-diagram-id="tooling"><button class="diagram-header" type="button" aria-expanded="true"><span class="diagram-arrow">▼</span><span class="diagram-header__copy"><span class="diagram-title">Claude Code Configuration</span><p class="diagram-description">MCP servers, plugins, and permissions</p></span><span class="diagram-kind">FLOWCHART</span></button><div class="diagram-content"><div class="diagram-canvas"><div class="diagram-loading">Rendering diagram…</div></div><script type="application/json" class="mermaid-source">"graph TB\nsubgraph CLAUDE[\"Claude Code\"]\ndirection TB\nCLI[\"Claude Code CLI\"]\n\nsubgraph PLUGINS[\"Enabled Plugins\"]\nFRONTEND[\"frontend-design\nProduction UI\"]\nFEATURE[\"feature-dev\nGuided Development\"]\nRALPH[\"ralph-loop\nIteration Loops\"]\nTSLSP[\"typescript-lsp\nTypeScript Support\"]\nCMEM[\"claude-mem\nSession Memory\"]\nend\nend\n\nsubgraph MCP[\"MCP Servers (Project-Enabled)\"]\ndirection TB\n\nsubgraph OBSIDIAN_MCP[\"Obsidian Integration\"]\nCLOBSIDIAN[\"clobsidian\nView, Edit, Screenshot\"]\nOBSMCP[\"obsidian-mcp\nAPI Access\"]\nend\n\nsubgraph BROWSER[\"Browser Automation\"]\nCLAUDEZILLA[\"claudezilla\nFirefox Control\"]\nend\n\nsubgraph MEMORY[\"Knowledge Systems\"]\nQDRANT[\"qdrant\nSemantic Search\n16K+ PREFIX docs\"]\nend\n\nsubgraph NETWORK[\"Network\"]\nTAILSCALE[\"tailscale\nVPN Management\"]\nend\n\nsubgraph CREATIVE[\"Creative\"]\nBLENDER[\"blender\n3D Modeling\"]\nend\nend\n\nsubgraph PERMISSIONS[\"Pre-Approved Permissions\"]\nREAD[\"Read vault/**\"]\nWRITE[\"Write vault/**\"]\nEDIT[\"Edit vault/**\"]\nPYTHON[\"Bash: python3\"]\nGIT[\"Bash: git\"]\nOBSTOOLS[\"mcp__clobsidian__*\nmcp__obsidian-mcp__*\"]\nend\n\nsubgraph CONFIG[\"Configuration Files\"]\nSETTINGS[\".claude/settings.json\nProject permissions\"]\nLOCAL[\".claude/settings.local.json\nMCP server enables\"]\nCLAUDEMD[\"CLAUDE.md\nDev conventions\"]\nend\n\nCLI --> PLUGINS\nCLI --> MCP\nMCP --> PERMISSIONS\nCONFIG --> CLI\n\nstyle OBSIDIAN_MCP fill:#2A4A3A,stroke:#2E8B57\nstyle PERMISSIONS fill:#2A3A4A,stroke:#1E90FF"</script></div></article><article class="surface-card diagram-card" id="scripts" data-diagram-id="scripts"><button class="diagram-header" type="button" aria-expanded="true"><span class="diagram-arrow">▼</span><span class="diagram-header__copy"><span class="diagram-title">Automation Scripts</span><p class="diagram-description">Python generators and content rebuilders</p></span><span class="diagram-kind">FLOWCHART</span></button><div class="diagram-content"><div class="diagram-canvas"><div class="diagram-loading">Rendering diagram…</div></div><script type="application/json" class="mermaid-source">"graph LR\nsubgraph SOURCE[\"Source Data\"]\nCSV[\"Calrec I/O CSV\ndocs/resources/\"]\nend\n\nsubgraph SCRIPTS[\"Python Scripts (scripts/)\"]\ndirection TB\nREBUILD_STREAMS[\"rebuild_streams.py\nGenerate 272 stream files\"]\nREBUILD_GATEWAYS[\"rebuild_gateways.py\nGenerate 8 gateway files\"]\nREBUILD_CARDS[\"rebuild_cards.py\nGenerate 56 card files\"]\nREBUILD_BOXES[\"rebuild_boxes.py\nGenerate 14 box files\"]\nCREATE_INDEX[\"create_index.py\nGenerate INDEX.md\"]\nend\n\nsubgraph OUTPUT[\"Generated Vault Content\"]\nSTREAMS_OUT[\"streams/*.md\"]\nGATEWAYS_OUT[\"gateways/*.md\"]\nCARDS_OUT[\"cards/*.md\"]\nBOXES_OUT[\"boxes/*.md\"]\nINDEX_OUT[\"INDEX.md\"]\nend\n\nsubgraph VALIDATION[\"Validation\"]\nAUDIT[\"audit_findings.md\nDiscrepancy report\"]\nend\n\nCSV --> SCRIPTS\nREBUILD_STREAMS --> STREAMS_OUT\nREBUILD_GATEWAYS --> GATEWAYS_OUT\nREBUILD_CARDS --> CARDS_OUT\nREBUILD_BOXES --> BOXES_OUT\nCREATE_INDEX --> INDEX_OUT\nOUTPUT --> AUDIT\n\nstyle SCRIPTS fill:#3A3A2A,stroke:#FFA500"</script></div></article></div></section>
+</main>
+
+<footer>
+  <div class="footer-notes"><p><strong>Source:</strong> <code>wireframes/v1.0.0/*.mermaid.md</code> | <strong>Notes:</strong> <code>wireframes/v1.0.0/*.notes.md</code></p><p>Generated for: <strong>2110-audio-io</strong> | Location: <code>~/dev/milano-cortina/2110-audio-io</code></p><p>Systems: Calrec Impulse Core, Calrec Apollo, Lawo VSM, SMPTE ST2110, AMWA NMOS</p><p>Standards: <a href="https://www.smpte.org/standards/st2110">SMPTE ST2110</a> | <a href="https://specs.amwa.tv/nmos">AMWA NMOS</a> | <a href="https://www.aes.org/publications/standards/search.cfm?docID=96">AES67</a></p></div>
+</footer>
+
+<script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+
+const THEME_KEY = "commandsheets-theme";
+const THEME_ORDER = ["light", "dark", "ember"];
+const diagramHeaders = Array.from(document.querySelectorAll(".diagram-header"));
+let currentHeaderIndex = -1;
+let renderRun = 0;
+
+function getDefaultTheme() {
+  return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+}
+
+function getSavedTheme() {
+  const saved = localStorage.getItem(THEME_KEY);
+  return THEME_ORDER.includes(saved) ? saved : null;
+}
+
+function getCurrentTheme() {
+  const current = document.documentElement.getAttribute("data-theme");
+  return THEME_ORDER.includes(current) ? current : getDefaultTheme();
+}
+
+function applyTheme(theme, persist = true) {
+  const nextTheme = THEME_ORDER.includes(theme) ? theme : getDefaultTheme();
+  document.documentElement.setAttribute("data-theme", nextTheme);
+  if (persist) {
+    localStorage.setItem(THEME_KEY, nextTheme);
+  }
+}
+
+function cssVar(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+function getMermaidTones() {
+  return {
+    neutral: {
+      fill: cssVar("--mermaid-neutral-fill"),
+      border: cssVar("--mermaid-neutral-border"),
+      text: cssVar("--mermaid-neutral-text"),
+    },
+    blue: {
+      fill: cssVar("--mermaid-blue-fill"),
+      border: cssVar("--mermaid-blue-border"),
+      text: cssVar("--mermaid-blue-text"),
+    },
+    green: {
+      fill: cssVar("--mermaid-green-fill"),
+      border: cssVar("--mermaid-green-border"),
+      text: cssVar("--mermaid-green-text"),
+    },
+    amber: {
+      fill: cssVar("--mermaid-amber-fill"),
+      border: cssVar("--mermaid-amber-border"),
+      text: cssVar("--mermaid-amber-text"),
+    },
+    red: {
+      fill: cssVar("--mermaid-red-fill"),
+      border: cssVar("--mermaid-red-border"),
+      text: cssVar("--mermaid-red-text"),
+    },
+    violet: {
+      fill: cssVar("--mermaid-violet-fill"),
+      border: cssVar("--mermaid-violet-border"),
+      text: cssVar("--mermaid-violet-text"),
+    },
+  };
+}
+
+function parseColorToken(token) {
+  const value = token.trim().toLowerCase();
+  if (!value) {
+    return null;
+  }
+  let match = value.match(/^#([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i);
+  if (match) {
+    let hex = match[1];
+    if (hex.length === 3) {
+      hex = hex.split("").map((part) => part + part).join("");
+    }
+    if (hex.length === 8) {
+      hex = hex.slice(0, 6);
+    }
+    return {
+      r: parseInt(hex.slice(0, 2), 16),
+      g: parseInt(hex.slice(2, 4), 16),
+      b: parseInt(hex.slice(4, 6), 16),
+    };
+  }
+  match = value.match(/^rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)/i);
+  if (match) {
+    return {
+      r: Number(match[1]),
+      g: Number(match[2]),
+      b: Number(match[3]),
+    };
+  }
+  return null;
+}
+
+function classifyColorToken(token) {
+  const parsed = parseColorToken(token);
+  if (!parsed) {
+    return "neutral";
+  }
+  const { r, g, b } = parsed;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const delta = max - min;
+  if (delta < 18) {
+    return "neutral";
+  }
+  const saturation = max === 0 ? 0 : delta / max;
+  if (saturation < 0.18) {
+    return "neutral";
+  }
+  let hue = 0;
+  if (delta !== 0) {
+    if (max === r) {
+      hue = ((g - b) / delta) % 6;
+    } else if (max === g) {
+      hue = (b - r) / delta + 2;
+    } else {
+      hue = (r - g) / delta + 4;
+    }
+    hue *= 60;
+    if (hue < 0) {
+      hue += 360;
+    }
+  }
+  if (hue < 18 || hue >= 338) {
+    return "red";
+  }
+  if (hue < 72) {
+    return "amber";
+  }
+  if (hue < 170) {
+    return "green";
+  }
+  if (hue < 255) {
+    return "blue";
+  }
+  return "violet";
+}
+
+function normalizeStyleProperties(propertyText) {
+  const tones = getMermaidTones();
+  const props = propertyText
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean);
+  if (!props.length) {
+    return propertyText;
+  }
+  return props
+    .map((entry) => {
+      const parts = entry.split(/:(.+)/);
+      if (parts.length < 3) {
+        return entry;
+      }
+      const key = parts[0].trim();
+      const value = parts[1].trim();
+      const tone = tones[classifyColorToken(value)] || tones.neutral;
+      if (/^fill$/i.test(key) || /bkg/i.test(key)) {
+        return `${key}:${tone.fill}`;
+      }
+      if (/^stroke$/i.test(key) || /border/i.test(key) || /line/i.test(key)) {
+        return `${key}:${tone.border}`;
+      }
+      if (/color/i.test(key) || /text/i.test(key)) {
+        return `${key}:${tone.text}`;
+      }
+      return entry;
+    })
+    .join(",");
+}
+
+function formatMermaidRectColor(token) {
+  const parsed = parseColorToken(token);
+  if (!parsed) {
+    return token;
+  }
+  return `rgb(${Math.round(parsed.r)}, ${Math.round(parsed.g)}, ${Math.round(parsed.b)})`;
+}
+
+function normalizeMermaidSource(raw) {
+  const tones = getMermaidTones();
+  let next = raw.replace(/%%\{init:[\s\S]*?%%\s*/g, "");
+  next = next.replace(/^(\s*rect\s+)(#[0-9a-fA-F]{3,8}|rgba?\([^)]+\))(.*)$/gm, (_match, prefix, color, suffix) => {
+    const tone = tones[classifyColorToken(color)] || tones.neutral;
+    return `${prefix}${formatMermaidRectColor(tone.fill)}${suffix}`;
+  });
+  next = next.replace(/^(\s*style\s+\S+\s+)(.+)$/gm, (_match, prefix, properties) => {
+    return `${prefix}${normalizeStyleProperties(properties)}`;
+  });
+  next = next.replace(/^(\s*classDef\s+[^\s]+\s+)(.+)$/gm, (_match, prefix, properties) => {
+    return `${prefix}${normalizeStyleProperties(properties)}`;
+  });
+  next = next.replace(/^(\s*linkStyle\s+.+?\s+)(.+)$/gm, (_match, prefix, properties) => {
+    return `${prefix}${normalizeStyleProperties(properties)}`;
+  });
+  return next;
+}
+
+function getMermaidThemeCss() {
+  const text = cssVar("--text");
+  const panel = cssVar("--bg-panel");
+  const border = cssVar("--border-strong");
+  const line = cssVar("--mermaid-line");
+  const lineMuted = cssVar("--mermaid-line-muted");
+  const labelFill = cssVar("--mermaid-label-fill");
+  const labelText = cssVar("--mermaid-label-text");
+  const accentSoft = cssVar("--accent-soft");
+  return `
+    svg {
+      color: ${text} !important;
+    }
+    text,
+    tspan,
+    .nodeLabel,
+    .nodeLabel p,
+    .nodeLabel div,
+    .nodeLabel span,
+    .messageText,
+    .messageText tspan,
+    .loopText,
+    .loopText tspan,
+    .sectionTitle text,
+    .taskText,
+    .taskTextOutsideLeft,
+    .taskTextOutsideRight,
+    .actor text,
+    .actor tspan,
+    .classTitle,
+    .classTitle tspan,
+    .classText,
+    .entityLabel,
+    .cluster-label text {
+      fill: ${text} !important;
+      color: ${text} !important;
+      font-family: "Geist Mono UltraLight", ui-monospace, monospace !important;
+      font-weight: 200 !important;
+    }
+    .noteText,
+    .noteText tspan,
+    .label text,
+    .label foreignObject,
+    .label foreignObject div,
+    .label foreignObject span,
+    .edgeLabel text,
+    .edgeLabel foreignObject,
+    .edgeLabel span,
+    .edgeLabel p,
+    .labelText,
+    .boxText {
+      fill: ${labelText} !important;
+      color: ${labelText} !important;
+      font-family: "Geist Mono UltraLight", ui-monospace, monospace !important;
+      font-weight: 200 !important;
+    }
+    .node rect,
+    .node circle,
+    .node ellipse,
+    .node polygon,
+    .node path,
+    .classBox,
+    .entityBox {
+      stroke-width: 1.35px !important;
+    }
+    .cluster rect,
+    .cluster polygon,
+    .labelBox,
+    .note,
+    .actor rect,
+    .activation0,
+    .activation1,
+    .activation2,
+    .activation3,
+    .activation4 {
+      fill: ${panel} !important;
+      stroke: ${border} !important;
+    }
+    .edgeLabel rect,
+    .labelBkg,
+    .label-container rect {
+      fill: ${labelFill} !important;
+      stroke: ${border} !important;
+      opacity: 1 !important;
+    }
+    .messageLine0,
+    .messageLine1,
+    .relation,
+    .transition,
+    .flowchart-link,
+    .actor-line,
+    .loopLine,
+    .separator {
+      stroke: ${line} !important;
+      stroke-width: 2px !important;
+    }
+    .messageLine0,
+    .messageLine1,
+    .relation,
+    .transition {
+      fill: none !important;
+    }
+    .marker,
+    .marker path,
+    .arrowheadPath,
+    .arrowMarkerPath {
+      fill: ${line} !important;
+      stroke: ${line} !important;
+    }
+    .actor-line,
+    .loopLine {
+      stroke: ${lineMuted} !important;
+    }
+    .today {
+      fill: ${accentSoft} !important;
+      stroke: ${line} !important;
+    }
+  `;
+}
+
+function getMermaidConfig() {
+  const theme = getCurrentTheme();
+  return {
+    startOnLoad: false,
+    securityLevel: "loose",
+    theme: "base",
+    themeCSS: getMermaidThemeCss(),
+    themeVariables: {
+      darkMode: theme !== "light",
+      fontFamily: '"Geist Mono UltraLight", ui-monospace, monospace',
+      primaryColor: cssVar("--bg-panel"),
+      primaryTextColor: cssVar("--text"),
+      primaryBorderColor: cssVar("--border-strong"),
+      lineColor: cssVar("--mermaid-line"),
+      secondaryColor: cssVar("--bg-panel-strong"),
+      tertiaryColor: cssVar("--bg-panel-hover"),
+      background: cssVar("--bg-deep"),
+      mainBkg: cssVar("--bg-panel"),
+      secondBkg: cssVar("--bg-panel-strong"),
+      tertiaryBkg: cssVar("--bg-panel-hover"),
+      nodeBorder: cssVar("--border-strong"),
+      clusterBkg: cssVar("--bg-panel"),
+      clusterBorder: cssVar("--border-strong"),
+      titleColor: cssVar("--text"),
+      textColor: cssVar("--text"),
+      edgeLabelBackground: cssVar("--bg-deep"),
+      noteBkgColor: cssVar("--bg-panel"),
+      noteBorderColor: cssVar("--border-strong"),
+      actorBkg: cssVar("--bg-panel"),
+      actorBorder: cssVar("--border-strong"),
+      actorTextColor: cssVar("--text"),
+      actorLineColor: cssVar("--mermaid-line-muted"),
+      activationBkgColor: cssVar("--bg-panel-hover"),
+      activationBorderColor: cssVar("--border-strong"),
+      signalColor: cssVar("--mermaid-line"),
+      signalTextColor: cssVar("--mermaid-label-text"),
+      labelBoxBkgColor: cssVar("--mermaid-label-fill"),
+      labelBoxBorderColor: cssVar("--border-strong"),
+      labelTextColor: cssVar("--mermaid-label-text"),
+      loopTextColor: cssVar("--mermaid-label-text"),
+      noteTextColor: cssVar("--mermaid-label-text"),
+      sequenceNumberColor: cssVar("--mermaid-label-text"),
+    },
+    flowchart: {
+      useMaxWidth: true,
+      htmlLabels: true,
+      curve: "basis",
+      nodeSpacing: 70,
+      rankSpacing: 90,
+      padding: 24,
+    },
+    sequence: {
+      useMaxWidth: true,
+      mirrorActors: false,
+      diagramMarginX: 40,
+      diagramMarginY: 20,
+      boxMargin: 10,
+      boxTextMargin: 8,
+      noteMargin: 10,
+      messageMargin: 35,
+    },
+    stateDiagram: { useMaxWidth: true },
+    classDiagram: { useMaxWidth: true },
+    er: { useMaxWidth: true },
+    gitGraph: { useMaxWidth: true },
+  };
+}
+
+function escapeHtml(value) {
+  return value.replace(/[&<>"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[char]));
+}
+
+async function renderAllDiagrams() {
+  const cards = Array.from(document.querySelectorAll(".diagram-card[data-diagram-id]"));
+  if (!cards.length) {
+    return;
+  }
+  const runId = ++renderRun;
+  mermaid.initialize(getMermaidConfig());
+  for (const [index, card] of cards.entries()) {
+    const sourceNode = card.querySelector(".mermaid-source");
+    const host = card.querySelector(".diagram-canvas");
+    let raw = "";
+    if (sourceNode) {
+      try {
+        raw = JSON.parse(sourceNode.textContent).trim();
+      } catch (_error) {
+        raw = sourceNode.textContent.trim();
+      }
+    }
+    if (!raw || !host) {
+      continue;
+    }
+    try {
+      const normalized = normalizeMermaidSource(raw);
+      const result = await mermaid.render(`gallery-mermaid-${runId}-${index}`, normalized);
+      if (runId !== renderRun) {
+        return;
+      }
+      host.innerHTML = result.svg;
+    } catch (error) {
+      host.innerHTML = `<pre class="diagram-error">${escapeHtml(String(error))}</pre>`;
+    }
+  }
+}
+
+function setFocusedCard(header) {
+  document.querySelectorAll(".diagram-card.is-focused").forEach((card) => {
+    card.classList.remove("is-focused");
+  });
+  if (!header) {
+    return;
+  }
+  header.closest(".diagram-card")?.classList.add("is-focused");
+}
+
+function toggleDiagram(header, force) {
+  const card = header.closest(".diagram-card");
+  const content = card?.querySelector(".diagram-content");
+  if (!card || !content) {
+    return;
+  }
+  const shouldCollapse = force !== undefined ? force : !card.classList.contains("collapsed");
+  card.classList.toggle("collapsed", shouldCollapse);
+  header.classList.toggle("collapsed", shouldCollapse);
+  content.classList.toggle("collapsed", shouldCollapse);
+  header.setAttribute("aria-expanded", String(!shouldCollapse));
+}
+
+function setAllDiagrams(collapsed) {
+  diagramHeaders.forEach((header) => toggleDiagram(header, collapsed));
+}
+
+function focusHeader(index) {
+  if (!diagramHeaders.length) {
+    return;
+  }
+  currentHeaderIndex = Math.max(0, Math.min(index, diagramHeaders.length - 1));
+  const header = diagramHeaders[currentHeaderIndex];
+  header.focus();
+  header.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+diagramHeaders.forEach((header, index) => {
+  header.addEventListener("click", () => {
+    toggleDiagram(header);
+    currentHeaderIndex = index;
+  });
+  header.addEventListener("focus", () => {
+    currentHeaderIndex = index;
+  });
+});
+
+document.addEventListener("focusin", (event) => {
+  const target = event.target;
+  const header = target instanceof Element ? target.closest(".diagram-header") : null;
+  setFocusedCard(header);
+});
+
+document.querySelectorAll(".nav-chip").forEach((link) => {
+  link.addEventListener("click", (event) => {
+    event.preventDefault();
+    const targetId = link.getAttribute("data-target");
+    const card = targetId ? document.getElementById(targetId) : null;
+    const header = card?.querySelector(".diagram-header");
+    if (!card || !header) {
+      return;
+    }
+    toggleDiagram(header, false);
+    header.scrollIntoView({ behavior: "smooth", block: "start" });
+    header.focus();
+  });
+});
+
+document.addEventListener("keydown", async (event) => {
+  const isTextField = event.target instanceof HTMLElement && (
+    event.target.tagName === "INPUT" ||
+    event.target.tagName === "TEXTAREA" ||
+    event.target.isContentEditable
+  );
+
+  if (!isTextField && !event.metaKey && !event.ctrlKey && !event.altKey && event.code === "Backslash") {
+    event.preventDefault();
+    const current = getCurrentTheme();
+    const next = THEME_ORDER[(THEME_ORDER.indexOf(current) + 1) % THEME_ORDER.length];
+    applyTheme(next);
+    await renderAllDiagrams();
+    return;
+  }
+
+  if (!isTextField && event.key === "Escape") {
+    event.preventDefault();
+    setAllDiagrams(true);
+    return;
+  }
+
+  if (!isTextField && !event.metaKey && !event.ctrlKey && !event.altKey && event.key.toLowerCase() === "a") {
+    event.preventDefault();
+    setAllDiagrams(false);
+    return;
+  }
+
+  const focused = document.activeElement;
+  if (!(focused instanceof HTMLElement) || !focused.classList.contains("diagram-header")) {
+    if (event.key === "ArrowDown" && diagramHeaders.length) {
+      event.preventDefault();
+      focusHeader(0);
+    }
+    return;
+  }
+
+  const index = diagramHeaders.indexOf(focused);
+  if (index >= 0) {
+    currentHeaderIndex = index;
+  }
+
+  switch (event.key) {
+    case "ArrowDown":
+      event.preventDefault();
+      focusHeader(Math.min(currentHeaderIndex + 1, diagramHeaders.length - 1));
+      break;
+    case "ArrowUp":
+      event.preventDefault();
+      focusHeader(Math.max(currentHeaderIndex - 1, 0));
+      break;
+    case "ArrowRight":
+      event.preventDefault();
+      toggleDiagram(focused, false);
+      break;
+    case "ArrowLeft":
+      event.preventDefault();
+      toggleDiagram(focused, true);
+      break;
+    case "Enter":
+    case " ":
+      event.preventDefault();
+      toggleDiagram(focused);
+      break;
+    case "Home":
+      event.preventDefault();
+      focusHeader(0);
+      break;
+    case "End":
+      event.preventDefault();
+      focusHeader(diagramHeaders.length - 1);
+      break;
+  }
+});
+
+(function initTheme() {
+  applyTheme(getSavedTheme() || getDefaultTheme(), false);
+})();
+
+renderAllDiagrams();
+</script>
+</body>
+</html>

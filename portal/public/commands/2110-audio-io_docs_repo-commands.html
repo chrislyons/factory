@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2110-audio-io - Repository Commands</title>
+<style>
+@font-face {
+  font-family: "Geist Pixel Square";
+  src: url("../../shared-fonts/geist/geist-pixel/GeistPixel-Square.woff2") format("woff2");
+  font-display: swap;
+  font-weight: 400;
+}
+@font-face {
+  font-family: "Geist Mono UltraLight";
+  src: url("../../shared-fonts/geist/geist-mono/GeistMono-UltraLight.woff2") format("woff2");
+  font-display: swap;
+  font-weight: 200;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0a1016;
+  --bg-gradient-top: #070e15;
+  --bg-gradient-bottom: #0d1520;
+  --bg-deep: #060b10;
+  --bg-panel: #111824;
+  --bg-panel-strong: #172131;
+  --bg-panel-hover: #1d2840;
+  --surface-strong: rgba(18, 25, 37, 0.95);
+  --text: #e5edf6;
+  --text-dim: #9bb0c8;
+  --text-muted: #677a92;
+  --accent: #58a6ff;
+  --accent-soft: rgba(88, 166, 255, 0.10);
+  --accent-border: rgba(88, 166, 255, 0.36);
+  --border: rgba(255,255,255,0.08);
+  --border-strong: rgba(255,255,255,0.13);
+  --grid-size-primary: 37px 37px;
+  --grid-size-secondary: 29px 29px;
+  --grid-mask-top: rgba(0, 0, 0, 1);
+  --grid-mask-bottom: rgba(0, 0, 0, 0.82);
+  --dust-dot: rgba(103,122,146,0.24);
+  --dust-accent-dot: rgba(88,166,255,0.16);
+  --search-focus-shadow: 0 0 12px rgba(88, 166, 255, 0.14), 0 0 4px rgba(88, 166, 255, 0.1);
+  --callout-info-ring: inset 0 0 0 1px rgba(88, 166, 255, 0.12);
+  --section-card-focus-shadow: 0 0 0 1px rgba(88, 166, 255, 0.16), 0 0 24px rgba(88, 166, 255, 0.12);
+  --section-header-focus-bg: linear-gradient(180deg, rgba(88, 166, 255, 0.14), rgba(88, 166, 255, 0.06));
+  --section-header-focus-shadow: inset 0 0 0 1px var(--accent-border), inset 0 0 18px rgba(88, 166, 255, 0.08);
+  --section-title-focus-shadow: 0 0 12px rgba(88, 166, 255, 0.16);
+  --section-count-focus-bg: rgba(88, 166, 255, 0.08);
+  --row-divider: rgba(255,255,255,0.04);
+  --osc-text: #7dd3fc;
+  --green: #34d399;
+  --yellow: #fbbf24;
+  --red: #f87171;
+  --radius: 14px;
+  --transition: 160ms cubic-bezier(0.2, 0.65, 0.2, 1);
+  --font-display: "Geist Pixel Square", ui-sans-serif, sans-serif;
+  --font-body: "Geist Mono UltraLight", ui-monospace, monospace;
+  --shell-width: min(1400px, 92vw);
+}
+
+[data-theme="light"] {
+  --bg: #f4f7fb;
+  --bg-gradient-top: #eef3f8;
+  --bg-gradient-bottom: #fbfdff;
+  --bg-deep: #e9eef5;
+  --bg-panel: #ffffff;
+  --bg-panel-strong: #f6f9fd;
+  --bg-panel-hover: #eef4fb;
+  --surface-strong: rgba(248, 251, 255, 0.94);
+  --text: #122033;
+  --text-dim: #4c5f78;
+  --text-muted: #7d8da3;
+  --accent: #006adc;
+  --accent-soft: rgba(0, 106, 220, 0.08);
+  --accent-border: rgba(0, 106, 220, 0.24);
+  --border: rgba(10, 21, 39, 0.08);
+  --border-strong: rgba(10, 21, 39, 0.14);
+  color-scheme: light;
+}
+
+[data-theme="ember"] {
+  --bg: #352619;
+  --bg-gradient-top: #312217;
+  --bg-gradient-bottom: #38281C;
+  --bg-deep: rgba(48, 38, 29, 0.93);
+  --bg-panel: rgba(73, 56, 44, 0.95);
+  --bg-panel-strong: rgba(105, 83, 62, 0.95);
+  --bg-panel-hover: rgba(137, 110, 82, 0.95);
+  --surface-strong: rgba(73, 56, 44, 0.95);
+  --text: #FFFDF9;
+  --text-dim: #F8EDDE;
+  --text-muted: #E0CAAA;
+  --accent: #FFB800;
+  --accent-soft: rgba(255, 184, 0, 0.2);
+  --accent-border: rgba(210, 160, 105, 0.7);
+  --border: rgba(210, 160, 105, 0.42);
+  --border-strong: rgba(210, 160, 105, 0.7);
+  --dust-dot: rgba(232, 206, 171, 0.22);
+  --dust-accent-dot: rgba(255, 184, 0, 0.16);
+  --search-focus-shadow: 0 0 12px rgba(255, 184, 0, 0.18), 0 0 4px rgba(255, 107, 53, 0.18);
+  --callout-info-ring: inset 0 0 0 1px rgba(210, 160, 105, 0.28);
+  --section-card-focus-shadow: 0 0 0 1px rgba(210, 160, 105, 0.34), 0 0 24px rgba(255, 107, 53, 0.14);
+  --section-header-focus-bg: linear-gradient(180deg, rgba(255, 184, 0, 0.16), rgba(255, 107, 53, 0.12));
+  --section-header-focus-shadow: inset 0 0 0 1px var(--accent-border), inset 0 0 18px rgba(255, 107, 53, 0.14);
+  --section-title-focus-shadow: 0 0 12px rgba(255, 107, 53, 0.18);
+  --section-count-focus-bg: rgba(255, 184, 0, 0.12);
+  --row-divider: rgba(210, 160, 105, 0.18);
+  --osc-text: #FF6B35;
+  color-scheme: dark;
+}
+
+html, body { min-height: 100%; }
+
+body {
+  font-family: var(--font-body);
+  font-weight: 200;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text);
+  background: linear-gradient(180deg, var(--bg-gradient-top), var(--bg-gradient-bottom));
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle, var(--dust-dot) 0.8px, transparent 0.8px),
+    radial-gradient(circle, var(--dust-accent-dot) 0.6px, transparent 0.6px);
+  background-size: var(--grid-size-primary), var(--grid-size-secondary);
+  background-position: 0 0, 17px 19px;
+  -webkit-mask-image: linear-gradient(180deg, var(--grid-mask-top), var(--grid-mask-bottom));
+  mask-image: linear-gradient(180deg, var(--grid-mask-top), var(--grid-mask-bottom));
+  animation: dust-drift 90s linear infinite;
+}
+
+body > * { position: relative; z-index: 1; }
+
+@keyframes dust-drift {
+  0% { background-position: 0 0, 11px 13px; }
+  100% { background-position: 24px 48px, 35px 61px; }
+}
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  border-bottom: 1px solid var(--border-strong);
+  background: var(--surface-strong);
+  backdrop-filter: blur(14px);
+}
+
+.site-header__inner,
+main,
+footer .inner {
+  width: var(--shell-width);
+  margin: 0 auto;
+}
+
+.site-header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  min-height: 38px;
+  text-decoration: none;
+}
+
+.brand__title {
+  font-family: var(--font-display);
+  font-size: 14px;
+  color: var(--text);
+}
+
+.header-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex: 1;
+}
+
+.hero-meta {
+  display: grid;
+  gap: 8px;
+  justify-items: end;
+  align-content: start;
+  flex: 0 1 520px;
+  min-width: 0;
+}
+
+main {
+  padding: 22px 0 42px;
+  display: grid;
+  gap: 16px;
+  flex: 1 0 auto;
+  align-content: start;
+}
+
+.hero-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.hero {
+  display: grid;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+  max-width: 72ch;
+}
+
+.hero-eyebrow {
+  font-family: var(--font-display);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(18px, 2.2vw, 24px);
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  margin-left: 4px;
+}
+
+.hero p {
+  color: var(--text-dim);
+  font-size: 12px;
+  margin-left: 4px;
+}
+
+.export-btn {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-muted);
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-right: 4px;
+  padding: 7px 14px;
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition), color var(--transition), box-shadow var(--transition), transform var(--transition);
+}
+
+.export-btn:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent-border);
+  color: var(--text);
+}
+
+.export-btn.is-confirmed {
+  background: rgba(52, 211, 153, 0.12);
+  border-color: rgba(52, 211, 153, 0.4);
+  color: var(--text);
+  box-shadow: 0 0 0 1px rgba(52, 211, 153, 0.12), 0 0 18px rgba(52, 211, 153, 0.18);
+  animation: export-confirm 420ms cubic-bezier(0.2, 0.65, 0.2, 1);
+}
+
+.export-btn.is-error {
+  background: rgba(248, 113, 113, 0.12);
+  border-color: rgba(248, 113, 113, 0.38);
+  color: var(--text);
+  box-shadow: 0 0 0 1px rgba(248, 113, 113, 0.1), 0 0 18px rgba(248, 113, 113, 0.14);
+}
+
+@keyframes export-confirm {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  40% {
+    transform: translateY(-1px) scale(1.03);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+.surface-card {
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+  overflow: hidden;
+}
+
+.surface-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 18px;
+  right: 18px;
+  height: 1px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, var(--border-strong), transparent);
+}
+
+.meta-chip {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: 100%;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+}
+
+.meta-chip__label {
+  color: var(--text-muted);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.meta-chip__value {
+  color: var(--text-dim);
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.search-wrap {
+  position: relative;
+}
+
+.search-input {
+  width: 100%;
+  height: 38px;
+  padding: 0 68px 0 36px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-deep);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 13px;
+  outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.search-input:focus {
+  border-color: var(--accent-border);
+  box-shadow: var(--search-focus-shadow);
+}
+
+.search-icon,
+.search-count {
+  position: absolute;
+  top: 0;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  color: var(--text-muted);
+}
+
+.search-icon { left: 11px; }
+.search-count { right: 34px; font-size: 11px; }
+
+.search-clear {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-muted);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.search-clear.visible { display: flex; }
+
+.search-clear:hover {
+  background: var(--accent-soft);
+  color: var(--text);
+}
+
+.callout-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.callout {
+  padding: 16px 18px;
+  display: grid;
+  gap: 8px;
+}
+
+.callout h2 {
+  font-family: var(--font-display);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.callout p {
+  color: var(--text-dim);
+  font-size: 11px;
+  white-space: pre-wrap;
+}
+
+.callout--info {
+  box-shadow: var(--callout-info-ring);
+}
+
+.callout--warning {
+  box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.16);
+}
+
+.callout--success {
+  box-shadow: inset 0 0 0 1px rgba(52, 211, 153, 0.16);
+}
+
+.section-card {
+  overflow: hidden;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.section-card.is-focused {
+  border-color: var(--accent-border);
+  box-shadow: var(--section-card-focus-shadow);
+}
+
+.section-card.is-hidden {
+  display: none;
+}
+
+.section-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-panel-strong);
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+  border-radius: calc(var(--radius) - 1px) calc(var(--radius) - 1px) 0 0;
+  transition: background var(--transition), border-radius var(--transition), box-shadow var(--transition);
+}
+
+.section-header:hover {
+  background: var(--bg-panel-hover);
+}
+
+.section-header:focus,
+.section-header:focus-visible {
+  outline: none;
+  background: var(--section-header-focus-bg);
+  box-shadow: var(--section-header-focus-shadow);
+}
+
+.section-header.collapsed {
+  border-radius: calc(var(--radius) - 1px);
+  border-bottom-color: transparent;
+}
+
+.section-arrow {
+  font-size: 9px;
+  color: var(--text-muted);
+  transition: transform var(--transition);
+}
+
+.section-header.collapsed .section-arrow {
+  transform: rotate(-90deg);
+}
+
+.section-header:focus .section-arrow,
+.section-header:focus-visible .section-arrow {
+  color: var(--accent);
+}
+
+.section-title {
+  flex: 1;
+  font-family: var(--font-display);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+}
+
+.section-header:focus .section-title,
+.section-header:focus-visible .section-title {
+  color: var(--text);
+  text-shadow: var(--section-title-focus-shadow);
+}
+
+.section-count {
+  padding: 1px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-deep);
+  color: var(--text-muted);
+  font-size: 10px;
+}
+
+.section-header:focus .section-count,
+.section-header:focus-visible .section-count {
+  border-color: var(--accent-border);
+  background: var(--section-count-focus-bg);
+  color: var(--text);
+}
+
+.section-body {
+  display: block;
+}
+
+.section-body.collapsed {
+  display: none;
+}
+
+.command-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.command-table th {
+  padding: 8px 12px;
+  text-align: left;
+  font-size: 10px;
+  font-weight: 200;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border);
+}
+
+.command-table th:nth-child(1) { width: 24%; }
+.command-table th:nth-child(2) { width: 38%; }
+.command-table th:nth-child(3) { width: 38%; }
+
+.command-row {
+  border-bottom: 1px solid var(--row-divider);
+}
+
+.command-row:last-child {
+  border-bottom: none;
+}
+
+.command-row.hidden {
+  display: none;
+}
+
+.command-row td {
+  padding: 10px 12px;
+  vertical-align: middle;
+  font-size: 11px;
+}
+
+.command-row td:first-child {
+  padding-left: 40px;
+}
+
+.task-text {
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+.row-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 7px;
+}
+
+.row-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid var(--accent-border);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 10px;
+  line-height: 1.2;
+}
+
+.value-block {
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--border);
+  background: var(--bg-deep);
+  color: var(--text);
+  border-radius: 10px;
+  padding: 8px 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  transition: border-color var(--transition), background var(--transition), transform var(--transition);
+}
+
+.value-block:hover {
+  border-color: var(--accent-border);
+  background: var(--accent-soft);
+}
+
+.value-block.copied {
+  border-color: rgba(52, 211, 153, 0.4);
+  background: rgba(52, 211, 153, 0.12);
+}
+
+.value-text {
+  font-family: var(--font-body);
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--accent);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.value-block--keys .value-text {
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.value-block--osc .value-text {
+  color: var(--osc-text);
+}
+
+.inline-key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  padding: 2px 7px;
+  border-radius: 6px;
+  border: 1px solid var(--accent-border);
+  background: var(--accent-soft);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 11px;
+}
+
+.key-combo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.key-join,
+.key-note {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.desc-text {
+  color: var(--text-dim);
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.empty-state {
+  padding: 22px 20px;
+  display: grid;
+  gap: 8px;
+}
+
+.empty-state h2 {
+  font-family: var(--font-display);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+}
+
+.empty-state p {
+  color: var(--text-dim);
+  max-width: 70ch;
+}
+
+footer {
+  border-top: 1px solid var(--border-strong);
+  background: var(--surface-strong);
+  backdrop-filter: blur(14px);
+  padding: 12px 0 14px;
+}
+
+footer .inner {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.footer-notes {
+  width: var(--shell-width);
+  margin: 10px auto 0;
+  display: grid;
+  gap: 6px;
+  color: var(--text-dim);
+  font-size: 11px;
+}
+
+@media (max-width: 900px) {
+  .hero-row {
+    flex-direction: column;
+  }
+
+  .site-header__inner {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .header-actions {
+    justify-content: flex-start;
+    align-items: flex-start;
+  }
+
+  .hero-meta {
+    width: 100%;
+    justify-items: start;
+  }
+
+  .command-table,
+  .command-table thead,
+  .command-table tbody,
+  .command-table tr,
+  .command-table th,
+  .command-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .command-table thead {
+    display: none;
+  }
+
+  .command-row td {
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+
+  .command-row td:first-child {
+    padding-left: 12px;
+  }
+
+  .command-row td:first-child {
+    padding-bottom: 0;
+  }
+
+  .command-row td:nth-child(2) {
+    padding-top: 8px;
+    padding-bottom: 0;
+  }
+
+  footer .inner {
+    flex-direction: column;
+  }
+}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="site-header__inner">
+    <div class="brand">
+      <span class="brand__title">codex-commandsheets</span>
+    </div>
+    <div class="header-actions"><button class="export-btn" id="export-btn" title="Copy visible results to clipboard as markdown">Export to Markdown</button></div>
+  </div>
+</header>
+
+<main>
+  <div class="hero-row">
+    <div class="hero">
+      <span class="hero-eyebrow">COMMAND REFERENCE</span>
+      <h1>2110-audio-io</h1>
+      <p>Quick reference for common development operations</p>
+    </div>
+    <div class="hero-meta"><div class="meta-chip"><span class="meta-chip__label">UPDATED</span><span class="meta-chip__value">Last updated: 2026-01-19 | Version: 1.0.0</span></div><div class="meta-chip"><span class="meta-chip__label">PROJECT ROOT</span><span class="meta-chip__value">~/dev/2110-audio-io</span></div><div class="meta-chip"><span class="meta-chip__label">NMOS-VAULT-SYNC</span><span class="meta-chip__value">~/dev/2110-audio-io/nmos-vault-sync</span></div></div>
+  </div>
+  <div class="search-wrap"><span class="search-icon">⌕</span><input class="search-input" type="text" placeholder="Search commands, snippets, or notes…" id="search" autocomplete="off" spellcheck="false"><span class="search-count" id="search-count"></span><button class="search-clear" id="search-clear" title="Clear search">×</button></div>
+  <section class="surface-card section-card" data-section="nmos-sync-1"><button class="section-header" type="button" aria-expanded="true"><span class="section-arrow">▼</span><span class="section-title">nmos-vault-sync Commands — Installation</span><span class="section-count">2</span></button><div class="section-body"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="install dependencies cd nmos-vault-sync &amp;&amp; npm install installation"><td><div class="task-text">Install dependencies</div></td><td><button class="value-block value-block--shell" data-copy="cd nmos-vault-sync &amp;&amp; npm install" title="Copy value"><code class="value-text">cd nmos-vault-sync &amp;&amp; npm install</code></button></td><td class="desc-text">Installation</td></tr><tr class="command-row" data-search="build typescript npm run build installation"><td><div class="task-text">Build TypeScript</div></td><td><button class="value-block value-block--shell" data-copy="npm run build" title="Copy value"><code class="value-text">npm run build</code></button></td><td class="desc-text">Installation</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="nmos-sync-2"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">nmos-vault-sync Commands — Sync Operations</span><span class="section-count">4</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="one-time sync npm run sync sync operations safe"><td><div class="task-text">One-time sync</div><div class="row-badges"><span class="row-badge">SAFE</span></div></td><td><button class="value-block value-block--shell" data-copy="npm run sync" title="Copy value"><code class="value-text">npm run sync</code></button></td><td class="desc-text">Sync Operations</td></tr><tr class="command-row" data-search="dry run (preview changes) npm run sync -- --dry-run sync operations safe"><td><div class="task-text">Dry run (preview changes)</div><div class="row-badges"><span class="row-badge">SAFE</span></div></td><td><button class="value-block value-block--shell" data-copy="npm run sync -- --dry-run" title="Copy value"><code class="value-text">npm run sync -- --dry-run</code></button></td><td class="desc-text">Sync Operations</td></tr><tr class="command-row" data-search="watch mode (continuous sync) npm run dev -- watch sync operations modifies vault"><td><div class="task-text">Watch mode (continuous sync)</div><div class="row-badges"><span class="row-badge">MODIFIES VAULT</span></div></td><td><button class="value-block value-block--shell" data-copy="npm run dev -- watch" title="Copy value"><code class="value-text">npm run dev -- watch</code></button></td><td class="desc-text">Sync Operations</td></tr><tr class="command-row" data-search="custom config file npm run sync -- --config ./config/custom.yaml sync operations"><td><div class="task-text">Custom config file</div></td><td><button class="value-block value-block--shell" data-copy="npm run sync -- --config ./config/custom.yaml" title="Copy value"><code class="value-text">npm run sync -- --config ./config/custom.yaml</code></button></td><td class="desc-text">Sync Operations</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="nmos-sync-3"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">nmos-vault-sync Commands — Discovery &amp; Debugging</span><span class="section-count">3</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="discover nmos/vsm endpoints npm run sync -- discover discovery &amp; debugging safe"><td><div class="task-text">Discover NMOS/VSM endpoints</div><div class="row-badges"><span class="row-badge">SAFE</span></div></td><td><button class="value-block value-block--shell" data-copy="npm run sync -- discover" title="Copy value"><code class="value-text">npm run sync -- discover</code></button></td><td class="desc-text">Discovery &amp; Debugging</td></tr><tr class="command-row" data-search="dump nmos state to json npm run sync -- dump --output data/samples/state.json discovery &amp; debugging safe"><td><div class="task-text">Dump NMOS state to JSON</div><div class="row-badges"><span class="row-badge">SAFE</span></div></td><td><button class="value-block value-block--shell" data-copy="npm run sync -- dump --output data/samples/state.json" title="Copy value"><code class="value-text">npm run sync -- dump --output data/samples/state.json</code></button></td><td class="desc-text">Discovery &amp; Debugging</td></tr><tr class="command-row" data-search="run tests npm test discovery &amp; debugging"><td><div class="task-text">Run tests</div></td><td><button class="value-block value-block--shell" data-copy="npm test" title="Copy value"><code class="value-text">npm test</code></button></td><td class="desc-text">Discovery &amp; Debugging</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="python-scripts-1"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Python Scripts (Legacy)</span><span class="section-count">4</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="rebuild all streams python3 scripts/rebuild_streams_complete.py python scripts (legacy) modifies vault"><td><div class="task-text">Rebuild all streams</div><div class="row-badges"><span class="row-badge">MODIFIES VAULT</span></div></td><td><button class="value-block value-block--shell" data-copy="python3 scripts/rebuild_streams_complete.py" title="Copy value"><code class="value-text">python3 scripts/rebuild_streams_complete.py</code></button></td><td class="desc-text">Python Scripts (Legacy)</td></tr><tr class="command-row" data-search="create agw entities python3 scripts/create_agw_entities.py python scripts (legacy) modifies vault"><td><div class="task-text">Create AGW entities</div><div class="row-badges"><span class="row-badge">MODIFIES VAULT</span></div></td><td><button class="value-block value-block--shell" data-copy="python3 scripts/create_agw_entities.py" title="Copy value"><code class="value-text">python3 scripts/create_agw_entities.py</code></button></td><td class="desc-text">Python Scripts (Legacy)</td></tr><tr class="command-row" data-search="create card children python3 scripts/create_card_children.py python scripts (legacy) modifies vault"><td><div class="task-text">Create card children</div><div class="row-badges"><span class="row-badge">MODIFIES VAULT</span></div></td><td><button class="value-block value-block--shell" data-copy="python3 scripts/create_card_children.py" title="Copy value"><code class="value-text">python3 scripts/create_card_children.py</code></button></td><td class="desc-text">Python Scripts (Legacy)</td></tr><tr class="command-row" data-search="add router targets python3 scripts/add_router_targets.py python scripts (legacy) modifies vault"><td><div class="task-text">Add router targets</div><div class="row-badges"><span class="row-badge">MODIFIES VAULT</span></div></td><td><button class="value-block value-block--shell" data-copy="python3 scripts/add_router_targets.py" title="Copy value"><code class="value-text">python3 scripts/add_router_targets.py</code></button></td><td class="desc-text">Python Scripts (Legacy)</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="vault-ops-1"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Vault Operations — File Statistics</span><span class="section-count">3</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="count all markdown files find . -name &quot;*.md&quot; -type f | wc -l file statistics safe"><td><div class="task-text">Count all markdown files</div><div class="row-badges"><span class="row-badge">SAFE</span></div></td><td><button class="value-block value-block--shell" data-copy="find . -name &quot;*.md&quot; -type f | wc -l" title="Copy value"><code class="value-text">find . -name "*.md" -type f | wc -l</code></button></td><td class="desc-text">File Statistics</td></tr><tr class="command-row" data-search="count streams by router for r in amx101 amx102 amx103 amx104; do echo -n &quot;$r: &quot;; ls streams/stream-$r-*.md 2&gt;/dev/null | wc -l; done file statistics safe"><td><div class="task-text">Count streams by router</div><div class="row-badges"><span class="row-badge">SAFE</span></div></td><td><button class="value-block value-block--shell" data-copy="for r in AMX101 AMX102 AMX103 AMX104; do echo -n &quot;$r: &quot;; ls streams/Stream-$r-*.md 2&gt;/dev/null | wc -l; done" title="Copy value"><code class="value-text">for r in AMX101 AMX102 AMX103 AMX104; do echo -n "$r: "; ls streams/Stream-$r-*.md 2&gt;/dev/null | wc -l; done</code></button></td><td class="desc-text">File Statistics</td></tr><tr class="command-row" data-search="list gateways ls -1 gateways/ file statistics safe"><td><div class="task-text">List gateways</div><div class="row-badges"><span class="row-badge">SAFE</span></div></td><td><button class="value-block value-block--shell" data-copy="ls -1 gateways/" title="Copy value"><code class="value-text">ls -1 gateways/</code></button></td><td class="desc-text">File Statistics</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="vault-ops-2"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Vault Operations — Search Operations</span><span class="section-count">2</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="find streams by gateway grep -l &quot;tormpxagw005&quot; streams/*.md search operations safe"><td><div class="task-text">Find streams by gateway</div><div class="row-badges"><span class="row-badge">SAFE</span></div></td><td><button class="value-block value-block--shell" data-copy="grep -l &quot;TORMPXAGW005&quot; streams/*.md" title="Copy value"><code class="value-text">grep -l "TORMPXAGW005" streams/*.md</code></button></td><td class="desc-text">Search Operations</td></tr><tr class="command-row" data-search="find acr40 entities grep -l &quot;acr: acr40&quot; streams/*.md router-cards/*.md search operations safe"><td><div class="task-text">Find ACR40 entities</div><div class="row-badges"><span class="row-badge">SAFE</span></div></td><td><button class="value-block value-block--shell" data-copy="grep -l &quot;acr: ACR40&quot; streams/*.md router-cards/*.md" title="Copy value"><code class="value-text">grep -l "acr: ACR40" streams/*.md router-cards/*.md</code></button></td><td class="desc-text">Search Operations</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="git-1"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Git Operations</span><span class="section-count">3</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="status check git status git operations safe"><td><div class="task-text">Status check</div><div class="row-badges"><span class="row-badge">SAFE</span></div></td><td><button class="value-block value-block--shell" data-copy="git status" title="Copy value"><code class="value-text">git status</code></button></td><td class="desc-text">Git Operations</td></tr><tr class="command-row" data-search="commit vault changes git add . &amp;&amp; git commit -m &quot;chore: sync vault from nmos&quot; git operations local"><td><div class="task-text">Commit vault changes</div><div class="row-badges"><span class="row-badge">LOCAL</span></div></td><td><button class="value-block value-block--shell" data-copy="git add . &amp;&amp; git commit -m &quot;chore: Sync vault from NMOS&quot;" title="Copy value"><code class="value-text">git add . &amp;&amp; git commit -m "chore: Sync vault from NMOS"</code></button></td><td class="desc-text">Git Operations</td></tr><tr class="command-row" data-search="create save point git checkout -b save/description-$(date +%y%m%d-%h%m) git operations safe"><td><div class="task-text">Create save point</div><div class="row-badges"><span class="row-badge">SAFE</span></div></td><td><button class="value-block value-block--shell" data-copy="git checkout -b save/description-$(date +%Y%m%d-%H%M)" title="Copy value"><code class="value-text">git checkout -b save/description-$(date +%Y%m%d-%H%M)</code></button></td><td class="desc-text">Git Operations</td></tr></tbody></table></div></section>
+  <section class="callout-grid"><article class="surface-card callout callout--info"><h2>Project Root</h2><p>~/dev/2110-audio-io</p><p>nmos-vault-sync: ~/dev/2110-audio-io/nmos-vault-sync</p></article></section>
+</main>
+
+<footer>
+  <div class="inner">
+    <span>Local command sheet generated from source content in <code>to-fix/</code>.</span>
+    <span>2110-audio-io_docs_repo-commands.html</span>
+  </div>
+  <div class="footer-notes"><p>Project: 2110-audio-io |
+Docs: 21io INDEX |
+Architecture: Architecture Gallery</p><p>Systems: Calrec Impulse Core, Lawo VSM, SMPTE ST2110, AMWA NMOS</p></div>
+</footer>
+
+<script>
+const THEME_KEY = "commandsheets-theme";
+const THEME_ORDER = ["light", "dark", "ember"];
+
+function getDefaultTheme() {
+  return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+}
+
+function getSavedTheme() {
+  const saved = localStorage.getItem(THEME_KEY);
+  return THEME_ORDER.includes(saved) ? saved : null;
+}
+
+function getCurrentTheme() {
+  const current = document.documentElement.getAttribute("data-theme");
+  return THEME_ORDER.includes(current) ? current : getDefaultTheme();
+}
+
+function applyTheme(theme, persist = true) {
+  const nextTheme = THEME_ORDER.includes(theme) ? theme : getDefaultTheme();
+  document.documentElement.setAttribute("data-theme", nextTheme);
+  if (persist) {
+    localStorage.setItem(THEME_KEY, nextTheme);
+  }
+}
+
+(function initTheme() {
+  applyTheme(getSavedTheme() || getDefaultTheme(), false);
+})();
+
+const sectionHeaders = Array.from(document.querySelectorAll(".section-header"));
+const headerArray = Array.from(sectionHeaders);
+let currentHeaderIndex = -1;
+
+function getVisibleHeaders() {
+  return headerArray.filter((header) => !header.closest(".section-card")?.classList.contains("is-hidden"));
+}
+
+function setFocusedSectionCard(header) {
+  document.querySelectorAll(".section-card.is-focused").forEach((card) => {
+    card.classList.remove("is-focused");
+  });
+  if (!header) return;
+  header.closest(".section-card")?.classList.add("is-focused");
+}
+
+function toggleSection(header, force) {
+  const body = header.nextElementSibling;
+  const shouldCollapse = force !== undefined ? force : !header.classList.contains("collapsed");
+  header.classList.toggle("collapsed", shouldCollapse);
+  body.classList.toggle("collapsed", shouldCollapse);
+  header.setAttribute("aria-expanded", String(!shouldCollapse));
+}
+
+function setAllSections(collapsed) {
+  headerArray.forEach((header) => {
+    toggleSection(header, collapsed);
+  });
+}
+
+function focusHeaderElement(header) {
+  if (!header) return;
+  currentHeaderIndex = headerArray.indexOf(header);
+  header.focus();
+  header.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+function focusVisibleHeader(index) {
+  const visibleHeaders = getVisibleHeaders();
+  if (index >= 0 && index < visibleHeaders.length) {
+    focusHeaderElement(visibleHeaders[index]);
+  }
+}
+
+document.querySelectorAll(".value-block").forEach((el) => {
+  el.addEventListener("click", async () => {
+    const text = el.dataset.copy || el.textContent || "";
+    try {
+      await navigator.clipboard.writeText(text);
+      el.classList.add("copied");
+      setTimeout(() => el.classList.remove("copied"), 420);
+    } catch (error) {
+      const area = document.createElement("textarea");
+      area.value = text;
+      document.body.appendChild(area);
+      area.select();
+      document.execCommand("copy");
+      document.body.removeChild(area);
+      el.classList.add("copied");
+      setTimeout(() => el.classList.remove("copied"), 420);
+    }
+  });
+});
+
+sectionHeaders.forEach((header, index) => {
+  header.addEventListener("click", () => toggleSection(header));
+  header.addEventListener("keydown", (event) => {
+    if (event.key === " " || event.key === "Enter") {
+      event.preventDefault();
+      toggleSection(header);
+    }
+  });
+  header.addEventListener("focus", () => {
+    currentHeaderIndex = index;
+  });
+});
+
+document.addEventListener("focusin", (event) => {
+  const target = event.target;
+  const header = target instanceof Element ? target.closest(".section-header") : null;
+  setFocusedSectionCard(header);
+});
+
+const searchInput = document.getElementById("search");
+const countEl = document.getElementById("search-count");
+const clearBtn = document.getElementById("search-clear");
+
+function applySearch() {
+  if (!searchInput) return;
+  const q = searchInput.value.trim().toLowerCase();
+  const rows = Array.from(document.querySelectorAll(".command-row"));
+  let visible = 0;
+  rows.forEach((row) => {
+    const match = !q || (row.dataset.search || "").includes(q);
+    row.classList.toggle("hidden", !match);
+    if (match) {
+      visible += 1;
+      if (q) {
+        const card = row.closest(".section-card");
+        const header = card?.querySelector(".section-header");
+        if (header && header.classList.contains("collapsed")) {
+          toggleSection(header, false);
+        }
+      }
+    }
+  });
+
+  document.querySelectorAll(".section-card").forEach((card) => {
+    const totalVisible = card.querySelectorAll(".command-row:not(.hidden)").length;
+    card.classList.toggle("is-hidden", q && totalVisible === 0);
+    const badge = card.querySelector(".section-count");
+    if (badge) {
+      const total = card.querySelectorAll(".command-row").length;
+      badge.textContent = q ? `${totalVisible}/${total}` : String(total);
+    }
+  });
+
+  countEl.textContent = q ? `${visible} match${visible === 1 ? "" : "es"}` : "";
+  clearBtn.classList.toggle("visible", !!q);
+}
+
+if (searchInput) {
+  searchInput.addEventListener("input", applySearch);
+  clearBtn.addEventListener("click", () => {
+    searchInput.value = "";
+    applySearch();
+    searchInput.focus();
+  });
+}
+
+function exportToMarkdown() {
+  const btn = document.getElementById("export-btn");
+  const resetExportButton = () => {
+    if (!btn) return;
+    btn.textContent = btn.dataset.defaultLabel || "Export to Markdown";
+    btn.classList.remove("is-confirmed", "is-error");
+  };
+
+  const flashExportButton = (label, stateClass) => {
+    if (!btn) return;
+    btn.dataset.defaultLabel = btn.dataset.defaultLabel || btn.textContent;
+    btn.textContent = label;
+    btn.classList.remove("is-confirmed", "is-error");
+    void btn.offsetWidth;
+    btn.classList.add(stateClass);
+    if (btn._resetTimer) {
+      window.clearTimeout(btn._resetTimer);
+    }
+    btn._resetTimer = window.setTimeout(resetExportButton, 1200);
+  };
+
+  const copyMarkdown = async (value) => {
+    try {
+      await navigator.clipboard.writeText(value);
+      return true;
+    } catch (error) {
+      try {
+        const area = document.createElement("textarea");
+        area.value = value;
+        document.body.appendChild(area);
+        area.select();
+        document.execCommand("copy");
+        document.body.removeChild(area);
+        return true;
+      } catch (fallbackError) {
+        return false;
+      }
+    }
+  };
+
+  const sections = Array.from(document.querySelectorAll(".section-card"))
+    .filter((card) => !card.classList.contains("is-hidden"))
+    .map((card) => {
+      const header = card.querySelector(".section-header");
+      if (header?.classList.contains("collapsed")) {
+        return null;
+      }
+      const title = card.querySelector(".section-title")?.textContent?.trim() || "";
+      const rows = Array.from(card.querySelectorAll(".command-row"))
+        .filter((row) => !row.classList.contains("hidden"))
+        .map((row) => {
+          const task = (row.querySelector(".task-text")?.textContent || "").trim();
+          const command = ((row.querySelector(".value-block")?.dataset.copy) || "").trim();
+          const desc = (row.querySelector(".desc-text")?.textContent || "").trim();
+          if (!(task || command || desc)) {
+            return null;
+          }
+          return {
+            task: task.replace(/\|/g, "\\|"),
+            command: command.replace(/\n/g, "<br>").replace(/\|/g, "\\|"),
+            desc: desc.replace(/\n/g, "<br>").replace(/\|/g, "\\|"),
+          };
+        })
+        .filter(Boolean);
+      if (!rows.length) {
+        return null;
+      }
+      return { title, rows };
+    })
+    .filter(Boolean);
+
+  if (!sections.length) {
+    flashExportButton("No visible rows", "is-error");
+    return;
+  }
+
+  let md = `# 2110-audio-io - Repository Commands\n\n`;
+  sections.forEach((card) => {
+    md += `## ${card.title}\n\n`;
+    md += "| Task | Command / Snippet | Description |\n";
+    md += "| --- | --- | --- |\n";
+    card.rows.forEach((row) => {
+      md += `| ${row.task} | \`${row.command}\` | ${row.desc} |\n`;
+    });
+    md += "\n";
+  });
+  copyMarkdown(md).then((success) => {
+    flashExportButton(success ? "✓ Copied Markdown" : "Copy failed", success ? "is-confirmed" : "is-error");
+  });
+}
+
+const exportBtn = document.getElementById("export-btn");
+if (exportBtn) {
+  exportBtn.addEventListener("click", exportToMarkdown);
+}
+
+document.addEventListener("keydown", (event) => {
+  const inSearch = searchInput && document.activeElement === searchInput;
+  const isExportShortcut =
+    (event.metaKey || event.ctrlKey) &&
+    event.shiftKey &&
+    !event.altKey &&
+    event.key.toLowerCase() === "e";
+
+  if (isExportShortcut) {
+    event.preventDefault();
+    exportToMarkdown();
+    return;
+  }
+
+  if (event.key === "\\") {
+    event.preventDefault();
+    const current = getCurrentTheme();
+    const next = THEME_ORDER[(THEME_ORDER.indexOf(current) + 1) % THEME_ORDER.length];
+    applyTheme(next);
+    return;
+  }
+
+  if (event.key === "Escape") {
+    event.preventDefault();
+    setAllSections(true);
+    if (inSearch) {
+      searchInput.value = "";
+      applySearch();
+      searchInput.blur();
+    }
+    return;
+  }
+
+  if (event.key === "Tab" && searchInput) {
+    event.preventDefault();
+    if (inSearch) {
+      searchInput.blur();
+    } else {
+      searchInput.focus();
+      searchInput.select();
+    }
+    return;
+  }
+
+  if (inSearch) {
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      focusVisibleHeader(0);
+    }
+    return;
+  }
+
+  if (!event.metaKey && !event.ctrlKey && !event.altKey && event.key.toLowerCase() === "a") {
+    event.preventDefault();
+    setAllSections(false);
+    return;
+  }
+
+  const focused = document.activeElement;
+  if (focused && focused.classList.contains("section-header")) {
+    currentHeaderIndex = headerArray.indexOf(focused);
+  }
+  const visibleHeaders = getVisibleHeaders();
+  const visibleIndex = focused && focused.classList.contains("section-header")
+    ? visibleHeaders.indexOf(focused)
+    : -1;
+
+  switch (event.key) {
+    case "ArrowDown":
+      event.preventDefault();
+      if (visibleHeaders.length) {
+        focusHeaderElement(
+          visibleHeaders[
+            visibleIndex < 0 ? 0 : Math.min(visibleIndex + 1, visibleHeaders.length - 1)
+          ]
+        );
+      }
+      break;
+    case "ArrowUp":
+      event.preventDefault();
+      if (visibleIndex <= 0) {
+        if (searchInput) {
+          searchInput.focus();
+          searchInput.select();
+        } else if (visibleHeaders.length) {
+          focusHeaderElement(visibleHeaders[0]);
+        }
+      } else {
+        focusHeaderElement(visibleHeaders[visibleIndex - 1]);
+      }
+      break;
+    case "ArrowRight":
+      if (focused && focused.classList.contains("section-header") && focused.classList.contains("collapsed")) {
+        event.preventDefault();
+        toggleSection(focused, false);
+      }
+      break;
+    case "ArrowLeft":
+      if (focused && focused.classList.contains("section-header") && !focused.classList.contains("collapsed")) {
+        event.preventDefault();
+        toggleSection(focused, true);
+      }
+      break;
+    case "Enter":
+    case " ":
+      if (focused && focused.classList.contains("section-header")) {
+        event.preventDefault();
+        toggleSection(focused);
+      }
+      break;
+  }
+});
+</script>
+</body>
+</html>

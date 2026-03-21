@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Freqfinder Repository Commands</title>
+<style>
+@font-face {
+  font-family: "Geist Pixel Square";
+  src: url("../../shared-fonts/geist/geist-pixel/GeistPixel-Square.woff2") format("woff2");
+  font-display: swap;
+  font-weight: 400;
+}
+@font-face {
+  font-family: "Geist Mono UltraLight";
+  src: url("../../shared-fonts/geist/geist-mono/GeistMono-UltraLight.woff2") format("woff2");
+  font-display: swap;
+  font-weight: 200;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0a1016;
+  --bg-gradient-top: #070e15;
+  --bg-gradient-bottom: #0d1520;
+  --bg-deep: #060b10;
+  --bg-panel: #111824;
+  --bg-panel-strong: #172131;
+  --bg-panel-hover: #1d2840;
+  --surface-strong: rgba(18, 25, 37, 0.95);
+  --text: #e5edf6;
+  --text-dim: #9bb0c8;
+  --text-muted: #677a92;
+  --accent: #58a6ff;
+  --accent-soft: rgba(88, 166, 255, 0.10);
+  --accent-border: rgba(88, 166, 255, 0.36);
+  --border: rgba(255,255,255,0.08);
+  --border-strong: rgba(255,255,255,0.13);
+  --grid-size-primary: 37px 37px;
+  --grid-size-secondary: 29px 29px;
+  --grid-mask-top: rgba(0, 0, 0, 1);
+  --grid-mask-bottom: rgba(0, 0, 0, 0.82);
+  --dust-dot: rgba(103,122,146,0.24);
+  --dust-accent-dot: rgba(88,166,255,0.16);
+  --search-focus-shadow: 0 0 12px rgba(88, 166, 255, 0.14), 0 0 4px rgba(88, 166, 255, 0.1);
+  --callout-info-ring: inset 0 0 0 1px rgba(88, 166, 255, 0.12);
+  --section-card-focus-shadow: 0 0 0 1px rgba(88, 166, 255, 0.16), 0 0 24px rgba(88, 166, 255, 0.12);
+  --section-header-focus-bg: linear-gradient(180deg, rgba(88, 166, 255, 0.14), rgba(88, 166, 255, 0.06));
+  --section-header-focus-shadow: inset 0 0 0 1px var(--accent-border), inset 0 0 18px rgba(88, 166, 255, 0.08);
+  --section-title-focus-shadow: 0 0 12px rgba(88, 166, 255, 0.16);
+  --section-count-focus-bg: rgba(88, 166, 255, 0.08);
+  --row-divider: rgba(255,255,255,0.04);
+  --osc-text: #7dd3fc;
+  --green: #34d399;
+  --yellow: #fbbf24;
+  --red: #f87171;
+  --radius: 14px;
+  --transition: 160ms cubic-bezier(0.2, 0.65, 0.2, 1);
+  --font-display: "Geist Pixel Square", ui-sans-serif, sans-serif;
+  --font-body: "Geist Mono UltraLight", ui-monospace, monospace;
+  --shell-width: min(1400px, 92vw);
+}
+
+[data-theme="light"] {
+  --bg: #f4f7fb;
+  --bg-gradient-top: #eef3f8;
+  --bg-gradient-bottom: #fbfdff;
+  --bg-deep: #e9eef5;
+  --bg-panel: #ffffff;
+  --bg-panel-strong: #f6f9fd;
+  --bg-panel-hover: #eef4fb;
+  --surface-strong: rgba(248, 251, 255, 0.94);
+  --text: #122033;
+  --text-dim: #4c5f78;
+  --text-muted: #7d8da3;
+  --accent: #006adc;
+  --accent-soft: rgba(0, 106, 220, 0.08);
+  --accent-border: rgba(0, 106, 220, 0.24);
+  --border: rgba(10, 21, 39, 0.08);
+  --border-strong: rgba(10, 21, 39, 0.14);
+  color-scheme: light;
+}
+
+[data-theme="ember"] {
+  --bg: #352619;
+  --bg-gradient-top: #312217;
+  --bg-gradient-bottom: #38281C;
+  --bg-deep: rgba(48, 38, 29, 0.93);
+  --bg-panel: rgba(73, 56, 44, 0.95);
+  --bg-panel-strong: rgba(105, 83, 62, 0.95);
+  --bg-panel-hover: rgba(137, 110, 82, 0.95);
+  --surface-strong: rgba(73, 56, 44, 0.95);
+  --text: #FFFDF9;
+  --text-dim: #F8EDDE;
+  --text-muted: #E0CAAA;
+  --accent: #FFB800;
+  --accent-soft: rgba(255, 184, 0, 0.2);
+  --accent-border: rgba(210, 160, 105, 0.7);
+  --border: rgba(210, 160, 105, 0.42);
+  --border-strong: rgba(210, 160, 105, 0.7);
+  --dust-dot: rgba(232, 206, 171, 0.22);
+  --dust-accent-dot: rgba(255, 184, 0, 0.16);
+  --search-focus-shadow: 0 0 12px rgba(255, 184, 0, 0.18), 0 0 4px rgba(255, 107, 53, 0.18);
+  --callout-info-ring: inset 0 0 0 1px rgba(210, 160, 105, 0.28);
+  --section-card-focus-shadow: 0 0 0 1px rgba(210, 160, 105, 0.34), 0 0 24px rgba(255, 107, 53, 0.14);
+  --section-header-focus-bg: linear-gradient(180deg, rgba(255, 184, 0, 0.16), rgba(255, 107, 53, 0.12));
+  --section-header-focus-shadow: inset 0 0 0 1px var(--accent-border), inset 0 0 18px rgba(255, 107, 53, 0.14);
+  --section-title-focus-shadow: 0 0 12px rgba(255, 107, 53, 0.18);
+  --section-count-focus-bg: rgba(255, 184, 0, 0.12);
+  --row-divider: rgba(210, 160, 105, 0.18);
+  --osc-text: #FF6B35;
+  color-scheme: dark;
+}
+
+html, body { min-height: 100%; }
+
+body {
+  font-family: var(--font-body);
+  font-weight: 200;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text);
+  background: linear-gradient(180deg, var(--bg-gradient-top), var(--bg-gradient-bottom));
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle, var(--dust-dot) 0.8px, transparent 0.8px),
+    radial-gradient(circle, var(--dust-accent-dot) 0.6px, transparent 0.6px);
+  background-size: var(--grid-size-primary), var(--grid-size-secondary);
+  background-position: 0 0, 17px 19px;
+  -webkit-mask-image: linear-gradient(180deg, var(--grid-mask-top), var(--grid-mask-bottom));
+  mask-image: linear-gradient(180deg, var(--grid-mask-top), var(--grid-mask-bottom));
+  animation: dust-drift 90s linear infinite;
+}
+
+body > * { position: relative; z-index: 1; }
+
+@keyframes dust-drift {
+  0% { background-position: 0 0, 11px 13px; }
+  100% { background-position: 24px 48px, 35px 61px; }
+}
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  border-bottom: 1px solid var(--border-strong);
+  background: var(--surface-strong);
+  backdrop-filter: blur(14px);
+}
+
+.site-header__inner,
+main,
+footer .inner {
+  width: var(--shell-width);
+  margin: 0 auto;
+}
+
+.site-header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  min-height: 38px;
+  text-decoration: none;
+}
+
+.brand__title {
+  font-family: var(--font-display);
+  font-size: 14px;
+  color: var(--text);
+}
+
+.header-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex: 1;
+}
+
+.hero-meta {
+  display: grid;
+  gap: 8px;
+  justify-items: end;
+  align-content: start;
+  flex: 0 1 520px;
+  min-width: 0;
+}
+
+main {
+  padding: 22px 0 42px;
+  display: grid;
+  gap: 16px;
+  flex: 1 0 auto;
+  align-content: start;
+}
+
+.hero-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.hero {
+  display: grid;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+  max-width: 72ch;
+}
+
+.hero-eyebrow {
+  font-family: var(--font-display);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(18px, 2.2vw, 24px);
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  margin-left: 4px;
+}
+
+.hero p {
+  color: var(--text-dim);
+  font-size: 12px;
+  margin-left: 4px;
+}
+
+.export-btn {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-muted);
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-right: 4px;
+  padding: 7px 14px;
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition), color var(--transition), box-shadow var(--transition), transform var(--transition);
+}
+
+.export-btn:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent-border);
+  color: var(--text);
+}
+
+.export-btn.is-confirmed {
+  background: rgba(52, 211, 153, 0.12);
+  border-color: rgba(52, 211, 153, 0.4);
+  color: var(--text);
+  box-shadow: 0 0 0 1px rgba(52, 211, 153, 0.12), 0 0 18px rgba(52, 211, 153, 0.18);
+  animation: export-confirm 420ms cubic-bezier(0.2, 0.65, 0.2, 1);
+}
+
+.export-btn.is-error {
+  background: rgba(248, 113, 113, 0.12);
+  border-color: rgba(248, 113, 113, 0.38);
+  color: var(--text);
+  box-shadow: 0 0 0 1px rgba(248, 113, 113, 0.1), 0 0 18px rgba(248, 113, 113, 0.14);
+}
+
+@keyframes export-confirm {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  40% {
+    transform: translateY(-1px) scale(1.03);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+.surface-card {
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+  overflow: hidden;
+}
+
+.surface-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 18px;
+  right: 18px;
+  height: 1px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, var(--border-strong), transparent);
+}
+
+.meta-chip {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: 100%;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+}
+
+.meta-chip__label {
+  color: var(--text-muted);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.meta-chip__value {
+  color: var(--text-dim);
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.search-wrap {
+  position: relative;
+}
+
+.search-input {
+  width: 100%;
+  height: 38px;
+  padding: 0 68px 0 36px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-deep);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 13px;
+  outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.search-input:focus {
+  border-color: var(--accent-border);
+  box-shadow: var(--search-focus-shadow);
+}
+
+.search-icon,
+.search-count {
+  position: absolute;
+  top: 0;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  color: var(--text-muted);
+}
+
+.search-icon { left: 11px; }
+.search-count { right: 34px; font-size: 11px; }
+
+.search-clear {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-muted);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.search-clear.visible { display: flex; }
+
+.search-clear:hover {
+  background: var(--accent-soft);
+  color: var(--text);
+}
+
+.callout-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.callout {
+  padding: 16px 18px;
+  display: grid;
+  gap: 8px;
+}
+
+.callout h2 {
+  font-family: var(--font-display);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.callout p {
+  color: var(--text-dim);
+  font-size: 11px;
+  white-space: pre-wrap;
+}
+
+.callout--info {
+  box-shadow: var(--callout-info-ring);
+}
+
+.callout--warning {
+  box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.16);
+}
+
+.callout--success {
+  box-shadow: inset 0 0 0 1px rgba(52, 211, 153, 0.16);
+}
+
+.section-card {
+  overflow: hidden;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.section-card.is-focused {
+  border-color: var(--accent-border);
+  box-shadow: var(--section-card-focus-shadow);
+}
+
+.section-card.is-hidden {
+  display: none;
+}
+
+.section-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-panel-strong);
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+  border-radius: calc(var(--radius) - 1px) calc(var(--radius) - 1px) 0 0;
+  transition: background var(--transition), border-radius var(--transition), box-shadow var(--transition);
+}
+
+.section-header:hover {
+  background: var(--bg-panel-hover);
+}
+
+.section-header:focus,
+.section-header:focus-visible {
+  outline: none;
+  background: var(--section-header-focus-bg);
+  box-shadow: var(--section-header-focus-shadow);
+}
+
+.section-header.collapsed {
+  border-radius: calc(var(--radius) - 1px);
+  border-bottom-color: transparent;
+}
+
+.section-arrow {
+  font-size: 9px;
+  color: var(--text-muted);
+  transition: transform var(--transition);
+}
+
+.section-header.collapsed .section-arrow {
+  transform: rotate(-90deg);
+}
+
+.section-header:focus .section-arrow,
+.section-header:focus-visible .section-arrow {
+  color: var(--accent);
+}
+
+.section-title {
+  flex: 1;
+  font-family: var(--font-display);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+}
+
+.section-header:focus .section-title,
+.section-header:focus-visible .section-title {
+  color: var(--text);
+  text-shadow: var(--section-title-focus-shadow);
+}
+
+.section-count {
+  padding: 1px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-deep);
+  color: var(--text-muted);
+  font-size: 10px;
+}
+
+.section-header:focus .section-count,
+.section-header:focus-visible .section-count {
+  border-color: var(--accent-border);
+  background: var(--section-count-focus-bg);
+  color: var(--text);
+}
+
+.section-body {
+  display: block;
+}
+
+.section-body.collapsed {
+  display: none;
+}
+
+.command-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.command-table th {
+  padding: 8px 12px;
+  text-align: left;
+  font-size: 10px;
+  font-weight: 200;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border);
+}
+
+.command-table th:nth-child(1) { width: 24%; }
+.command-table th:nth-child(2) { width: 38%; }
+.command-table th:nth-child(3) { width: 38%; }
+
+.command-row {
+  border-bottom: 1px solid var(--row-divider);
+}
+
+.command-row:last-child {
+  border-bottom: none;
+}
+
+.command-row.hidden {
+  display: none;
+}
+
+.command-row td {
+  padding: 10px 12px;
+  vertical-align: middle;
+  font-size: 11px;
+}
+
+.command-row td:first-child {
+  padding-left: 40px;
+}
+
+.task-text {
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+.row-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 7px;
+}
+
+.row-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid var(--accent-border);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 10px;
+  line-height: 1.2;
+}
+
+.value-block {
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--border);
+  background: var(--bg-deep);
+  color: var(--text);
+  border-radius: 10px;
+  padding: 8px 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  transition: border-color var(--transition), background var(--transition), transform var(--transition);
+}
+
+.value-block:hover {
+  border-color: var(--accent-border);
+  background: var(--accent-soft);
+}
+
+.value-block.copied {
+  border-color: rgba(52, 211, 153, 0.4);
+  background: rgba(52, 211, 153, 0.12);
+}
+
+.value-text {
+  font-family: var(--font-body);
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--accent);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.value-block--keys .value-text {
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.value-block--osc .value-text {
+  color: var(--osc-text);
+}
+
+.inline-key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  padding: 2px 7px;
+  border-radius: 6px;
+  border: 1px solid var(--accent-border);
+  background: var(--accent-soft);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 11px;
+}
+
+.key-combo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.key-join,
+.key-note {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.desc-text {
+  color: var(--text-dim);
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.empty-state {
+  padding: 22px 20px;
+  display: grid;
+  gap: 8px;
+}
+
+.empty-state h2 {
+  font-family: var(--font-display);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+}
+
+.empty-state p {
+  color: var(--text-dim);
+  max-width: 70ch;
+}
+
+footer {
+  border-top: 1px solid var(--border-strong);
+  background: var(--surface-strong);
+  backdrop-filter: blur(14px);
+  padding: 12px 0 14px;
+}
+
+footer .inner {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.footer-notes {
+  width: var(--shell-width);
+  margin: 10px auto 0;
+  display: grid;
+  gap: 6px;
+  color: var(--text-dim);
+  font-size: 11px;
+}
+
+@media (max-width: 900px) {
+  .hero-row {
+    flex-direction: column;
+  }
+
+  .site-header__inner {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .header-actions {
+    justify-content: flex-start;
+    align-items: flex-start;
+  }
+
+  .hero-meta {
+    width: 100%;
+    justify-items: start;
+  }
+
+  .command-table,
+  .command-table thead,
+  .command-table tbody,
+  .command-table tr,
+  .command-table th,
+  .command-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .command-table thead {
+    display: none;
+  }
+
+  .command-row td {
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+
+  .command-row td:first-child {
+    padding-left: 12px;
+  }
+
+  .command-row td:first-child {
+    padding-bottom: 0;
+  }
+
+  .command-row td:nth-child(2) {
+    padding-top: 8px;
+    padding-bottom: 0;
+  }
+
+  footer .inner {
+    flex-direction: column;
+  }
+}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="site-header__inner">
+    <div class="brand">
+      <span class="brand__title">codex-commandsheets</span>
+    </div>
+    <div class="header-actions"><button class="export-btn" id="export-btn" title="Copy visible results to clipboard as markdown">Export to Markdown</button></div>
+  </div>
+</header>
+
+<main>
+  <div class="hero-row">
+    <div class="hero">
+      <span class="hero-eyebrow">COMMAND REFERENCE</span>
+      <h1>Freqfinder</h1>
+      <p>Freqfinder v0.2.1 - JUCE Audio Plugin</p>
+    </div>
+    <div class="hero-meta"><div class="meta-chip"><span class="meta-chip__label">UPDATED</span><span class="meta-chip__value">Last updated: 2025-11-04 | Freqfinder v0.2.1</span></div><div class="meta-chip"><span class="meta-chip__label">REPO</span><span class="meta-chip__value">~/dev/freqfinder</span></div></div>
+  </div>
+  <div class="search-wrap"><span class="search-icon">⌕</span><input class="search-input" type="text" placeholder="Search commands, snippets, or notes…" id="search" autocomplete="off" spellcheck="false"><span class="search-count" id="search-count"></span><button class="search-clear" id="search-clear" title="Clear search">×</button></div>
+  <section class="surface-card section-card" data-section="build-commands"><button class="section-header" type="button" aria-expanded="true"><span class="section-arrow">▼</span><span class="section-title">Build Commands</span><span class="section-count">4</span></button><div class="section-body"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="initial setup (first build) cd ~/dev/freqfinder&#10;rm -rf build&#10;mkdir build &amp;&amp; cd build&#10;cmake -dcmake_build_type=release ..&#10;cmake --build . --config release -j8 note: first build takes 10-15 minutes as juce downloads and compiles. subsequent builds are much faster (&lt;1 minute)."><td><div class="task-text">Initial Setup (First Build)</div></td><td><button class="value-block value-block--snippet" data-copy="cd ~/dev/freqfinder&#10;rm -rf build&#10;mkdir build &amp;&amp; cd build&#10;cmake -DCMAKE_BUILD_TYPE=Release ..&#10;cmake --build . --config Release -j8" title="Copy value"><code class="value-text">cd ~/dev/freqfinder<br>rm -rf build<br>mkdir build &amp;&amp; cd build<br>cmake -DCMAKE_BUILD_TYPE=Release ..<br>cmake --build . --config Release -j8</code></button></td><td class="desc-text">Note: First build takes 10-15 minutes as JUCE downloads and compiles. Subsequent builds are much faster (&lt;1 minute).</td></tr><tr class="command-row" data-search="clean rebuild cd ~/dev/freqfinder&#10;rm -rf build&#10;mkdir build &amp;&amp; cd build&#10;cmake -dcmake_build_type=release ..&#10;cmake --build . --config release -j8"><td><div class="task-text">Clean Rebuild</div></td><td><button class="value-block value-block--snippet" data-copy="cd ~/dev/freqfinder&#10;rm -rf build&#10;mkdir build &amp;&amp; cd build&#10;cmake -DCMAKE_BUILD_TYPE=Release ..&#10;cmake --build . --config Release -j8" title="Copy value"><code class="value-text">cd ~/dev/freqfinder<br>rm -rf build<br>mkdir build &amp;&amp; cd build<br>cmake -DCMAKE_BUILD_TYPE=Release ..<br>cmake --build . --config Release -j8</code></button></td><td class="desc-text"></td></tr><tr class="command-row" data-search="incremental build (after code changes) cd ~/dev/freqfinder/build&#10;cmake --build . --config release -j8"><td><div class="task-text">Incremental Build (after code changes)</div></td><td><button class="value-block value-block--snippet" data-copy="cd ~/dev/freqfinder/build&#10;cmake --build . --config Release -j8" title="Copy value"><code class="value-text">cd ~/dev/freqfinder/build<br>cmake --build . --config Release -j8</code></button></td><td class="desc-text"></td></tr><tr class="command-row" data-search="debug build cd ~/dev/freqfinder&#10;rm -rf build&#10;mkdir build &amp;&amp; cd build&#10;cmake -dcmake_build_type=debug ..&#10;cmake --build . --config debug -j8"><td><div class="task-text">Debug Build</div></td><td><button class="value-block value-block--snippet" data-copy="cd ~/dev/freqfinder&#10;rm -rf build&#10;mkdir build &amp;&amp; cd build&#10;cmake -DCMAKE_BUILD_TYPE=Debug ..&#10;cmake --build . --config Debug -j8" title="Copy value"><code class="value-text">cd ~/dev/freqfinder<br>rm -rf build<br>mkdir build &amp;&amp; cd build<br>cmake -DCMAKE_BUILD_TYPE=Debug ..<br>cmake --build . --config Debug -j8</code></button></td><td class="desc-text"></td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="running-testing"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Running &amp; Testing</span><span class="section-count">3</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="launch standalone app open ~/dev/freqfinder/build/freqfinder_artefacts/release/standalone/freqfinder.app"><td><div class="task-text">Launch Standalone App</div></td><td><button class="value-block value-block--snippet" data-copy="open ~/dev/freqfinder/build/FreqFinder_artefacts/Release/Standalone/Freqfinder.app" title="Copy value"><code class="value-text">open ~/dev/freqfinder/build/FreqFinder_artefacts/Release/Standalone/Freqfinder.app</code></button></td><td class="desc-text"></td></tr><tr class="command-row" data-search="run from terminal (see console output) ~/dev/freqfinder/build/freqfinder_artefacts/release/standalone/freqfinder.app/contents/macos/freqfinder"><td><div class="task-text">Run from Terminal (see console output)</div></td><td><button class="value-block value-block--snippet" data-copy="~/dev/freqfinder/build/FreqFinder_artefacts/Release/Standalone/Freqfinder.app/Contents/MacOS/Freqfinder" title="Copy value"><code class="value-text">~/dev/freqfinder/build/FreqFinder_artefacts/Release/Standalone/Freqfinder.app/Contents/MacOS/Freqfinder</code></button></td><td class="desc-text"></td></tr><tr class="command-row" data-search="check build outputs ls -lh ~/dev/freqfinder/build/freqfinder_artefacts/release/"><td><div class="task-text">Check Build Outputs</div></td><td><button class="value-block value-block--snippet" data-copy="ls -lh ~/dev/freqfinder/build/FreqFinder_artefacts/Release/" title="Copy value"><code class="value-text">ls -lh ~/dev/freqfinder/build/FreqFinder_artefacts/Release/</code></button></td><td class="desc-text"></td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="installation"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Installation</span><span class="section-count">3</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="install vst3 plugin cp -r ~/dev/freqfinder/build/freqfinder_artefacts/release/vst3/freqfinder.vst3 \&#10;~/library/audio/plug-ins/vst3/"><td><div class="task-text">Install VST3 Plugin</div></td><td><button class="value-block value-block--snippet" data-copy="cp -r ~/dev/freqfinder/build/FreqFinder_artefacts/Release/VST3/Freqfinder.vst3 \&#10;~/Library/Audio/Plug-Ins/VST3/" title="Copy value"><code class="value-text">cp -r ~/dev/freqfinder/build/FreqFinder_artefacts/Release/VST3/Freqfinder.vst3 \<br>~/Library/Audio/Plug-Ins/VST3/</code></button></td><td class="desc-text"></td></tr><tr class="command-row" data-search="install au plugin cp -r ~/dev/freqfinder/build/freqfinder_artefacts/release/au/freqfinder.component \&#10;~/library/audio/plug-ins/components/"><td><div class="task-text">Install AU Plugin</div></td><td><button class="value-block value-block--snippet" data-copy="cp -r ~/dev/freqfinder/build/FreqFinder_artefacts/Release/AU/Freqfinder.component \&#10;~/Library/Audio/Plug-Ins/Components/" title="Copy value"><code class="value-text">cp -r ~/dev/freqfinder/build/FreqFinder_artefacts/Release/AU/Freqfinder.component \<br>~/Library/Audio/Plug-Ins/Components/</code></button></td><td class="desc-text"></td></tr><tr class="command-row" data-search="uninstall plugins rm -rf ~/library/audio/plug-ins/vst3/freqfinder.vst3&#10;rm -rf ~/library/audio/plug-ins/components/freqfinder.component"><td><div class="task-text">Uninstall Plugins</div></td><td><button class="value-block value-block--snippet" data-copy="rm -rf ~/Library/Audio/Plug-Ins/VST3/Freqfinder.vst3&#10;rm -rf ~/Library/Audio/Plug-Ins/Components/Freqfinder.component" title="Copy value"><code class="value-text">rm -rf ~/Library/Audio/Plug-Ins/VST3/Freqfinder.vst3<br>rm -rf ~/Library/Audio/Plug-Ins/Components/Freqfinder.component</code></button></td><td class="desc-text"></td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="development"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Development</span><span class="section-count">3</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="generate compile commands (for ides) cd ~/dev/freqfinder/build&#10;cmake -dcmake_export_compile_commands=on .."><td><div class="task-text">Generate Compile Commands (for IDEs)</div></td><td><button class="value-block value-block--snippet" data-copy="cd ~/dev/freqfinder/build&#10;cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON .." title="Copy value"><code class="value-text">cd ~/dev/freqfinder/build<br>cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..</code></button></td><td class="desc-text"></td></tr><tr class="command-row" data-search="check for warnings cd ~/dev/freqfinder/build&#10;cmake --build . --config release 2&gt;&amp;1 | grep warning"><td><div class="task-text">Check for Warnings</div></td><td><button class="value-block value-block--snippet" data-copy="cd ~/dev/freqfinder/build&#10;cmake --build . --config Release 2&gt;&amp;1 | grep warning" title="Copy value"><code class="value-text">cd ~/dev/freqfinder/build<br>cmake --build . --config Release 2&gt;&amp;1 | grep warning</code></button></td><td class="desc-text"></td></tr><tr class="command-row" data-search="run clang-format (code formatting) cd ~/dev/freqfinder&#10;find src -name &quot;*.h&quot; -o -name &quot;*.cpp&quot; | xargs clang-format -i"><td><div class="task-text">Run clang-format (code formatting)</div></td><td><button class="value-block value-block--snippet" data-copy="cd ~/dev/freqfinder&#10;find src -name &quot;*.h&quot; -o -name &quot;*.cpp&quot; | xargs clang-format -i" title="Copy value"><code class="value-text">cd ~/dev/freqfinder<br>find src -name "*.h" -o -name "*.cpp" | xargs clang-format -i</code></button></td><td class="desc-text"></td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="documentation"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Documentation</span><span class="section-count">2</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="find next prefix number ls -1 ~/dev/freqfinder/docs/frq/ | grep -e &#x27;^frq[0-9]{3}&#x27; | \&#10;sed -e &#x27;s/frq([0-9]+).*/\1/&#x27; | sort -n | tail -1"><td><div class="task-text">Find Next PREFIX Number</div></td><td><button class="value-block value-block--snippet" data-copy="ls -1 ~/dev/freqfinder/docs/frq/ | grep -E &#x27;^FRQ[0-9]{3}&#x27; | \&#10;sed -E &#x27;s/FRQ([0-9]+).*/\1/&#x27; | sort -n | tail -1" title="Copy value"><code class="value-text">ls -1 ~/dev/freqfinder/docs/frq/ | grep -E '^FRQ[0-9]{3}' | \<br>sed -E 's/FRQ([0-9]+).*/\1/' | sort -n | tail -1</code></button></td><td class="desc-text"></td></tr><tr class="command-row" data-search="create new documentation # get next number (add 1 to result above)&#10;nano ~/dev/freqfinder/docs/frq/frq002\ your\ title\ here.md"><td><div class="task-text">Create New Documentation</div></td><td><button class="value-block value-block--snippet" data-copy="# Get next number (add 1 to result above)&#10;nano ~/dev/freqfinder/docs/frq/FRQ002\ Your\ Title\ Here.md" title="Copy value"><code class="value-text"># Get next number (add 1 to result above)<br>nano ~/dev/freqfinder/docs/frq/FRQ002\ Your\ Title\ Here.md</code></button></td><td class="desc-text"></td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="debugging"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Debugging</span><span class="section-count">3</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="view crash logs ls -lt ~/library/logs/diagnosticreports/freqfinder*.crash | head -1"><td><div class="task-text">View Crash Logs</div></td><td><button class="value-block value-block--snippet" data-copy="ls -lt ~/Library/Logs/DiagnosticReports/Freqfinder*.crash | head -1" title="Copy value"><code class="value-text">ls -lt ~/Library/Logs/DiagnosticReports/Freqfinder*.crash | head -1</code></button></td><td class="desc-text"></td></tr><tr class="command-row" data-search="view system logs log show --predicate &#x27;process == &quot;freqfinder&quot;&#x27; --last 10m --style compact"><td><div class="task-text">View System Logs</div></td><td><button class="value-block value-block--snippet" data-copy="log show --predicate &#x27;process == &quot;Freqfinder&quot;&#x27; --last 10m --style compact" title="Copy value"><code class="value-text">log show --predicate 'process == "Freqfinder"' --last 10m --style compact</code></button></td><td class="desc-text"></td></tr><tr class="command-row" data-search="check plugin validation # vst3&#10;pluginval --strictness-level 5 --validate \&#10;~/dev/freqfinder/build/freqfinder_artefacts/release/vst3/freqfinder.vst3&#10;&#10;# au (macos)&#10;auval -v aufx freq orph note: pluginval must be installed separately: brew install pluginval"><td><div class="task-text">Check Plugin Validation</div></td><td><button class="value-block value-block--snippet" data-copy="# VST3&#10;pluginval --strictness-level 5 --validate \&#10;~/dev/freqfinder/build/FreqFinder_artefacts/Release/VST3/Freqfinder.vst3&#10;&#10;# AU (macOS)&#10;auval -v aufx Freq Orph" title="Copy value"><code class="value-text"># VST3<br>pluginval --strictness-level 5 --validate \<br>~/dev/freqfinder/build/FreqFinder_artefacts/Release/VST3/Freqfinder.vst3<br><br># AU (macOS)<br>auval -v aufx Freq Orph</code></button></td><td class="desc-text">Note: pluginval must be installed separately: brew install pluginval</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="performance-testing"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Performance Testing</span><span class="section-count">2</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="profile cpu usage instruments -t &quot;time profiler&quot; \&#10;~/dev/freqfinder/build/freqfinder_artefacts/release/standalone/freqfinder.app"><td><div class="task-text">Profile CPU Usage</div></td><td><button class="value-block value-block--snippet" data-copy="instruments -t &quot;Time Profiler&quot; \&#10;~/dev/freqfinder/build/FreqFinder_artefacts/Release/Standalone/Freqfinder.app" title="Copy value"><code class="value-text">instruments -t "Time Profiler" \<br>~/dev/freqfinder/build/FreqFinder_artefacts/Release/Standalone/Freqfinder.app</code></button></td><td class="desc-text"></td></tr><tr class="command-row" data-search="check binary size du -h ~/dev/freqfinder/build/freqfinder_artefacts/release/standalone/freqfinder.app"><td><div class="task-text">Check Binary Size</div></td><td><button class="value-block value-block--snippet" data-copy="du -h ~/dev/freqfinder/build/FreqFinder_artefacts/Release/Standalone/Freqfinder.app" title="Copy value"><code class="value-text">du -h ~/dev/freqfinder/build/FreqFinder_artefacts/Release/Standalone/Freqfinder.app</code></button></td><td class="desc-text"></td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="git-workflow"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Git Workflow</span><span class="section-count">2</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="common workflow cd ~/dev/freqfinder&#10;&#10;# check status&#10;git status&#10;&#10;# stage changes&#10;git add src/&#10;&#10;# commit with descriptive message&#10;git commit -m &quot;feat: add frequency portamento with adaptive glide times&#10;&#10;- implemented portamentoramp dsp utility&#10;- adaptive glide: 13.33ms (low freq) to 66.7ms (high freq)&#10;- exponential ramping for smooth transitions&#10;&#10;🤖 generated with claude code&#10;co-authored-by: claude &quot;&#10;&#10;# push to remote&#10;git push origin main"><td><div class="task-text">Common Workflow</div></td><td><button class="value-block value-block--snippet" data-copy="cd ~/dev/freqfinder&#10;&#10;# Check status&#10;git status&#10;&#10;# Stage changes&#10;git add src/&#10;&#10;# Commit with descriptive message&#10;git commit -m &quot;feat: Add frequency portamento with adaptive glide times&#10;&#10;- Implemented PortamentoRamp DSP utility&#10;- Adaptive glide: 13.33ms (low freq) to 66.7ms (high freq)&#10;- Exponential ramping for smooth transitions&#10;&#10;🤖 Generated with Claude Code&#10;Co-Authored-By: Claude &quot;&#10;&#10;# Push to remote&#10;git push origin main" title="Copy value"><code class="value-text">cd ~/dev/freqfinder<br><br># Check status<br>git status<br><br># Stage changes<br>git add src/<br><br># Commit with descriptive message<br>git commit -m "feat: Add frequency portamento with adaptive glide times<br><br>- Implemented PortamentoRamp DSP utility<br>- Adaptive glide: 13.33ms (low freq) to 66.7ms (high freq)<br>- Exponential ramping for smooth transitions<br><br>🤖 Generated with Claude Code<br>Co-Authored-By: Claude "<br><br># Push to remote<br>git push origin main</code></button></td><td class="desc-text"></td></tr><tr class="command-row" data-search="create feature branch git checkout -b feature/sidechain-input&#10;# ... make changes ...&#10;git add .&#10;git commit -m &quot;feat: add sidechain input for external analysis&quot;&#10;git push -u origin feature/sidechain-input"><td><div class="task-text">Create Feature Branch</div></td><td><button class="value-block value-block--snippet" data-copy="git checkout -b feature/sidechain-input&#10;# ... make changes ...&#10;git add .&#10;git commit -m &quot;feat: Add sidechain input for external analysis&quot;&#10;git push -u origin feature/sidechain-input" title="Copy value"><code class="value-text">git checkout -b feature/sidechain-input<br># ... make changes ...<br>git add .<br>git commit -m "feat: Add sidechain input for external analysis"<br>git push -u origin feature/sidechain-input</code></button></td><td class="desc-text"></td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="common-issues"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Common Issues</span><span class="section-count">3</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="build fails with &quot;juceheader.h not found&quot; #include &lt;juce_audio_processors/juce_audio_processors.h&gt;&#10;#include &lt;juce_dsp/juce_dsp.h&gt; solution: juce 8.x doesn&#x27;t use juceheader.h. use individual module headers instead: issue"><td><div class="task-text">Build Fails with "JuceHeader.h not found"</div><div class="row-badges"><span class="row-badge">Issue</span></div></td><td><button class="value-block value-block--snippet" data-copy="#include &lt;juce_audio_processors/juce_audio_processors.h&gt;&#10;#include &lt;juce_dsp/juce_dsp.h&gt;" title="Copy value"><code class="value-text">#include &lt;juce_audio_processors/juce_audio_processors.h&gt;<br>#include &lt;juce_dsp/juce_dsp.h&gt;</code></button></td><td class="desc-text">Solution: JUCE 8.x doesn't use JuceHeader.h. Use individual module headers instead:</td></tr><tr class="command-row" data-search="app crashes on launch ~/dev/freqfinder/build/freqfinder_artefacts/release/standalone/freqfinder.app/contents/macos/freqfinder solution: check crash logs and run from terminal to see console output: issue"><td><div class="task-text">App Crashes on Launch</div><div class="row-badges"><span class="row-badge">Issue</span></div></td><td><button class="value-block value-block--snippet" data-copy="~/dev/freqfinder/build/FreqFinder_artefacts/Release/Standalone/Freqfinder.app/Contents/MacOS/Freqfinder" title="Copy value"><code class="value-text">~/dev/freqfinder/build/FreqFinder_artefacts/Release/Standalone/Freqfinder.app/Contents/MacOS/Freqfinder</code></button></td><td class="desc-text">Solution: Check crash logs and run from terminal to see console output:</td></tr><tr class="command-row" data-search="cmake error: cmake_c_compile_object not set project(freqfinder version 0.2.1 languages c cxx) solution: ensure project declares both c and cxx languages: issue"><td><div class="task-text">CMake Error: CMAKE_C_COMPILE_OBJECT not set</div><div class="row-badges"><span class="row-badge">Issue</span></div></td><td><button class="value-block value-block--snippet" data-copy="project(FreqFinder VERSION 0.2.1 LANGUAGES C CXX)" title="Copy value"><code class="value-text">project(FreqFinder VERSION 0.2.1 LANGUAGES C CXX)</code></button></td><td class="desc-text">Solution: Ensure project declares both C and CXX languages:</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="build-targets"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Build Targets</span><span class="section-count">3</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="standalone build/freqfinder_artefacts/release/standalone/ extension: .app"><td><div class="task-text">Standalone</div></td><td><button class="value-block value-block--snippet" data-copy="build/FreqFinder_artefacts/Release/Standalone/" title="Copy value"><code class="value-text">build/FreqFinder_artefacts/Release/Standalone/</code></button></td><td class="desc-text">Extension: .app</td></tr><tr class="command-row" data-search="vst3 build/freqfinder_artefacts/release/vst3/ extension: .vst3"><td><div class="task-text">VST3</div></td><td><button class="value-block value-block--snippet" data-copy="build/FreqFinder_artefacts/Release/VST3/" title="Copy value"><code class="value-text">build/FreqFinder_artefacts/Release/VST3/</code></button></td><td class="desc-text">Extension: .vst3</td></tr><tr class="command-row" data-search="au build/freqfinder_artefacts/release/au/ extension: .component"><td><div class="task-text">AU</div></td><td><button class="value-block value-block--snippet" data-copy="build/FreqFinder_artefacts/Release/AU/" title="Copy value"><code class="value-text">build/FreqFinder_artefacts/Release/AU/</code></button></td><td class="desc-text">Extension: .component</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="quick-tests"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Quick Tests</span><span class="section-count">3</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="verify all oscillators work 1. launch standalone app&#10;2. click frequency display to start fundamental (should hear tone)&#10;3. click &quot;2&quot; in even column (should hear octave up)&#10;4. click &quot;3&quot; in odd column (should hear perfect fifth)&#10;5. verify vu meters show levels for active oscillators manual verification steps"><td><div class="task-text">Verify All Oscillators Work</div></td><td><button class="value-block value-block--snippet" data-copy="1. Launch standalone app&#10;2. Click frequency display to start fundamental (should hear tone)&#10;3. Click &quot;2&quot; in Even column (should hear octave up)&#10;4. Click &quot;3&quot; in Odd column (should hear perfect fifth)&#10;5. Verify VU meters show levels for active oscillators" title="Copy value"><code class="value-text">1. Launch standalone app<br>2. Click frequency display to start fundamental (should hear tone)<br>3. Click "2" in Even column (should hear octave up)<br>4. Click "3" in Odd column (should hear perfect fifth)<br>5. Verify VU meters show levels for active oscillators</code></button></td><td class="desc-text">Manual verification steps</td></tr><tr class="command-row" data-search="test midi input 1. connect midi keyboard&#10;2. launch standalone app&#10;3. settings → audio/midi settings → enable midi input device&#10;4. play midi note (frequency should change automatically) manual verification steps"><td><div class="task-text">Test MIDI Input</div></td><td><button class="value-block value-block--snippet" data-copy="1. Connect MIDI keyboard&#10;2. Launch standalone app&#10;3. Settings → Audio/MIDI Settings → Enable MIDI input device&#10;4. Play MIDI note (frequency should change automatically)" title="Copy value"><code class="value-text">1. Connect MIDI keyboard<br>2. Launch standalone app<br>3. Settings → Audio/MIDI Settings → Enable MIDI input device<br>4. Play MIDI note (frequency should change automatically)</code></button></td><td class="desc-text">Manual verification steps</td></tr><tr class="command-row" data-search="test parameter automation (daw) 1. load vst3 in daw (logic, ableton, reaper, etc.)&#10;2. automate &quot;master volume&quot; parameter&#10;3. play timeline - volume should change smoothly&#10;4. no clicks or pops should be audible manual verification steps"><td><div class="task-text">Test Parameter Automation (DAW)</div></td><td><button class="value-block value-block--snippet" data-copy="1. Load VST3 in DAW (Logic, Ableton, Reaper, etc.)&#10;2. Automate &quot;Master Volume&quot; parameter&#10;3. Play timeline - volume should change smoothly&#10;4. No clicks or pops should be audible" title="Copy value"><code class="value-text">1. Load VST3 in DAW (Logic, Ableton, Reaper, etc.)<br>2. Automate "Master Volume" parameter<br>3. Play timeline - volume should change smoothly<br>4. No clicks or pops should be audible</code></button></td><td class="desc-text">Manual verification steps</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="file-locations"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">File Locations</span><span class="section-count">7</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="source code ~/dev/freqfinder/src/ filesystem path"><td><div class="task-text">Source code</div></td><td><button class="value-block value-block--snippet" data-copy="~/dev/freqfinder/src/" title="Copy value"><code class="value-text">~/dev/freqfinder/src/</code></button></td><td class="desc-text">Filesystem path</td></tr><tr class="command-row" data-search="documentation ~/dev/freqfinder/docs/frq/ filesystem path"><td><div class="task-text">Documentation</div></td><td><button class="value-block value-block--snippet" data-copy="~/dev/freqfinder/docs/frq/" title="Copy value"><code class="value-text">~/dev/freqfinder/docs/frq/</code></button></td><td class="desc-text">Filesystem path</td></tr><tr class="command-row" data-search="build directory ~/dev/freqfinder/build/ filesystem path"><td><div class="task-text">Build directory</div></td><td><button class="value-block value-block--snippet" data-copy="~/dev/freqfinder/build/" title="Copy value"><code class="value-text">~/dev/freqfinder/build/</code></button></td><td class="desc-text">Filesystem path</td></tr><tr class="command-row" data-search="cmake config ~/dev/freqfinder/cmakelists.txt filesystem path"><td><div class="task-text">CMake config</div></td><td><button class="value-block value-block--snippet" data-copy="~/dev/freqfinder/CMakeLists.txt" title="Copy value"><code class="value-text">~/dev/freqfinder/CMakeLists.txt</code></button></td><td class="desc-text">Filesystem path</td></tr><tr class="command-row" data-search="implementation notes ~/dev/freqfinder/docs/implementation.md filesystem path"><td><div class="task-text">Implementation notes</div></td><td><button class="value-block value-block--snippet" data-copy="~/dev/freqfinder/docs/IMPLEMENTATION.md" title="Copy value"><code class="value-text">~/dev/freqfinder/docs/IMPLEMENTATION.md</code></button></td><td class="desc-text">Filesystem path</td></tr><tr class="command-row" data-search="installed vst3 ~/library/audio/plug-ins/vst3/ filesystem path"><td><div class="task-text">Installed VST3</div></td><td><button class="value-block value-block--snippet" data-copy="~/Library/Audio/Plug-Ins/VST3/" title="Copy value"><code class="value-text">~/Library/Audio/Plug-Ins/VST3/</code></button></td><td class="desc-text">Filesystem path</td></tr><tr class="command-row" data-search="installed au ~/library/audio/plug-ins/components/ filesystem path"><td><div class="task-text">Installed AU</div></td><td><button class="value-block value-block--snippet" data-copy="~/Library/Audio/Plug-Ins/Components/" title="Copy value"><code class="value-text">~/Library/Audio/Plug-Ins/Components/</code></button></td><td class="desc-text">Filesystem path</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="useful-links"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Useful Links</span><span class="section-count">4</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="juce documentation https://juce.com/learn/documentation reference link"><td><div class="task-text">JUCE Documentation</div></td><td><button class="value-block value-block--snippet" data-copy="https://juce.com/learn/documentation" title="Copy value"><code class="value-text">https://juce.com/learn/documentation</code></button></td><td class="desc-text">Reference link</td></tr><tr class="command-row" data-search="juce tutorials https://docs.juce.com/master/tutorial_new_projucer_project.html reference link"><td><div class="task-text">JUCE Tutorials</div></td><td><button class="value-block value-block--snippet" data-copy="https://docs.juce.com/master/tutorial_new_projucer_project.html" title="Copy value"><code class="value-text">https://docs.juce.com/master/tutorial_new_projucer_project.html</code></button></td><td class="desc-text">Reference link</td></tr><tr class="command-row" data-search="juce forum https://forum.juce.com/ reference link"><td><div class="task-text">JUCE Forum</div></td><td><button class="value-block value-block--snippet" data-copy="https://forum.juce.com/" title="Copy value"><code class="value-text">https://forum.juce.com/</code></button></td><td class="desc-text">Reference link</td></tr><tr class="command-row" data-search="cmake documentation https://cmake.org/cmake/help/latest/ reference link"><td><div class="task-text">CMake Documentation</div></td><td><button class="value-block value-block--snippet" data-copy="https://cmake.org/cmake/help/latest/" title="Copy value"><code class="value-text">https://cmake.org/cmake/help/latest/</code></button></td><td class="desc-text">Reference link</td></tr></tbody></table></div></section>
+  <section class="callout-grid"><article class="surface-card callout callout--info"><h2>Quick Reference</h2><p>For general Git/GitHub commands, see ~/dev/docs/git-commands.html. This file contains Freqfinder-specific build and development commands.</p></article></section>
+</main>
+
+<footer>
+  <div class="inner">
+    <span>Local command sheet generated from source content in <code>to-fix/</code>.</span>
+    <span>freqfinder_docs_repo-commands.html</span>
+  </div>
+  
+</footer>
+
+<script>
+const THEME_KEY = "commandsheets-theme";
+const THEME_ORDER = ["light", "dark", "ember"];
+
+function getDefaultTheme() {
+  return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+}
+
+function getSavedTheme() {
+  const saved = localStorage.getItem(THEME_KEY);
+  return THEME_ORDER.includes(saved) ? saved : null;
+}
+
+function getCurrentTheme() {
+  const current = document.documentElement.getAttribute("data-theme");
+  return THEME_ORDER.includes(current) ? current : getDefaultTheme();
+}
+
+function applyTheme(theme, persist = true) {
+  const nextTheme = THEME_ORDER.includes(theme) ? theme : getDefaultTheme();
+  document.documentElement.setAttribute("data-theme", nextTheme);
+  if (persist) {
+    localStorage.setItem(THEME_KEY, nextTheme);
+  }
+}
+
+(function initTheme() {
+  applyTheme(getSavedTheme() || getDefaultTheme(), false);
+})();
+
+const sectionHeaders = Array.from(document.querySelectorAll(".section-header"));
+const headerArray = Array.from(sectionHeaders);
+let currentHeaderIndex = -1;
+
+function getVisibleHeaders() {
+  return headerArray.filter((header) => !header.closest(".section-card")?.classList.contains("is-hidden"));
+}
+
+function setFocusedSectionCard(header) {
+  document.querySelectorAll(".section-card.is-focused").forEach((card) => {
+    card.classList.remove("is-focused");
+  });
+  if (!header) return;
+  header.closest(".section-card")?.classList.add("is-focused");
+}
+
+function toggleSection(header, force) {
+  const body = header.nextElementSibling;
+  const shouldCollapse = force !== undefined ? force : !header.classList.contains("collapsed");
+  header.classList.toggle("collapsed", shouldCollapse);
+  body.classList.toggle("collapsed", shouldCollapse);
+  header.setAttribute("aria-expanded", String(!shouldCollapse));
+}
+
+function setAllSections(collapsed) {
+  headerArray.forEach((header) => {
+    toggleSection(header, collapsed);
+  });
+}
+
+function focusHeaderElement(header) {
+  if (!header) return;
+  currentHeaderIndex = headerArray.indexOf(header);
+  header.focus();
+  header.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+function focusVisibleHeader(index) {
+  const visibleHeaders = getVisibleHeaders();
+  if (index >= 0 && index < visibleHeaders.length) {
+    focusHeaderElement(visibleHeaders[index]);
+  }
+}
+
+document.querySelectorAll(".value-block").forEach((el) => {
+  el.addEventListener("click", async () => {
+    const text = el.dataset.copy || el.textContent || "";
+    try {
+      await navigator.clipboard.writeText(text);
+      el.classList.add("copied");
+      setTimeout(() => el.classList.remove("copied"), 420);
+    } catch (error) {
+      const area = document.createElement("textarea");
+      area.value = text;
+      document.body.appendChild(area);
+      area.select();
+      document.execCommand("copy");
+      document.body.removeChild(area);
+      el.classList.add("copied");
+      setTimeout(() => el.classList.remove("copied"), 420);
+    }
+  });
+});
+
+sectionHeaders.forEach((header, index) => {
+  header.addEventListener("click", () => toggleSection(header));
+  header.addEventListener("keydown", (event) => {
+    if (event.key === " " || event.key === "Enter") {
+      event.preventDefault();
+      toggleSection(header);
+    }
+  });
+  header.addEventListener("focus", () => {
+    currentHeaderIndex = index;
+  });
+});
+
+document.addEventListener("focusin", (event) => {
+  const target = event.target;
+  const header = target instanceof Element ? target.closest(".section-header") : null;
+  setFocusedSectionCard(header);
+});
+
+const searchInput = document.getElementById("search");
+const countEl = document.getElementById("search-count");
+const clearBtn = document.getElementById("search-clear");
+
+function applySearch() {
+  if (!searchInput) return;
+  const q = searchInput.value.trim().toLowerCase();
+  const rows = Array.from(document.querySelectorAll(".command-row"));
+  let visible = 0;
+  rows.forEach((row) => {
+    const match = !q || (row.dataset.search || "").includes(q);
+    row.classList.toggle("hidden", !match);
+    if (match) {
+      visible += 1;
+      if (q) {
+        const card = row.closest(".section-card");
+        const header = card?.querySelector(".section-header");
+        if (header && header.classList.contains("collapsed")) {
+          toggleSection(header, false);
+        }
+      }
+    }
+  });
+
+  document.querySelectorAll(".section-card").forEach((card) => {
+    const totalVisible = card.querySelectorAll(".command-row:not(.hidden)").length;
+    card.classList.toggle("is-hidden", q && totalVisible === 0);
+    const badge = card.querySelector(".section-count");
+    if (badge) {
+      const total = card.querySelectorAll(".command-row").length;
+      badge.textContent = q ? `${totalVisible}/${total}` : String(total);
+    }
+  });
+
+  countEl.textContent = q ? `${visible} match${visible === 1 ? "" : "es"}` : "";
+  clearBtn.classList.toggle("visible", !!q);
+}
+
+if (searchInput) {
+  searchInput.addEventListener("input", applySearch);
+  clearBtn.addEventListener("click", () => {
+    searchInput.value = "";
+    applySearch();
+    searchInput.focus();
+  });
+}
+
+function exportToMarkdown() {
+  const btn = document.getElementById("export-btn");
+  const resetExportButton = () => {
+    if (!btn) return;
+    btn.textContent = btn.dataset.defaultLabel || "Export to Markdown";
+    btn.classList.remove("is-confirmed", "is-error");
+  };
+
+  const flashExportButton = (label, stateClass) => {
+    if (!btn) return;
+    btn.dataset.defaultLabel = btn.dataset.defaultLabel || btn.textContent;
+    btn.textContent = label;
+    btn.classList.remove("is-confirmed", "is-error");
+    void btn.offsetWidth;
+    btn.classList.add(stateClass);
+    if (btn._resetTimer) {
+      window.clearTimeout(btn._resetTimer);
+    }
+    btn._resetTimer = window.setTimeout(resetExportButton, 1200);
+  };
+
+  const copyMarkdown = async (value) => {
+    try {
+      await navigator.clipboard.writeText(value);
+      return true;
+    } catch (error) {
+      try {
+        const area = document.createElement("textarea");
+        area.value = value;
+        document.body.appendChild(area);
+        area.select();
+        document.execCommand("copy");
+        document.body.removeChild(area);
+        return true;
+      } catch (fallbackError) {
+        return false;
+      }
+    }
+  };
+
+  const sections = Array.from(document.querySelectorAll(".section-card"))
+    .filter((card) => !card.classList.contains("is-hidden"))
+    .map((card) => {
+      const header = card.querySelector(".section-header");
+      if (header?.classList.contains("collapsed")) {
+        return null;
+      }
+      const title = card.querySelector(".section-title")?.textContent?.trim() || "";
+      const rows = Array.from(card.querySelectorAll(".command-row"))
+        .filter((row) => !row.classList.contains("hidden"))
+        .map((row) => {
+          const task = (row.querySelector(".task-text")?.textContent || "").trim();
+          const command = ((row.querySelector(".value-block")?.dataset.copy) || "").trim();
+          const desc = (row.querySelector(".desc-text")?.textContent || "").trim();
+          if (!(task || command || desc)) {
+            return null;
+          }
+          return {
+            task: task.replace(/\|/g, "\\|"),
+            command: command.replace(/\n/g, "<br>").replace(/\|/g, "\\|"),
+            desc: desc.replace(/\n/g, "<br>").replace(/\|/g, "\\|"),
+          };
+        })
+        .filter(Boolean);
+      if (!rows.length) {
+        return null;
+      }
+      return { title, rows };
+    })
+    .filter(Boolean);
+
+  if (!sections.length) {
+    flashExportButton("No visible rows", "is-error");
+    return;
+  }
+
+  let md = `# Freqfinder Repository Commands\n\n`;
+  sections.forEach((card) => {
+    md += `## ${card.title}\n\n`;
+    md += "| Task | Command / Snippet | Description |\n";
+    md += "| --- | --- | --- |\n";
+    card.rows.forEach((row) => {
+      md += `| ${row.task} | \`${row.command}\` | ${row.desc} |\n`;
+    });
+    md += "\n";
+  });
+  copyMarkdown(md).then((success) => {
+    flashExportButton(success ? "✓ Copied Markdown" : "Copy failed", success ? "is-confirmed" : "is-error");
+  });
+}
+
+const exportBtn = document.getElementById("export-btn");
+if (exportBtn) {
+  exportBtn.addEventListener("click", exportToMarkdown);
+}
+
+document.addEventListener("keydown", (event) => {
+  const inSearch = searchInput && document.activeElement === searchInput;
+  const isExportShortcut =
+    (event.metaKey || event.ctrlKey) &&
+    event.shiftKey &&
+    !event.altKey &&
+    event.key.toLowerCase() === "e";
+
+  if (isExportShortcut) {
+    event.preventDefault();
+    exportToMarkdown();
+    return;
+  }
+
+  if (event.key === "\\") {
+    event.preventDefault();
+    const current = getCurrentTheme();
+    const next = THEME_ORDER[(THEME_ORDER.indexOf(current) + 1) % THEME_ORDER.length];
+    applyTheme(next);
+    return;
+  }
+
+  if (event.key === "Escape") {
+    event.preventDefault();
+    setAllSections(true);
+    if (inSearch) {
+      searchInput.value = "";
+      applySearch();
+      searchInput.blur();
+    }
+    return;
+  }
+
+  if (event.key === "Tab" && searchInput) {
+    event.preventDefault();
+    if (inSearch) {
+      searchInput.blur();
+    } else {
+      searchInput.focus();
+      searchInput.select();
+    }
+    return;
+  }
+
+  if (inSearch) {
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      focusVisibleHeader(0);
+    }
+    return;
+  }
+
+  if (!event.metaKey && !event.ctrlKey && !event.altKey && event.key.toLowerCase() === "a") {
+    event.preventDefault();
+    setAllSections(false);
+    return;
+  }
+
+  const focused = document.activeElement;
+  if (focused && focused.classList.contains("section-header")) {
+    currentHeaderIndex = headerArray.indexOf(focused);
+  }
+  const visibleHeaders = getVisibleHeaders();
+  const visibleIndex = focused && focused.classList.contains("section-header")
+    ? visibleHeaders.indexOf(focused)
+    : -1;
+
+  switch (event.key) {
+    case "ArrowDown":
+      event.preventDefault();
+      if (visibleHeaders.length) {
+        focusHeaderElement(
+          visibleHeaders[
+            visibleIndex < 0 ? 0 : Math.min(visibleIndex + 1, visibleHeaders.length - 1)
+          ]
+        );
+      }
+      break;
+    case "ArrowUp":
+      event.preventDefault();
+      if (visibleIndex <= 0) {
+        if (searchInput) {
+          searchInput.focus();
+          searchInput.select();
+        } else if (visibleHeaders.length) {
+          focusHeaderElement(visibleHeaders[0]);
+        }
+      } else {
+        focusHeaderElement(visibleHeaders[visibleIndex - 1]);
+      }
+      break;
+    case "ArrowRight":
+      if (focused && focused.classList.contains("section-header") && focused.classList.contains("collapsed")) {
+        event.preventDefault();
+        toggleSection(focused, false);
+      }
+      break;
+    case "ArrowLeft":
+      if (focused && focused.classList.contains("section-header") && !focused.classList.contains("collapsed")) {
+        event.preventDefault();
+        toggleSection(focused, true);
+      }
+      break;
+    case "Enter":
+    case " ":
+      if (focused && focused.classList.contains("section-header")) {
+        event.preventDefault();
+        toggleSection(focused);
+      }
+      break;
+  }
+});
+</script>
+</body>
+</html>
