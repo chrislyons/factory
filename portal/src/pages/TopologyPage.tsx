@@ -123,7 +123,7 @@ export function TopologyPage() {
 
   return (
     <AppShell
-      title="System"
+      title="System Topology"
       pageKey="/pages/topology.html"
       statusSlot={<SyncClock updatedAt={latestDataUpdatedAt(statuses.results)} stale={statuses.hasError} />}
     >

@@ -18,11 +18,13 @@ The portal is a React multi-page app deployed to Blackbox via Caddy.
 cd portal
 pnpm install
 pnpm build        # production build → dist/
-pnpm test         # vitest (25 tests)
+pnpm test         # vitest (17 tests, 9 files)
 make sync         # deploy to Blackbox :41910
 ```
 
-**Typography:** Geist Pixel Grid (headers), Geist Mono UltraLight (body). Font trial system on Topology page.
+**Pages:** Jobs Tracker, Loops, Object Index, Analytics, System Topology (nav: Jobs/Loops/Objects/Analytics/System)
+**Typography:** Geist Pixel Square (display), Geist Mono UltraLight (body). Font trial system on System Topology page.
+**Shell:** `min(1400px, 92vw)` all viewports.
 
 ## Job Registry
 

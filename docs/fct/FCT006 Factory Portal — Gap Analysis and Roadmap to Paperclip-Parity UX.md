@@ -275,3 +275,120 @@ After Phase 3 (full parity):
 [2] FCT005, "Hermes Agent — Fit Assessment for Paperclip x Factory Workflow," 2026-03-17.
 [3] Factory Portal source, ~/dev/factory/portal/. Accessed 2026-03-17.
 [4] Paperclip UI source, github.com/paperclipai/paperclip/tree/master/ui. Accessed 2026-03-17.
+
+---
+
+## Appendix A — React Migration Path
+
+### Rationale
+
+The portal's destination is a full operator control plane with complex interactive state: live transcript streaming, approval workflows, multi-scope budget management, real-time chart updates. This is the exact problem React solves. However, the codebase currently has no build toolchain, no npm, no bundler. A wholesale migration today means rewriting working code before the new features exist.
+
+**The pragmatic path: hybrid portal during Phase 1–2, then unified React codebase by Phase 3+.**
+
+This approach:
+- Ships new features in React immediately (approvals, run cards, budget pages get React UX from day one)
+- Preserves working vanilla JS pages (dashboard-v4, explainers, topology continue as-is)
+- Avoids the "rewrite cost" trap (you're not rebuilding old code, building new features in better framework)
+- Naturally completes the migration as old pages are superseded
+
+### Implementation Strategy
+
+**Immediate (before Phase 1):**
+
+1. **Scaffold Vite + React project** in `portal/src/`
+   - `npm init vite@latest . -- --template react`
+   - `npm install`
+   - TypeScript (optional but recommended for approval/budget complexity)
+   - Tailwind + shadcn/ui (matches Paperclip aesthetics, optional but recommended)
+   - eslint + prettier
+
+2. **Configure build output**
+   - Vite outputs to `portal/pages/` (where static files are served)
+   - Makefile updated with `npm run build` step in deployment target
+   - Keep Input Sans font loading in index.html or CSS
+
+3. **Create React entry points** for new pages
+   - `src/pages/Approvals.tsx`
+   - `src/pages/Budget.tsx`
+   - `src/pages/Analytics.tsx`
+   - `src/pages/AgentDetail.tsx`
+   - Each bundled as a separate chunk or single SPA, served as `approvals.html`, `budget.html`, etc.
+
+4. **Shared state/hooks**
+   - `hooks/useApprovals.ts` — fetch + polling logic for `/approvals/pending`
+   - `hooks/useBudget.ts` — fetch + polling logic for `/budget/status`
+   - `hooks/useAgents.ts` — fetch + polling logic for `/status/{agent}.json`
+   - `lib/api.ts` — axios/fetch wrapper with error handling
+
+**Phase 1–2 (hybrid state):**
+
+- Portal landing page: still vanilla HTML (`portal.html`)
+- Mission Control dashboard: still vanilla JS (`dashboard-v4.html`, enhanced but not rewritten)
+- Topology, architecture gallery: still vanilla/React-in-HTML (`topology.html`, unchanged)
+- **Approvals page:** React component, linked from portal.html
+- **Budget page:** React component, linked from portal.html
+- **Analytics page:** React component, linked from portal.html
+
+**Phase 3–4 (unification):**
+
+- Backfill old pages into React as needed
+- Approval/budget/analytics experience stabilizes → apply patterns to agent detail pages
+- Eventually migrate dashboard-v4 to React for consistency
+- Final state: single Vite build, all pages React components, consistent UX
+
+### Tech Stack Choices
+
+**Build:**
+- **Vite** — fast dev server, minimal config, outputs optimized SPA bundles
+- **React 18** — core framework
+- **TypeScript** — optional but recommended for approval/budget state complexity
+- **Tailwind CSS** — style consistency with Paperclip's design (not required, can extend Input Sans CSS)
+- **shadcn/ui** — component library, works on Tailwind, ships only what you use
+- **React Query / TanStack Query** — handles polling, caching, refetching of approval/budget/agent data
+- **Zod or React Hook Form** — validation for approval decision forms, budget overrides
+
+**Styling:**
+- Extend Input Sans font loading to Vite build
+- Keep existing CSS custom properties (dark mode variables, spacing scale)
+- OR: adopt Tailwind for React pages, vanilla CSS for legacy pages (temporary inconsistency, acceptable during Phase 1–2)
+
+**API communication:**
+- Fetch or axios in React hooks
+- Mirror the polling intervals: 3s for approvals, 10s for budget, 5s for agent status
+- Graceful error states, offline fallback (retry with backoff)
+
+### Deployment Changes
+
+**Makefile additions:**
+```makefile
+build-portal:
+	cd portal && npm run build
+
+deploy-portal: build-portal
+	# rsync new portal/dist/ to Blackbox
+	# restart Caddy service
+```
+
+**Caddy configuration (serve.sh):**
+- No changes — Vite outputs static files to `portal/pages/`, Caddy serves them as-is
+- SPA routing: if you use React Router, configure Caddy to rewrite 404s to `index.html`
+
+**Systemd service:**
+- No changes — portal and GSD backend continue to run as services
+
+### Fallback Plan
+
+If React migration proves slower than expected:
+- Stick with vanilla JS + Chart.js for Phase 1–2 (still ships features on schedule)
+- Migrate to React in Phase 3 or later
+- The hybrid state is stable — you can ship a working portal with vanilla + React pages indefinitely
+
+### Success Criteria
+
+- Phase 1 approvals/budget/run-cards ship in React with streaming updates and complex state management
+- No build complexity leaks into ops — `npm run build` is the only build step, rest is unchanged
+- Old vanilla pages continue to work without modification
+- Deployment time increases by <5min (npm install + build)
+
+

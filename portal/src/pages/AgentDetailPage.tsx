@@ -89,7 +89,7 @@ export function AgentDetailPage({ agentId }: { agentId: AgentId }) {
         />
       }
     >
-      <SurfaceCard title="Agent Header" subtitle="Identity and control plane">
+      <SurfaceCard title="Agent Header" subtitle="Identity and control plane" className="surface-card--compact">
         {!agent ? (
           <EmptyState title="Waiting for agent detail" detail="The coordinator agent detail endpoint is not available yet." />
         ) : (
@@ -139,7 +139,7 @@ export function AgentDetailPage({ agentId }: { agentId: AgentId }) {
 
       {tab === "overview" ? (
         <div className="dashboard-grid">
-          <SurfaceCard title="Current Status" subtitle="Latest live state">
+          <SurfaceCard title="Current Status" subtitle="Latest live state" className="surface-card--compact">
             {agent?.current_run ? (
               <div className="stack">
                 <div className="placeholder-copy">{agent.current_run.status} · {relativeTimestamp(agent.current_run.started_at)}</div>
@@ -149,7 +149,7 @@ export function AgentDetailPage({ agentId }: { agentId: AgentId }) {
               <EmptyState title="No active run" detail="Run state appears here when the coordinator exposes it." />
             )}
           </SurfaceCard>
-          <SurfaceCard title="Budget" subtitle="Shared budget component">
+          <SurfaceCard title="Budget" subtitle="Shared budget component" className="surface-card--compact">
             {budget ? (
               <BudgetBar spent={budget.spent_this_month_usd} limit={budget.monthly_limit_usd} />
             ) : (
@@ -160,7 +160,7 @@ export function AgentDetailPage({ agentId }: { agentId: AgentId }) {
       ) : null}
 
       {tab === "runs" ? (
-        <SurfaceCard title="Run History" subtitle="Last 10 runs">
+        <SurfaceCard title="Run History" subtitle="Last 10 runs" className="surface-card--compact">
           {(detail.data?.runs ?? []).length === 0 ? (
             <EmptyState title="No runs yet" detail="Coordinator run history will appear here." />
           ) : (
@@ -210,7 +210,7 @@ export function AgentDetailPage({ agentId }: { agentId: AgentId }) {
       ) : null}
 
       {tab === "loops" ? (
-        <SurfaceCard title="Agent Loops" subtitle="Loops scoped to this agent">
+        <SurfaceCard title="Agent Loops" subtitle="Loops scoped to this agent" className="surface-card--compact">
           {loops.error && agentLoops.length === 0 ? (
             <EmptyState title="Waiting for loop data" detail="`GET /loops` is not returning data yet." />
           ) : agentLoops.length === 0 ? (
@@ -250,7 +250,7 @@ export function AgentDetailPage({ agentId }: { agentId: AgentId }) {
       ) : null}
 
       {tab === "budget" ? (
-        <SurfaceCard title="Budget Detail" subtitle="Per-agent budget summary">
+        <SurfaceCard title="Budget Detail" subtitle="Per-agent budget summary" className="surface-card--compact">
           {budget ? (
             <div className="stack">
               <BudgetBar spent={budget.spent_this_month_usd} limit={budget.monthly_limit_usd} />
@@ -268,7 +268,7 @@ export function AgentDetailPage({ agentId }: { agentId: AgentId }) {
       ) : null}
 
       {tab === "config" ? (
-        <SurfaceCard title="Config" subtitle="Coordinator-exposed config surface">
+        <SurfaceCard title="Config" subtitle="Coordinator-exposed config surface" className="surface-card--compact">
           {agent?.config ? (
             <pre className="config-viewer">{JSON.stringify(agent.config, null, 2)}</pre>
           ) : (

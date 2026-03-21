@@ -180,10 +180,10 @@ export function LoopsPage() {
       </SurfaceCard>
 
       <SurfaceCard title="Loop Controls" subtitle="Start, filter, and inspect active loops" className="surface-card--compact">
-        <div className="task-toolbar">
+        <div className="loop-launch-row">
           <input
-            className="text-input"
-            placeholder="Loop Spec path, e.g. /Users/chrislyons/dev/autoresearch/loop-specs/researcher.yaml"
+            className="text-input loop-launch-row__input"
+            placeholder="Loop spec path…"
             value={specPath}
             onChange={(event) => setSpecPath(event.target.value)}
             onKeyDown={(event) => {
@@ -196,17 +196,13 @@ export function LoopsPage() {
             disabled={loopStart.isPending}
             onClick={() => void handleLoopStart()}
           >
-            Start Loop
+            Start
           </button>
         </div>
-        {loopStart.error ? (
+        {loopStart.error && (
           <div className="alert-banner is-danger">Loop start failed. Coordinator loop actions are not available yet.</div>
-        ) : (
-          <div className="placeholder-copy">
-            Start and abort controls stay visible even when the coordinator loop routes are unavailable.
-          </div>
         )}
-        <div className="filter-row-ui">
+        <div className="loop-filter-strip">
           <select className="select-input loop-filter" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
             <option value="all">All statuses</option>
             <option value="pending">Pending</option>

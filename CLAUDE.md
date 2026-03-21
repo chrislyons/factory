@@ -26,12 +26,13 @@ factory/
 - **Build:** `pnpm build` — outputs to `portal/dist/`
 - **Brand:** "dreamfactory" (hero header, 16px/10px)
 - **Nav tabs (5):** Jobs, Loops, Objects, Analytics, System (hotkeys 1-5)
-- **Landing page:** Jobs (`jobs.html`, aliases `dashboard-v4.html`)
-- **Shell width:** min(1410px, 93.3vw) desktop, min(1410px, 98.3vw) mobile
-- **Mobile (<980px):** Nav hidden, page title h1 becomes nav dropdown
+- **Landing page:** Jobs Tracker (`jobs.html`, aliases `dashboard-v4.html`; nav button stays "Jobs")
+- **Shell width:** min(1400px, 92vw) all viewports (no mobile override)
+- **Mobile (<980px):** Nav hidden, page title h1 becomes nav dropdown, topology sections stack vertically
 - **Header order:** [Command Palette] [SyncClock] [Theme Toggle]
 - **Merged pages:** Approvals→Loops, Budget→Analytics
-- **Objects page:** 334-item searchable index from `objectIndex.ts`
+- **Objects page:** 334-item searchable index from `objectIndex.ts`; page title "Object Index" (nav button stays "Objects")
+- **System page title:** System Topology (nav button stays "System")
 - **Retired:** Portal landing (redirects to Jobs), ApprovalsPage, BudgetPage
 
 ## Job Registry

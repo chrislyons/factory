@@ -1,5 +1,5 @@
 # FCT001 FACTORY
-## System Architecture & Strategic Plan
+## Initial Architecture & Strategic Plan
 *Boot Industries — March 2026 — Draft*
 
 ---

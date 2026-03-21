@@ -142,8 +142,8 @@
   --border-strong: rgba(255, 255, 255, 0.12);
   --shadow: 0 16px 40px rgba(0, 0, 0, 0.28);
 
-  --shell-max: 1410px;
-  --shell-width: 93.3vw;
+  --shell-max: 1400px;
+  --shell-width: 92vw;
   --transition: 160ms cubic-bezier(0.2, 0.65, 0.2, 1);
   --radius: 12px;
 
@@ -346,7 +346,6 @@ textarea {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  overflow-x: hidden;
 }
 
 .portal-header {
@@ -574,6 +573,12 @@ textarea {
   gap: 16px;
   margin-top: 12px;
   min-width: 0;
+  max-width: 100%;
+}
+
+.portal-page-content > * {
+  min-width: 0;
+  max-width: 100%;
 }
 
 /* ── Surface Cards ────────────────────────────────────────────────── */
@@ -585,6 +590,7 @@ textarea {
   padding: 18px 20px;
   background: var(--bg-panel);
   box-shadow: var(--shadow);
+  min-width: 0;
 }
 
 .surface-card::before {
@@ -828,6 +834,11 @@ textarea {
 }
 
 /* ── Dashboard ────────────────────────────────────────────────────── */
+
+.dashboard-grid {
+  display: grid;
+  gap: 16px;
+}
 
 .dashboard-highlights {
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1139,6 +1150,7 @@ textarea {
   font-family: var(--font-display);
   font-size: 13px;
   font-weight: 700;
+  margin-bottom: 4px;
 }
 
 .task-card-ui__meta,
@@ -1561,7 +1573,7 @@ textarea {
   width: 18px;
   height: 18px;
   border-radius: 5px;
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border-strong);
   background: var(--bg-deep);
 }
 
@@ -1924,8 +1936,44 @@ textarea {
   font-size: 12px;
 }
 
+/* ── Loop Controls ────────────────────────────────────────────────── */
+
+.loop-launch-row {
+  display: flex;
+  gap: 0;
+  border-radius: 9px;
+  border: 1px solid var(--border);
+  background: var(--bg-deep);
+  overflow: hidden;
+}
+
+.loop-launch-row__input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+}
+
+.loop-launch-row .primary-button {
+  border-radius: 0;
+  border: none;
+  border-left: 1px solid var(--border);
+  padding: 0 16px;
+  white-space: nowrap;
+}
+
+.loop-filter-strip {
+  display: flex;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
 .loop-filter {
-  max-width: 180px;
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: none;
 }
 
 .config-viewer {
@@ -2148,6 +2196,7 @@ textarea {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
+  overflow-x: auto;
 }
 
 @media (max-width: 640px) {
@@ -2233,11 +2282,13 @@ textarea {
 .font-trial-bar {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
   padding: 8px 10px;
   border-radius: var(--radius);
   background: var(--bg-panel);
   border: 1px solid var(--border);
+  min-width: 0;
+  overflow: hidden;
 }
 
 .font-trial-row {
@@ -2566,8 +2617,84 @@ textarea {
     flex-direction: column;
   }
 
+  .task-card-ui p,
+  .task-card-ui__meta {
+    margin-left: -28px;
+  }
+
   .task-card-ui__actions {
     min-width: 0;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+  }
+
+  .task-card-ui__actions .select-input,
+  .task-card-ui__actions .secondary-button {
+    min-height: 34px;
+  }
+
+  .topology-flow {
+    flex-direction: column;
+    align-items: stretch;
+    overflow-x: hidden;
+  }
+
+  .topology-flow-node {
+    min-width: 0;
+  }
+
+  .topology-flow-connector {
+    flex: 0 0 20px;
+    width: 1px;
+    height: 20px;
+    align-self: center;
+  }
+
+  .topology-flow-connector::after {
+    right: auto;
+    top: auto;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 6px solid var(--text-muted);
+    border-bottom: none;
+  }
+
+  .topology-tier-row {
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 6px 0;
+  }
+
+  .topology-tier-row__trigger {
+    flex-basis: 100%;
+    text-align: left;
+    max-width: none;
+    margin-left: 38px;
+    margin-top: -2px;
+  }
+
+  .topology-tier-row__label {
+    font-size: 10px;
+  }
+
+  .topology-tier-row__model {
+    font-size: 9px;
+    word-break: break-all;
+  }
+
+  .topology-mini-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .topology-mini-node {
+    padding: 6px 8px;
+  }
+
+  .topology-mini-node__label {
+    font-size: 11px;
   }
 
   .loop-row,
@@ -2583,10 +2710,6 @@ textarea {
 }
 
 @media (max-width: 760px) {
-  :root {
-    --shell-width: 98vw;
-  }
-
   .landing-grid,
   .portal-columns,
   .topology-grid,
@@ -2596,6 +2719,145 @@ textarea {
 
   .topology-agent-strip {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .surface-card--compact {
+    padding: 10px 12px;
+  }
+
+  .topology-flow {
+    flex-direction: column;
+    align-items: stretch;
+    overflow-x: hidden;
+  }
+
+  .topology-flow-node {
+    min-width: 0;
+  }
+
+  .topology-flow-connector {
+    flex: 0 0 20px;
+    width: 1px;
+    height: 20px;
+    align-self: center;
+  }
+
+  .topology-flow-connector::after {
+    right: auto;
+    top: auto;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 6px solid var(--text-muted);
+    border-bottom: none;
+  }
+
+  .topology-tier-row {
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 6px 0;
+  }
+
+  .topology-tier-row__trigger {
+    flex-basis: 100%;
+    text-align: left;
+    max-width: none;
+    margin-left: 38px;
+    margin-top: -2px;
+  }
+
+  .topology-tier-row__label {
+    font-size: 10px;
+  }
+
+  .topology-mini-node {
+    padding: 6px 8px;
+  }
+
+  .topology-mini-node__label {
+    font-size: 11px;
+  }
+
+  .font-trial-bar {
+    padding: 6px 8px;
+  }
+
+  .font-trial-row {
+    gap: 4px;
+  }
+
+  .font-trial-btn {
+    font-size: 10px;
+    padding: 3px 7px;
+  }
+
+  .topology-mini-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .topology-tier-row__model {
+    font-size: 9px;
+    word-break: break-all;
+  }
+
+  .registry-table {
+    font-size: 10px;
+  }
+
+  .task-toolbar {
+    margin-bottom: 8px;
+  }
+
+  .obj-kbd-hints {
+    display: none;
+  }
+
+  .compact-list {
+    font-size: 11px;
+    padding-left: 14px;
+  }
+
+  .loop-filter-strip {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  .run-events__row,
+  .run-table__row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .agent-action-row {
+    gap: 6px;
+  }
+
+  .agent-action-row .secondary-button,
+  .agent-action-row .danger-button {
+    flex: 1 1 auto;
+    min-height: 34px;
+  }
+
+  .tab-row {
+    gap: 4px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 2px;
+  }
+
+  .tab-button {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .agent-detail-meta {
+    flex-direction: column;
+    gap: 2px;
   }
 
   .last-updated-chip {
@@ -2604,12 +2866,17 @@ textarea {
 
   .portal-main {
     padding-top: 14px;
+    font-size: 12px;
   }
 }
 
 @media (max-width: 520px) {
   .topology-agent-strip {
     grid-template-columns: 1fr;
+  }
+
+  .topology-agent-card {
+    padding: 8px 10px;
   }
 
   .command-trigger {

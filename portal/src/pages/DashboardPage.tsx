@@ -212,7 +212,7 @@ export function DashboardPage() {
 
   return (
     <AppShell
-      title="Jobs"
+      title="Jobs Tracker"
       pageKey="/pages/jobs.html"
       statusSlot={
         <SyncClock
