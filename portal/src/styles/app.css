@@ -2569,6 +2569,10 @@ textarea {
 }
 
 @media (max-width: 980px) {
+  :root {
+    --shell-width: 96vw;
+  }
+
   .portal-header__inner {
     grid-template-columns: auto 1fr;
     gap: 10px;
@@ -2590,7 +2594,7 @@ textarea {
     display: block;
     font-family: var(--font-display);
     font-size: clamp(18px, 2.2vw, 24px);
-    font-weight: 400;
+    font-weight: 700;
     letter-spacing: -0.03em;
     color: var(--text);
     background: transparent;
