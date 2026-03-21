@@ -15,8 +15,16 @@ function getStoredTheme(): Theme | null {
   return null;
 }
 
+const THEME_COLORS: Record<Theme, string> = {
+  ember: "#352619",
+  dark: "#0b1117",
+  light: "#f8fafc",
+};
+
 function applyTheme(theme: Theme) {
   document.documentElement.setAttribute("data-theme", theme);
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute("content", THEME_COLORS[theme]);
 }
 
 export function useTheme() {
