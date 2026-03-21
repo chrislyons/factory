@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>dreamfactory — Portal Object Index</title>
+<style>
+@font-face {
+  font-family: "Geist Pixel Square";
+  src: url("../portal/public/fonts/GeistPixel-Square.woff2") format("woff2");
+  font-display: swap;
+  font-weight: 400;
+}
+@font-face {
+  font-family: "Geist Mono UltraLight";
+  src: url("../portal/public/fonts/GeistMono-UltraLight.woff2") format("woff2");
+  font-display: swap;
+  font-weight: 200;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0b1117;
+  --bg-deep: #070c11;
+  --bg-panel: #10161e;
+  --bg-panel-strong: #151d28;
+  --bg-panel-hover: #1a2435;
+  --surface-strong: rgba(21, 29, 40, 0.96);
+  --text: #e4eaf1;
+  --text-dim: #94a3b8;
+  --text-muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99, 102, 241, 0.1);
+  --accent-border: rgba(99, 102, 241, 0.38);
+  --border: rgba(255,255,255,0.07);
+  --border-strong: rgba(255,255,255,0.12);
+  --green: #34d399;
+  --radius: 12px;
+  --transition: 160ms cubic-bezier(0.2, 0.65, 0.2, 1);
+  --font-display: "Geist Pixel Square", system-ui, sans-serif;
+  --font-body: "Geist Mono UltraLight", ui-monospace, monospace;
+}
+
+[data-theme="light"] {
+  --bg: #f8fafc;
+  --bg-deep: #f1f5f9;
+  --bg-panel: #ffffff;
+  --bg-panel-strong: #f8fafc;
+  --bg-panel-hover: #f1f5f9;
+  --surface-strong: rgba(248, 250, 252, 0.97);
+  --text: #0f172a;
+  --text-dim: #475569;
+  --text-muted: #94a3b8;
+  --accent: #4f46e5;
+  --accent-soft: rgba(79, 70, 229, 0.08);
+  --accent-border: rgba(79, 70, 229, 0.3);
+  --border: rgba(0, 0, 0, 0.08);
+  --border-strong: rgba(0, 0, 0, 0.14);
+  --green: #10b981;
+  color-scheme: light;
+}
+
+html, body { min-height: 100%; }
+
+body {
+  font-family: var(--font-body);
+  font-weight: 200;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text);
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+main { flex: 1; }
+
+/* Dust grid */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle, rgba(148,163,184,0.22) 0.8px, transparent 0.8px),
+    radial-gradient(circle, rgba(99,102,241,0.12) 0.6px, transparent 0.6px);
+  background-size: 40px 40px, 29px 29px;
+  background-position: 0 0, 17px 19px;
+  animation: dust-drift 90s linear infinite;
+}
+@keyframes dust-drift {
+  0%   { background-position: 0 0, 11px 13px; }
+  100% { background-position: 24px 48px, 35px 61px; }
+}
+
+body > * { position: relative; z-index: 1; }
+
+[data-theme="light"] body::before {
+  background-image:
+    radial-gradient(circle, rgba(71,85,105,0.16) 0.8px, transparent 0.8px),
+    radial-gradient(circle, rgba(79,70,229,0.08) 0.6px, transparent 0.6px);
+}
+
+/* Header */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  border-bottom: 1px solid var(--border-strong);
+  background: var(--surface-strong);
+  backdrop-filter: blur(14px);
+}
+.site-header__inner {
+  max-width: 1410px;
+  width: 93.3vw;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 0;
+}
+.brand {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  text-decoration: none;
+}
+.brand__title {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+.brand__sub {
+  font-family: var(--font-display);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.header-meta {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* Main */
+main {
+  max-width: 1410px;
+  width: 93.3vw;
+  margin: 0 auto;
+  padding: 20px 0 40px;
+  display: grid;
+  gap: 16px;
+}
+
+/* Hero */
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(18px, 2.2vw, 24px);
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  margin-bottom: 4px;
+}
+.hero p {
+  color: var(--text-dim);
+  font-size: 12px;
+}
+
+/* Search */
+.search-wrap {
+  position: relative;
+}
+.search-input {
+  width: 100%;
+  height: 36px;
+  padding: 0 60px 0 36px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-deep);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-weight: 200;
+  font-size: 13px;
+  outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.search-input:focus { border-color: var(--accent-border); box-shadow: 0 0 12px rgba(99, 102, 241, 0.15), 0 0 4px rgba(99, 102, 241, 0.1); }
+.search-icon {
+  position: absolute;
+  left: 10px;
+  top: 0;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  color: var(--text-muted);
+  font-size: 14px;
+  pointer-events: none;
+  line-height: 1;
+}
+.search-count {
+  position: absolute;
+  right: 32px;
+  top: 0;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  color: var(--text-muted);
+  font-size: 11px;
+}
+.search-clear {
+  position: absolute;
+  right: 5px;
+  top: 5px;
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 15px;
+  font-family: var(--font-body);
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: color var(--transition), background var(--transition);
+}
+.search-clear:hover { color: var(--text); background: var(--accent-soft); border: 1px solid var(--accent-border); }
+.search-clear.visible { display: flex; }
+
+/* Surface card */
+.card {
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+  overflow: hidden;
+}
+.card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 18px; right: 18px;
+  height: 1px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, var(--border-strong), transparent);
+}
+
+/* Section header (collapsible) */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  user-select: none;
+  background: var(--bg-panel-strong);
+  border-radius: var(--radius) var(--radius) 0 0;
+  transition: background var(--transition), border-radius var(--transition), border-color var(--transition);
+}
+.section-header.collapsed {
+  border-bottom-color: transparent;
+  border-radius: var(--radius);
+}
+.section-header:hover { background: var(--bg-panel-hover); }
+.section-header:focus { outline: none; box-shadow: inset 0 0 0 1px var(--accent-border); }
+.section-arrow {
+  font-size: 9px;
+  color: var(--text-muted);
+  transition: transform var(--transition);
+  flex-shrink: 0;
+}
+.section-header.collapsed .section-arrow { transform: rotate(-90deg); }
+.section-title {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  flex: 1;
+}
+.section-count {
+  font-size: 10px;
+  color: var(--text-muted);
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 1px 8px;
+}
+
+/* Table */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.section-body { display: block; }
+.section-body.collapsed { display: none; }
+
+thead th {
+  padding: 6px 12px;
+  text-align: left;
+  font-size: 10px;
+  font-weight: 200;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-panel);
+}
+th:nth-child(1) { width: 28%; }
+th:nth-child(2) { width: 14%; }
+th:nth-child(3) { width: 58%; }
+
+tbody tr { border-bottom: 1px solid rgba(255,255,255,0.04); }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: var(--bg-panel-hover); }
+tbody tr.hidden { display: none; }
+
+td {
+  padding: 6px 12px 6px 60px;
+  vertical-align: top;
+  font-size: 11px;
+}
+
+.obj-name {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 200;
+  color: var(--accent);
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 6px;
+  cursor: pointer;
+  display: inline-block;
+  transition: background var(--transition), border-color var(--transition);
+  position: relative;
+}
+.obj-name:hover { background: var(--accent-soft); border-color: var(--accent-border); }
+.obj-name::after { content: " ⎘"; opacity: 0.4; font-size: 10px; }
+.obj-name.copied { animation: copy-flash 0.35s ease; }
+@keyframes copy-flash {
+  0%, 100% { background: var(--bg-deep); }
+  50% { background: rgba(52,211,153,0.15); border-color: rgba(52,211,153,0.4); }
+}
+
+.obj-type {
+  color: var(--text-muted);
+  font-size: 10px;
+}
+
+.obj-type-badge {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  font-size: 10px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.obj-desc {
+  color: var(--text-dim);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+/* Hero row */
+.hero-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.hero-row .hero { flex: 1; }
+
+/* Export button */
+.export-btn {
+  font-family: var(--font-body);
+  font-weight: 200;
+  font-size: 11px;
+  color: var(--text-muted);
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 5px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--transition), border-color var(--transition), color var(--transition);
+}
+.export-btn:hover { background: var(--accent-soft); border-color: var(--accent-border); color: var(--text); }
+.export-btn.exported {
+  color: var(--green);
+  border-color: rgba(52, 211, 153, 0.4);
+  background: rgba(52, 211, 153, 0.08);
+  box-shadow: 0 0 8px rgba(52, 211, 153, 0.12);
+  transition: all 0.2s ease;
+}
+.export-btn.export-fade {
+  transition: all 0.6s ease;
+  color: var(--text-muted);
+  border-color: var(--border);
+  background: var(--bg-deep);
+  box-shadow: none;
+}
+
+/* Kbd hints */
+.kbd-hints {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-size: 10px;
+  color: var(--text-muted);
+  padding: 4px 0;
+}
+.kbd-hints kbd {
+  display: inline-block;
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 200;
+  color: var(--text-dim);
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  line-height: 1.3;
+}
+
+/* Footer */
+footer {
+  border-top: 1px solid var(--border-strong);
+  background: var(--surface-strong);
+  backdrop-filter: blur(14px);
+  padding: 12px 0;
+}
+footer .inner {
+  max-width: 1410px;
+  width: 93.3vw;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-muted);
+  font-size: 11px;
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="site-header__inner">
+    <a class="brand" href="../portal/dist/portal.html">
+      <span class="brand__title">dreamfactory</span>
+      <span class="brand__sub">portal</span>
+    </a>
+    <span class="header-meta">Portal Object Index — 2026-03-20</span>
+  </div>
+</header>
+
+<main>
+  <div class="hero-row">
+    <div class="hero">
+      <h1>Portal Object Index</h1>
+      <p>All CSS classes, components, hooks, types, constants, API functions and design tokens. Click any name to copy.</p>
+    </div>
+    <button class="export-btn" id="export-btn" title="Copy filtered results as markdown">Export to Markdown</button>
+  </div>
+
+  <div class="search-wrap">
+    <span class="search-icon">⌕</span>
+    <input class="search-input" type="text" placeholder="Search objects…" id="search" autocomplete="off" spellcheck="false">
+    <span class="search-count" id="search-count"></span>
+    <button class="search-clear" id="search-clear" title="Clear search">×</button>
+  </div>
+
+  <!-- ── CSS Classes ── -->
+  <div class="card" data-section="css">
+    <div class="section-header collapsed" tabindex="-1" onclick="toggleSection(this)">
+      <span class="section-arrow">▼</span>
+      <span class="section-title">CSS Classes</span>
+      <span class="section-count">220+</span>
+    </div>
+    <div class="section-body collapsed">
+      <table>
+        <thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <!-- App Shell -->
+          <tr><td><code class="obj-name">.portal-app-shell</code></td><td><span class="obj-type-badge">layout</span></td><td class="obj-desc">Root flexbox column container for the entire app (header, main, footer)</td></tr>
+          <tr><td><code class="obj-name">.portal-header</code></td><td><span class="obj-type-badge">layout</span></td><td class="obj-desc">Sticky top header bar with border, backdrop blur, and z-index 30</td></tr>
+          <tr><td><code class="obj-name">.portal-header__inner</code></td><td><span class="obj-type-badge">layout</span></td><td class="obj-desc">Max-width grid container inside header: brand / nav / actions</td></tr>
+          <tr><td><code class="obj-name">.portal-main</code></td><td><span class="obj-type-badge">layout</span></td><td class="obj-desc">Flex-1 main content area between header and footer</td></tr>
+          <tr><td><code class="obj-name">.portal-footer</code></td><td><span class="obj-type-badge">layout</span></td><td class="obj-desc">Bottom footer with translucent surface-strong background and backdrop blur</td></tr>
+          <tr><td><code class="obj-name">.portal-footer__inner</code></td><td><span class="obj-type-badge">layout</span></td><td class="obj-desc">Max-width flex container for footer links and copyright text</td></tr>
+          <!-- Branding -->
+          <tr><td><code class="obj-name">.portal-brand</code></td><td><span class="obj-type-badge">brand</span></td><td class="obj-desc">Inline-flex logo link wrapper in the header</td></tr>
+          <tr><td><code class="obj-name">.portal-brand__title</code></td><td><span class="obj-type-badge">brand</span></td><td class="obj-desc">"dreamfactory" display text using Geist Pixel Square at 14px</td></tr>
+          <tr><td><code class="obj-name">.portal-brand__sub</code></td><td><span class="obj-type-badge">brand</span></td><td class="obj-desc">"portal" tagline in uppercase accent color below title</td></tr>
+          <!-- Navigation -->
+          <tr><td><code class="obj-name">.portal-nav</code></td><td><span class="obj-type-badge">nav</span></td><td class="obj-desc">Horizontal scrollable nav link container between brand and actions</td></tr>
+          <tr><td><code class="obj-name">.portal-nav__link</code></td><td><span class="obj-type-badge">nav</span></td><td class="obj-desc">Individual nav link pill button with soft border and background</td></tr>
+          <tr><td><code class="obj-name">.portal-nav__link.is-active</code></td><td><span class="obj-type-badge">nav</span></td><td class="obj-desc">Active page state with indigo border and inner glow</td></tr>
+          <tr><td><code class="obj-name">.portal-header__actions</code></td><td><span class="obj-type-badge">nav</span></td><td class="obj-desc">Right-side header slot for theme toggle, last-updated chip, command button</td></tr>
+          <!-- Hero -->
+          <tr><td><code class="obj-name">.portal-hero</code></td><td><span class="obj-type-badge">hero</span></td><td class="obj-desc">Grid container for page eyebrow, h1 title, and description</td></tr>
+          <tr><td><code class="obj-name">.portal-hero__eyebrow</code></td><td><span class="obj-type-badge">hero</span></td><td class="obj-desc">Uppercase accent-colored small label above the page title</td></tr>
+          <tr><td><code class="obj-name">.portal-hero h1</code></td><td><span class="obj-type-badge">hero</span></td><td class="obj-desc">Main page title — Geist Pixel Square, clamp(18px, 2.2vw, 24px)</td></tr>
+          <tr><td><code class="obj-name">.portal-hero__desc</code></td><td><span class="obj-type-badge">hero</span></td><td class="obj-desc">Subtitle text below h1, muted color, max 72ch</td></tr>
+          <tr><td><code class="obj-name">.portal-page-content</code></td><td><span class="obj-type-badge">layout</span></td><td class="obj-desc">Grid container for page sections with 16px gap</td></tr>
+          <!-- Surface Cards -->
+          <tr><td><code class="obj-name">.surface-card</code></td><td><span class="obj-type-badge">card</span></td><td class="obj-desc">Bordered panel with top-edge gradient highlight, panel background, and shadow</td></tr>
+          <tr><td><code class="obj-name">.surface-card--compact</code></td><td><span class="obj-type-badge">card</span></td><td class="obj-desc">Reduced padding variant of surface-card (14px vs 18px)</td></tr>
+          <tr><td><code class="obj-name">.surface-card__header</code></td><td><span class="obj-type-badge">card</span></td><td class="obj-desc">Flex row with title/subtitle on left and optional action on right</td></tr>
+          <tr><td><code class="obj-name">.surface-card__header h2</code></td><td><span class="obj-type-badge">card</span></td><td class="obj-desc">Uppercase display-font section title at 12px with letter-spacing</td></tr>
+          <tr><td><code class="obj-name">.surface-card__header p</code></td><td><span class="obj-type-badge">card</span></td><td class="obj-desc">Muted subtitle text below card h2 at 11px</td></tr>
+          <tr><td><code class="obj-name">.surface-card__action-link</code></td><td><span class="obj-type-badge">card</span></td><td class="obj-desc">Small pill link shown in card header right slot</td></tr>
+          <!-- Layout Utilities -->
+          <tr><td><code class="obj-name">.stack</code></td><td><span class="obj-type-badge">util</span></td><td class="obj-desc">Grid layout with 14px vertical gap between children</td></tr>
+          <tr><td><code class="obj-name">.stack-tight</code></td><td><span class="obj-type-badge">util</span></td><td class="obj-desc">Grid layout with 4px vertical gap between children</td></tr>
+          <tr><td><code class="obj-name">.landing-grid</code></td><td><span class="obj-type-badge">layout</span></td><td class="obj-desc">12-column grid for landing page cards</td></tr>
+          <tr><td><code class="obj-name">.portal-columns</code></td><td><span class="obj-type-badge">layout</span></td><td class="obj-desc">Two-column equal grid for content layout</td></tr>
+          <tr><td><code class="obj-name">.dashboard-columns</code></td><td><span class="obj-type-badge">layout</span></td><td class="obj-desc">3fr/1fr two-column grid for main + sidebar dashboard layout</td></tr>
+          <tr><td><code class="obj-name">.dashboard-sidebar</code></td><td><span class="obj-type-badge">layout</span></td><td class="obj-desc">Sticky right sidebar, max-height scrollable</td></tr>
+          <tr><td><code class="obj-name">.dashboard-highlights</code></td><td><span class="obj-type-badge">layout</span></td><td class="obj-desc">2-column grid for top dashboard summary cards</td></tr>
+          <tr><td><code class="obj-name">.dashboard-status-bar</code></td><td><span class="obj-type-badge">layout</span></td><td class="obj-desc">Horizontal mono status indicator strip at top of dashboard</td></tr>
+          <tr><td><code class="obj-name">.live-run-grid</code></td><td><span class="obj-type-badge">layout</span></td><td class="obj-desc">Auto-fit grid for live run cards, min 220px each</td></tr>
+          <tr><td><code class="obj-name">.agent-runs-layout</code></td><td><span class="obj-type-badge">layout</span></td><td class="obj-desc">Two-column grid for agent run table + event detail</td></tr>
+          <tr><td><code class="obj-name">.agent-header-grid</code></td><td><span class="obj-type-badge">layout</span></td><td class="obj-desc">1fr/auto grid for agent identity header + action buttons</td></tr>
+          <tr><td><code class="obj-name">.approvals-layout</code></td><td><span class="obj-type-badge">layout</span></td><td class="obj-desc">Two-panel layout: pending approvals (left) + resolved history (right)</td></tr>
+          <tr><td><code class="obj-name">.budget-grid</code></td><td><span class="obj-type-badge">layout</span></td><td class="obj-desc">Auto-fit grid for per-agent budget cards, min 240px</td></tr>
+          <tr><td><code class="obj-name">.chart-grid</code></td><td><span class="obj-type-badge">layout</span></td><td class="obj-desc">Two-column grid for analytics charts</td></tr>
+          <tr><td><code class="obj-name">.loop-console-layout</code></td><td><span class="obj-type-badge">layout</span></td><td class="obj-desc">Two-panel layout: loop inventory (left) + detail panel (right)</td></tr>
+          <tr><td><code class="obj-name">.loop-detail-grid</code></td><td><span class="obj-type-badge">layout</span></td><td class="obj-desc">Auto-fit grid for loop detail section cards</td></tr>
+          <tr><td><code class="obj-name">.topology-grid</code></td><td><span class="obj-type-badge">layout</span></td><td class="obj-desc">Two-column grid for topology sections</td></tr>
+          <!-- Landing Cards -->
+          <tr><td><code class="obj-name">.landing-card</code></td><td><span class="obj-type-badge">card</span></td><td class="obj-desc">Clickable surface card on the portal landing page with lift-hover</td></tr>
+          <tr><td><code class="obj-name">.landing-card.is-primary</code></td><td><span class="obj-type-badge">card</span></td><td class="obj-desc">Spans 3 columns in landing grid</td></tr>
+          <tr><td><code class="obj-name">.landing-card.is-secondary</code></td><td><span class="obj-type-badge">card</span></td><td class="obj-desc">Spans 4 columns in landing grid</td></tr>
+          <tr><td><code class="obj-name">.landing-card__topline</code></td><td><span class="obj-type-badge">card</span></td><td class="obj-desc">Flex header inside landing card with eyebrow and badge</td></tr>
+          <tr><td><code class="obj-name">.landing-card__eyebrow</code></td><td><span class="obj-type-badge">card</span></td><td class="obj-desc">Uppercase small meta label (e.g., "Primary Surface") in muted color</td></tr>
+          <tr><td><code class="obj-name">.landing-card__badge</code></td><td><span class="obj-type-badge">card</span></td><td class="obj-desc">Blue count badge (e.g., "4 active agents") in card topline</td></tr>
+          <tr><td><code class="obj-name">.landing-card__badge.is-alert</code></td><td><span class="obj-type-badge">card</span></td><td class="obj-desc">Red variant of badge for urgent counts</td></tr>
+          <tr><td><code class="obj-name">.landing-card h2</code></td><td><span class="obj-type-badge">card</span></td><td class="obj-desc">Card title at 16px in display font</td></tr>
+          <tr><td><code class="obj-name">.landing-card__note</code></td><td><span class="obj-type-badge">card</span></td><td class="obj-desc">Footer note text, auto margin-top to push to bottom</td></tr>
+          <!-- Tasks -->
+          <tr><td><code class="obj-name">.task-list</code></td><td><span class="obj-type-badge">task</span></td><td class="obj-desc">Vertical grid container for task card rows</td></tr>
+          <tr><td><code class="obj-name">.task-card-ui</code></td><td><span class="obj-type-badge">task</span></td><td class="obj-desc">Flex card for a single task: checkbox, title, meta, action buttons</td></tr>
+          <tr><td><code class="obj-name">.task-card-ui__main</code></td><td><span class="obj-type-badge">task</span></td><td class="obj-desc">Flex row containing checkbox + body content</td></tr>
+          <tr><td><code class="obj-name">.task-card-ui__title</code></td><td><span class="obj-type-badge">task</span></td><td class="obj-desc">Task title text in display font at 13px</td></tr>
+          <tr><td><code class="obj-name">.task-card-ui__meta</code></td><td><span class="obj-type-badge">task</span></td><td class="obj-desc">Flex row of inline meta tags (status chip, job ID, effort, etc.)</td></tr>
+          <tr><td><code class="obj-name">.task-card-ui__actions</code></td><td><span class="obj-type-badge">task</span></td><td class="obj-desc">Right-side grid of select + cycle-status button</td></tr>
+          <tr><td><code class="obj-name">.task-status-chip</code></td><td><span class="obj-type-badge">task</span></td><td class="obj-desc">Small inline badge showing task status (pending/in-progress/done/blocked)</td></tr>
+          <tr><td><code class="obj-name">.task-status-chip.is-pending</code></td><td><span class="obj-type-badge">task</span></td><td class="obj-desc">Blue chip for pending tasks</td></tr>
+          <tr><td><code class="obj-name">.task-status-chip.is-in-progress</code></td><td><span class="obj-type-badge">task</span></td><td class="obj-desc">Indigo chip for in-progress tasks</td></tr>
+          <tr><td><code class="obj-name">.task-status-chip.is-done</code></td><td><span class="obj-type-badge">task</span></td><td class="obj-desc">Green chip for completed tasks</td></tr>
+          <tr><td><code class="obj-name">.task-status-chip.is-blocked</code></td><td><span class="obj-type-badge">task</span></td><td class="obj-desc">Purple chip for blocked tasks</td></tr>
+          <tr><td><code class="obj-name">.task-toolbar</code></td><td><span class="obj-type-badge">task</span></td><td class="obj-desc">Flex toolbar for search input, add button, and filter chips</td></tr>
+          <tr><td><code class="obj-name">.filter-row-ui</code></td><td><span class="obj-type-badge">task</span></td><td class="obj-desc">Flex row of filter chip buttons below toolbar</td></tr>
+          <tr><td><code class="obj-name">.filter-chip-ui</code></td><td><span class="obj-type-badge">task</span></td><td class="obj-desc">Clickable pill filter button with dynamic color via --chip-color</td></tr>
+          <tr><td><code class="obj-name">.filter-chip-ui.is-active</code></td><td><span class="obj-type-badge">task</span></td><td class="obj-desc">Selected filter state with colored background tint</td></tr>
+          <tr><td><code class="obj-name">.job-address</code></td><td><span class="obj-type-badge">task</span></td><td class="obj-desc">Monospace display of job ID suffix (e.g., .0001)</td></tr>
+          <!-- Status -->
+          <tr><td><code class="obj-name">.status-dot-ui</code></td><td><span class="obj-type-badge">status</span></td><td class="obj-desc">Animated status indicator dot container (8x8px)</td></tr>
+          <tr><td><code class="obj-name">.status-dot-ui__core</code></td><td><span class="obj-type-badge">status</span></td><td class="obj-desc">Inner 6px colored core of the status dot</td></tr>
+          <tr><td><code class="obj-name">.status-dot-ui.is-active</code></td><td><span class="obj-type-badge">status</span></td><td class="obj-desc">Green pulsing glow for active/running agents</td></tr>
+          <tr><td><code class="obj-name">.status-dot-ui.is-paused</code></td><td><span class="obj-type-badge">status</span></td><td class="obj-desc">Yellow dot for paused agents</td></tr>
+          <tr><td><code class="obj-name">.status-dot-ui.is-error</code></td><td><span class="obj-type-badge">status</span></td><td class="obj-desc">Red dot for errored agents</td></tr>
+          <tr><td><code class="obj-name">.last-updated-chip</code></td><td><span class="obj-type-badge">status</span></td><td class="obj-desc">Small header chip showing data sync time ("Last updated X min ago")</td></tr>
+          <tr><td><code class="obj-name">.last-updated-chip.is-stale</code></td><td><span class="obj-type-badge">status</span></td><td class="obj-desc">Red border variant when data is stale/unreachable</td></tr>
+          <!-- Approvals -->
+          <tr><td><code class="obj-name">.approval-list</code></td><td><span class="obj-type-badge">approval</span></td><td class="obj-desc">Vertical list container for pending approval cards</td></tr>
+          <tr><td><code class="obj-name">.approval-card</code></td><td><span class="obj-type-badge">approval</span></td><td class="obj-desc">Card for a single pending approval request with header, body, footer</td></tr>
+          <tr><td><code class="obj-name">.approval-card__header</code></td><td><span class="obj-type-badge">approval</span></td><td class="obj-desc">Flex row with agent badge, gate pill, and countdown timer</td></tr>
+          <tr><td><code class="obj-name">.approval-card__body</code></td><td><span class="obj-type-badge">approval</span></td><td class="obj-desc">Payload summary text block at 12px</td></tr>
+          <tr><td><code class="obj-name">.approval-card__footer</code></td><td><span class="obj-type-badge">approval</span></td><td class="obj-desc">Flex row with timestamp and approve/reject action buttons</td></tr>
+          <tr><td><code class="obj-name">.approval-card__actions</code></td><td><span class="obj-type-badge">approval</span></td><td class="obj-desc">Flex container for Approve and Reject buttons</td></tr>
+          <tr><td><code class="obj-name">.approval-history</code></td><td><span class="obj-type-badge">approval</span></td><td class="obj-desc">List of resolved approvals below pending queue</td></tr>
+          <tr><td><code class="obj-name">.approval-history__row</code></td><td><span class="obj-type-badge">approval</span></td><td class="obj-desc">Single resolved approval row showing agent, decision, timestamp</td></tr>
+          <tr><td><code class="obj-name">.gate-pill</code></td><td><span class="obj-type-badge">approval</span></td><td class="obj-desc">Colored badge for approval gate type (tool_call, trading, etc.) via --gate-color</td></tr>
+          <tr><td><code class="obj-name">.countdown</code></td><td><span class="obj-type-badge">approval</span></td><td class="obj-desc">Live countdown timer display (Xh Ym Zs) for approval timeout</td></tr>
+          <tr><td><code class="obj-name">.countdown.is-urgent</code></td><td><span class="obj-type-badge">approval</span></td><td class="obj-desc">Orange color when less than 20% time remains</td></tr>
+          <tr><td><code class="obj-name">.countdown.is-expired</code></td><td><span class="obj-type-badge">approval</span></td><td class="obj-desc">Red color when timeout has passed</td></tr>
+          <!-- Budget -->
+          <tr><td><code class="obj-name">.budget-card-ui</code></td><td><span class="obj-type-badge">budget</span></td><td class="obj-desc">Card showing agent monthly spend, bar, and incident list</td></tr>
+          <tr><td><code class="obj-name">.budget-bar</code></td><td><span class="obj-type-badge">budget</span></td><td class="obj-desc">Spend visualization with label, track, and fill bar</td></tr>
+          <tr><td><code class="obj-name">.budget-bar__track</code></td><td><span class="obj-type-badge">budget</span></td><td class="obj-desc">Gray background track bar for budget fill</td></tr>
+          <tr><td><code class="obj-name">.budget-bar__fill</code></td><td><span class="obj-type-badge">budget</span></td><td class="obj-desc">Colored progress fill inside track</td></tr>
+          <tr><td><code class="obj-name">.budget-bar__fill.is-emerald</code></td><td><span class="obj-type-badge">budget</span></td><td class="obj-desc">Green fill when spend is normal (&lt;80%)</td></tr>
+          <tr><td><code class="obj-name">.budget-bar__fill.is-amber</code></td><td><span class="obj-type-badge">budget</span></td><td class="obj-desc">Yellow fill when spend is warning (80–100%)</td></tr>
+          <tr><td><code class="obj-name">.budget-bar__fill.is-red</code></td><td><span class="obj-type-badge">budget</span></td><td class="obj-desc">Red fill when spend is exceeded (&gt;100%)</td></tr>
+          <tr><td><code class="obj-name">.alert-banner</code></td><td><span class="obj-type-badge">budget</span></td><td class="obj-desc">Warning box shown when agent budget is paused</td></tr>
+          <tr><td><code class="obj-name">.budget-incident</code></td><td><span class="obj-type-badge">budget</span></td><td class="obj-desc">Single incident row inside budget card</td></tr>
+          <!-- Loops -->
+          <tr><td><code class="obj-name">.loop-strip</code></td><td><span class="obj-type-badge">loop</span></td><td class="obj-desc">Top-level container for all loop agent groups</td></tr>
+          <tr><td><code class="obj-name">.loop-agent-group</code></td><td><span class="obj-type-badge">loop</span></td><td class="obj-desc">Section grouping loops belonging to one agent</td></tr>
+          <tr><td><code class="obj-name">.loop-row</code></td><td><span class="obj-type-badge">loop</span></td><td class="obj-desc">Clickable loop record row in inventory list</td></tr>
+          <tr><td><code class="obj-name">.loop-row.is-selected</code></td><td><span class="obj-type-badge">loop</span></td><td class="obj-desc">Highlighted indigo state for selected loop</td></tr>
+          <tr><td><code class="obj-name">.loop-row__title</code></td><td><span class="obj-type-badge">loop</span></td><td class="obj-desc">Loop name + status pill inline</td></tr>
+          <tr><td><code class="obj-name">.loop-row__meta</code></td><td><span class="obj-type-badge">loop</span></td><td class="obj-desc">Loop type, approval gate, iteration count in muted text</td></tr>
+          <tr><td><code class="obj-name">.loop-status-pill</code></td><td><span class="obj-type-badge">loop</span></td><td class="obj-desc">Status badge for loop lifecycle (pending/running/paused/completed/aborted)</td></tr>
+          <tr><td><code class="obj-name">.loop-status-pill.is-running</code></td><td><span class="obj-type-badge">loop</span></td><td class="obj-desc">Green running state pill</td></tr>
+          <tr><td><code class="obj-name">.loop-status-pill.is-paused</code></td><td><span class="obj-type-badge">loop</span></td><td class="obj-desc">Orange paused state pill</td></tr>
+          <tr><td><code class="obj-name">.loop-status-pill.is-completed</code></td><td><span class="obj-type-badge">loop</span></td><td class="obj-desc">Green completed state pill</td></tr>
+          <tr><td><code class="obj-name">.loop-status-pill.is-aborted</code></td><td><span class="obj-type-badge">loop</span></td><td class="obj-desc">Red aborted state pill</td></tr>
+          <tr><td><code class="obj-name">.loop-detail-panel</code></td><td><span class="obj-type-badge">loop</span></td><td class="obj-desc">Full detail view panel for a selected loop spec</td></tr>
+          <tr><td><code class="obj-name">.loop-detail-card</code></td><td><span class="obj-type-badge">loop</span></td><td class="obj-desc">Section card within loop detail (Metric, Budget, Frozen Harness, etc.)</td></tr>
+          <tr><td><code class="obj-name">.loop-path-pill</code></td><td><span class="obj-type-badge">loop</span></td><td class="obj-desc">Code path badge showing frozen or mutable file path</td></tr>
+          <tr><td><code class="obj-name">.loop-path-pill.is-frozen</code></td><td><span class="obj-type-badge">loop</span></td><td class="obj-desc">Red border path pill for frozen (locked) harness entries</td></tr>
+          <tr><td><code class="obj-name">.loop-path-pill.is-mutable</code></td><td><span class="obj-type-badge">loop</span></td><td class="obj-desc">Indigo border path pill for mutable surface entries</td></tr>
+          <tr><td><code class="obj-name">.loop-iteration-row</code></td><td><span class="obj-type-badge">loop</span></td><td class="obj-desc">Single iteration record in loop timeline</td></tr>
+          <tr><td><code class="obj-name">.loop-meta-pair</code></td><td><span class="obj-type-badge">loop</span></td><td class="obj-desc">Key-value stat pair (label + metric value) in loop overview</td></tr>
+          <!-- Topology -->
+          <tr><td><code class="obj-name">.topology-agent-strip</code></td><td><span class="obj-type-badge">topology</span></td><td class="obj-desc">4-column horizontal strip of agent identity cards at top of Topology page</td></tr>
+          <tr><td><code class="obj-name">.topology-agent-card</code></td><td><span class="obj-type-badge">topology</span></td><td class="obj-desc">Card showing agent name, status, model, trust level, current task</td></tr>
+          <tr><td><code class="obj-name">.topology-agent-card__name</code></td><td><span class="obj-type-badge">topology</span></td><td class="obj-desc">Agent label text in agent's brand color</td></tr>
+          <tr><td><code class="obj-name">.topology-agent-card__model</code></td><td><span class="obj-type-badge">topology</span></td><td class="obj-desc">Model name with inline color dot at 10px mono</td></tr>
+          <tr><td><code class="obj-name">.topology-agent-card__trust</code></td><td><span class="obj-type-badge">topology</span></td><td class="obj-desc">Trust level text (L1 Observer, L2 Advisor, L3 Operator) at 10px</td></tr>
+          <tr><td><code class="obj-name">.topology-agent-card__task</code></td><td><span class="obj-type-badge">topology</span></td><td class="obj-desc">Current task label truncated with ellipsis, or "idle"</td></tr>
+          <tr><td><code class="obj-name">.topology-node</code></td><td><span class="obj-type-badge">topology</span></td><td class="obj-desc">Generic service/component card with accent-tinted border</td></tr>
+          <tr><td><code class="obj-name">.topology-node__status</code></td><td><span class="obj-type-badge">topology</span></td><td class="obj-desc">Status badge on topology node (running/paused/error)</td></tr>
+          <tr><td><code class="obj-name">.topology-layer-title</code></td><td><span class="obj-type-badge">topology</span></td><td class="obj-desc">Uppercase indigo section divider label (e.g., "Services", "Hardware")</td></tr>
+          <tr><td><code class="obj-name">.topology-mini-grid</code></td><td><span class="obj-type-badge">topology</span></td><td class="obj-desc">Auto-fit 4-column grid for compact service cards</td></tr>
+          <tr><td><code class="obj-name">.topology-mini-node</code></td><td><span class="obj-type-badge">topology</span></td><td class="obj-desc">Small service component box with indigo accent border</td></tr>
+          <tr><td><code class="obj-name">.topology-mini-node__label</code></td><td><span class="obj-type-badge">topology</span></td><td class="obj-desc">Mini node title in display font at 12px bold</td></tr>
+          <tr><td><code class="obj-name">.topology-mini-node__meta</code></td><td><span class="obj-type-badge">topology</span></td><td class="obj-desc">Mini node description in muted color at 10px</td></tr>
+          <tr><td><code class="obj-name">.topology-flow</code></td><td><span class="obj-type-badge">topology</span></td><td class="obj-desc">Horizontal flex container for directional flow diagrams</td></tr>
+          <tr><td><code class="obj-name">.topology-flow-node</code></td><td><span class="obj-type-badge">topology</span></td><td class="obj-desc">Flow node box — flex-1, used in escalation chain</td></tr>
+          <tr><td><code class="obj-name">.topology-flow-node--low</code></td><td><span class="obj-type-badge">topology</span></td><td class="obj-desc">Green-tinted border for auto-approve (low risk) tier</td></tr>
+          <tr><td><code class="obj-name">.topology-flow-node--medium</code></td><td><span class="obj-type-badge">topology</span></td><td class="obj-desc">Amber-tinted border for propose-then-execute (medium risk) tier</td></tr>
+          <tr><td><code class="obj-name">.topology-flow-node--high</code></td><td><span class="obj-type-badge">topology</span></td><td class="obj-desc">Red-tinted border for human-approval-required (high risk) tier</td></tr>
+          <tr><td><code class="obj-name">.topology-flow-connector</code></td><td><span class="obj-type-badge">topology</span></td><td class="obj-desc">Horizontal line drawn between flow nodes (28px wide, 1px tall)</td></tr>
+          <tr><td><code class="obj-name">.topology-flow-connector::after</code></td><td><span class="obj-type-badge">topology</span></td><td class="obj-desc">CSS triangle arrowhead at right end of connector line</td></tr>
+          <tr><td><code class="obj-name">.topology-tier-list</code></td><td><span class="obj-type-badge">topology</span></td><td class="obj-desc">Grid container for reasoning tier rows (T0–T4)</td></tr>
+          <tr><td><code class="obj-name">.topology-tier-row</code></td><td><span class="obj-type-badge">topology</span></td><td class="obj-desc">Single tier row with badge, label, model name, and trigger condition</td></tr>
+          <tr><td><code class="obj-name">.topology-tier-badge</code></td><td><span class="obj-type-badge">topology</span></td><td class="obj-desc">28px square badge showing tier number (T0, T1, etc.) in tier color</td></tr>
+          <tr><td><code class="obj-name">.topology-stat-row</code></td><td><span class="obj-type-badge">topology</span></td><td class="obj-desc">Flex row of stat key-value pairs</td></tr>
+          <tr><td><code class="obj-name">.topology-stat__value</code></td><td><span class="obj-type-badge">topology</span></td><td class="obj-desc">Metric value at 14px mono tabular-nums bold</td></tr>
+          <!-- Registry -->
+          <tr><td><code class="obj-name">.registry-tables</code></td><td><span class="obj-type-badge">registry</span></td><td class="obj-desc">Two-column grid for domain and class registry tables side by side</td></tr>
+          <tr><td><code class="obj-name">.registry-table</code></td><td><span class="obj-type-badge">registry</span></td><td class="obj-desc">Dense mono table for domain or class entries</td></tr>
+          <tr><td><code class="obj-name">.registry-table__code</code></td><td><span class="obj-type-badge">registry</span></td><td class="obj-desc">Indigo monospace code column (domain/class codes like "00", "001")</td></tr>
+          <tr><td><code class="obj-name">.registry-table__desc</code></td><td><span class="obj-type-badge">registry</span></td><td class="obj-desc">Description cell in body font at 10px dim color</td></tr>
+          <tr><td><code class="obj-name">.registry-color-swatch</code></td><td><span class="obj-type-badge">registry</span></td><td class="obj-desc">8px inline color dot next to hex value in class table</td></tr>
+          <tr><td><code class="obj-name">.registry-editable</code></td><td><span class="obj-type-badge">registry</span></td><td class="obj-desc">Clickable span that reveals a text input for inline editing on click</td></tr>
+          <tr><td><code class="obj-name">.registry-editable__input</code></td><td><span class="obj-type-badge">registry</span></td><td class="obj-desc">Inline text input shown when editing a registry cell</td></tr>
+          <!-- Font Trial -->
+          <tr><td><code class="obj-name">.font-trial-bar</code></td><td><span class="obj-type-badge">experiment</span></td><td class="obj-desc">Container card for the font trial switcher on Topology page</td></tr>
+          <tr><td><code class="obj-name">.font-trial-row</code></td><td><span class="obj-type-badge">experiment</span></td><td class="obj-desc">Single row of font option buttons (Display or Body)</td></tr>
+          <tr><td><code class="obj-name">.font-trial-btn</code></td><td><span class="obj-type-badge">experiment</span></td><td class="obj-desc">Pill button for selecting a trial font option</td></tr>
+          <tr><td><code class="obj-name">.font-trial-btn.is-active</code></td><td><span class="obj-type-badge">experiment</span></td><td class="obj-desc">Indigo highlighted state for the currently active font trial</td></tr>
+          <!-- Misc -->
+          <tr><td><code class="obj-name">.count-badge</code></td><td><span class="obj-type-badge">misc</span></td><td class="obj-desc">Small circular numeric badge in blue for queue counts</td></tr>
+          <tr><td><code class="obj-name">.count-badge.is-alert</code></td><td><span class="obj-type-badge">misc</span></td><td class="obj-desc">Red variant of count badge for urgent counts</td></tr>
+          <tr><td><code class="obj-name">.agent-badge</code></td><td><span class="obj-type-badge">misc</span></td><td class="obj-desc">Flex container for status dot + agent name label</td></tr>
+          <tr><td><code class="obj-name">.empty-state</code></td><td><span class="obj-type-badge">misc</span></td><td class="obj-desc">Centered empty state container with icon, title, and detail text</td></tr>
+          <tr><td><code class="obj-name">.empty-state.is-compact</code></td><td><span class="obj-type-badge">misc</span></td><td class="obj-desc">Reduced height empty state for dense contexts</td></tr>
+          <tr><td><code class="obj-name">.transcript-tail</code></td><td><span class="obj-type-badge">misc</span></td><td class="obj-desc">Scrollable mono transcript box showing last N messages from a run</td></tr>
+          <tr><td><code class="obj-name">.transcript-tail__line</code></td><td><span class="obj-type-badge">misc</span></td><td class="obj-desc">Single transcript line with sequence number and message text</td></tr>
+          <tr><td><code class="obj-name">.command-palette-backdrop</code></td><td><span class="obj-type-badge">misc</span></td><td class="obj-desc">Full-screen blur backdrop behind command palette modal</td></tr>
+          <tr><td><code class="obj-name">.command-palette</code></td><td><span class="obj-type-badge">misc</span></td><td class="obj-desc">Command palette modal with search input and result list</td></tr>
+          <tr><td><code class="obj-name">.command-palette__result</code></td><td><span class="obj-type-badge">misc</span></td><td class="obj-desc">Single result row in command palette</td></tr>
+          <tr><td><code class="obj-name">.command-palette__result.is-active</code></td><td><span class="obj-type-badge">misc</span></td><td class="obj-desc">Keyboard-highlighted result row</td></tr>
+          <tr><td><code class="obj-name">.primary-button</code></td><td><span class="obj-type-badge">button</span></td><td class="obj-desc">Indigo gradient CTA button</td></tr>
+          <tr><td><code class="obj-name">.secondary-button</code></td><td><span class="obj-type-badge">button</span></td><td class="obj-desc">Subtle secondary action button</td></tr>
+          <tr><td><code class="obj-name">.danger-button</code></td><td><span class="obj-type-badge">button</span></td><td class="obj-desc">Red destructive action button</td></tr>
+          <tr><td><code class="obj-name">.tab-button</code></td><td><span class="obj-type-badge">button</span></td><td class="obj-desc">Tab switcher button (inactive by default)</td></tr>
+          <tr><td><code class="obj-name">.tab-button.is-active</code></td><td><span class="obj-type-badge">button</span></td><td class="obj-desc">Selected tab with indigo border and background</td></tr>
+          <tr><td><code class="obj-name">.theme-toggle</code></td><td><span class="obj-type-badge">button</span></td><td class="obj-desc">30px square dark/light mode toggle button in header</td></tr>
+          <tr><td><code class="obj-name">.text-input</code></td><td><span class="obj-type-badge">form</span></td><td class="obj-desc">Standard text input field (dark deep bg, full width, 34px height)</td></tr>
+          <tr><td><code class="obj-name">.select-input</code></td><td><span class="obj-type-badge">form</span></td><td class="obj-desc">Standard select dropdown field matching text-input style</td></tr>
+          <tr><td><code class="obj-name">.checkbox-wrap</code></td><td><span class="obj-type-badge">form</span></td><td class="obj-desc">Custom checkbox with hidden native input and styled span</td></tr>
+          <tr><td><code class="obj-name">.placeholder-copy</code></td><td><span class="obj-type-badge">misc</span></td><td class="obj-desc">Muted gray explanatory text for placeholder/empty sections</td></tr>
+          <tr><td><code class="obj-name">.task-meta-mono</code></td><td><span class="obj-type-badge">misc</span></td><td class="obj-desc">Monospace tabular-nums styling for task IDs and effort values</td></tr>
+          <tr><td><code class="obj-name">.run-table__row</code></td><td><span class="obj-type-badge">misc</span></td><td class="obj-desc">Clickable run history row with status, timestamp, and duration</td></tr>
+          <tr><td><code class="obj-name">.run-table__row.is-selected</code></td><td><span class="obj-type-badge">misc</span></td><td class="obj-desc">Highlighted selected run row</td></tr>
+          <tr><td><code class="obj-name">.dependency-card</code></td><td><span class="obj-type-badge">misc</span></td><td class="obj-desc">Card showing a blocked task and its blockers at 11px</td></tr>
+          <tr><td><code class="obj-name">.activity-log-ui__entry</code></td><td><span class="obj-type-badge">misc</span></td><td class="obj-desc">Single activity log row with timestamp, actor, and action</td></tr>
+          <tr><td><code class="obj-name">.sidebar-row</code></td><td><span class="obj-type-badge">misc</span></td><td class="obj-desc">Flex row in sidebar list with label and detail text</td></tr>
+          <tr><td><code class="obj-name">.compact-list</code></td><td><span class="obj-type-badge">misc</span></td><td class="obj-desc">Bulleted compact list at 11px dim text</td></tr>
+          <tr><td><code class="obj-name">.config-viewer</code></td><td><span class="obj-type-badge">misc</span></td><td class="obj-desc">Monospace pre-formatted code block for config display (min 140px)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── Components ── -->
+  <div class="card" data-section="components">
+    <div class="section-header collapsed" tabindex="-1" onclick="toggleSection(this)">
+      <span class="section-arrow">▼</span>
+      <span class="section-title">React Components</span>
+      <span class="section-count">20+</span>
+    </div>
+    <div class="section-body collapsed">
+      <table>
+        <thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code class="obj-name">AppShell</code></td><td><span class="obj-type-badge">shell</span></td><td class="obj-desc">Root layout: sticky header with nav, main content area, footer. Props: title, eyebrow?, description?, statusSlot?, pageKey?</td></tr>
+          <tr><td><code class="obj-name">SurfaceCard</code></td><td><span class="obj-type-badge">shell</span></td><td class="obj-desc">Reusable bordered card with header slot and child content. Props: title, subtitle?, action?, className?</td></tr>
+          <tr><td><code class="obj-name">CommandPaletteProvider</code></td><td><span class="obj-type-badge">overlay</span></td><td class="obj-desc">Context provider managing Cmd+K palette with dynamic task/approval/loop results</td></tr>
+          <tr><td><code class="obj-name">CommandPaletteButton</code></td><td><span class="obj-type-badge">overlay</span></td><td class="obj-desc">Header button that opens command palette, shows ⌘K hint</td></tr>
+          <tr><td><code class="obj-name">AgentBadge</code></td><td><span class="obj-type-badge">primitive</span></td><td class="obj-desc">Status dot + agent name in brand color. Props: agentId?, fallback?, status?</td></tr>
+          <tr><td><code class="obj-name">StatusDot</code></td><td><span class="obj-type-badge">primitive</span></td><td class="obj-desc">Animated 8px status dot with glow ring. Props: status ("active"|"idle"|"paused"|"error")</td></tr>
+          <tr><td><code class="obj-name">CountdownTimer</code></td><td><span class="obj-type-badge">primitive</span></td><td class="obj-desc">Live countdown for approval timeout, turns urgent at 20%. Props: requestedAt, timeoutMs</td></tr>
+          <tr><td><code class="obj-name">BudgetBar</code></td><td><span class="obj-type-badge">primitive</span></td><td class="obj-desc">Horizontal spend bar with green/amber/red color coding. Props: spent, limit</td></tr>
+          <tr><td><code class="obj-name">GateTypePill</code></td><td><span class="obj-type-badge">primitive</span></td><td class="obj-desc">Colored approval gate type badge. Props: gateType</td></tr>
+          <tr><td><code class="obj-name">TranscriptTail</code></td><td><span class="obj-type-badge">primitive</span></td><td class="obj-desc">Auto-scrolling mono transcript box showing last N messages. Props: entries, limit?</td></tr>
+          <tr><td><code class="obj-name">LastUpdatedChip</code></td><td><span class="obj-type-badge">primitive</span></td><td class="obj-desc">Header chip showing data sync time, red when stale. Props: updatedAt?, stale?</td></tr>
+          <tr><td><code class="obj-name">EmptyState</code></td><td><span class="obj-type-badge">primitive</span></td><td class="obj-desc">Centered empty state with icon placeholder and text. Props: title, detail?, compact?</td></tr>
+          <tr><td><code class="obj-name">ChartCanvas</code></td><td><span class="obj-type-badge">chart</span></td><td class="obj-desc">Chart.js canvas wrapper for bar and doughnut charts. Props: config (ChartConfiguration)</td></tr>
+          <tr><td><code class="obj-name">LoopStatusPill</code></td><td><span class="obj-type-badge">loop</span></td><td class="obj-desc">Loop lifecycle status badge. Props: status (LoopStatus)</td></tr>
+          <tr><td><code class="obj-name">LoopDetailPanel</code></td><td><span class="obj-type-badge">loop</span></td><td class="obj-desc">Full loop spec detail with metric, budget, paths, iterations. Props: loop, actionSlot?, heading?</td></tr>
+          <tr><td><code class="obj-name">FontTrialSwitcher</code></td><td><span class="obj-type-badge">experiment</span></td><td class="obj-desc">Two-row font selector bar on Topology page (display + body options). No props.</td></tr>
+          <tr><td><code class="obj-name">FontTrialRow</code></td><td><span class="obj-type-badge">experiment</span></td><td class="obj-desc">Single row of font trial buttons. Props: label, attr (data attribute name), options[]</td></tr>
+          <tr><td><code class="obj-name">EditableCell</code></td><td><span class="obj-type-badge">registry</span></td><td class="obj-desc">Click-to-edit span that becomes an input, saves on blur/Enter. Props: value, onSave</td></tr>
+          <!-- Pages -->
+          <tr><td><code class="obj-name">PortalPage</code></td><td><span class="obj-type-badge">page</span></td><td class="obj-desc">Landing page with 6 surface cards linking to all portal sections</td></tr>
+          <tr><td><code class="obj-name">DashboardPage</code></td><td><span class="obj-type-badge">page</span></td><td class="obj-desc">Mission Control: task list, live runs, active loops, dependencies, activity log</td></tr>
+          <tr><td><code class="obj-name">ApprovalsPage</code></td><td><span class="obj-type-badge">page</span></td><td class="obj-desc">Pending approval queue with approve/reject, countdown timers, and resolved history</td></tr>
+          <tr><td><code class="obj-name">BudgetPage</code></td><td><span class="obj-type-badge">page</span></td><td class="obj-desc">Per-agent spend bars, incident lists, and override request buttons</td></tr>
+          <tr><td><code class="obj-name">LoopsPage</code></td><td><span class="obj-type-badge">page</span></td><td class="obj-desc">Loop console: start loop, filter/browse inventory, inspect selected loop detail</td></tr>
+          <tr><td><code class="obj-name">AnalyticsPage</code></td><td><span class="obj-type-badge">page</span></td><td class="obj-desc">Four Chart.js charts over 14 days: run activity, task status, assignee, approval rate</td></tr>
+          <tr><td><code class="obj-name">TopologyPage</code></td><td><span class="obj-type-badge">page</span></td><td class="obj-desc">Agent strip, font trial bar, infrastructure grid, escalation flow, reasoning tiers, registry tables</td></tr>
+          <tr><td><code class="obj-name">AgentDetailPage</code></td><td><span class="obj-type-badge">page</span></td><td class="obj-desc">Per-agent detail with tabs: Overview, Runs, Loops, Budget, Config</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── Hooks ── -->
+  <div class="card" data-section="hooks">
+    <div class="section-header collapsed" tabindex="-1" onclick="toggleSection(this)">
+      <span class="section-arrow">▼</span>
+      <span class="section-title">Custom Hooks</span>
+      <span class="section-count">14</span>
+    </div>
+    <div class="section-body collapsed">
+      <table>
+        <thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code class="obj-name">useNow</code></td><td><span class="obj-type-badge">time</span></td><td class="obj-desc">Returns current Date.now(), updates every intervalMs (default 1000). Used by CountdownTimer.</td></tr>
+          <tr><td><code class="obj-name">useTheme</code></td><td><span class="obj-type-badge">ui</span></td><td class="obj-desc">Returns { theme, setTheme, toggle } — reads from localStorage + system preference, syncs data-theme</td></tr>
+          <tr><td><code class="obj-name">useTasksDocument</code></td><td><span class="obj-type-badge">query</span></td><td class="obj-desc">Fetches jobs.json; returns query + saveMutation + updateDocument(fn) with optimistic rollback</td></tr>
+          <tr><td><code class="obj-name">useAgentStatuses</code></td><td><span class="obj-type-badge">query</span></td><td class="obj-desc">Polls all 4 agents in parallel; returns { data: Map&lt;AgentId, AgentStatus&gt;, hasError, ... }</td></tr>
+          <tr><td><code class="obj-name">usePendingApprovals</code></td><td><span class="obj-type-badge">query</span></td><td class="obj-desc">Polls /approvals/pending every 5s; returns UseQueryResult&lt;PendingApproval[]&gt;</td></tr>
+          <tr><td><code class="obj-name">useResolvedApprovals</code></td><td><span class="obj-type-badge">query</span></td><td class="obj-desc">Polls /approvals/resolved?limit=20 every 5s; returns UseQueryResult&lt;ResolvedApproval[]&gt;</td></tr>
+          <tr><td><code class="obj-name">useApprovalDecision</code></td><td><span class="obj-type-badge">mutation</span></td><td class="obj-desc">Mutation for approve/reject decision; optimistically updates both pending and resolved lists</td></tr>
+          <tr><td><code class="obj-name">useBudgetStatus</code></td><td><span class="obj-type-badge">query</span></td><td class="obj-desc">Polls /budget/status every 5s; returns { agents: AgentBudgetStatus[] }</td></tr>
+          <tr><td><code class="obj-name">useBudgetOverride</code></td><td><span class="obj-type-badge">mutation</span></td><td class="obj-desc">Mutation to POST a budget override request; invalidates pending approvals on settle</td></tr>
+          <tr><td><code class="obj-name">useAnalytics</code></td><td><span class="obj-type-badge">query</span></td><td class="obj-desc">Polls /analytics/summary?days=N every 10s; returns AnalyticsSummary with chart data</td></tr>
+          <tr><td><code class="obj-name">useAgentDetail</code></td><td><span class="obj-type-badge">query</span></td><td class="obj-desc">Polls /agents/{agentId} every 5s; returns AgentDetailResponse (identity, runs, loops, budget, config)</td></tr>
+          <tr><td><code class="obj-name">useRunEvents</code></td><td><span class="obj-type-badge">query</span></td><td class="obj-desc">Polls /runs/{runId}/events every 5s if runId set; returns RunEvent[]</td></tr>
+          <tr><td><code class="obj-name">useLoops</code></td><td><span class="obj-type-badge">query</span></td><td class="obj-desc">Polls /loops every 5s; returns ActiveLoop[] with all active loop records</td></tr>
+          <tr><td><code class="obj-name">useLoopDetail</code></td><td><span class="obj-type-badge">query</span></td><td class="obj-desc">Polls /loops/{loopId} every 5s if loopId set; returns full ActiveLoop with iterations</td></tr>
+          <tr><td><code class="obj-name">useLoopStart</code></td><td><span class="obj-type-badge">mutation</span></td><td class="obj-desc">Mutation to POST /loops/start with spec_path; invalidates loops + agent-status</td></tr>
+          <tr><td><code class="obj-name">useLoopAbort</code></td><td><span class="obj-type-badge">mutation</span></td><td class="obj-desc">Mutation to POST /loops/{loopId}/abort; invalidates loops + agent detail</td></tr>
+          <tr><td><code class="obj-name">useRunCancel</code></td><td><span class="obj-type-badge">mutation</span></td><td class="obj-desc">Mutation to POST /runs/{runId}/cancel; invalidates agent-detail + agent-status</td></tr>
+          <tr><td><code class="obj-name">useAgentAction</code></td><td><span class="obj-type-badge">mutation</span></td><td class="obj-desc">Mutation for pause/resume/heartbeat on an agent; invalidates agent-detail + status</td></tr>
+          <tr><td><code class="obj-name">latestDataUpdatedAt</code></td><td><span class="obj-type-badge">util</span></td><td class="obj-desc">Helper returning the most recent dataUpdatedAt timestamp across an array of query results</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── Types ── -->
+  <div class="card" data-section="types">
+    <div class="section-header collapsed" tabindex="-1" onclick="toggleSection(this)">
+      <span class="section-arrow">▼</span>
+      <span class="section-title">TypeScript Types & Interfaces</span>
+      <span class="section-count">35+</span>
+    </div>
+    <div class="section-body collapsed">
+      <table>
+        <thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code class="obj-name">AgentId</code></td><td><span class="obj-type-badge">union</span></td><td class="obj-desc">"boot" | "ig88" | "kelk" | "nan" — the four valid agent identifiers</td></tr>
+          <tr><td><code class="obj-name">ApprovalGateType</code></td><td><span class="obj-type-badge">union</span></td><td class="obj-desc">Union of gate types: tool_call, trading_execution, agent_elevation, loop_spec_deploy, budget_override, loop_iteration, infra_change</td></tr>
+          <tr><td><code class="obj-name">ApprovalDecisionInput</code></td><td><span class="obj-type-badge">union</span></td><td class="obj-desc">"approve" | "reject" — choices when resolving a pending approval</td></tr>
+          <tr><td><code class="obj-name">RunEventType</code></td><td><span class="obj-type-badge">union</span></td><td class="obj-desc">Union of event types in a run log (tool_call, checkpoint, error, session_start, loop_start, etc.)</td></tr>
+          <tr><td><code class="obj-name">LoopType</code></td><td><span class="obj-type-badge">union</span></td><td class="obj-desc">"researcher" | "narrative" | "infra_improve" | "coding" | "swarm"</td></tr>
+          <tr><td><code class="obj-name">LoopStatus</code></td><td><span class="obj-type-badge">union</span></td><td class="obj-desc">"pending" | "running" | "paused" | "completed" | "aborted"</td></tr>
+          <tr><td><code class="obj-name">LoopApprovalGate</code></td><td><span class="obj-type-badge">union</span></td><td class="obj-desc">"none" | "propose_then_execute" | "human_approval_required"</td></tr>
+          <tr><td><code class="obj-name">MetricDirection</code></td><td><span class="obj-type-badge">union</span></td><td class="obj-desc">"higher_is_better" | "lower_is_better" — optimization direction for loop metric</td></tr>
+          <tr><td><code class="obj-name">RollbackMethod</code></td><td><span class="obj-type-badge">union</span></td><td class="obj-desc">"git_reset" | "config_revert" | "file_delete" | "timer_cancel"</td></tr>
+          <tr><td><code class="obj-name">TaskRecord</code></td><td><span class="obj-type-badge">interface</span></td><td class="obj-desc">Full job/task record: id, title, description?, status, effort?, blocked_by[], block, assignee?, domain?, job_class?, legacy_id?</td></tr>
+          <tr><td><code class="obj-name">TaskBlock</code></td><td><span class="obj-type-badge">interface</span></td><td class="obj-desc">Job swimlane definition: label + color for the task card header</td></tr>
+          <tr><td><code class="obj-name">TaskLogEntry</code></td><td><span class="obj-type-badge">interface</span></td><td class="obj-desc">Activity log entry: timestamp, actor, action, task_id?, detail?</td></tr>
+          <tr><td><code class="obj-name">RegistryEntry</code></td><td><span class="obj-type-badge">interface</span></td><td class="obj-desc">Domain or class registry row: label, description?, color?</td></tr>
+          <tr><td><code class="obj-name">TasksDocument</code></td><td><span class="obj-type-badge">interface</span></td><td class="obj-desc">jobs.json shape: tasks[], blocks {}, log[], updated?, updated_by?, registry? { domains, classes }</td></tr>
+          <tr><td><code class="obj-name">LoopSpec</code></td><td><span class="obj-type-badge">interface</span></td><td class="obj-desc">Full loop spec: loop_id, name, objective, loop_type, agent_id, metric, frozen_harness[], mutable_surface[], budget, rollback, approval_gate</td></tr>
+          <tr><td><code class="obj-name">LoopMetric</code></td><td><span class="obj-type-badge">interface</span></td><td class="obj-desc">Loop success metric: name, formula, baseline, direction, machine_readable</td></tr>
+          <tr><td><code class="obj-name">LoopBudget</code></td><td><span class="obj-type-badge">interface</span></td><td class="obj-desc">Loop spend limits: per_iteration (invocations), max_iterations</td></tr>
+          <tr><td><code class="obj-name">RollbackMechanism</code></td><td><span class="obj-type-badge">interface</span></td><td class="obj-desc">Rollback config: method, command, scope</td></tr>
+          <tr><td><code class="obj-name">IterationRecord</code></td><td><span class="obj-type-badge">interface</span></td><td class="obj-desc">Single loop iteration: iteration, metric_value, delta, tokens_used, kept, started_at, ended_at</td></tr>
+          <tr><td><code class="obj-name">ActiveLoop</code></td><td><span class="obj-type-badge">interface</span></td><td class="obj-desc">Full active loop: loop_id, spec, status, current_iteration, token counts, best_metric?, iterations[]</td></tr>
+          <tr><td><code class="obj-name">StatusActiveLoop</code></td><td><span class="obj-type-badge">interface</span></td><td class="obj-desc">Compact active loop for status polling: loop_id, status, current_iteration, best_metric?, spec (summary)</td></tr>
+          <tr><td><code class="obj-name">AgentStatus</code></td><td><span class="obj-type-badge">interface</span></td><td class="obj-desc">Live agent status.json shape: status?, notes?, current_task?, last_updated?, current_run?, active_loops?</td></tr>
+          <tr><td><code class="obj-name">AgentDetailSummary</code></td><td><span class="obj-type-badge">interface</span></td><td class="obj-desc">Full agent detail: agent_id, name, model?, trust_level?, context_mode?, status?, runtime_state?, budget?, config?, current_run?, loops?</td></tr>
+          <tr><td><code class="obj-name">AgentRunRecord</code></td><td><span class="obj-type-badge">interface</span></td><td class="obj-desc">Run history row: id, status, started_at, finished_at?, duration_ms?, task?, cost_cents?</td></tr>
+          <tr><td><code class="obj-name">RunEvent</code></td><td><span class="obj-type-badge">interface</span></td><td class="obj-desc">Single run event log entry: run_id, seq, event_type, stream, level, message, payload?, timestamp</td></tr>
+          <tr><td><code class="obj-name">PendingApproval</code></td><td><span class="obj-type-badge">interface</span></td><td class="obj-desc">Approval awaiting decision: id, gate_type, agent_name, tool_name?, payload?, requested_at, timeout_ms</td></tr>
+          <tr><td><code class="obj-name">ResolvedApproval</code></td><td><span class="obj-type-badge">interface</span></td><td class="obj-desc">Extends PendingApproval with: decision ("approved"|"rejected"|"timed_out"), resolved_at?</td></tr>
+          <tr><td><code class="obj-name">BudgetStatusSummary</code></td><td><span class="obj-type-badge">union</span></td><td class="obj-desc">Discriminated union: { kind: "normal" } | { kind: "warning", pct } | { kind: "paused", reason }</td></tr>
+          <tr><td><code class="obj-name">BudgetIncident</code></td><td><span class="obj-type-badge">interface</span></td><td class="obj-desc">Spend incident: id, agent_id, threshold_type, amount_limit, amount_observed, status, created_at, resolved_at?</td></tr>
+          <tr><td><code class="obj-name">AgentBudgetStatus</code></td><td><span class="obj-type-badge">interface</span></td><td class="obj-desc">Per-agent budget: agent_id, monthly_limit_usd, spent_this_month_usd, status, incidents[], runtime_state?</td></tr>
+          <tr><td><code class="obj-name">AnalyticsSummary</code></td><td><span class="obj-type-badge">interface</span></td><td class="obj-desc">Chart data: run_activity[], tasks_by_status[], tasks_by_assignee[], approval_rate { approved, rejected, timed_out }</td></tr>
+          <tr><td><code class="obj-name">AgentDefinition</code></td><td><span class="obj-type-badge">interface</span></td><td class="obj-desc">Static agent config: id, label, shortLabel, color, accent, model, trust</td></tr>
+          <tr><td><code class="obj-name">ApiError</code></td><td><span class="obj-type-badge">class</span></td><td class="obj-desc">Custom Error subclass with a status: number field for HTTP error codes</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── Design Tokens ── -->
+  <div class="card" data-section="tokens">
+    <div class="section-header collapsed" tabindex="-1" onclick="toggleSection(this)">
+      <span class="section-arrow">▼</span>
+      <span class="section-title">Design Tokens (CSS Custom Properties)</span>
+      <span class="section-count">40+</span>
+    </div>
+    <div class="section-body collapsed">
+      <table>
+        <thead><tr><th>Name</th><th>Value</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code class="obj-name">--font-display</code></td><td><span class="obj-type-badge">typography</span></td><td class="obj-desc">"Geist Pixel Square" — headers, labels, card titles, nav links</td></tr>
+          <tr><td><code class="obj-name">--font-body</code></td><td><span class="obj-type-badge">typography</span></td><td class="obj-desc">"Geist Mono UltraLight" 200wt — all body and paragraph text</td></tr>
+          <tr><td><code class="obj-name">--font-mono</code></td><td><span class="obj-type-badge">typography</span></td><td class="obj-desc">"Geist Mono UltraLight" — code, IDs, metrics, mono-specific text</td></tr>
+          <tr><td><code class="obj-name">--bg</code></td><td><span class="obj-type-badge">color</span></td><td class="obj-desc">#0b1117 — deepest page background</td></tr>
+          <tr><td><code class="obj-name">--bg-deep</code></td><td><span class="obj-type-badge">color</span></td><td class="obj-desc">#070c11 — even deeper background for nested cards/inputs</td></tr>
+          <tr><td><code class="obj-name">--bg-panel</code></td><td><span class="obj-type-badge">color</span></td><td class="obj-desc">#10161e — surface card and panel background</td></tr>
+          <tr><td><code class="obj-name">--bg-panel-strong</code></td><td><span class="obj-type-badge">color</span></td><td class="obj-desc">#151d28 — stronger panel background (section headers)</td></tr>
+          <tr><td><code class="obj-name">--bg-panel-hover</code></td><td><span class="obj-type-badge">color</span></td><td class="obj-desc">#1a2435 — panel hover state background</td></tr>
+          <tr><td><code class="obj-name">--surface-soft</code></td><td><span class="obj-type-badge">color</span></td><td class="obj-desc">rgba(16,22,30,0.88) — translucent overlay for nav buttons</td></tr>
+          <tr><td><code class="obj-name">--surface-strong</code></td><td><span class="obj-type-badge">color</span></td><td class="obj-desc">rgba(21,29,40,0.96) — header and footer frosted glass background</td></tr>
+          <tr><td><code class="obj-name">--text</code></td><td><span class="obj-type-badge">color</span></td><td class="obj-desc">#e4eaf1 — primary text color</td></tr>
+          <tr><td><code class="obj-name">--text-dim</code></td><td><span class="obj-type-badge">color</span></td><td class="obj-desc">#94a3b8 — secondary text (labels, descriptions)</td></tr>
+          <tr><td><code class="obj-name">--text-muted</code></td><td><span class="obj-type-badge">color</span></td><td class="obj-desc">#64748b — tertiary text (meta, disabled, timestamps)</td></tr>
+          <tr><td><code class="obj-name">--accent</code></td><td><span class="obj-type-badge">color</span></td><td class="obj-desc">#6366f1 — primary indigo accent for borders, highlights, active states</td></tr>
+          <tr><td><code class="obj-name">--accent-soft</code></td><td><span class="obj-type-badge">color</span></td><td class="obj-desc">rgba(99,102,241,0.10) — accent background tint for hover states</td></tr>
+          <tr><td><code class="obj-name">--accent-border</code></td><td><span class="obj-type-badge">color</span></td><td class="obj-desc">rgba(99,102,241,0.38) — accent border for active/focused elements</td></tr>
+          <tr><td><code class="obj-name">--accent-glow</code></td><td><span class="obj-type-badge">color</span></td><td class="obj-desc">rgba(99,102,241,0.16) — subtle inner glow shadow for active nav links</td></tr>
+          <tr><td><code class="obj-name">--green</code></td><td><span class="obj-type-badge">color</span></td><td class="obj-desc">#34d399 — success, active, done states</td></tr>
+          <tr><td><code class="obj-name">--yellow</code></td><td><span class="obj-type-badge">color</span></td><td class="obj-desc">#fbbf24 — warning, paused states</td></tr>
+          <tr><td><code class="obj-name">--red</code></td><td><span class="obj-type-badge">color</span></td><td class="obj-desc">#f87171 — error, danger, expired states</td></tr>
+          <tr><td><code class="obj-name">--blue</code></td><td><span class="obj-type-badge">color</span></td><td class="obj-desc">#60a5fa — info, pending, count badges</td></tr>
+          <tr><td><code class="obj-name">--purple</code></td><td><span class="obj-type-badge">color</span></td><td class="obj-desc">#a78bfa — blocked tasks, alternate accent</td></tr>
+          <tr><td><code class="obj-name">--orange</code></td><td><span class="obj-type-badge">color</span></td><td class="obj-desc">#fb923c — secondary warning color</td></tr>
+          <tr><td><code class="obj-name">--agent-boot</code></td><td><span class="obj-type-badge">color</span></td><td class="obj-desc">#38bdf8 — Boot agent brand color (cyan)</td></tr>
+          <tr><td><code class="obj-name">--agent-ig88</code></td><td><span class="obj-type-badge">color</span></td><td class="obj-desc">#f97316 — IG-88 agent brand color (orange)</td></tr>
+          <tr><td><code class="obj-name">--agent-kelk</code></td><td><span class="obj-type-badge">color</span></td><td class="obj-desc">#a78bfa — Kelk agent brand color (purple)</td></tr>
+          <tr><td><code class="obj-name">--agent-nan</code></td><td><span class="obj-type-badge">color</span></td><td class="obj-desc">#fb7185 — Nan agent brand color (pink)</td></tr>
+          <tr><td><code class="obj-name">--border</code></td><td><span class="obj-type-badge">border</span></td><td class="obj-desc">rgba(255,255,255,0.07) — default subtle border</td></tr>
+          <tr><td><code class="obj-name">--border-strong</code></td><td><span class="obj-type-badge">border</span></td><td class="obj-desc">rgba(255,255,255,0.12) — stronger border for section dividers</td></tr>
+          <tr><td><code class="obj-name">--shadow</code></td><td><span class="obj-type-badge">shadow</span></td><td class="obj-desc">0 16px 40px rgba(0,0,0,0.28) — card drop shadow</td></tr>
+          <tr><td><code class="obj-name">--shell-max</code></td><td><span class="obj-type-badge">layout</span></td><td class="obj-desc">1360px — maximum content width for all pages</td></tr>
+          <tr><td><code class="obj-name">--shell-width</code></td><td><span class="obj-type-badge">layout</span></td><td class="obj-desc">calc(100vw - 32px) — responsive width with 16px margins each side</td></tr>
+          <tr><td><code class="obj-name">--radius</code></td><td><span class="obj-type-badge">layout</span></td><td class="obj-desc">12px — default border radius for cards and panels</td></tr>
+          <tr><td><code class="obj-name">--transition</code></td><td><span class="obj-type-badge">animation</span></td><td class="obj-desc">160ms cubic-bezier(0.2, 0.65, 0.2, 1) — standard easing for all hover/state transitions</td></tr>
+          <tr><td><code class="obj-name">--dust-dot</code></td><td><span class="obj-type-badge">texture</span></td><td class="obj-desc">rgba(148,163,184,0.22) — primary dot color for background dust grid</td></tr>
+          <tr><td><code class="obj-name">--dust-dot-dim</code></td><td><span class="obj-type-badge">texture</span></td><td class="obj-desc">rgba(99,102,241,0.12) — secondary indigo dot for background dust grid</td></tr>
+          <tr><td><code class="obj-name">--node-accent</code></td><td><span class="obj-type-badge">dynamic</span></td><td class="obj-desc">Set inline per topology node to agent brand color for border tinting</td></tr>
+          <tr><td><code class="obj-name">--chip-color</code></td><td><span class="obj-type-badge">dynamic</span></td><td class="obj-desc">Set inline per filter chip to job block color</td></tr>
+          <tr><td><code class="obj-name">--gate-color</code></td><td><span class="obj-type-badge">dynamic</span></td><td class="obj-desc">Set inline per gate pill to approval gate type color (yellow/red/etc.)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── API Functions ── -->
+  <div class="card" data-section="api">
+    <div class="section-header collapsed" tabindex="-1" onclick="toggleSection(this)">
+      <span class="section-arrow">▼</span>
+      <span class="section-title">API Functions</span>
+      <span class="section-count">20</span>
+    </div>
+    <div class="section-body collapsed">
+      <table>
+        <thead><tr><th>Name</th><th>Method</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code class="obj-name">fetchTasks</code></td><td><span class="obj-type-badge">GET</span></td><td class="obj-desc">GET /jobs.json — fetches the full task/job registry document</td></tr>
+          <tr><td><code class="obj-name">saveTasks</code></td><td><span class="obj-type-badge">PUT</span></td><td class="obj-desc">PUT /jobs.json — persists updated TasksDocument (used by all inline edits)</td></tr>
+          <tr><td><code class="obj-name">fetchAgentStatus</code></td><td><span class="obj-type-badge">GET</span></td><td class="obj-desc">GET /status/{agentId}.json — live agent status (current_task, active_loops, current_run)</td></tr>
+          <tr><td><code class="obj-name">fetchAgentDetail</code></td><td><span class="obj-type-badge">GET</span></td><td class="obj-desc">GET /agents/{agentId} — full agent detail with identity, runtime state, runs, loops, config</td></tr>
+          <tr><td><code class="obj-name">fetchPendingApprovals</code></td><td><span class="obj-type-badge">GET</span></td><td class="obj-desc">GET /approvals/pending — list of awaiting-decision approval requests</td></tr>
+          <tr><td><code class="obj-name">fetchResolvedApprovals</code></td><td><span class="obj-type-badge">GET</span></td><td class="obj-desc">GET /approvals/resolved?limit=20 — recent approval decision history</td></tr>
+          <tr><td><code class="obj-name">decideApproval</code></td><td><span class="obj-type-badge">POST</span></td><td class="obj-desc">POST /approvals/{id}/decide with { decision } — approve or reject a pending request</td></tr>
+          <tr><td><code class="obj-name">fetchBudgetStatus</code></td><td><span class="obj-type-badge">GET</span></td><td class="obj-desc">GET /budget/status — per-agent spend, limits, incidents, and status summary</td></tr>
+          <tr><td><code class="obj-name">requestBudgetOverride</code></td><td><span class="obj-type-badge">POST</span></td><td class="obj-desc">POST /approvals/budget-override with { agent_id } — create an override approval request</td></tr>
+          <tr><td><code class="obj-name">fetchAnalyticsSummary</code></td><td><span class="obj-type-badge">GET</span></td><td class="obj-desc">GET /analytics/summary?days=N — 14-day chart data for runs, tasks, assignees, approvals</td></tr>
+          <tr><td><code class="obj-name">cancelRun</code></td><td><span class="obj-type-badge">POST</span></td><td class="obj-desc">POST /runs/{runId}/cancel — stop an active agent run</td></tr>
+          <tr><td><code class="obj-name">triggerAgentAction</code></td><td><span class="obj-type-badge">POST</span></td><td class="obj-desc">POST /agents/{agentId}/{action} — send pause/resume/heartbeat to agent</td></tr>
+          <tr><td><code class="obj-name">fetchRunEvents</code></td><td><span class="obj-type-badge">GET</span></td><td class="obj-desc">GET /runs/{runId}/events — full event log for a specific run</td></tr>
+          <tr><td><code class="obj-name">fetchLoops</code></td><td><span class="obj-type-badge">GET</span></td><td class="obj-desc">GET /loops — all active loop records with status and iteration counts</td></tr>
+          <tr><td><code class="obj-name">fetchLoopDetail</code></td><td><span class="obj-type-badge">GET</span></td><td class="obj-desc">GET /loops/{loopId} — complete loop spec, status, and full iteration history</td></tr>
+          <tr><td><code class="obj-name">startLoop</code></td><td><span class="obj-type-badge">POST</span></td><td class="obj-desc">POST /loops/start with { spec_path } — launch a new optimization loop</td></tr>
+          <tr><td><code class="obj-name">abortLoop</code></td><td><span class="obj-type-badge">POST</span></td><td class="obj-desc">POST /loops/{loopId}/abort — stop a running loop</td></tr>
+          <tr><td><code class="obj-name">fetchJson</code></td><td><span class="obj-type-badge">util</span></td><td class="obj-desc">Base fetch wrapper — adds no-store cache and JSON headers, throws ApiError on non-ok</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── Constants ── -->
+  <div class="card" data-section="constants">
+    <div class="section-header collapsed" tabindex="-1" onclick="toggleSection(this)">
+      <span class="section-arrow">▼</span>
+      <span class="section-title">Constants & Utilities</span>
+      <span class="section-count">25+</span>
+    </div>
+    <div class="section-body collapsed">
+      <table>
+        <thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code class="obj-name">AGENTS</code></td><td><span class="obj-type-badge">const</span></td><td class="obj-desc">Array of 4 AgentDefinition objects: Boot (#38bdf8), IG-88 (#f97316), Kelk (#a78bfa), Nan (#fb7185)</td></tr>
+          <tr><td><code class="obj-name">NAV_LINKS</code></td><td><span class="obj-type-badge">const</span></td><td class="obj-desc">Array of { href, label } for the main header navigation (7 links)</td></tr>
+          <tr><td><code class="obj-name">DOC_LINKS</code></td><td><span class="obj-type-badge">const</span></td><td class="obj-desc">Array of { href, label } for the footer documentation links (5 links)</td></tr>
+          <tr><td><code class="obj-name">PORTAL_HOME</code></td><td><span class="obj-type-badge">const</span></td><td class="obj-desc">"/portal.html" — canonical landing page route</td></tr>
+          <tr><td><code class="obj-name">POLL_INTERVAL_MS</code></td><td><span class="obj-type-badge">const</span></td><td class="obj-desc">5000 — base polling interval in milliseconds for React Query</td></tr>
+          <tr><td><code class="obj-name">cn</code></td><td><span class="obj-type-badge">util</span></td><td class="obj-desc">Classname builder — joins non-falsy string parts with spaces</td></tr>
+          <tr><td><code class="obj-name">formatUsd</code></td><td><span class="obj-type-badge">util</span></td><td class="obj-desc">Formats a number as USD currency string with adaptive decimal places</td></tr>
+          <tr><td><code class="obj-name">formatCents</code></td><td><span class="obj-type-badge">util</span></td><td class="obj-desc">Converts cents to dollars and formats as USD</td></tr>
+          <tr><td><code class="obj-name">timeAgo</code></td><td><span class="obj-type-badge">util</span></td><td class="obj-desc">Returns relative time string from ISO timestamp (e.g., "2 hours ago")</td></tr>
+          <tr><td><code class="obj-name">relativeTimestamp</code></td><td><span class="obj-type-badge">util</span></td><td class="obj-desc">Returns full timestamp + relative string (e.g., "3/20/2026, 2:30 PM · 2 hours ago")</td></tr>
+          <tr><td><code class="obj-name">formatMetricValue</code></td><td><span class="obj-type-badge">util</span></td><td class="obj-desc">Formats loop metric values with adaptive precision (0/2/4 decimals)</td></tr>
+          <tr><td><code class="obj-name">approvalGateLabel</code></td><td><span class="obj-type-badge">util</span></td><td class="obj-desc">Maps ApprovalGateType to human-readable label string</td></tr>
+          <tr><td><code class="obj-name">approvalGateColor</code></td><td><span class="obj-type-badge">util</span></td><td class="obj-desc">Maps ApprovalGateType to CSS color variable string</td></tr>
+          <tr><td><code class="obj-name">loopTypeLabel</code></td><td><span class="obj-type-badge">util</span></td><td class="obj-desc">Maps LoopType to display label (e.g., "infra_improve" → "Infra Improve")</td></tr>
+          <tr><td><code class="obj-name">loopApprovalGateLabel</code></td><td><span class="obj-type-badge">util</span></td><td class="obj-desc">Maps LoopApprovalGate to display label</td></tr>
+          <tr><td><code class="obj-name">loopStatusLabel</code></td><td><span class="obj-type-badge">util</span></td><td class="obj-desc">Maps LoopStatus to capitalized display string</td></tr>
+          <tr><td><code class="obj-name">loopStatusTone</code></td><td><span class="obj-type-badge">util</span></td><td class="obj-desc">Maps LoopStatus to CSS tone class (is-running, is-paused, etc.)</td></tr>
+          <tr><td><code class="obj-name">rollbackMethodLabel</code></td><td><span class="obj-type-badge">util</span></td><td class="obj-desc">Maps RollbackMethod to human-readable string</td></tr>
+          <tr><td><code class="obj-name">runEventLabel</code></td><td><span class="obj-type-badge">util</span></td><td class="obj-desc">Maps RunEventType to display label</td></tr>
+          <tr><td><code class="obj-name">agentDefinition</code></td><td><span class="obj-type-badge">util</span></td><td class="obj-desc">Looks up AgentDefinition from AGENTS by agent ID string; returns null if not found</td></tr>
+          <tr><td><code class="obj-name">budgetStatusKind</code></td><td><span class="obj-type-badge">util</span></td><td class="obj-desc">Normalizes budget status to "normal" | "warning" | "paused" (handles string or union input)</td></tr>
+          <tr><td><code class="obj-name">clamp</code></td><td><span class="obj-type-badge">util</span></td><td class="obj-desc">Constrains a number value to [min, max] range</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <div class="inner">
+    <span>dreamfactory portal — object index</span>
+    <span>2026-03-20 · factory v8</span>
+  </div>
+</footer>
+
+<script>
+// Theme init — respect saved preference or system
+(function() {
+  const saved = localStorage.getItem("portal-theme");
+  if (saved) { document.documentElement.setAttribute("data-theme", saved); }
+  else if (window.matchMedia("(prefers-color-scheme: light)").matches) {
+    document.documentElement.setAttribute("data-theme", "light");
+  }
+})();
+
+function toggleSection(header) {
+  header.classList.toggle("collapsed");
+  const body = header.nextElementSibling;
+  body.classList.toggle("collapsed");
+}
+
+function expandAll() {
+  document.querySelectorAll(".section-header.collapsed").forEach(h => {
+    h.classList.remove("collapsed");
+    h.nextElementSibling.classList.remove("collapsed");
+  });
+}
+
+function collapseAll() {
+  document.querySelectorAll(".section-header:not(.collapsed)").forEach(h => {
+    h.classList.add("collapsed");
+    h.nextElementSibling.classList.add("collapsed");
+  });
+}
+
+const searchInput = document.getElementById("search");
+const countEl = document.getElementById("search-count");
+const clearBtn = document.getElementById("search-clear");
+const sectionHeaders = document.querySelectorAll(".section-header");
+const headerArray = Array.from(sectionHeaders);
+let currentHeaderIndex = -1;
+
+function focusHeader(index) {
+  if (index >= 0 && index < headerArray.length) {
+    currentHeaderIndex = index;
+    headerArray[index].focus();
+    headerArray[index].scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+}
+
+searchInput.addEventListener("input", () => {
+  const q = searchInput.value.trim().toLowerCase();
+  const rows = document.querySelectorAll("tbody tr");
+  let visible = 0;
+  rows.forEach(row => {
+    const text = row.textContent.toLowerCase();
+    const match = !q || text.includes(q);
+    row.classList.toggle("hidden", !match);
+    if (match) visible++;
+    if (match && q) {
+      const body = row.closest(".section-body");
+      const header = body?.previousElementSibling;
+      if (header?.classList.contains("collapsed")) {
+        header.classList.remove("collapsed");
+        body.classList.remove("collapsed");
+      }
+    }
+  });
+  countEl.textContent = q ? `${visible} match${visible !== 1 ? "es" : ""}` : "";
+  clearBtn.classList.toggle("visible", !!q);
+  if (!q) collapseAll();
+});
+
+clearBtn.addEventListener("click", () => {
+  searchInput.value = "";
+  searchInput.dispatchEvent(new Event("input"));
+  searchInput.focus();
+});
+
+document.querySelectorAll(".obj-name").forEach(el => {
+  el.addEventListener("click", () => {
+    const text = el.textContent.replace(" ⎘", "").trim();
+    navigator.clipboard.writeText(text).then(() => {
+      el.classList.add("copied");
+      setTimeout(() => el.classList.remove("copied"), 400);
+    });
+  });
+});
+
+// Keyboard navigation
+document.addEventListener("keydown", (e) => {
+  const inSearch = e.target === searchInput;
+
+  // Esc always works: blur search first, then collapse all
+  if (e.key === "Escape") {
+    e.preventDefault();
+    if (inSearch) { searchInput.value = ""; searchInput.dispatchEvent(new Event("input")); searchInput.blur(); return; }
+    collapseAll();
+    return;
+  }
+
+  // Tab toggles in/out of search
+  if (e.key === "Tab") {
+    e.preventDefault();
+    if (inSearch) { searchInput.blur(); }
+    else { searchInput.focus(); searchInput.select(); }
+    return;
+  }
+
+  // Arrow keys: exit search if in it, then navigate sections
+  if (inSearch && (e.key === "ArrowDown" || e.key === "ArrowUp")) {
+    e.preventDefault();
+    searchInput.blur();
+    if (e.key === "ArrowDown") focusHeader(currentHeaderIndex < 0 ? 0 : Math.min(currentHeaderIndex + 1, headerArray.length - 1));
+    else focusHeader(currentHeaderIndex < 0 ? headerArray.length - 1 : Math.max(currentHeaderIndex - 1, 0));
+    return;
+  }
+
+  // Cmd+Shift+E: export to markdown (works from anywhere)
+  if (e.key.toLowerCase() === "e" && e.metaKey && e.shiftKey) {
+    e.preventDefault();
+    exportToMarkdown();
+    return;
+  }
+
+  // \: toggle dark/light mode
+  if (e.key === "\\") {
+    e.preventDefault();
+    const html = document.documentElement;
+    const current = html.getAttribute("data-theme");
+    const next = current === "light" ? "dark" : "light";
+    html.setAttribute("data-theme", next);
+    localStorage.setItem("portal-theme", next);
+    return;
+  }
+
+  if (inSearch) return;
+
+  const focused = document.activeElement;
+  if (focused && focused.classList.contains("section-header")) {
+    currentHeaderIndex = headerArray.indexOf(focused);
+  }
+
+  switch (e.key) {
+    case "ArrowDown":
+      e.preventDefault();
+      if (currentHeaderIndex < headerArray.length - 1) focusHeader(currentHeaderIndex + 1);
+      else if (currentHeaderIndex === -1 && headerArray.length > 0) focusHeader(0);
+      break;
+    case "ArrowUp":
+      e.preventDefault();
+      if (currentHeaderIndex > 0) focusHeader(currentHeaderIndex - 1);
+      else if (currentHeaderIndex === -1 && headerArray.length > 0) focusHeader(headerArray.length - 1);
+      break;
+    case "ArrowRight":
+      if (focused && focused.classList.contains("section-header") && focused.classList.contains("collapsed")) {
+        e.preventDefault();
+        toggleSection(focused);
+      }
+      break;
+    case "ArrowLeft":
+      if (focused && focused.classList.contains("section-header") && !focused.classList.contains("collapsed")) {
+        e.preventDefault();
+        toggleSection(focused);
+      }
+      break;
+    case " ":
+    case "Enter":
+      if (focused && focused.classList.contains("section-header")) {
+        e.preventDefault();
+        toggleSection(focused);
+      }
+      break;
+    case "a":
+      if (!e.ctrlKey && !e.metaKey) { e.preventDefault(); expandAll(); }
+      break;
+  }
+});
+
+// Export to Markdown
+function exportToMarkdown() {
+  const q = searchInput.value.trim().toLowerCase();
+  const sections = document.querySelectorAll(".card[data-section]");
+  let md = "# Portal Object Index\n\n";
+  if (q) md += `> Filtered: "${searchInput.value.trim()}"\n\n`;
+
+  sections.forEach(section => {
+    const title = section.querySelector(".section-title")?.textContent || "";
+    const rows = section.querySelectorAll("tbody tr");
+    const visibleRows = [];
+    rows.forEach(row => {
+      if (!row.classList.contains("hidden")) visibleRows.push(row);
+    });
+    if (visibleRows.length === 0) return;
+
+    md += `## ${title}\n\n`;
+    md += "| Name | Type | Description |\n";
+    md += "|------|------|-------------|\n";
+    visibleRows.forEach(row => {
+      const cells = row.querySelectorAll("td");
+      const name = cells[0]?.textContent.replace(" ⎘", "").trim() || "";
+      const type = cells[1]?.textContent.trim() || "";
+      const desc = cells[2]?.textContent.trim() || "";
+      md += `| \`${name}\` | ${type} | ${desc} |\n`;
+    });
+    md += "\n";
+  });
+
+  navigator.clipboard.writeText(md).then(() => {
+    const btn = document.getElementById("export-btn");
+    const orig = btn.textContent;
+    btn.textContent = "✓ Copied";
+    btn.classList.remove("export-fade");
+    btn.classList.add("exported");
+    setTimeout(() => {
+      btn.classList.remove("exported");
+      btn.classList.add("export-fade");
+      btn.textContent = orig;
+      setTimeout(() => btn.classList.remove("export-fade"), 600);
+    }, 1200);
+  });
+}
+document.getElementById("export-btn").addEventListener("click", exportToMarkdown);
+</script>
+</body>
+</html>
