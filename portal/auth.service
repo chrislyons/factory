@@ -1,0 +1,14 @@
+[Unit]
+Description=Factory Portal Auth Sidecar
+After=network.target
+
+[Service]
+Type=simple
+User=nesbitt
+WorkingDirectory=/home/nesbitt/projects/factory-portal
+ExecStart=/usr/bin/python3 /home/nesbitt/projects/factory-portal/auth.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

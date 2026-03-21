@@ -2681,12 +2681,16 @@ textarea {
 
   .command-trigger {
     padding-inline: 10px;
-    min-width: 170px;
+    min-width: 140px;
   }
 
   .command-trigger span { font-size: 0; }
   .command-trigger span::after { content: "Commands"; font-size: 11px; }
   .command-trigger kbd { display: none; }
+
+  .theme-toggle { display: none; }
+
+  .portal-brand { cursor: pointer; }
 
   .portal-hero__title-desktop {
     display: none;

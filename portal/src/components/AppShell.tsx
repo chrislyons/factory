@@ -51,7 +51,16 @@ export function AppShell({
       <header className="portal-header">
         <div className="portal-header__inner">
           <div>
-            <a className="portal-brand" href={PORTAL_HOME}>
+            <a
+              className="portal-brand"
+              href={PORTAL_HOME}
+              onClick={(e) => {
+                if (window.innerWidth <= 980) {
+                  e.preventDefault();
+                  toggle();
+                }
+              }}
+            >
               <span className="portal-brand__title">dreamfactory</span>
               <span className="portal-brand__sub">portal</span>
             </a>

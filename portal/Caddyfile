@@ -1,0 +1,74 @@
+{
+	admin off
+}
+
+http://100.87.53.109:41910 {
+	encode gzip
+
+	# ── Public routes ────────────────────────────────────────────────
+	handle /login {
+		root * /home/nesbitt/projects/factory-portal/dist/pages
+		rewrite * /login.html
+		file_server
+	}
+
+	handle /auth/* {
+		reverse_proxy 127.0.0.1:41914
+	}
+
+	@fonts_public {
+		path /fonts/*
+	}
+	handle @fonts_public {
+		root * /home/nesbitt/projects/factory-portal/dist
+		header Cache-Control "public, max-age=31536000, immutable"
+		file_server
+	}
+
+	# ── Cookie auth gate ─────────────────────────────────────────────
+	@has_session {
+		header_regexp Cookie factory_session=.+
+	}
+	@no_session {
+		not header_regexp Cookie factory_session=.+
+	}
+	handle @no_session {
+		redir * /login?redirect={uri} 302
+	}
+
+	# ── Protected routes ─────────────────────────────────────────────
+	handle /jobs.json {
+		reverse_proxy 127.0.0.1:41911
+	}
+
+	handle /tasks.json {
+		reverse_proxy 127.0.0.1:41911
+	}
+
+	handle /status/* {
+		reverse_proxy 127.0.0.1:41911
+	}
+
+	handle /repos/* {
+		root * /home/nesbitt/projects/factory-portal
+		file_server
+	}
+
+	handle {
+		root * /home/nesbitt/projects/factory-portal/dist
+
+		@html {
+			path *.html
+		}
+		header @html Cache-Control "no-cache"
+
+		@json {
+			path /index.json
+		}
+		header @json Cache-Control "no-store"
+
+		file_server {
+			index portal.html
+		}
+	}
+}
