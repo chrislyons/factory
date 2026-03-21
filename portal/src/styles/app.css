@@ -408,6 +408,10 @@ textarea {
   padding-bottom: 2px;
 }
 
+.portal-hero__title-mobile-wrap {
+  display: none;
+}
+
 .portal-hero__title-mobile {
   display: none;
 }
@@ -2590,6 +2594,13 @@ textarea {
     display: none;
   }
 
+  .portal-hero__title-mobile-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 8px;
+  }
+
   .portal-hero__title-mobile {
     display: block;
     font-family: var(--font-display);
@@ -2604,6 +2615,19 @@ textarea {
     appearance: none;
     -webkit-appearance: none;
     width: auto;
+  }
+
+  .portal-hero__title-mobile-arrow {
+    font-size: 18px;
+    color: var(--text-muted);
+    line-height: 1;
+    pointer-events: none;
+    transition: transform 200ms ease;
+    margin-right: 8px;
+  }
+
+  .portal-hero__title-mobile-arrow.is-open {
+    transform: rotate(180deg);
   }
 
   .portal-footer__inner {
