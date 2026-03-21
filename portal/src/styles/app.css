@@ -2522,7 +2522,7 @@ textarea {
 
   .portal-header__actions {
     order: 3;
-    justify-content: flex-start;
+    justify-content: flex-end;
   }
 
   .portal-footer__inner {
