@@ -140,7 +140,7 @@ export function AnalyticsPage() {
 
   return (
     <AppShell
-      title="Analytics"
+      title="Statistics"
       description="Run, task, and approval activity over the last 14 days."
       pageKey="/pages/analytics.html"
       statusSlot={<SyncClock updatedAt={Math.max(analytics.dataUpdatedAt || 0, budget.dataUpdatedAt || 0)} stale={Boolean(analytics.error || budget.error)} />}

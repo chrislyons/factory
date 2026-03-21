@@ -123,12 +123,10 @@ export function TopologyPage() {
 
   return (
     <AppShell
-      title="System Topology"
+      title="Configuration"
       pageKey="/pages/topology.html"
       statusSlot={<SyncClock updatedAt={latestDataUpdatedAt(statuses.results)} stale={statuses.hasError} />}
     >
-      <FontTrialSwitcher />
-
       {/* Agent Strip */}
       <div className="topology-agent-strip">
         {AGENTS.map((agent) => {
@@ -316,6 +314,7 @@ export function TopologyPage() {
           </div>
         </SurfaceCard>
       )}
+      <FontTrialSwitcher />
     </AppShell>
   );
 }

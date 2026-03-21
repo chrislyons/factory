@@ -22,17 +22,25 @@ export const AGENTS: AgentDefinition[] = [
 export const NAV_LINKS = [
   { href: PORTAL_HOME, label: "Jobs" },
   { href: "/pages/loops.html", label: "Loops" },
-  { href: "/pages/object-index.html", label: "Objects" },
-  { href: "/pages/analytics.html", label: "Analytics" },
-  { href: "/pages/topology.html", label: "System" },
+  { href: "/pages/docs.html", label: "Docs" },
+  { href: "/pages/analytics.html", label: "Stats" },
+  { href: "/pages/topology.html", label: "Config" },
 ];
 
 export const DOC_LINKS = [
-  { href: "/pages/explainers-v4.html", label: "Repo Explorer" },
-  { href: "/pages/architecture-gallery.html", label: "Architecture Gallery" },
-  { href: "/pages/credential-rotation-guide.html", label: "Credential Rotation" },
-  { href: "/pages/local-inference-guide.html", label: "Local Inference" },
-  { href: "/pages/repo-commands.html", label: "Command Reference" }
+  { href: "/pages/docs.html", label: "Reference Docs" },
+  { href: "/pages/docs.html?tab=objects", label: "Object Index" },
 ];
 
 export const POLL_INTERVAL_MS = 5_000;
+
+export interface AssigneeDefinition {
+  id: string;
+  label: string;
+  color: string;
+}
+
+export const ASSIGNEES: AssigneeDefinition[] = [
+  ...AGENTS.map(a => ({ id: a.id, label: a.label, color: a.color })),
+  { id: "chris", label: "Chris", color: "#94a3b8" },
+];

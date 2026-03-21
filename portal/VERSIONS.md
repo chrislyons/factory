@@ -13,7 +13,8 @@
 | v7 | — | 2026-03-17 | — | Retired | Pre-indigo palette |
 | v8 | eebcb83 | 2026-03-20 | :41910 | Retired | Indigo palette, Geist Pixel Grid + Geist Mono, dark+light mode |
 | v9 | 875f1b9 | 2026-03-21 | :41910 | Retired | Tab restructure: 5 tabs, SyncClock, mobile dropdown nav, merged pages, Objects page (334 items) |
-| v9.1 | — | 2026-03-21 | :41910 | Live | Mobile optimization: shell 1400px/92vw, page titles (Jobs Tracker/Object Index/System Topology), Loop Controls redesign, job card mobile polish, agent detail compact cards, iOS zoom fix, overflow fixes |
+| v9.1 | — | 2026-03-21 | :41910 | Retired | Mobile optimization: shell 1400px/92vw, page titles (Jobs Tracker/Object Index/System Topology), Loop Controls redesign, job card mobile polish, agent detail compact cards, iOS zoom fix, overflow fixes |
+| v10 | — | 2026-03-21 | :41910 | Live | Docs page (RepoExplorer + Object Index sub-tabs), nav renames (Docs/Stats/Config), class-colored filter chips, styled assign dropdown with Chris option, unified search/add combobox, dependencies/completions slide-in panel, column sorting in Object Index |
 
 ---
 

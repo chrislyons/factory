@@ -25,14 +25,15 @@ factory/
 - **Tests:** `pnpm test` (vitest, 17 tests across 9 files)
 - **Build:** `pnpm build` — outputs to `portal/dist/`
 - **Brand:** "dreamfactory" (hero header, 16px/10px)
-- **Nav tabs (5):** Jobs, Loops, Objects, Analytics, System (hotkeys 1-5)
+- **Nav tabs (5):** Jobs, Loops, Docs, Stats, Config (hotkeys 1-5)
 - **Landing page:** Jobs Tracker (`jobs.html`, aliases `dashboard-v4.html`; nav button stays "Jobs")
 - **Shell width:** min(1400px, 92vw) all viewports (no mobile override)
 - **Mobile (<980px):** Nav hidden, page title h1 becomes nav dropdown, topology sections stack vertically
 - **Header order:** [Command Palette] [SyncClock] [Theme Toggle]
 - **Merged pages:** Approvals→Loops, Budget→Analytics
-- **Objects page:** 334-item searchable index from `objectIndex.ts`; page title "Object Index" (nav button stays "Objects")
-- **System page title:** System Topology (nav button stays "System")
+- **Docs page:** Combines RepoExplorer and Object Index as sub-tabs (nav button "Docs")
+- **Stats page title:** Statistics (nav button "Stats")
+- **Config page title:** Configuration (nav button "Config")
 - **Retired:** Portal landing (redirects to Jobs), ApprovalsPage, BudgetPage
 
 ## Job Registry
@@ -54,7 +55,7 @@ factory/
 - Commit format: `type(scope): description`
 - Documentation: `docs/fct/FCT### Title.md`
 - Never read: `node_modules/`, `dist/`, `target/`, `.DS_Store`
-- Font trial system available on System page for design experimentation
+- Font trial system available on Config page for design experimentation
 
 ## Port Scheme
 

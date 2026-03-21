@@ -1,5 +1,8 @@
 import { useMemo, useState } from "react";
 import { AppShell, SurfaceCard } from "../components/AppShell";
+import { AssignDropdown } from "../components/AssignDropdown";
+import { JobCombobox } from "../components/JobCombobox";
+import { SidePanel } from "../components/SidePanel";
 import { LoopStatusPill } from "../components/loops/LoopStatusPill";
 import { AgentBadge } from "../components/primitives/AgentBadge";
 import { EmptyState } from "../components/primitives/EmptyState";
@@ -89,7 +92,7 @@ function statusFeedsExposeLoops(statuses: ReturnType<typeof useAgentStatuses>["d
 export function DashboardPage() {
   const [activeFilter, setActiveFilter] = useState("all");
   const [taskSearch, setTaskSearch] = useState("");
-  const [newTaskTitle, setNewTaskTitle] = useState("");
+  const [panelView, setPanelView] = useState<"deps" | "completions" | null>(null);
 
   const tasks = useTasksDocument();
   const statuses = useAgentStatuses();
@@ -130,12 +133,10 @@ export function DashboardPage() {
     await tasks.updateDocument((current) => updater(structuredClone(current)));
   }
 
-  async function addTask() {
-    const title = newTaskTitle.trim();
-    if (!title) return;
+  async function addTaskWithTitle(title: string) {
+    if (!title.trim()) return;
     await withTasksUpdate((current) => {
       const nextOrder = current.tasks.reduce((max, task) => Math.max(max, task.order), 0) + 1;
-      // Find max address in system domain, first available class
       const domain = "00";
       const jobClass = Object.keys(current.blocks)[0] === "infrastructure" ? "001" : "001";
       const prefix = `job.${domain}.${jobClass}.`;
@@ -148,7 +149,7 @@ export function DashboardPage() {
       const taskId = `job.${domain}.${jobClass}.${String(maxAddr + 1).padStart(4, "0")}`;
       current.tasks.push({
         id: taskId,
-        title,
+        title: title.trim(),
         description: "",
         status: "pending",
         effort: "unknown",
@@ -160,10 +161,9 @@ export function DashboardPage() {
         updated: new Date().toISOString()
       });
       stampDocument(current);
-      addLogEntry(current, "portal", "created", taskId, title);
+      addLogEntry(current, "portal", "created", taskId, title.trim());
       return current;
     });
-    setNewTaskTitle("");
   }
 
   async function toggleTask(taskId: string) {
@@ -219,6 +219,22 @@ export function DashboardPage() {
           updatedAt={latestUpdate}
           stale={Boolean(tasks.error || approvals.error || budget.error || statuses.hasError)}
         />
+      }
+      headerAction={
+        <div className="panel-toggle-pair">
+          <button
+            className={cn("panel-toggle-btn", panelView === "completions" && "is-active")}
+            type="button"
+            onClick={() => setPanelView(panelView === "completions" ? null : "completions")}
+            aria-label="Completions"
+          >&#x2713;</button>
+          <button
+            className={cn("panel-toggle-btn", panelView === "deps" && "is-active")}
+            type="button"
+            onClick={() => setPanelView(panelView === "deps" ? null : "deps")}
+            aria-label="Dependencies"
+          >&#x29DF;</button>
+        </div>
       }
     >
       {!loopFeedsEnabled && liveRuns.length === 0 ? null : (
@@ -314,25 +330,12 @@ export function DashboardPage() {
       )}
 
       <div className="dashboard-columns">
-      <div>
         <div className="task-toolbar task-toolbar--primary">
-          <input
-            className="text-input"
-            value={newTaskTitle}
-            onChange={(event) => setNewTaskTitle(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") void addTask();
-            }}
-            placeholder="Add a job..."
-          />
-          <button className="primary-button" type="button" onClick={() => void addTask()}>
-            Add
-          </button>
-          <input
-            className="text-input task-toolbar__search"
-            value={taskSearch}
-            onChange={(event) => setTaskSearch(event.target.value)}
-            placeholder="Search jobs, assignees, blocks..."
+          <JobCombobox
+            tasks={document?.tasks ?? []}
+            blocks={document?.blocks ?? {}}
+            onFilter={setTaskSearch}
+            onCreate={(title) => void addTaskWithTitle(title)}
           />
         </div>
         <div className="filter-row-ui">
@@ -351,6 +354,7 @@ export function DashboardPage() {
                 className={cn("filter-chip-ui", activeFilter === blockId && "is-active")}
                 type="button"
                 onClick={() => setActiveFilter(blockId)}
+                style={{ '--chip-color': block.color } as React.CSSProperties}
               >
                 {block.label} ({count})
               </button>
@@ -363,7 +367,7 @@ export function DashboardPage() {
             <EmptyState title="No jobs match the current view" detail="Adjust the filter or wait for jobs.json." />
           ) : (
             visibleTasks.map((task) => (
-              <div key={task.id} className="task-card-ui">
+              <div key={task.id} id={`task-${task.id}`} className="task-card-ui">
                 <div className="task-card-ui__title-row">
                   <label className="checkbox-wrap">
                     <input
@@ -383,18 +387,11 @@ export function DashboardPage() {
                   <span className="task-meta-mono">{task.effort ?? "unknown"}</span>
                   <span className="task-meta-mono">{document?.blocks[task.block]?.label ?? task.block}</span>
                 </div>
-                <select
-                  className="select-input task-card-ui__assign"
-                  value={task.assignee ?? "unassigned"}
-                  onChange={(event) => void assignTask(task.id, event.target.value)}
-                >
-                  <option value="unassigned">Unassigned</option>
-                  {AGENTS.map((agent) => (
-                    <option key={agent.id} value={agent.id}>
-                      {agent.label}
-                    </option>
-                  ))}
-                </select>
+                <AssignDropdown
+                  value={task.assignee ?? null}
+                  onChange={(val) => void assignTask(task.id, val)}
+                  className="task-card-ui__assign"
+                />
                 <button className="secondary-button task-card-ui__cycle" type="button" onClick={() => void cycleTask(task.id)}>
                   Cycle
                 </button>
@@ -402,24 +399,6 @@ export function DashboardPage() {
             ))
           )}
         </div>
-      </div>
-
-      <SurfaceCard title="Dependencies" subtitle="Blocked work and unresolved chains" className="surface-card--compact dashboard-sidebar">
-        <div className="dependency-list">
-          {(document?.tasks ?? []).filter((task) => task.blocked_by.length > 0).length === 0 ? (
-            <EmptyState compact title="No active dependencies" />
-          ) : (
-            (document?.tasks ?? [])
-              .filter((task) => task.blocked_by.length > 0)
-              .map((task) => (
-                <div key={task.id} className="dependency-card">
-                  <strong>{task.title}</strong>
-                  <span>Blocked by {task.blocked_by.join(", ")}</span>
-                </div>
-              ))
-          )}
-        </div>
-      </SurfaceCard>
       </div>
 
       <SurfaceCard title="Activity Log" subtitle="Recent job mutations" className="surface-card--compact">
@@ -439,6 +418,14 @@ export function DashboardPage() {
           )}
         </div>
       </SurfaceCard>
+
+      <SidePanel
+        open={panelView !== null}
+        view={panelView ?? "deps"}
+        onClose={() => setPanelView(null)}
+        tasks={document?.tasks ?? []}
+        blocks={document?.blocks ?? {}}
+      />
     </AppShell>
   );
 }

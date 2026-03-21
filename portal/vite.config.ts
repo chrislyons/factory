@@ -19,7 +19,7 @@ export default defineConfig({
         topology: resolve(root, "pages/topology.html"),
         analytics: resolve(root, "pages/analytics.html"),
         loops: resolve(root, "pages/loops.html"),
-        objectIndex: resolve(root, "pages/object-index.html"),
+        docs: resolve(root, "pages/docs.html"),
         agentBoot: resolve(root, "pages/agents/boot.html"),
         agentIg88: resolve(root, "pages/agents/ig88.html"),
         agentKelk: resolve(root, "pages/agents/kelk.html"),
