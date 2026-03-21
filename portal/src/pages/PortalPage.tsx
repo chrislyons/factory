@@ -1,53 +1,45 @@
 import { AppShell, SurfaceCard } from "../components/AppShell";
-import { LastUpdatedChip } from "../components/primitives/LastUpdatedChip";
+import { SyncClock } from "../components/primitives/SyncClock";
 import { AGENTS, PORTAL_HOME } from "../lib/constants";
 import { useAgentStatuses, useBudgetStatus, usePendingApprovals, latestDataUpdatedAt } from "../hooks/usePortalQueries";
 import { budgetStatusKind, formatUsd } from "../lib/utils";
 
 const cards = [
   {
-    href: "/pages/dashboard-v4.html",
-    title: "Mission Control",
+    href: "/pages/jobs.html",
+    title: "Jobs",
     description: "Task operations, live agents, and operator metrics",
     note: "Dispatch, live state, and work routing",
     key: "mission",
     priority: "primary"
   },
   {
-    href: "/pages/approvals.html",
-    title: "Approvals",
-    description: "Typed gate inbox with optimistic decisions and history",
-    note: "Gate decisions, countdowns, and outcomes",
-    key: "approvals",
-    priority: "primary"
-  },
-  {
-    href: "/pages/budget.html",
-    title: "Budget",
-    description: "Per-agent spend, incidents, and override surfaces",
-    note: "Spend guardrails and override posture",
-    key: "budget",
-    priority: "primary"
-  },
-  {
     href: "/pages/loops.html",
     title: "Loops",
-    description: "Active loop console, iteration history, and operator controls",
-    note: "Iteration oversight and abort controls",
+    description: "Active loop console, approvals queue, and iteration controls",
+    note: "Iteration oversight, gate decisions, and abort controls",
     key: "loops",
-    priority: "secondary"
+    priority: "primary"
   },
   {
     href: "/pages/analytics.html",
     title: "Analytics",
-    description: "14-day activity and approval performance charts",
-    note: "Trend signals and performance context",
+    description: "14-day activity charts, budget policies, and approval performance",
+    note: "Trend signals, spend guardrails, and performance context",
     key: "analytics",
+    priority: "primary"
+  },
+  {
+    href: "/pages/object-index.html",
+    title: "Objects",
+    description: "Searchable index of all factory objects and entities",
+    note: "Entity lookup and cross-reference",
+    key: "objectindex",
     priority: "secondary"
   },
   {
     href: "/pages/topology.html",
-    title: "Topology",
+    title: "System",
     description: "System map and direct links into agent detail views",
     note: "Agent identity, status, and detail entry points",
     key: "topology",
@@ -92,7 +84,7 @@ export function PortalPage() {
       description="A consolidated React surface for approvals, budgets, live runs, metrics, and operator controls."
       pageKey={PORTAL_HOME}
       statusSlot={
-        <LastUpdatedChip
+        <SyncClock
           updatedAt={lastUpdatedAt}
           stale={Boolean(approvals.error || budget.error || statuses.hasError)}
         />
@@ -110,15 +102,14 @@ export function PortalPage() {
               {card.key === "mission" && statusFeedsLoaded ? (
                 <span className="landing-card__badge">{activeAgents} active agents</span>
               ) : null}
-              {card.key === "loops" && loopFeedsEnabled ? (
+              {card.key === "loops" && approvalsLoaded && pendingApprovals > 0 ? (
+                <span className="landing-card__badge is-alert">{pendingApprovals} pending</span>
+              ) : card.key === "loops" && loopFeedsEnabled ? (
                 <span className={activeLoopCount > 0 ? "landing-card__badge is-alert" : "landing-card__badge"}>
                   {activeLoopCount} active
                 </span>
               ) : null}
-              {card.key === "approvals" && approvalsLoaded && pendingApprovals > 0 ? (
-                <span className="landing-card__badge is-alert">{pendingApprovals} pending</span>
-              ) : null}
-              {card.key === "budget" && budgetLoaded ? (
+              {card.key === "analytics" && budgetLoaded ? (
                 <span className={pausedBudgets > 0 ? "landing-card__badge is-alert" : "landing-card__badge"}>
                   {pausedBudgets > 0 ? `${pausedBudgets} paused` : formatUsd(totalSpend)}
                 </span>
@@ -129,25 +120,6 @@ export function PortalPage() {
             <span className="landing-card__note">{card.note}</span>
           </a>
         ))}
-      </div>
-
-      <div className="portal-columns">
-        <SurfaceCard title="Operator Flow" subtitle="Where each surface earns its keep" className="surface-card--compact">
-          <ul className="compact-list">
-            <li>Open Mission Control first for dispatch, task handling, and live operator context.</li>
-            <li>Use Approvals for decision pressure, Budget for guardrails, and Loops for active iteration control.</li>
-            <li>Topology is the shortest path into agent-specific detail when a surface needs more context.</li>
-            <li>Analytics stays as the long-view companion once work is already in motion.</li>
-          </ul>
-        </SurfaceCard>
-        <SurfaceCard title="Shared Signals" subtitle="Conventions that carry across every page" className="surface-card--compact">
-          <ul className="compact-list">
-            <li>Agent color is consistent between topology, task rails, and detail entry points.</li>
-            <li>Selected navigation and urgent incidents are the only places that should glow brightly.</li>
-            <li>Every page keeps working in a useful degraded state when coordinator routes are unavailable.</li>
-            <li>`Cmd/Ctrl + K` is global, so navigation does not depend on visual scanning alone.</li>
-          </ul>
-        </SurfaceCard>
       </div>
     </AppShell>
   );

@@ -10,7 +10,7 @@ export interface AgentDefinition {
   trust: string;
 }
 
-export const PORTAL_HOME = "/portal.html";
+export const PORTAL_HOME = "/pages/jobs.html";
 
 export const AGENTS: AgentDefinition[] = [
   { id: "boot", label: "Boot", shortLabel: "BT", color: "#38bdf8", accent: "#38bdf8", model: "Nanbeige4.1-3B", trust: "L2 Advisor" },
@@ -20,13 +20,11 @@ export const AGENTS: AgentDefinition[] = [
 ];
 
 export const NAV_LINKS = [
-  { href: PORTAL_HOME, label: "Portal" },
-  { href: "/pages/dashboard-v4.html", label: "Mission Control" },
+  { href: PORTAL_HOME, label: "Jobs" },
   { href: "/pages/loops.html", label: "Loops" },
-  { href: "/pages/approvals.html", label: "Approvals" },
-  { href: "/pages/budget.html", label: "Budget" },
+  { href: "/pages/object-index.html", label: "Objects" },
   { href: "/pages/analytics.html", label: "Analytics" },
-  { href: "/pages/topology.html", label: "Topology" }
+  { href: "/pages/topology.html", label: "System" },
 ];
 
 export const DOC_LINKS = [

@@ -5,7 +5,7 @@ import { LoopStatusPill } from "../components/loops/LoopStatusPill";
 import { AgentBadge } from "../components/primitives/AgentBadge";
 import { BudgetBar } from "../components/primitives/BudgetBar";
 import { EmptyState } from "../components/primitives/EmptyState";
-import { LastUpdatedChip } from "../components/primitives/LastUpdatedChip";
+import { SyncClock } from "../components/primitives/SyncClock";
 import { TranscriptTail } from "../components/primitives/TranscriptTail";
 import {
   useAgentAction,
@@ -83,7 +83,7 @@ export function AgentDetailPage({ agentId }: { agentId: AgentId }) {
       description="Per-agent identity, runtime state, run history, transcript, and controls."
       pageKey=""
       statusSlot={
-        <LastUpdatedChip
+        <SyncClock
           updatedAt={Math.max(detail.dataUpdatedAt || 0, loops.dataUpdatedAt || 0, loopDetail.dataUpdatedAt || 0)}
           stale={Boolean(detail.error || loops.error || loopDetail.error)}
         />

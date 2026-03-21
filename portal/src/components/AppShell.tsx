@@ -66,11 +66,11 @@ export function AppShell({
             ))}
           </nav>
           <div className="portal-header__actions">
+            <CommandPaletteButton />
+            {statusSlot}
             <button className="theme-toggle" type="button" onClick={toggle} aria-label="Toggle theme">
               {theme === "dark" ? "\u263E" : "\u2600"}
             </button>
-            {statusSlot}
-            <CommandPaletteButton />
           </div>
         </div>
       </header>
@@ -85,7 +85,7 @@ export function AppShell({
 
       <footer className="portal-footer">
         <div className="portal-footer__inner">
-          <div>Paperclip-informed operator surface for Factory.</div>
+          <div>&copy; 2026 dreamfactory</div>
           <div className="portal-footer__links">
             {DOC_LINKS.map((doc) => (
               <a key={doc.href} href={doc.href}>

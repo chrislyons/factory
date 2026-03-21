@@ -3,7 +3,7 @@ import { AppShell, SurfaceCard } from "../components/AppShell";
 import { LoopStatusPill } from "../components/loops/LoopStatusPill";
 import { AgentBadge } from "../components/primitives/AgentBadge";
 import { EmptyState } from "../components/primitives/EmptyState";
-import { LastUpdatedChip } from "../components/primitives/LastUpdatedChip";
+import { SyncClock } from "../components/primitives/SyncClock";
 import { TranscriptTail } from "../components/primitives/TranscriptTail";
 import {
   latestDataUpdatedAt,
@@ -212,10 +212,10 @@ export function DashboardPage() {
 
   return (
     <AppShell
-      title="Mission Control"
-      pageKey="/pages/dashboard-v4.html"
+      title="Jobs"
+      pageKey="/pages/jobs.html"
       statusSlot={
-        <LastUpdatedChip
+        <SyncClock
           updatedAt={latestUpdate}
           stale={Boolean(tasks.error || approvals.error || budget.error || statuses.hasError)}
         />
@@ -314,11 +314,7 @@ export function DashboardPage() {
       )}
 
       <div className="dashboard-columns">
-      <SurfaceCard
-        title="Jobs"
-        subtitle="Dispatch, assign, and resolve work"
-        action={<a className="surface-card__action-link" href="#task-list">Job list</a>}
-      >
+      <div>
         <div className="task-toolbar task-toolbar--primary">
           <input
             className="text-input"
@@ -411,7 +407,7 @@ export function DashboardPage() {
             ))
           )}
         </div>
-      </SurfaceCard>
+      </div>
 
       <SurfaceCard title="Dependencies" subtitle="Blocked work and unresolved chains" className="surface-card--compact dashboard-sidebar">
         <div className="dependency-list">

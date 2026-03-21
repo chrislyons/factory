@@ -64,7 +64,7 @@ export function CommandPaletteProvider({ children }: PropsWithChildren) {
           };
           for (const task of document.tasks ?? []) {
             nextItems.push({
-              href: "/pages/dashboard-v4.html#task-list",
+              href: "/pages/jobs.html#task-list",
               label: `${task.title} (${task.id})`,
               group: "Tasks"
             });

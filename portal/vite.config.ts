@@ -14,12 +14,12 @@ export default defineConfig({
     rollupOptions: {
       input: {
         portal: resolve(root, "portal.html"),
+        jobs: resolve(root, "pages/jobs.html"),
         dashboard: resolve(root, "pages/dashboard-v4.html"),
         topology: resolve(root, "pages/topology.html"),
-        approvals: resolve(root, "pages/approvals.html"),
-        budget: resolve(root, "pages/budget.html"),
         analytics: resolve(root, "pages/analytics.html"),
         loops: resolve(root, "pages/loops.html"),
+        objectIndex: resolve(root, "pages/object-index.html"),
         agentBoot: resolve(root, "pages/agents/boot.html"),
         agentIg88: resolve(root, "pages/agents/ig88.html"),
         agentKelk: resolve(root, "pages/agents/kelk.html"),

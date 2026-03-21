@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { LastUpdatedChip } from "../components/primitives/LastUpdatedChip";
+import { SyncClock } from "../components/primitives/SyncClock";
 import { useAgentStatuses, useTasksDocument, latestDataUpdatedAt } from "../hooks/usePortalQueries";
 import { AGENTS } from "../lib/constants";
 import { AppShell, SurfaceCard } from "../components/AppShell";
@@ -123,9 +123,9 @@ export function TopologyPage() {
 
   return (
     <AppShell
-      title="Topology"
+      title="System"
       pageKey="/pages/topology.html"
-      statusSlot={<LastUpdatedChip updatedAt={latestDataUpdatedAt(statuses.results)} stale={statuses.hasError} />}
+      statusSlot={<SyncClock updatedAt={latestDataUpdatedAt(statuses.results)} stale={statuses.hasError} />}
     >
       <FontTrialSwitcher />
 
@@ -234,6 +234,26 @@ export function TopologyPage() {
           ))}
         </div>
       </SurfaceCard>
+      {/* Operator Context */}
+      <div className="portal-columns">
+        <SurfaceCard title="Operator Flow" subtitle="Where each surface earns its keep" className="surface-card--compact">
+          <ul className="compact-list">
+            <li>Open Jobs first for dispatch, task handling, and live operator context.</li>
+            <li>Loops now includes the approval queue — gate decisions and loop controls in one surface.</li>
+            <li>Analytics absorbs budget policies alongside trend charts for full operational context.</li>
+            <li>System is the shortest path into agent-specific detail when a surface needs more context.</li>
+          </ul>
+        </SurfaceCard>
+        <SurfaceCard title="Shared Signals" subtitle="Conventions that carry across every page" className="surface-card--compact">
+          <ul className="compact-list">
+            <li>Agent color is consistent between topology, task rails, and detail entry points.</li>
+            <li>Selected navigation and urgent incidents are the only places that should glow brightly.</li>
+            <li>Every page keeps working in a useful degraded state when coordinator routes are unavailable.</li>
+            <li>{"`Cmd/Ctrl + K`"} is global, so navigation does not depend on visual scanning alone.</li>
+          </ul>
+        </SurfaceCard>
+      </div>
+
       {/* Domain & Class Registries */}
       {registry && (
         <SurfaceCard title="Job Registry" subtitle="Domain and class definitions — click to edit" className="surface-card--compact">

@@ -2,8 +2,13 @@ import { useMemo } from "react";
 import type { ChartConfiguration } from "chart.js";
 import { AppShell, SurfaceCard } from "../components/AppShell";
 import { ChartCanvas } from "../components/charts/ChartCanvas";
-import { LastUpdatedChip } from "../components/primitives/LastUpdatedChip";
-import { useAnalytics } from "../hooks/usePortalQueries";
+import { AgentBadge } from "../components/primitives/AgentBadge";
+import { BudgetBar } from "../components/primitives/BudgetBar";
+import { EmptyState } from "../components/primitives/EmptyState";
+import { SyncClock } from "../components/primitives/SyncClock";
+import { useAnalytics, useBudgetOverride, useBudgetStatus } from "../hooks/usePortalQueries";
+import type { AgentId } from "../lib/types";
+import { budgetStatusKind, formatUsd, relativeTimestamp } from "../lib/utils";
 
 function ChartPlaceholder({
   detail,
@@ -69,6 +74,9 @@ function barConfig({
 
 export function AnalyticsPage() {
   const analytics = useAnalytics();
+  const budget = useBudgetStatus();
+  const override = useBudgetOverride();
+  const agents = budget.data?.agents ?? [];
   const data = analytics.data;
 
   const runActivityConfig = useMemo<ChartConfiguration<"bar"> | null>(() => {
@@ -135,8 +143,59 @@ export function AnalyticsPage() {
       title="Analytics"
       description="Run, task, and approval activity over the last 14 days."
       pageKey="/pages/analytics.html"
-      statusSlot={<LastUpdatedChip updatedAt={analytics.dataUpdatedAt} stale={Boolean(analytics.error)} />}
+      statusSlot={<SyncClock updatedAt={Math.max(analytics.dataUpdatedAt || 0, budget.dataUpdatedAt || 0)} stale={Boolean(analytics.error || budget.error)} />}
     >
+      {/* Budget Policies */}
+      <SurfaceCard title="Budget Policies" subtitle="Company and per-agent guardrails">
+        {agents.length === 0 ? (
+          <EmptyState compact title="Waiting for coordinator budget status" detail="No budget data yet." />
+        ) : (
+          <div className="budget-grid">
+            {agents.map((agent) => {
+              const statusKind = budgetStatusKind(agent.status);
+              return (
+                <article key={agent.agent_id} className="budget-card-ui">
+                  <div className="budget-card-ui__header">
+                    <div>
+                      <AgentBadge agentId={agent.agent_id} fallback={agent.agent_id} status={statusKind === "paused" ? "paused" : "idle"} />
+                      <div className="budget-card-ui__meta">{formatUsd(agent.monthly_limit_usd)} monthly cap</div>
+                    </div>
+                    <button
+                      className="secondary-button"
+                      type="button"
+                      disabled={override.isPending}
+                      onClick={() => override.mutate(agent.agent_id as AgentId)}
+                    >
+                      Request Override
+                    </button>
+                  </div>
+
+                  {statusKind === "paused" ? (
+                    <div className="alert-banner is-danger">Budget exhausted — agent paused</div>
+                  ) : null}
+
+                  <BudgetBar spent={agent.spent_this_month_usd} limit={agent.monthly_limit_usd} />
+
+                  <div className="budget-incident-list">
+                    {agent.incidents.length === 0 ? (
+                      <div className="placeholder-copy">No active incidents.</div>
+                    ) : (
+                      agent.incidents.map((incident) => (
+                        <div key={incident.id} className="budget-incident">
+                          <strong>{incident.threshold_type}</strong>
+                          <span>{formatUsd(incident.amount_observed)} observed</span>
+                          <span>{relativeTimestamp(incident.created_at)}</span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
+      </SurfaceCard>
+
       <div className="chart-grid">
         <SurfaceCard title="Run Activity" subtitle="Succeeded vs failed vs other">
           {runActivityConfig ? (
