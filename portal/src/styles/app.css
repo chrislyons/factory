@@ -1205,11 +1205,6 @@ textarea {
   grid-row: 3;
 }
 
-.task-card-ui > .task-card-ui__meta {
-  min-height: 30px;
-  align-items: center;
-}
-
 .task-card-ui__assign {
   grid-column: 2;
   grid-row: 1;
@@ -2714,7 +2709,6 @@ textarea {
 
   .task-card-ui {
     grid-template-columns: 1fr;
-    align-items: start;
   }
 
   .task-card-ui__title-row {
