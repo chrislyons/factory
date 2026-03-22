@@ -112,6 +112,7 @@ export function DashboardPage() {
   const visibleTasks = useMemo(() => {
     const all = [...(document?.tasks ?? [])].sort((a, b) => a.order - b.order);
     return all.filter((task) => {
+      if (activeFilter === "all" && (task.status === "done" || task.status === "deferred" || task.status === "deprecated")) return false;
       if (activeFilter !== "all" && task.block !== activeFilter) return false;
       if (!taskSearch.trim()) return true;
       const haystack = [
@@ -347,7 +348,7 @@ export function DashboardPage() {
               type="button"
               onClick={() => setActiveFilter("all")}
             >
-              All ({document?.tasks.length ?? 0})
+              All ({document?.tasks.filter((t) => t.status !== "done" && t.status !== "deferred" && t.status !== "deprecated").length ?? 0})
             </button>
             {Object.entries(document?.blocks ?? {}).map(([blockId, block]) => {
               const count = (document?.tasks ?? []).filter((task) => task.block === blockId).length;

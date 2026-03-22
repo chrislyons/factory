@@ -9,7 +9,7 @@
 
 | Job | Title | Evidence |
 |-----|-------|----------|
-| `job.00.001.0001` | ☑ Set up Bitwarden Secrets Manager | MEMORY.md: "Bitwarden Session Sync — COMPLETE", BKX121/122/123 |
+| `job.00.001.0001` | ~~☑~~ Set up Bitwarden Secrets Manager | **CORRECTION (FCT030):** MEMORY.md "Bitwarden Session Sync" refers to the Bitwarden *vault* (password manager), not Bitwarden *Secrets Manager* (programmatic API). Vault is active; BSM is not set up. Reverted to pending. |
 | `job.00.001.0003` | ☑ Security audit — Tailscale MCP | Description self-documents completion; `tailscale-acl-guard.sh` deployed both machines |
 | `job.00.001.0004` | [COMPLETE] Implement comprehensive backup system | MEMORY.md: `sys-bup` fully operational (script, alias, encryption, Whitebox destination) |
 | `job.00.003.0001` | ☑ Write first real Loop Spec (researcher type) | `researcher-boot-2026-03-19.md` exists in autoresearch/loop-specs/ |

@@ -358,7 +358,7 @@ The matrix-mcp server bridges Claude Code agents to Matrix rooms via the Model C
 - `.env.example` files contain only placeholder values
 - Git history shows no accidentally committed secrets
 - No `.pem`, `.key`, or credential files tracked by git
-- Bitwarden integration in progress (Cloudkicker migrated; Blackbox uses age encryption)
+- Bitwarden password vault active (Cloudkicker migrated; Blackbox uses age encryption). Bitwarden Secrets Manager (programmatic API) not yet set up.
 
 ### Recommendations
 
@@ -388,7 +388,7 @@ Based on analysis of [paperclipai/paperclip](https://github.com/paperclipai/pape
 |---------|-----------|-----------------|-----|
 | **API Key Auth** | Bearer tokens, hashed at rest, per-agent key management | Matrix allowlist only | **CRITICAL** — need API key infrastructure |
 | **Multi-tenant isolation** | `company_id` scoping on all entities, enforced at every route | Single-tenant (personal use) | Required for public release |
-| **Secrets service** | Pluggable providers, audit trail, rotation support | Bitwarden + age (manual) | Need programmatic secrets API |
+| **Secrets service** | Pluggable providers, audit trail, rotation support | Bitwarden vault + age (manual). BSM not set up. | Need Bitwarden Secrets Manager (programmatic API) |
 | **RBAC** | Per-permission authorization checks | Flat allowlist, trust levels exist but not enforced on commands | **HIGH** — need role→command mapping |
 | **Configuration versioning** | Full JSONB snapshots with rollback | YAML files in git | Adequate for current use; needs versioning API for public |
 | **Activity audit log** | Actor type/ID, action, entity, sanitized metadata | Coordinator audit log exists with restricted permissions | Good foundation; extend to portal/sidecar |
