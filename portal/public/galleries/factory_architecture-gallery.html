@@ -1123,6 +1123,47 @@ function escapeHtml(value) {
   return value.replace(/[&<>"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[char]));
 }
 
+function patchSvgTheme(svg) {
+  const panel = cssVar("--bg-panel");
+  const border = cssVar("--border-strong");
+  const text = cssVar("--text");
+  const line = cssVar("--mermaid-line");
+  const labelFill = cssVar("--mermaid-label-fill");
+  const labelText = cssVar("--mermaid-label-text");
+
+  // Cluster/subgraph backgrounds
+  svg.querySelectorAll(".cluster rect, .cluster polygon").forEach(el => {
+    el.setAttribute("fill", panel);
+    el.setAttribute("stroke", border);
+  });
+
+  // Edge label backgrounds
+  svg.querySelectorAll(".edgeLabel rect, .labelBkg, .label-container rect").forEach(el => {
+    el.setAttribute("fill", labelFill);
+    el.setAttribute("stroke", border);
+  });
+
+  // Edge label text
+  svg.querySelectorAll(".edgeLabel text, .edgeLabel tspan, .edgeLabel span, .edgeLabel foreignObject div").forEach(el => {
+    el.style.fill = labelText;
+    el.style.color = labelText;
+  });
+
+  // Lines and arrows
+  svg.querySelectorAll(".flowchart-link, .edgePath path").forEach(el => {
+    el.setAttribute("stroke", line);
+  });
+  svg.querySelectorAll(".marker path, .arrowheadPath, .arrowMarkerPath").forEach(el => {
+    el.setAttribute("fill", line);
+    el.setAttribute("stroke", line);
+  });
+
+  // Cluster label text
+  svg.querySelectorAll(".cluster-label text, .cluster-label tspan").forEach(el => {
+    el.setAttribute("fill", text);
+  });
+}
+
 async function renderAllDiagrams() {
   const cards = Array.from(document.querySelectorAll(".diagram-card[data-diagram-id]"));
   if (!cards.length) {
@@ -1146,12 +1187,13 @@ async function renderAllDiagrams() {
     }
     try {
       const normalized = normalizeMermaidSource(raw);
-      if (index === 0) console.log("[theme-debug]", getCurrentTheme(), normalized.split("\n").filter(l => l.includes("classDef")).join(" | "));
       const result = await mermaid.render(`gallery-mermaid-${runId}-${index}`, normalized);
       if (runId !== renderRun) {
         return;
       }
       host.innerHTML = result.svg;
+      const svg = host.querySelector("svg");
+      if (svg) patchSvgTheme(svg);
     } catch (error) {
       host.innerHTML = `<pre class="diagram-error">${escapeHtml(String(error))}</pre>`;
     }
