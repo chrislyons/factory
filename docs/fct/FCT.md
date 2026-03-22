@@ -4,12 +4,12 @@ Project documentation index for factory.
 
 ## Recent Documents
 
-- [[FCT017 Factory Portal — Topology Flow, Registry Tables, Font System, and Visual Texture]]
-- [[FCT018 Factory Portal — Mobile Optimization and UX Polish Sprint]]
-- [[FCT019 Ember Theme — Three-Theme Cycle Implementation]]
-- [[FCT020 Factory Security Audit — Red-Hat Team Assessment]]
-- [[FCT021 Security Hardening Roadmap — B- to A+]]
-- [[FCT023 Sprint Complete — FCT022 Unified Security and E2EE Migration]]
+- [[FCT029 Factory Consolidated Plan — Architecture, Recovery, and Roadmap]]
+- [[FCT028 v0 Factory Jobs Audit Report]]
+- [[FCT027 Post-Deployment Recovery and Next Steps]]
+- [[FCT026 Three Integration Seams- Jobs ↔ Matrix, Approval Convergence, Transcript Printing]]
+- [[FCT025 The Compound Interface- Why Factory Has Two Faces]]
+- [[FCT024 Security Verification Review and Phase 3 Sprint Specification]]
 
 ## All Documents
 
@@ -34,7 +34,14 @@ Project documentation index for factory.
 - [[FCT019 Ember Theme — Three-Theme Cycle Implementation]]
 - [[FCT020 Factory Security Audit — Red-Hat Team Assessment]]
 - [[FCT021 Security Hardening Roadmap — B- to A+]]
+- [[FCT022 Unified Security and E2EE Sprint Plan]]
 - [[FCT023 Sprint Complete — FCT022 Unified Security and E2EE Migration]]
+- [[FCT024 Security Verification Review and Phase 3 Sprint Specification]]
+- [[FCT025 The Compound Interface- Why Factory Has Two Faces]]
+- [[FCT026 Three Integration Seams- Jobs ↔ Matrix, Approval Convergence, Transcript Printing]]
+- [[FCT027 Post-Deployment Recovery and Next Steps]]
+- [[FCT028 v0 Factory Jobs Audit Report]]
+- [[FCT029 Factory Consolidated Plan — Architecture, Recovery, and Roadmap]]
 
 ## Navigation
 
@@ -48,4 +55,4 @@ Project documentation index for factory.
 
 ---
 
-**Last Generated:** 2026-03-21
+**Last Generated:** 2026-03-22

@@ -10,3 +10,8 @@ portal/status/
 portal/tasks.json
 portal/index.json
 portal/.env
+
+# Job registry (operational data, private)
+jobs/
+jobs.json
+jobs.json.bak-*
