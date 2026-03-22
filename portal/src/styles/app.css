@@ -3419,6 +3419,9 @@ textarea {
   color: var(--text-dim);
   cursor: pointer;
   transition: border-color var(--transition), color var(--transition), background var(--transition);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
 }
 
 .docs-tab:hover {
