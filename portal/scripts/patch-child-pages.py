@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Patch commands/ and galleries/ child pages for mobile layout fixes.
+"""Patch commands/ and galleries/ child pages for portal-specific fixes.
 
 Idempotent — safe to run multiple times.
 
@@ -32,6 +32,9 @@ FONT_REPLACEMENTS = [
 
 # --- Fix 2: Mobile shell width (injected into 900px media query) ---
 SHELL_WIDTH_CSS = """\
+  .hero-meta {
+    display: none;
+  }
 
   main,
   .site-header__inner,
