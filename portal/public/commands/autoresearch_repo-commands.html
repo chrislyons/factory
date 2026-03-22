@@ -7,13 +7,13 @@
 <style>
 @font-face {
   font-family: "Geist Pixel Square";
-  src: url("../../shared-fonts/geist/geist-pixel/GeistPixel-Square.woff2") format("woff2");
+  src: url("/fonts/GeistPixel-Square.woff2") format("woff2");
   font-display: swap;
   font-weight: 400;
 }
 @font-face {
   font-family: "Geist Mono UltraLight";
-  src: url("../../shared-fonts/geist/geist-mono/GeistMono-UltraLight.woff2") format("woff2");
+  src: url("/fonts/GeistMono-UltraLight.woff2") format("woff2");
   font-display: swap;
   font-weight: 200;
 }
@@ -185,6 +185,7 @@ footer .inner {
   font-family: var(--font-display);
   font-size: 14px;
   color: var(--text);
+  text-decoration: none;
 }
 
 .header-actions {
@@ -777,6 +778,37 @@ footer .inner {
   footer .inner {
     flex-direction: column;
   }
+
+  main,
+  .site-header__inner,
+  .footer-notes,
+  footer .inner {
+    width: 96vw;
+  }
+
+  .hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .meta-chip {
+    font-size: 10px;
+  }
+
+  .value-block {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .value-text {
+    word-break: break-all;
+  }
+
+  .desc-text {
+    display: block;
+    padding: 4px 12px 8px;
+  }
 }
 </style>
 </head>
@@ -784,7 +816,7 @@ footer .inner {
 <header class="site-header">
   <div class="site-header__inner">
     <div class="brand">
-      <span class="brand__title">codex-commandsheets</span>
+      <a class="brand__title" href="/pages/docs.html">dreamfactory</a>
     </div>
     
   </div>

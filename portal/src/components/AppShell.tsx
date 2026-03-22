@@ -94,19 +94,22 @@ export function AppShell({
             {headerAction}
           </div>
           <div className="portal-hero__title-mobile-wrap">
-            <select
-              className="portal-hero__title-mobile"
-              value={pageKey ?? ""}
-              onChange={(e) => { window.location.href = e.target.value; }}
-              aria-label="Navigate"
-            >
-              {NAV_LINKS.map((link) => (
-                <option key={link.href} value={link.href}>
-                  {link.href === pageKey ? title : link.label}
-                </option>
-              ))}
-            </select>
-            <span className="portal-hero__title-mobile-arrow" aria-hidden="true">▾</span>
+            <div className="portal-hero__title-mobile-left">
+              <select
+                className="portal-hero__title-mobile"
+                value={pageKey ?? ""}
+                onChange={(e) => { window.location.href = e.target.value; }}
+                aria-label="Navigate"
+              >
+                {NAV_LINKS.map((link) => (
+                  <option key={link.href} value={link.href}>
+                    {link.href === pageKey ? title : link.label}
+                  </option>
+                ))}
+              </select>
+              <span className="portal-hero__title-mobile-arrow" aria-hidden="true">▾</span>
+            </div>
+            {headerAction}
           </div>
         </section>
         <div className="portal-page-content">{children}</div>

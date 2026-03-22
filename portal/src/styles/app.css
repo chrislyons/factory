@@ -2897,6 +2897,8 @@ textarea {
 .panel-toggle-pair {
   display: flex;
   gap: 4px;
+  margin-right: 8px;
+  opacity: 0.9;
 }
 
 .panel-toggle-btn {
@@ -2960,6 +2962,10 @@ textarea {
     gap: 10px;
   }
 
+  .panel-toggle-pair {
+    margin-right: 0;
+  }
+
   .portal-nav {
     display: none;
   }
@@ -2981,15 +2987,22 @@ textarea {
 
   .portal-brand { cursor: pointer; }
 
-  .portal-hero__title-desktop {
+  .portal-hero__title-row {
     display: none;
   }
 
   .portal-hero__title-mobile-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin: 0 8px 0 4px;
+  }
+
+  .portal-hero__title-mobile-left {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    margin-left: 8px;
   }
 
   .portal-hero__title-mobile {
