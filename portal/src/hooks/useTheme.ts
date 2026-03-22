@@ -3,12 +3,19 @@ import { useCallback, useEffect, useState } from "react";
 type Theme = "dark" | "light" | "ember";
 
 const STORAGE_KEY = "factory-portal-theme";
+const GALLERY_KEY = "commandsheets-theme";
 const CYCLE: Theme[] = ["ember", "dark", "light"];
+
+function isTheme(v: string | null): v is Theme {
+  return v === "dark" || v === "light" || v === "ember";
+}
 
 function getStoredTheme(): Theme | null {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored === "dark" || stored === "light" || stored === "ember") return stored as Theme;
+    if (isTheme(stored)) return stored;
+    const gallery = localStorage.getItem(GALLERY_KEY);
+    if (isTheme(gallery)) return gallery;
   } catch {
     // localStorage unavailable
   }
@@ -38,6 +45,7 @@ export function useTheme() {
     setThemeState(next);
     try {
       localStorage.setItem(STORAGE_KEY, next);
+      localStorage.setItem(GALLERY_KEY, next);
     } catch {
       // localStorage unavailable
     }
