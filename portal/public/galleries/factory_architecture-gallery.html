@@ -1237,6 +1237,7 @@ document.addEventListener("keydown", async (event) => {
     const current = getCurrentTheme();
     const next = THEME_ORDER[(THEME_ORDER.indexOf(current) + 1) % THEME_ORDER.length];
     applyTheme(next);
+    await new Promise(r => requestAnimationFrame(r));
     await renderAllDiagrams();
     return;
   }
