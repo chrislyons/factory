@@ -43,6 +43,12 @@ export function DocsPage() {
         >
           Object Index
         </button>
+        <a
+          className="docs-tab"
+          href="/galleries/factory_architecture-gallery.html"
+        >
+          Factory Diagrams
+        </a>
       </div>
 
       {tab === "repos"
