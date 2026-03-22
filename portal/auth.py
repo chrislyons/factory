@@ -29,11 +29,11 @@ BCRYPT_HASH = os.environ.get(
     "$2a$14$EpVwjmAQzSbVuQwxr3MFhunjzx2HnUqRJBgjC8qKVC5GOb9.ypEKm",
 )
 AUTH_USER = os.environ.get("AUTH_USER", "nesbitt")
-SECRET_KEY = os.environ.get(
-    "AUTH_SECRET",
-    # Generate a persistent key on first run if not set
-    hashlib.sha256(f"factory-portal-{BCRYPT_HASH}".encode()).hexdigest(),
-)
+SECRET_KEY = os.environ.get("AUTH_SECRET", "")
+if not SECRET_KEY:
+    import sys
+    print("FATAL: AUTH_SECRET environment variable is required. Generate with: python3 -c \"import secrets; print(secrets.token_hex(32))\"", file=sys.stderr)
+    sys.exit(1)
 
 
 def sign_cookie(payload: str) -> str:
@@ -131,7 +131,7 @@ class AuthHandler(http.server.BaseHTTPRequestHandler):
 
         redirect = params.get("redirect", ["/"])[0]
         # Sanitize redirect — only allow relative paths
-        if not redirect.startswith("/"):
+        if not redirect.startswith("/") or redirect.startswith("//"):
             redirect = "/"
 
         if user == AUTH_USER and bcrypt.checkpw(pw.encode(), BCRYPT_HASH.encode()):
