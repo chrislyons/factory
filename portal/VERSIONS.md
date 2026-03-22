@@ -57,6 +57,12 @@ All Factory services use the `:419xx` range. Ranges are grouped by function with
 
 ---
 
+## TLS / Transport Security
+
+The portal runs plain HTTP (`:41910`) because TLS is provided at the network layer by **Tailscale's WireGuard tunnel**. All traffic between clients and the portal host traverses an encrypted WireGuard tunnel authenticated by Tailscale device identity. No application-layer TLS certificate is required. Access is restricted to Tailscale-authenticated devices on the tailnet.
+
+---
+
 ## Migration Notes
 
 - Blackbox (RP5, 100.87.53.109) is staging. Same port scheme transfers to Whitebox.

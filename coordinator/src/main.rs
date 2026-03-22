@@ -7,13 +7,18 @@ mod delegate;
 mod health;
 mod infra;
 mod lifecycle;
-mod matrix;
+mod matrix_legacy;
+use matrix_legacy as matrix;
 mod memory;
 mod run_events;
 mod runtime_state;
 mod task_lease;
 mod timer;
 mod loop_engine;
+#[cfg(feature = "native-e2ee")]
+mod identity_store;
+#[cfg(feature = "native-e2ee")]
+mod matrix_native;
 
 use anyhow::Result;
 use tracing::info;

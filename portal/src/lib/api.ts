@@ -1,3 +1,4 @@
+import { z } from "zod";
 import type {
   ActiveLoop,
   AgentBudgetStatus,
@@ -12,6 +13,25 @@ import type {
   TasksDocument
 } from "./types";
 
+const TaskRecordSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  status: z.string(),
+  order: z.number(),
+  blocked_by: z.array(z.string()),
+  block: z.string(),
+}).passthrough();
+
+const TasksDocumentSchema = z.object({
+  tasks: z.array(TaskRecordSchema),
+  blocks: z.record(z.string(), z.object({ label: z.string(), color: z.string() })),
+  log: z.array(z.object({ timestamp: z.string(), actor: z.string(), action: z.string() }).passthrough()),
+}).passthrough();
+
+const AgentStatusSchema = z.object({}).passthrough();
+
+const OkResponseSchema = z.object({ ok: z.literal(true) });
+
 export class ApiError extends Error {
   readonly status: number;
 
@@ -19,6 +39,11 @@ export class ApiError extends Error {
     super(message);
     this.status = status;
   }
+}
+
+function getCsrfToken(): string {
+  const match = document.cookie.match(/(?:^|;\s*)factory_csrf=([^;]+)/);
+  return match?.[1] ?? "";
 }
 
 async function parseResponse<T>(response: Response): Promise<T> {
@@ -29,11 +54,18 @@ async function parseResponse<T>(response: Response): Promise<T> {
 }
 
 export async function fetchJson<T>(input: string, init?: RequestInit) {
+  const method = init?.method?.toUpperCase() ?? "GET";
+  const csrfHeaders: Record<string, string> =
+    method === "POST" || method === "PUT" || method === "DELETE"
+      ? { "X-CSRF-Token": getCsrfToken() }
+      : {};
+
   const response = await fetch(input, {
     cache: "no-store",
     ...init,
     headers: {
       "Content-Type": "application/json",
+      ...csrfHeaders,
       ...(init?.headers ?? {})
     }
   });
@@ -41,18 +73,21 @@ export async function fetchJson<T>(input: string, init?: RequestInit) {
 }
 
 export async function fetchTasks() {
-  return fetchJson<TasksDocument>("/jobs.json");
+  const data = await fetchJson<TasksDocument>("/jobs.json");
+  return TasksDocumentSchema.parse(data) as TasksDocument;
 }
 
 export async function saveTasks(document: TasksDocument) {
-  return fetchJson<TasksDocument>("/jobs.json", {
+  const data = await fetchJson<TasksDocument>("/jobs.json", {
     method: "PUT",
     body: JSON.stringify(document, null, 2)
   });
+  return data;
 }
 
 export async function fetchAgentStatus(agentId: AgentId) {
-  return fetchJson<AgentStatus>(`/status/${agentId}.json`);
+  const data = await fetchJson<AgentStatus>(`/status/${agentId}.json`);
+  return AgentStatusSchema.parse(data) as AgentStatus;
 }
 
 export async function fetchPendingApprovals() {

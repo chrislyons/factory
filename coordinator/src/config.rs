@@ -109,6 +109,15 @@ pub struct Settings {
     pub loop_state_file: Option<String>,
     #[serde(default)]
     pub loop_max_concurrent: Option<u32>,
+
+    #[serde(default)]
+    pub e2ee: Option<E2eeSettings>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct E2eeSettings {
+    pub state_dir: String,
+    pub homeserver_url: String,
 }
 
 #[derive(Debug, Clone, Deserialize, PartialEq)]
@@ -214,6 +223,8 @@ pub struct AgentConfig {
     pub default_cwd: Option<String>,
     #[serde(default)]
     pub context_mode: ContextMode,
+    pub password_env: Option<String>,
+    pub recovery_key_env: Option<String>,
 }
 
 #[derive(Debug, Clone, Deserialize, PartialEq)]
@@ -396,6 +407,16 @@ pub fn load(path: &std::path::Path) -> Result<Config> {
         .with_context(|| format!("Failed to parse config YAML: {}", path.display()))?;
 
     expand_paths(&mut config);
+
+    for (name, agent) in &config.agents {
+        if agent.trust_level.is_none() {
+            anyhow::bail!("Agent '{}' missing required trust_level field", name);
+        }
+    }
+
+    if config.settings.pantalaimon_url.is_some() && config.settings.e2ee.is_some() {
+        tracing::warn!("pantalaimon_url is deprecated when e2ee is configured — it will be ignored in favor of native E2EE");
+    }
 
     Ok(config)
 }

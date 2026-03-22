@@ -53,7 +53,7 @@ const OUTPUT_DEDUP_WINDOW_SECS: u64 = 60;
 const TYPING_TIMEOUT_MS: u64 = 30_000;
 
 /// Shell metacharacter pattern — commands with these are never auto-approved.
-const SHELL_METACHARS: &str = r"[|><;&`$()]";
+const SHELL_METACHARS: &str = r"[|><;&`$()]|\.\.";
 
 // Phase 3 constants
 /// Status HUD update interval (60 seconds).
@@ -80,7 +80,6 @@ const AUTO_APPROVE_TOOLS: &[&str] = &[
     "mcp__graphiti__search_nodes",
     "mcp__graphiti__get_episodes",
     "mcp__graphiti__get_status",
-    "mcp__graphiti__add_memory",
     "mcp__matrix-boot__list-joined-rooms",
     "mcp__matrix-boot__get-room-info",
     "mcp__matrix-boot__get-room-members",
@@ -95,9 +94,6 @@ const AUTO_APPROVE_TOOLS: &[&str] = &[
     "mcp__matrix-boot__get-all-users",
     "mcp__matrix-boot__get-reactions",
     "mcp__matrix-boot__get-account-data",
-    "mcp__matrix-boot__send-message",
-    "mcp__matrix-boot__send-direct-message",
-    "mcp__matrix-boot__send-reaction",
     "mcp__research-mcp__qdrant_search",
     "Read",
     "Glob",
@@ -137,6 +133,8 @@ struct PendingMatrixApproval {
     thread_id: String,
     /// Typed gate for this approval (FCT007 Borrow #2)
     gate_type: crate::approval::ApprovalGateType,
+    /// HMAC tag embedded in the approval message for integrity verification
+    hmac_tag: String,
 }
 
 /// Generate a 5-char human-readable thread ID from current time microseconds.
@@ -179,7 +177,7 @@ struct CoordinatorState {
     /// Approval infrastructure
     approval_tracker: ApprovalTracker,
     approval_rate_limiter: ApprovalRateLimiter,
-    hmac_signer: Option<HmacSigner>,
+    hmac_signer: HmacSigner,
     /// Pending Matrix approvals awaiting reaction (keyed by thread root event_id)
     pending_matrix_approvals: HashMap<String, PendingMatrixApproval>,
     /// Lifecycle manager (circuit breaker, audit log, trust levels)
@@ -239,15 +237,18 @@ struct CoordinatorState {
     run_event_log: RunEventLog,
     /// Atomic task checkout with TTL leases
     task_lease: TaskLeaseManager,
+    /// Slash command rate limiter (per-user)
+    command_rate_limiter: ApprovalRateLimiter,
 }
 
 impl CoordinatorState {
-    fn new(config: Config, shutdown_tx: broadcast::Sender<()>) -> Self {
+    fn new(config: Config, shutdown_tx: broadcast::Sender<()>) -> Result<Self> {
         let home = std::env::var("HOME").unwrap_or_default();
         let audit_dir = format!("{}/.claude/audit", home);
         let state_dir = format!("{}/.config/ig88", home);
 
-        let hmac_signer = HmacSigner::load(&format!("{}/.approval_hmac_secret", state_dir)).ok();
+        let hmac_signer = HmacSigner::load(&format!("{}/.approval_hmac_secret", state_dir))
+            .context("HMAC signer is required — ensure ~/.config/ig88/.approval_hmac_secret exists")?;
 
         let approval_dir = config.settings.approval_dir.clone()
             .unwrap_or_else(|| format!("{}/.config/ig88/approvals", home));
@@ -271,7 +272,7 @@ impl CoordinatorState {
                 config::read_token(&path).ok()
             });
 
-        Self {
+        Ok(Self {
             config,
             sessions: HashMap::new(),
             sync_tokens: SyncTokenStore::load(),
@@ -315,7 +316,8 @@ impl CoordinatorState {
             runtime_state: RuntimeStateManager::new(PathBuf::from(format!("{}/runtime-state.json", state_dir))),
             run_event_log: RunEventLog::new(PathBuf::from(format!("{}/runs", state_dir))),
             task_lease: TaskLeaseManager::new(std::time::Duration::from_secs(300)),
-        }
+            command_rate_limiter: ApprovalRateLimiter::new(10, 60_000),
+        })
     }
 
     /// Check if an event has already been processed (dedup).
@@ -589,7 +591,7 @@ pub async fn run() -> Result<()> {
         let _ = shutdown_tx_clone.send(());
     });
 
-    let mut state = CoordinatorState::new(config, shutdown_tx.clone());
+    let mut state = CoordinatorState::new(config, shutdown_tx.clone())?;
 
     // Initialize all agent sessions
     init_agent_sessions(&mut state).await?;
@@ -721,22 +723,15 @@ async fn init_agent_sessions(state: &mut CoordinatorState) -> Result<()> {
         info!("[{}] Agent session initialized", agent_name);
     }
 
-    // Resolve coordinator's Matrix user_id via whoami so API calls use the correct identity.
-    // Falls back to "@coord:matrix.org" (the hardcoded string in older code) if this fails.
+    // Resolve coordinator's Matrix user_id via whoami — required for startup.
     if let Some(ref coord_token) = state.coord_token.clone() {
         let pantalaimon_url = state.config.settings.pantalaimon_url.as_deref();
-        match MatrixClient::new(pantalaimon_url, coord_token.clone(), String::new()) {
-            Ok(temp_client) => {
-                match temp_client.whoami().await {
-                    Ok(uid) => {
-                        info!("Coordinator Matrix user_id: {}", uid);
-                        state.coord_user_id = Some(uid);
-                    }
-                    Err(e) => warn!("Failed to resolve coord user_id via whoami: {} — using @coord:matrix.org", e),
-                }
-            }
-            Err(e) => warn!("Failed to build temp Matrix client for coord whoami: {}", e),
-        }
+        let temp_client = MatrixClient::new(pantalaimon_url, coord_token.clone(), String::new())
+            .context("Failed to build Matrix client for coord whoami")?;
+        let uid = temp_client.whoami().await
+            .context("Failed to resolve coord user_id via whoami — cannot start without coordinator identity")?;
+        info!("Coordinator Matrix user_id: {}", uid);
+        state.coord_user_id = Some(uid);
     }
 
     Ok(())
@@ -1072,7 +1067,7 @@ async fn process_event(
 
         if is_default_agent {
             let command_handled =
-                handle_command(state, agent_name, room_id, &body, matrix_client).await;
+                handle_command(state, agent_name, room_id, &body, &event.sender, matrix_client).await;
             if command_handled {
                 return;
             }
@@ -1504,9 +1499,10 @@ async fn process_pending_approvals(state: &mut CoordinatorState) {
             } else {
                 format!(" [{}]", thread_id)
             };
+            let hmac_tag = state.hmac_signer.sign(&req.request_id);
             let approval_msg = format!(
-                "**⚠️ {} needs approval{}**\n\nTool: `{}`\nInput:\n```\n{}\n```\n\nReact ✅ to approve, ❌ to deny",
-                agent_name, thread_label, tool_name, input_preview
+                "**⚠️ {} needs approval{}**\n\nTool: `{}`\nInput:\n```\n{}\n```\n\nReact ✅ to approve, ❌ to deny\n\n`hmac:{}`",
+                agent_name, thread_label, tool_name, input_preview, hmac_tag
             );
 
             match matrix_client
@@ -1519,8 +1515,6 @@ async fn process_pending_approvals(state: &mut CoordinatorState) {
                         agent_name, tool_name, thread_id, event_id
                     );
 
-                    // Store pending approval keyed by the message event_id.
-                    // room_id is COORD_APPROVAL_ROOM so reactions there are matched correctly.
                     state.pending_matrix_approvals.insert(
                         event_id.clone(),
                         PendingMatrixApproval {
@@ -1532,6 +1526,7 @@ async fn process_pending_approvals(state: &mut CoordinatorState) {
                             fs_approval: false,
                             thread_id: thread_id.clone(),
                             gate_type: crate::approval::ApprovalGateType::ToolCall,
+                            hmac_tag,
                         },
                     );
                 }
@@ -1566,6 +1561,7 @@ async fn process_pending_approvals(state: &mut CoordinatorState) {
                                             fs_approval: false,
                                             thread_id: thread_id.clone(),
                                             gate_type: crate::approval::ApprovalGateType::ToolCall,
+                                            hmac_tag: hmac_tag.clone(),
                                         },
                                     );
                                 }
@@ -1621,6 +1617,16 @@ async fn process_reaction(state: &mut CoordinatorState, event: &MatrixEvent) {
         None => return, // Not a tracked approval
     };
 
+    // C2: Verify HMAC integrity — ensure the pending approval was created by this coordinator
+    let expected_tag = state.hmac_signer.sign(&pending.request_id);
+    if pending.hmac_tag != expected_tag {
+        warn!(
+            "[{}] HMAC verification failed for approval {} — rejecting reaction",
+            pending.agent_name, pending.request_id
+        );
+        return;
+    }
+
     let approved = key.contains('✅') || key.contains("approve") || key.contains("yes");
     let denied = key.contains('❌') || key.contains("deny") || key.contains("no");
 
@@ -1644,18 +1650,10 @@ async fn process_reaction(state: &mut CoordinatorState, event: &MatrixEvent) {
     if pending.fs_approval {
         // Filesystem hook approval — write .response file
         let decision_str = if approved { "allow" } else { "deny" };
-        if let Some(ref signer) = state.hmac_signer {
-            if let Err(e) = signer.write_approval_response(
-                &state.approval_dir, &pending.request_id, decision_str,
-            ) {
-                error!("[{}] Failed to write fs approval response: {}", pending.agent_name, e);
-            }
-        } else {
-            // No HMAC signer — write unsigned response (hook will accept without sig)
-            let path = format!("{}/{}.response", state.approval_dir, pending.request_id);
-            if let Err(e) = std::fs::write(&path, decision_str) {
-                error!("[{}] Failed to write fs approval response: {}", pending.agent_name, e);
-            }
+        if let Err(e) = state.hmac_signer.write_approval_response(
+            &state.approval_dir, &pending.request_id, decision_str,
+        ) {
+            error!("[{}] Failed to write fs approval response: {}", pending.agent_name, e);
         }
         info!("[{}] Wrote fs approval response: {} for {}", pending.agent_name, decision_str, pending.tool_name);
     } else if let Some(session) = state.sessions.get(&pending.agent_name) {
@@ -1716,14 +1714,9 @@ async fn sweep_timed_out_approvals(state: &mut CoordinatorState) {
 
             if pending.fs_approval {
                 // Write deny .response for filesystem hook
-                if let Some(ref signer) = state.hmac_signer {
-                    let _ = signer.write_approval_response(
-                        &state.approval_dir, &pending.request_id, "deny",
-                    );
-                } else {
-                    let path = format!("{}/{}.response", state.approval_dir, pending.request_id);
-                    let _ = std::fs::write(&path, "deny");
-                }
+                let _ = state.hmac_signer.write_approval_response(
+                    &state.approval_dir, &pending.request_id, "deny",
+                );
             } else if let Some(session) = state.sessions.get(&pending.agent_name) {
                 let _ = session
                     .approval_tx
@@ -1902,12 +1895,7 @@ async fn scan_filesystem_approvals(state: &mut CoordinatorState) {
                     warn!("Stale approval request {} (age: {}s) — auto-denying", request_id, age.num_seconds());
                     let _ = std::fs::remove_file(&path);
                     // Write deny response for the timed-out hook
-                    if let Some(ref signer) = state.hmac_signer {
-                        let _ = signer.write_approval_response(&state.approval_dir, &request_id, "deny");
-                    } else {
-                        let resp_path = format!("{}/{}.response", state.approval_dir, request_id);
-                        let _ = std::fs::write(&resp_path, "deny");
-                    }
+                    let _ = state.hmac_signer.write_approval_response(&state.approval_dir, &request_id, "deny");
                     continue;
                 }
             }
@@ -1968,12 +1956,7 @@ async fn scan_filesystem_approvals(state: &mut CoordinatorState) {
 
             if let Some(frozen_path) = frozen_violation {
                 warn!("[{}] Frozen harness violation (fs): {} attempted on {}", agent_name, tool_name, frozen_path);
-                if let Some(ref signer) = state.hmac_signer {
-                    let _ = signer.write_approval_response(&state.approval_dir, &request_id, "deny");
-                } else {
-                    let resp_path = format!("{}/{}.response", state.approval_dir, request_id);
-                    let _ = std::fs::write(&resp_path, "deny");
-                }
+                let _ = state.hmac_signer.write_approval_response(&state.approval_dir, &request_id, "deny");
                 let _ = state.run_event_log.append_event(
                     &agent_name,
                     RunEventType::FrozenHarnessViolation,
@@ -2001,12 +1984,7 @@ async fn scan_filesystem_approvals(state: &mut CoordinatorState) {
 
         if state.should_auto_approve(&tool_name, tool_input.as_ref(), trust_level) {
             debug!("[{}] Auto-approving fs request: {}", agent_name, tool_name);
-            if let Some(ref signer) = state.hmac_signer {
-                let _ = signer.write_approval_response(&state.approval_dir, &request_id, "allow");
-            } else {
-                let resp_path = format!("{}/{}.response", state.approval_dir, request_id);
-                let _ = std::fs::write(&resp_path, "allow");
-            }
+            let _ = state.hmac_signer.write_approval_response(&state.approval_dir, &request_id, "allow");
             state.approval_tracker.record(ApprovalRecord {
                 agent_name: agent_name.clone(),
                 tool_name: tool_name.clone(),
@@ -2060,13 +2038,14 @@ async fn scan_filesystem_approvals(state: &mut CoordinatorState) {
             })
             .unwrap_or_default();
 
+        let hmac_tag = state.hmac_signer.sign(&request_id);
         let approval_msg = format!(
             "**🔐 Approval Required** (hook)\n\n\
              Agent: `{}`\n\
              Tool: `{}`\n\
              Input: ```{}```\n\n\
-             React ✅ to approve, ❌ to deny",
-            agent_name, tool_name, input_preview
+             React ✅ to approve, ❌ to deny\n\n`hmac:{}`",
+            agent_name, tool_name, input_preview, hmac_tag
         );
 
         match matrix_client
@@ -2092,6 +2071,7 @@ async fn scan_filesystem_approvals(state: &mut CoordinatorState) {
                         fs_approval: true,
                         thread_id: fs_thread_id,
                         gate_type: crate::approval::ApprovalGateType::ToolCall,
+                        hmac_tag,
                     },
                 );
             }
@@ -2100,12 +2080,7 @@ async fn scan_filesystem_approvals(state: &mut CoordinatorState) {
                     "[{}] Failed to post fs approval to Matrix: {} — auto-denying",
                     agent_name, e
                 );
-                if let Some(ref signer) = state.hmac_signer {
-                    let _ = signer.write_approval_response(&state.approval_dir, &request_id, "deny");
-                } else {
-                    let resp_path = format!("{}/{}.response", state.approval_dir, request_id);
-                    let _ = std::fs::write(&resp_path, "deny");
-                }
+                let _ = state.hmac_signer.write_approval_response(&state.approval_dir, &request_id, "deny");
             }
         }
     }
@@ -2187,16 +2162,53 @@ fn save_agent_sessions(state: &CoordinatorState) {
 // Command handling (2F)
 // ============================================================================
 
+fn is_privileged_command(parts: &[&str]) -> bool {
+    if parts.is_empty() {
+        return false;
+    }
+    let cmd = parts[0];
+    if matches!(cmd, "/approve" | "/deny" | "/delegate") {
+        return true;
+    }
+    if cmd == "/agent" && parts.get(1) == Some(&"recover") {
+        return true;
+    }
+    if cmd == "/loop" && matches!(parts.get(1).copied(), Some("start") | Some("abort")) {
+        return true;
+    }
+    false
+}
+
 /// Handle coordinator commands (messages starting with /). Returns true if handled.
 async fn handle_command(
     state: &mut CoordinatorState,
     _agent_name: &str,
     room_id: &str,
     body: &str,
+    sender: &str,
     matrix_client: &MatrixClient,
 ) -> bool {
     let parts: Vec<&str> = body.trim().split_whitespace().collect();
     let cmd = parts.first().copied().unwrap_or("");
+
+    // M5: Rate limit slash commands — max 10 per user per 60s
+    if state.command_rate_limiter.check_and_increment(sender) {
+        let _ = matrix_client
+            .send_message(room_id, "Rate limited — too many commands. Try again shortly.", None)
+            .await;
+        return true;
+    }
+
+    // C1: RBAC — privileged commands require owner or high trust
+    if is_privileged_command(&parts) {
+        let is_owner = sender == state.config.settings.approval_owner;
+        if !is_owner {
+            let _ = matrix_client
+                .send_message(room_id, "Permission denied — this command requires owner privileges.", None)
+                .await;
+            return true;
+        }
+    }
 
     let response = match cmd {
         "/health" => Some(format_health_report(state)),
@@ -2278,12 +2290,24 @@ async fn handle_command(
         ),
         "/loop" if parts.len() >= 3 && parts[1] == "start" => {
             let spec_path = parts[2];
-            match state.loop_manager.load_and_register(std::path::Path::new(spec_path)) {
-                Ok(loop_id) => {
-                    let _ = state.loop_manager.start_loop(&loop_id);
-                    Some(format!("Loop **{}** started from `{}`", loop_id, spec_path))
+            if spec_path.contains("..") {
+                Some("Invalid spec path: must not contain '..'".to_string())
+            } else {
+                let home = std::env::var("HOME").unwrap_or_default();
+                let allowed_dir = state.config.settings.loop_specs_dir.clone()
+                    .unwrap_or_else(|| format!("{}/dev/autoresearch/loop-specs", home));
+                let resolved = std::path::Path::new(spec_path);
+                if resolved.is_absolute() && !resolved.starts_with(&allowed_dir) {
+                    Some(format!("Invalid spec path: must be within {}", allowed_dir))
+                } else {
+                    match state.loop_manager.load_and_register(std::path::Path::new(spec_path)) {
+                        Ok(loop_id) => {
+                            let _ = state.loop_manager.start_loop(&loop_id);
+                            Some(format!("Loop **{}** started from `{}`", loop_id, spec_path))
+                        }
+                        Err(e) => Some(format!("Failed to start loop: {}", e)),
+                    }
                 }
-                Err(e) => Some(format!("Failed to start loop: {}", e)),
             }
         }
         "/loop" if parts.len() >= 3 && parts[1] == "abort" => {
@@ -2479,15 +2503,10 @@ async fn manual_approve(state: &mut CoordinatorState, prefix: &str, approved: bo
         if pending.fs_approval {
             // Filesystem hook approval — write .response file
             let decision_str = if approved { "allow" } else { "deny" };
-            if let Some(ref signer) = state.hmac_signer {
-                if let Err(e) = signer.write_approval_response(
-                    &state.approval_dir, &pending.request_id, decision_str,
-                ) {
-                    error!("[{}] Failed to write fs approval response: {}", pending.agent_name, e);
-                }
-            } else {
-                let path = format!("{}/{}.response", state.approval_dir, pending.request_id);
-                let _ = std::fs::write(&path, decision_str);
+            if let Err(e) = state.hmac_signer.write_approval_response(
+                &state.approval_dir, &pending.request_id, decision_str,
+            ) {
+                error!("[{}] Failed to write fs approval response: {}", pending.agent_name, e);
             }
         } else if let Some(session) = state.sessions.get(&pending.agent_name) {
             let _ = session

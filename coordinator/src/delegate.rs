@@ -2,6 +2,7 @@
 /// Phase 3C: Spawns Claude on Cloudkicker via session-relay.sh,
 /// streams JSON bidirectionally, handles tool approvals, posts results.
 use anyhow::{bail, Context, Result};
+use regex::Regex;
 use serde_json::json;
 use std::collections::HashSet;
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
@@ -84,6 +85,20 @@ pub async fn run_delegate_session(
         "[{}] Starting delegate session on {} — repo={} model={}",
         agent_name, device_name, repo, model
     );
+
+    // Validate parameters to prevent shell injection
+    let safe_param_re = Regex::new(r"^[a-zA-Z0-9._/\-]+$").expect("valid regex");
+    if !safe_param_re.is_match(repo) {
+        bail!("Invalid characters in repo parameter: {}", repo);
+    }
+    if !safe_param_re.is_match(model) {
+        bail!("Invalid characters in model parameter: {}", model);
+    }
+    if let Some(spec_path) = loop_spec_path {
+        if !safe_param_re.is_match(spec_path) {
+            bail!("Invalid characters in loop_spec_path parameter: {}", spec_path);
+        }
+    }
 
     // Spawn SSH process running session-relay.sh
     let relay_cmd = if let Some(spec_path) = loop_spec_path {
@@ -296,8 +311,16 @@ fn should_auto_approve_delegate(
         return true;
     }
 
-    // Edit/Write within delegate working dir — auto-approve
+    // Edit/Write — auto-approve unless path contains traversal patterns
     if matches!(tool_name, "Edit" | "Write") {
+        if let Some(path) = tool_input
+            .and_then(|i| i.get("file_path"))
+            .and_then(|p| p.as_str())
+        {
+            if path.contains("..") {
+                return false;
+            }
+        }
         return true;
     }
 

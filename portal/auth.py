@@ -14,6 +14,7 @@ import hmac
 import http.server
 import json
 import os
+import secrets
 import time
 import urllib.parse
 
@@ -54,6 +55,19 @@ def verify_cookie(cookie_val: str) -> bool:
         return False
 
 
+def generate_csrf_token() -> str:
+    return secrets.token_hex(32)
+
+
+def make_csrf_cookie(token: str) -> str:
+    return (
+        f"factory_csrf={token}; "
+        f"Path=/; "
+        f"Max-Age={COOKIE_MAX_AGE}; "
+        f"SameSite=Strict"
+    )
+
+
 def make_session_cookie() -> str:
     payload = json.dumps({"user": AUTH_USER, "exp": int(time.time() + COOKIE_MAX_AGE)})
     signed = sign_cookie(payload)
@@ -89,6 +103,14 @@ class AuthHandler(http.server.BaseHTTPRequestHandler):
         # Caddy forward_auth sends subrequests here
         cookie = get_cookie(self.headers, COOKIE_NAME)
         if cookie and verify_cookie(cookie):
+            fwd_method = self.headers.get("X-Forwarded-Method", "GET")
+            if fwd_method in ("POST", "PUT", "DELETE"):
+                csrf_cookie = get_cookie(self.headers, "factory_csrf")
+                csrf_header = self.headers.get("X-CSRF-Token", "")
+                if not csrf_cookie or not csrf_header or not hmac.compare_digest(csrf_cookie, csrf_header):
+                    self.send_response(403)
+                    self.end_headers()
+                    return
             self.send_response(200)
             self.end_headers()
         else:
@@ -113,8 +135,10 @@ class AuthHandler(http.server.BaseHTTPRequestHandler):
             redirect = "/"
 
         if user == AUTH_USER and bcrypt.checkpw(pw.encode(), BCRYPT_HASH.encode()):
+            csrf_token = generate_csrf_token()
             self.send_response(303)
             self.send_header("Set-Cookie", make_session_cookie())
+            self.send_header("Set-Cookie", make_csrf_cookie(csrf_token))
             self.send_header("Location", redirect)
             self.end_headers()
         else:

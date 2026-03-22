@@ -9,7 +9,7 @@ use tracing::{debug, warn};
 // ============================================================================
 
 const DOCKER_CONTAINERS: &[&str] = &["qdrant", "graphiti-mcp", "falkordb"];
-const SYSTEMD_SERVICES: &[&str] = &["ollama", "pantalaimon", "qdrant-mcp"];
+const SYSTEMD_SERVICES: &[&str] = &["ollama", "qdrant-mcp"];
 const TAILSCALE_PEERS: &[&str] = &["cloudkicker", "greybox"];
 
 /// How many consecutive checks a state must persist before alerting.
@@ -154,7 +154,7 @@ impl InfraChecker {
 // ============================================================================
 
 async fn check_docker_containers() -> Vec<ServiceStatus> {
-    let output = Command::new("docker")
+    let output = Command::new("/usr/bin/docker")
         .args(["ps", "--format", "{{.Names}}\t{{.Status}}"])
         .output()
         .await;
@@ -201,7 +201,7 @@ async fn check_systemd_services() -> Vec<ServiceStatus> {
     let mut results = Vec::new();
 
     for name in SYSTEMD_SERVICES {
-        let output = Command::new("systemctl")
+        let output = Command::new("/usr/bin/systemctl")
             .args(["is-active", "--quiet", name])
             .output()
             .await;
@@ -236,7 +236,7 @@ async fn check_tailscale_peers() -> Vec<ServiceStatus> {
     let mut results = Vec::new();
 
     for name in TAILSCALE_PEERS {
-        let output = Command::new("tailscale")
+        let output = Command::new("/usr/bin/tailscale")
             .args(["ping", "--c", "1", "--timeout", "5s", name])
             .output()
             .await;

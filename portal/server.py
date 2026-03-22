@@ -16,7 +16,8 @@ from pathlib import Path
 
 HOST = os.environ.get("GSD_HOST", "127.0.0.1")
 PORT = int(os.environ.get("GSD_PORT", 41935))
-DATA_ROOT = Path(os.environ.get("GSD_DATA_ROOT", Path(__file__).resolve().parent))
+DATA_ROOT = Path(os.environ.get("GSD_DATA_ROOT", Path(__file__).resolve().parent)).resolve()
+GSD_AUTH_SECRET = os.environ.get("GSD_AUTH_SECRET")
 ALLOWED_WRITE_PATHS = {"tasks.json", "jobs.json"}
 ALLOWED_WRITE_DIRS = {"status"}
 
@@ -27,7 +28,23 @@ class PortalDataHandler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(DATA_ROOT), **kwargs)
 
+    def _check_auth(self) -> bool:
+        if not GSD_AUTH_SECRET:
+            return True
+        auth = self.headers.get("Authorization", "")
+        if auth == f"Bearer {GSD_AUTH_SECRET}":
+            return True
+        self.send_error(401, "Unauthorized")
+        return False
+
+    def do_GET(self) -> None:  # noqa: N802
+        if not self._check_auth():
+            return
+        super().do_GET()
+
     def do_PUT(self) -> None:  # noqa: N802 - stdlib hook name
+        if not self._check_auth():
+            return
         try:
             self._handle_put()
         except Exception as error:  # pragma: no cover - defensive logging
@@ -58,7 +75,10 @@ class PortalDataHandler(SimpleHTTPRequestHandler):
             self.send_error(400, f"Invalid JSON: {error}")
             return
 
-        file_path = DATA_ROOT / request_path
+        file_path = (DATA_ROOT / request_path).resolve()
+        if not file_path.is_relative_to(DATA_ROOT):
+            self.send_error(403, "Path traversal denied")
+            return
         file_path.parent.mkdir(parents=True, exist_ok=True)
         file_path.write_bytes(body)
 

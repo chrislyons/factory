@@ -636,7 +636,7 @@ async fn spawn_claude(
         .stdin(std::process::Stdio::piped())
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::piped())
-        .kill_on_drop(false);
+        .kill_on_drop(true);
 
     // Provider-specific env overrides (e.g. ANTHROPIC_BASE_URL for greybox)
     for (k, v) in &provider.env {
