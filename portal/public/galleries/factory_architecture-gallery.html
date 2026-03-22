@@ -1129,9 +1129,7 @@ async function renderAllDiagrams() {
     return;
   }
   const runId = ++renderRun;
-  const config = getMermaidConfig();
-  mermaid.initialize(config);
-  const themeCss = config.themeCSS || "";
+  mermaid.initialize(getMermaidConfig());
   for (const [index, card] of cards.entries()) {
     const sourceNode = card.querySelector(".mermaid-source");
     const host = card.querySelector(".diagram-canvas");
@@ -1148,16 +1146,12 @@ async function renderAllDiagrams() {
     }
     try {
       const normalized = normalizeMermaidSource(raw);
+      if (index === 0) console.log("[theme-debug]", getCurrentTheme(), normalized.split("\n").filter(l => l.includes("classDef")).join(" | "));
       const result = await mermaid.render(`gallery-mermaid-${runId}-${index}`, normalized);
       if (runId !== renderRun) {
         return;
       }
-      // Inject theme CSS directly into SVG to override mermaid's cached styles
-      const svgWithTheme = result.svg.replace(
-        /(<svg[^>]*>)/,
-        `$1<style>${themeCss}</style>`
-      );
-      host.innerHTML = svgWithTheme;
+      host.innerHTML = result.svg;
     } catch (error) {
       host.innerHTML = `<pre class="diagram-error">${escapeHtml(String(error))}</pre>`;
     }
