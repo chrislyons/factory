@@ -110,8 +110,7 @@ export function RepoExplorer({ onMeta }: RepoExplorerProps = {}) {
     if (!onMeta || loading) return;
     onMeta(
       <span className="docs-meta-chip">
-        <span className="docs-meta-chip__label">Repos</span>
-        <span className="docs-meta-chip__value">{allRepos.length}</span>
+        <span className="docs-meta-chip__value">Repos: {allRepos.length}</span>
       </span>
     );
   }, [onMeta, loading, generatedAt, allRepos.length]);
