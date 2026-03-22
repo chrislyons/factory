@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { AppShell, SurfaceCard } from "../components/AppShell";
 import { AssignDropdown } from "../components/AssignDropdown";
 import { JobCombobox } from "../components/JobCombobox";
-import { SidePanel } from "../components/SidePanel";
+import { SidePanel, SidePanelContent } from "../components/SidePanel";
 import { LoopStatusPill } from "../components/loops/LoopStatusPill";
 import { AgentBadge } from "../components/primitives/AgentBadge";
 import { EmptyState } from "../components/primitives/EmptyState";
@@ -92,7 +92,7 @@ function statusFeedsExposeLoops(statuses: ReturnType<typeof useAgentStatuses>["d
 export function DashboardPage() {
   const [activeFilter, setActiveFilter] = useState("all");
   const [taskSearch, setTaskSearch] = useState("");
-  const [panelView, setPanelView] = useState<"deps" | "completions" | null>(null);
+  const [panelView, setPanelView] = useState<"deps" | "completions" | null>("deps");
 
   const tasks = useTasksDocument();
   const statuses = useAgentStatuses();
@@ -227,7 +227,7 @@ export function DashboardPage() {
             type="button"
             onClick={() => setPanelView(panelView === "completions" ? null : "completions")}
             aria-label="Completions"
-          >&#x2713;</button>
+          ><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><polyline points="8 12 11 15 16 9"/></svg></button>
           <button
             className={cn("panel-toggle-btn", panelView === "deps" && "is-active")}
             type="button"
@@ -330,74 +330,84 @@ export function DashboardPage() {
       )}
 
       <div className="dashboard-columns">
-        <div className="task-toolbar task-toolbar--primary">
-          <JobCombobox
-            tasks={document?.tasks ?? []}
-            blocks={document?.blocks ?? {}}
-            onFilter={setTaskSearch}
-            onCreate={(title) => void addTaskWithTitle(title)}
-          />
-        </div>
-        <div className="filter-row-ui">
-          <button
-            className={cn("filter-chip-ui", activeFilter === "all" && "is-active")}
-            type="button"
-            onClick={() => setActiveFilter("all")}
-          >
-            All ({document?.tasks.length ?? 0})
-          </button>
-          {Object.entries(document?.blocks ?? {}).map(([blockId, block]) => {
-            const count = (document?.tasks ?? []).filter((task) => task.block === blockId).length;
-            return (
-              <button
-                key={blockId}
-                className={cn("filter-chip-ui", activeFilter === blockId && "is-active")}
-                type="button"
-                onClick={() => setActiveFilter(blockId)}
-                style={{ '--chip-color': block.color } as React.CSSProperties}
-              >
-                {block.label} ({count})
-              </button>
-            );
-          })}
+        <div className="dashboard-col-main">
+          <div className="task-toolbar task-toolbar--primary">
+            <JobCombobox
+              tasks={document?.tasks ?? []}
+              blocks={document?.blocks ?? {}}
+              onFilter={setTaskSearch}
+              onCreate={(title) => void addTaskWithTitle(title)}
+            />
+          </div>
+          <div className="filter-row-ui">
+            <button
+              className={cn("filter-chip-ui", activeFilter === "all" && "is-active")}
+              type="button"
+              onClick={() => setActiveFilter("all")}
+            >
+              All ({document?.tasks.length ?? 0})
+            </button>
+            {Object.entries(document?.blocks ?? {}).map(([blockId, block]) => {
+              const count = (document?.tasks ?? []).filter((task) => task.block === blockId).length;
+              return (
+                <button
+                  key={blockId}
+                  className={cn("filter-chip-ui", activeFilter === blockId && "is-active")}
+                  type="button"
+                  onClick={() => setActiveFilter(blockId)}
+                  style={{ '--chip-color': block.color } as React.CSSProperties}
+                >
+                  {block.label} ({count})
+                </button>
+              );
+            })}
+          </div>
+
+          <div id="task-list" className="task-list">
+            {visibleTasks.length === 0 ? (
+              <EmptyState title="No jobs match the current view" detail="Adjust the filter or wait for jobs.json." />
+            ) : (
+              visibleTasks.map((task) => (
+                <div key={task.id} id={`task-${task.id}`} className="task-card-ui">
+                  <div className="task-card-ui__title-row">
+                    <label className="checkbox-wrap">
+                      <input
+                        checked={task.status === "done"}
+                        disabled={task.status === "blocked"}
+                        type="checkbox"
+                        onChange={() => void toggleTask(task.id)}
+                      />
+                      <span />
+                    </label>
+                    <div className="task-card-ui__title">{task.title}</div>
+                  </div>
+                  {task.description ? <p className="task-card-ui__desc">{task.description}</p> : null}
+                  <div className="task-card-ui__meta">
+                    <span className={`task-status-chip is-${task.status}`}>{task.status}</span>
+                    <span className="task-meta-mono job-address">{task.id.replace("job.", "")}</span>
+                    <span className="task-meta-mono">{task.effort ?? "unknown"}</span>
+                    <span className="task-meta-mono">{document?.blocks[task.block]?.label ?? task.block}</span>
+                  </div>
+                  <AssignDropdown
+                    value={task.assignee ?? null}
+                    onChange={(val) => void assignTask(task.id, val)}
+                    className="task-card-ui__assign"
+                  />
+                  <button className="secondary-button task-card-ui__cycle" type="button" onClick={() => void cycleTask(task.id)}>
+                    Cycle
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
         </div>
 
-        <div id="task-list" className="task-list">
-          {visibleTasks.length === 0 ? (
-            <EmptyState title="No jobs match the current view" detail="Adjust the filter or wait for jobs.json." />
-          ) : (
-            visibleTasks.map((task) => (
-              <div key={task.id} id={`task-${task.id}`} className="task-card-ui">
-                <div className="task-card-ui__title-row">
-                  <label className="checkbox-wrap">
-                    <input
-                      checked={task.status === "done"}
-                      disabled={task.status === "blocked"}
-                      type="checkbox"
-                      onChange={() => void toggleTask(task.id)}
-                    />
-                    <span />
-                  </label>
-                  <div className="task-card-ui__title">{task.title}</div>
-                </div>
-                {task.description ? <p className="task-card-ui__desc">{task.description}</p> : null}
-                <div className="task-card-ui__meta">
-                  <span className={`task-status-chip is-${task.status}`}>{task.status}</span>
-                  <span className="task-meta-mono job-address">{task.id.replace("job.", "")}</span>
-                  <span className="task-meta-mono">{task.effort ?? "unknown"}</span>
-                  <span className="task-meta-mono">{document?.blocks[task.block]?.label ?? task.block}</span>
-                </div>
-                <AssignDropdown
-                  value={task.assignee ?? null}
-                  onChange={(val) => void assignTask(task.id, val)}
-                  className="task-card-ui__assign"
-                />
-                <button className="secondary-button task-card-ui__cycle" type="button" onClick={() => void cycleTask(task.id)}>
-                  Cycle
-                </button>
-              </div>
-            ))
-          )}
+        <div className="dashboard-col-panel">
+          <SidePanelContent
+            view={panelView ?? "deps"}
+            tasks={document?.tasks ?? []}
+            blocks={document?.blocks ?? {}}
+          />
         </div>
       </div>
 

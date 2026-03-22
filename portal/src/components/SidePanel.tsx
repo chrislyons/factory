@@ -10,6 +10,61 @@ interface SidePanelProps {
   blocks: Record<string, TaskBlock>;
 }
 
+interface SidePanelContentProps {
+  view: "deps" | "completions";
+  tasks: TaskRecord[];
+  blocks: Record<string, TaskBlock>;
+  onClose?: () => void;
+}
+
+export function SidePanelContent({ view, tasks, blocks, onClose }: SidePanelContentProps) {
+  const blockedTasks = tasks.filter(t => t.blocked_by.length > 0);
+  const completedTasks = tasks
+    .filter(t => t.status === "done")
+    .sort((a, b) => new Date(b.updated ?? "").getTime() - new Date(a.updated ?? "").getTime());
+
+  const title = view === "deps" ? "Dependencies" : "Completions";
+  const subtitle = view === "deps"
+    ? "Blocked work and unresolved chains"
+    : "Completed jobs, most recent first";
+
+  const items = view === "deps" ? blockedTasks : completedTasks;
+
+  return (
+    <div className="side-panel-content">
+      <div className="side-panel__header">
+        <div>
+          <h2>{title}</h2>
+          <p>{subtitle}</p>
+        </div>
+        {onClose && (
+          <button className="secondary-button" type="button" onClick={onClose}>&times;</button>
+        )}
+      </div>
+      <div className="side-panel__body">
+        {items.length === 0 ? (
+          <div className="side-panel__empty">
+            {view === "deps" ? "No active dependencies" : "No completed jobs yet"}
+          </div>
+        ) : (
+          <div className="dependency-list">
+            {items.map(task => (
+              <div key={task.id} className="dependency-card">
+                <strong>{task.title}</strong>
+                {view === "deps" ? (
+                  <span>Blocked by {task.blocked_by.join(", ")}</span>
+                ) : (
+                  <span>{blocks[task.block]?.label ?? task.block}</span>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function SidePanel({ open, view, onClose, tasks, blocks }: SidePanelProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef(0);
@@ -32,18 +87,6 @@ export function SidePanel({ open, view, onClose, tasks, blocks }: SidePanelProps
     if (diff > 80) onClose();
   }, [onClose]);
 
-  const blockedTasks = tasks.filter(t => t.blocked_by.length > 0);
-  const completedTasks = tasks
-    .filter(t => t.status === "done")
-    .sort((a, b) => new Date(b.updated ?? "").getTime() - new Date(a.updated ?? "").getTime());
-
-  const title = view === "deps" ? "Dependencies" : "Completions";
-  const subtitle = view === "deps"
-    ? "Blocked work and unresolved chains"
-    : "Completed jobs, most recent first";
-
-  const items = view === "deps" ? blockedTasks : completedTasks;
-
   return (
     <>
       <div
@@ -56,33 +99,7 @@ export function SidePanel({ open, view, onClose, tasks, blocks }: SidePanelProps
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        <div className="side-panel__header">
-          <div>
-            <h2>{title}</h2>
-            <p>{subtitle}</p>
-          </div>
-          <button className="secondary-button" type="button" onClick={onClose}>&times;</button>
-        </div>
-        <div className="side-panel__body">
-          {items.length === 0 ? (
-            <div className="side-panel__empty">
-              {view === "deps" ? "No active dependencies" : "No completed jobs yet"}
-            </div>
-          ) : (
-            <div className="dependency-list">
-              {items.map(task => (
-                <div key={task.id} className="dependency-card">
-                  <strong>{task.title}</strong>
-                  {view === "deps" ? (
-                    <span>Blocked by {task.blocked_by.join(", ")}</span>
-                  ) : (
-                    <span>{blocks[task.block]?.label ?? task.block}</span>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        <SidePanelContent view={view} tasks={tasks} blocks={blocks} onClose={onClose} />
       </div>
     </>
   );
