@@ -732,6 +732,7 @@ import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.mi
 const THEME_KEY = "commandsheets-theme";
 const THEME_ORDER = ["light", "dark", "ember"];
 const diagramHeaders = Array.from(document.querySelectorAll(".diagram-header"));
+const rawDiagramSources = new Map();
 let currentHeaderIndex = -1;
 let renderRun = 0;
 
@@ -874,14 +875,14 @@ function classifyColorToken(token) {
 
 function normalizeStyleProperties(propertyText) {
   const tones = getMermaidTones();
-  const props = propertyText
+  const normalizedEntries = propertyText
     .split(",")
     .map((part) => part.trim())
     .filter(Boolean);
-  if (!props.length) {
+  if (!normalizedEntries.length) {
     return propertyText;
   }
-  return props
+  return normalizedEntries
     .map((entry) => {
       const parts = entry.split(/:(.+)/);
       if (parts.length < 3) {
@@ -904,6 +905,26 @@ function normalizeStyleProperties(propertyText) {
     .join(",");
 }
 
+function getNormalizedStyleMap(propertyText) {
+  const props = propertyText
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean);
+  const styleMap = {};
+  for (const entry of props) {
+    const parts = entry.split(/:(.+)/);
+    if (parts.length < 3) {
+      continue;
+    }
+    const key = parts[0].trim();
+    const value = parts[1].trim();
+    if (key) {
+      styleMap[key] = value;
+    }
+  }
+  return styleMap;
+}
+
 function formatMermaidRectColor(token) {
   const parsed = parseColorToken(token);
   if (!parsed) {
@@ -912,9 +933,45 @@ function formatMermaidRectColor(token) {
   return `rgb(${Math.round(parsed.r)}, ${Math.round(parsed.g)}, ${Math.round(parsed.b)})`;
 }
 
-function normalizeMermaidSource(raw) {
+function getRawDiagramSource(card) {
+  const cacheKey = card.getAttribute("data-diagram-id") || card.id;
+  if (cacheKey && rawDiagramSources.has(cacheKey)) {
+    return rawDiagramSources.get(cacheKey);
+  }
+  const sourceNode = card.querySelector(".mermaid-source");
+  let raw = "";
+  if (sourceNode) {
+    try {
+      raw = JSON.parse(sourceNode.textContent).trim();
+    } catch (_error) {
+      raw = sourceNode.textContent.trim();
+    }
+  }
+  if (cacheKey && raw) {
+    rawDiagramSources.set(cacheKey, raw);
+  }
+  return raw;
+}
+
+function prepareMermaidSource(raw) {
   const tones = getMermaidTones();
+  const semanticClassStyles = {};
   let next = raw.replace(/%%\{init:[\s\S]*?%%\s*/g, "");
+  next = next.replace(/^(\s*classDef\s+([^\s]+)\s+)(.+)$/gm, (_match, _prefix, classNames, properties) => {
+    const normalizedProperties = normalizeStyleProperties(properties);
+    const styleMap = getNormalizedStyleMap(normalizedProperties);
+    classNames
+      .split(",")
+      .map((className) => className.trim())
+      .filter(Boolean)
+      .forEach((className) => {
+        semanticClassStyles[className] = {
+          ...(semanticClassStyles[className] || {}),
+          ...styleMap,
+        };
+      });
+    return "";
+  });
   next = next.replace(/^(\s*rect\s+)(#[0-9a-fA-F]{3,8}|rgba?\([^)]+\))(.*)$/gm, (_match, prefix, color, suffix) => {
     const tone = tones[classifyColorToken(color)] || tones.neutral;
     return `${prefix}${formatMermaidRectColor(tone.fill)}${suffix}`;
@@ -922,13 +979,64 @@ function normalizeMermaidSource(raw) {
   next = next.replace(/^(\s*style\s+\S+\s+)(.+)$/gm, (_match, prefix, properties) => {
     return `${prefix}${normalizeStyleProperties(properties)}`;
   });
-  next = next.replace(/^(\s*classDef\s+[^\s]+\s+)(.+)$/gm, (_match, prefix, properties) => {
-    return `${prefix}${normalizeStyleProperties(properties)}`;
-  });
   next = next.replace(/^(\s*linkStyle\s+.+?\s+)(.+)$/gm, (_match, prefix, properties) => {
     return `${prefix}${normalizeStyleProperties(properties)}`;
   });
-  return next;
+  next = next.replace(/\n{3,}/g, "\n\n").trim();
+  return { source: next, semanticClassStyles };
+}
+
+function setImportantStyle(elements, property, value) {
+  elements.forEach((element) => {
+    element.style.setProperty(property, value, "important");
+  });
+}
+
+function applySemanticStyleToNode(node, styleMap) {
+  let shapeElements = Array.from(node.children).filter((child) => {
+    return child instanceof SVGElement && ["rect", "circle", "ellipse", "polygon", "path"].includes(child.tagName.toLowerCase());
+  });
+  if (!shapeElements.length) {
+    shapeElements = Array.from(node.querySelectorAll("rect, circle, ellipse, polygon, path"));
+  }
+  const textElements = Array.from(node.querySelectorAll("text, tspan"));
+  const htmlTextElements = Array.from(node.querySelectorAll("foreignObject, foreignObject *, foreignObject div, foreignObject span, foreignObject p"));
+  for (const [key, value] of Object.entries(styleMap)) {
+    if (/^fill$/i.test(key) || /bkg/i.test(key)) {
+      setImportantStyle(shapeElements, "fill", value);
+      continue;
+    }
+    if (/^stroke$/i.test(key) || /border/i.test(key) || /line/i.test(key)) {
+      setImportantStyle(shapeElements, "stroke", value);
+      continue;
+    }
+    if (/color/i.test(key) || /text/i.test(key)) {
+      setImportantStyle(textElements, "fill", value);
+      setImportantStyle(htmlTextElements, "color", value);
+      continue;
+    }
+    if (/font/i.test(key)) {
+      setImportantStyle(textElements, key, value);
+      setImportantStyle(htmlTextElements, key, value);
+      continue;
+    }
+    setImportantStyle(shapeElements, key, value);
+  }
+}
+
+function applySemanticNodeStyles(svg, semanticClassStyles) {
+  const nodes = Array.from(svg.querySelectorAll(".node"));
+  nodes.forEach((node) => {
+    const mergedStyles = {};
+    node.classList.forEach((className) => {
+      if (semanticClassStyles[className]) {
+        Object.assign(mergedStyles, semanticClassStyles[className]);
+      }
+    });
+    if (Object.keys(mergedStyles).length) {
+      applySemanticStyleToNode(node, mergedStyles);
+    }
+  });
 }
 
 function getMermaidThemeCss() {
@@ -1123,47 +1231,6 @@ function escapeHtml(value) {
   return value.replace(/[&<>"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[char]));
 }
 
-function patchSvgTheme(svg) {
-  const panel = cssVar("--bg-panel");
-  const border = cssVar("--border-strong");
-  const text = cssVar("--text");
-  const line = cssVar("--mermaid-line");
-  const labelFill = cssVar("--mermaid-label-fill");
-  const labelText = cssVar("--mermaid-label-text");
-
-  // Cluster/subgraph backgrounds
-  svg.querySelectorAll(".cluster rect, .cluster polygon").forEach(el => {
-    el.setAttribute("fill", panel);
-    el.setAttribute("stroke", border);
-  });
-
-  // Edge label backgrounds
-  svg.querySelectorAll(".edgeLabel rect, .labelBkg, .label-container rect").forEach(el => {
-    el.setAttribute("fill", labelFill);
-    el.setAttribute("stroke", border);
-  });
-
-  // Edge label text
-  svg.querySelectorAll(".edgeLabel text, .edgeLabel tspan, .edgeLabel span, .edgeLabel foreignObject div").forEach(el => {
-    el.style.fill = labelText;
-    el.style.color = labelText;
-  });
-
-  // Lines and arrows
-  svg.querySelectorAll(".flowchart-link, .edgePath path").forEach(el => {
-    el.setAttribute("stroke", line);
-  });
-  svg.querySelectorAll(".marker path, .arrowheadPath, .arrowMarkerPath").forEach(el => {
-    el.setAttribute("fill", line);
-    el.setAttribute("stroke", line);
-  });
-
-  // Cluster label text
-  svg.querySelectorAll(".cluster-label text, .cluster-label tspan").forEach(el => {
-    el.setAttribute("fill", text);
-  });
-}
-
 async function renderAllDiagrams() {
   const cards = Array.from(document.querySelectorAll(".diagram-card[data-diagram-id]"));
   if (!cards.length) {
@@ -1172,28 +1239,23 @@ async function renderAllDiagrams() {
   const runId = ++renderRun;
   mermaid.initialize(getMermaidConfig());
   for (const [index, card] of cards.entries()) {
-    const sourceNode = card.querySelector(".mermaid-source");
     const host = card.querySelector(".diagram-canvas");
-    let raw = "";
-    if (sourceNode) {
-      try {
-        raw = JSON.parse(sourceNode.textContent).trim();
-      } catch (_error) {
-        raw = sourceNode.textContent.trim();
-      }
-    }
+    const raw = getRawDiagramSource(card);
     if (!raw || !host) {
       continue;
     }
     try {
-      const normalized = normalizeMermaidSource(raw);
-      const result = await mermaid.render(`gallery-mermaid-${runId}-${index}`, normalized);
+      const { source, semanticClassStyles } = prepareMermaidSource(raw);
+      const result = await mermaid.render(`gallery-mermaid-${runId}-${index}`, source);
       if (runId !== renderRun) {
         return;
       }
       host.innerHTML = result.svg;
       const svg = host.querySelector("svg");
-      if (svg) patchSvgTheme(svg);
+      if (svg instanceof SVGElement) {
+        applySemanticNodeStyles(svg, semanticClassStyles);
+      }
+      result.bindFunctions?.(host);
     } catch (error) {
       host.innerHTML = `<pre class="diagram-error">${escapeHtml(String(error))}</pre>`;
     }
@@ -1280,7 +1342,6 @@ document.addEventListener("keydown", async (event) => {
     const current = getCurrentTheme();
     const next = THEME_ORDER[(THEME_ORDER.indexOf(current) + 1) % THEME_ORDER.length];
     applyTheme(next);
-    await new Promise(r => requestAnimationFrame(r));
     await renderAllDiagrams();
     return;
   }
