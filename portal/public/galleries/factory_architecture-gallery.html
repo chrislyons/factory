@@ -713,7 +713,7 @@ footer {
     <div class="hero">
       <span class="hero-eyebrow">ARCHITECTURE GALLERY</span>
       <h1>factory</h1>
-      <p>Agent orchestration architecture — models, escalation, loops, and machine topology</p>
+      <p>Agent orchestration architecture — models, escalation, loops, and topology</p>
     </div>
     <div class="hero-meta"><div class="meta-chip"><span class="meta-chip__label">UPDATED</span><span class="meta-chip__value">2026-03-22</span></div><div class="meta-chip"><span class="meta-chip__label">VERSION</span><span class="meta-chip__value">2.0</span></div><div class="meta-chip"><span class="meta-chip__label">SOURCE</span><span class="meta-chip__value">wireframes/v2.0-2026-03-22/*.mermaid.md</span></div></div>
   </div>
@@ -729,14 +729,14 @@ footer {
 <script type="module">
 import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
 
-const THEME_KEY = "commandsheets-theme";
-const THEME_ORDER = ["light", "dark", "ember"];
+const THEME_KEY = "factory-portal-theme";
+const THEME_ORDER = ["ember", "dark", "light"];
 const diagramHeaders = Array.from(document.querySelectorAll(".diagram-header"));
 let currentHeaderIndex = -1;
 let renderRun = 0;
 
 function getDefaultTheme() {
-  return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+  return "ember";
 }
 
 function getSavedTheme() {
