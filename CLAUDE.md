@@ -59,7 +59,7 @@ factory/
 
 ## Port Scheme
 
-> Full master table: [`docs/fct/ports.md`](docs/fct/ports.md)
+> Full master table: `~/dev/docs/ports.md`
 
 **Factory Application Ports (Blackbox 100.87.53.109):**
 
