@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, type ReactNode } from "react";
 import { AppShell } from "../components/AppShell";
 import { SyncClock } from "../components/primitives/SyncClock";
 import { RepoExplorer } from "../components/RepoExplorer";
@@ -11,9 +11,11 @@ function getInitialTab(): "repos" | "objects" {
 
 export function DocsPage() {
   const [tab, setTabState] = useState<"repos" | "objects">(getInitialTab);
+  const [headerAction, setHeaderAction] = useState<ReactNode>(null);
 
   const setTab = useCallback((next: "repos" | "objects") => {
     setTabState(next);
+    setHeaderAction(null);
     const url = new URL(window.location.href);
     url.searchParams.set("tab", next);
     window.history.replaceState(null, "", url.toString());
@@ -24,6 +26,7 @@ export function DocsPage() {
       title="Documentation"
       pageKey="/pages/docs.html"
       statusSlot={<SyncClock updatedAt={Date.now()} />}
+      headerAction={headerAction}
     >
       <div className="docs-tabs">
         <button
@@ -42,7 +45,9 @@ export function DocsPage() {
         </button>
       </div>
 
-      {tab === "repos" ? <RepoExplorer /> : <ObjectIndexContent />}
+      {tab === "repos"
+        ? <RepoExplorer onMeta={setHeaderAction} />
+        : <ObjectIndexContent onExport={setHeaderAction} />}
     </AppShell>
   );
 }

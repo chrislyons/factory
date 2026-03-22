@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo, type ReactNode } from "react";
 
 interface RepoEntry {
   name: string;
@@ -72,7 +72,11 @@ function latestMtime(repo: RepoEntry): string | undefined {
   return times.sort().pop();
 }
 
-export function RepoExplorer() {
+interface RepoExplorerProps {
+  onMeta?: (chips: ReactNode) => void;
+}
+
+export function RepoExplorer({ onMeta }: RepoExplorerProps = {}) {
   const [allRepos, setAllRepos] = useState<RepoEntry[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [focusedIndex, setFocusedIndex] = useState(-1);
@@ -101,6 +105,16 @@ export function RepoExplorer() {
   }, []);
 
   useEffect(() => { void fetchData(); }, [fetchData]);
+
+  useEffect(() => {
+    if (!onMeta || loading) return;
+    onMeta(
+      <span className="docs-meta-chip">
+        <span className="docs-meta-chip__label">Repos</span>
+        <span className="docs-meta-chip__value">{allRepos.length}</span>
+      </span>
+    );
+  }, [onMeta, loading, generatedAt, allRepos.length]);
 
   const filtered = useMemo(() => {
     if (!searchQuery.trim()) return allRepos;
@@ -253,23 +267,6 @@ export function RepoExplorer() {
 
   return (
     <>
-      <div className="docs-meta-row">
-        {generatedAt && (
-          <span className="docs-meta-chip">
-            <span className="docs-meta-chip__label">Updated</span>
-            <span className="docs-meta-chip__value">{relativeTime(generatedAt)}</span>
-          </span>
-        )}
-        <span className="docs-meta-chip">
-          <span className="docs-meta-chip__label">Source</span>
-          <span className="docs-meta-chip__value">codex-commandsheets</span>
-        </span>
-        <span className="docs-meta-chip">
-          <span className="docs-meta-chip__label">Repos</span>
-          <span className="docs-meta-chip__value">{filtered.length}</span>
-        </span>
-      </div>
-
       <div className="docs-search-wrap">
         <span className="docs-search-icon">&#x2315;</span>
         <input

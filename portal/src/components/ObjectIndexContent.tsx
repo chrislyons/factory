@@ -1,11 +1,15 @@
-import { useMemo, useState, useRef, useCallback, useEffect } from "react";
+import { useMemo, useState, useRef, useCallback, useEffect, type ReactNode } from "react";
 import { SurfaceCard } from "./AppShell";
 import { OBJECT_INDEX } from "../lib/objectIndex";
 
 type SortCol = "name" | "type" | "description" | null;
 type SortDir = "asc" | "desc";
 
-export function ObjectIndexContent() {
+interface ObjectIndexContentProps {
+  onExport?: (btn: ReactNode) => void;
+}
+
+export function ObjectIndexContent({ onExport }: ObjectIndexContentProps = {}) {
   const [query, setQuery] = useState("");
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [copiedName, setCopiedName] = useState<string | null>(null);
@@ -79,6 +83,18 @@ export function ObjectIndexContent() {
     setExported(true);
     setTimeout(() => setExported(false), 1200);
   }, [sorted]);
+
+  useEffect(() => {
+    onExport?.(
+      <button
+        className={`obj-export-btn${exported ? " is-exported" : ""}`}
+        type="button"
+        onClick={() => void exportMarkdown()}
+      >
+        {exported ? "Copied!" : "Export to Markdown"}
+      </button>
+    );
+  }, [onExport, exported, exportMarkdown]);
 
   const setAllSections = useCallback((collapsed: boolean) => {
     const next: Record<string, boolean> = {};
@@ -201,15 +217,6 @@ export function ObjectIndexContent() {
 
   return (
     <>
-      <button
-        className={`obj-export-btn${exported ? " is-exported" : ""}`}
-        type="button"
-        onClick={() => void exportMarkdown()}
-        style={{ marginBottom: 12 }}
-      >
-        {exported ? "Copied!" : "Export to Markdown"}
-      </button>
-
       <div className="obj-search-wrap">
         <span className="obj-search-icon">&#x2315;</span>
         <input
