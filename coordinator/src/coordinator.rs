@@ -149,7 +149,8 @@ fn generate_thread_id() -> String {
     let mut n = micros as usize;
     let mut id = String::with_capacity(5);
     for _ in 0..5 {
-        id.push(ALPHA[n % ALPHA.len()] as char);
+        let idx = n % ALPHA.len();
+        id.push(*ALPHA.get(idx).unwrap_or(&b'x') as char);
         n /= ALPHA.len();
     }
     id
