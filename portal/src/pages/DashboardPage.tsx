@@ -92,7 +92,9 @@ function statusFeedsExposeLoops(statuses: ReturnType<typeof useAgentStatuses>["d
 export function DashboardPage() {
   const [activeFilter, setActiveFilter] = useState("all");
   const [taskSearch, setTaskSearch] = useState("");
-  const [panelView, setPanelView] = useState<"deps" | "completions" | null>("deps");
+  const [panelView, setPanelView] = useState<"deps" | "completions" | null>(
+    () => window.matchMedia?.("(min-width: 981px)").matches ? "deps" : null
+  );
 
   const tasks = useTasksDocument();
   const statuses = useAgentStatuses();
