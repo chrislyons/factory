@@ -32,16 +32,15 @@ http://100.87.53.109:41910 {
 		file_server
 	}
 
-	# ── Session auth gate (forward_auth to sidecar) ──────────────────
-	forward_auth 127.0.0.1:41914 {
-		uri /
-		header_up X-Forwarded-Method {method}
-		header_up X-Forwarded-Uri {uri}
-
-		@unauthorized status 401 403
-		handle_response @unauthorized {
-			redir * /login?redirect={uri} 302
-		}
+	# ── Session auth gate (cookie check) ─────────────────────────────
+	@has_session {
+		header_regexp Cookie factory_session=.+
+	}
+	@no_session {
+		not header_regexp Cookie factory_session=.+
+	}
+	handle @no_session {
+		redir * /login?redirect={uri} 302
 	}
 
 	# ── Protected routes ─────────────────────────────────────────────

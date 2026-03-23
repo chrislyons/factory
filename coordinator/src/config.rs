@@ -207,7 +207,7 @@ impl Default for ContextMode {
 #[derive(Debug, Clone, Deserialize)]
 pub struct AgentConfig {
     pub matrix_user: String,
-    pub token_file: String,
+    pub token_env: String,
     pub description: String,
     pub sandbox_profile: SandboxProfile,
     pub default_device: String,
@@ -421,14 +421,9 @@ pub fn load(path: &std::path::Path) -> Result<Config> {
     Ok(config)
 }
 
-/// Expand ${HOME} and ~ in token_file and worker_cwd fields.
+/// Expand ${HOME} and ~ in path fields (worker_cwd, timer_dir, etc.).
 fn expand_paths(config: &mut Config) {
     let home = std::env::var("HOME").unwrap_or_default();
-
-    for agent in config.agents.values_mut() {
-        agent.token_file = agent.token_file.replace("${HOME}", &home);
-        agent.token_file = expand_tilde(&agent.token_file, &home);
-    }
 
     for room in config.rooms.values_mut() {
         if let Some(ref cwd) = room.worker_cwd.clone() {
@@ -465,10 +460,10 @@ pub fn expand_tilde(s: &str, home: &str) -> String {
     }
 }
 
-/// Read a Matrix access token from a file. Trims whitespace.
-pub fn read_token(token_file: &str) -> Result<String> {
-    std::fs::read_to_string(token_file)
-        .with_context(|| format!("Failed to read token file: {}", token_file))
+/// Read a Matrix access token from an environment variable.
+pub fn read_token_env(env_var: &str) -> Result<String> {
+    std::env::var(env_var)
+        .with_context(|| format!("Required env var not set: {}", env_var))
         .map(|s| s.trim().to_string())
 }
 

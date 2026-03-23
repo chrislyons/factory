@@ -265,13 +265,8 @@ impl CoordinatorState {
             config.settings.degradation_warning_ms.unwrap_or(300_000),
         );
 
-        // Load coord token (env-first, then file)
-        let coord_token = std::env::var("MATRIX_TOKEN_COORD_PAN")
-            .ok()
-            .or_else(|| {
-                let path = format!("{}/.config/ig88/matrix_token_coord_pan", home);
-                config::read_token(&path).ok()
-            });
+        // Load coord token (env-only, no plaintext file fallback)
+        let coord_token = std::env::var("MATRIX_TOKEN_COORD_PAN").ok();
 
         Ok(Self {
             config,
@@ -635,21 +630,11 @@ async fn init_agent_sessions(state: &mut CoordinatorState) -> Result<()> {
             agent_config.default_cwd.as_deref().unwrap_or(&home)
         );
 
-        // Load Matrix token
-        let token = match std::env::var(
-            agent_config
-                .token_file
-                .split('/')
-                .last()
-                .unwrap_or("")
-                .to_uppercase(),
-        )
-        .ok()
-        .or_else(|| config::read_token(&agent_config.token_file).ok())
-        {
-            Some(t) => t,
-            None => {
-                warn!("[{}] Failed to load token, skipping", agent_name);
+        // Load Matrix token (env-only, no plaintext file fallback)
+        let token = match config::read_token_env(&agent_config.token_env) {
+            Ok(t) => t,
+            Err(e) => {
+                warn!("[{}] {}, skipping", agent_name, e);
                 continue;
             }
         };
