@@ -85,21 +85,36 @@ Successfully migrated 10 of 12 planned launchd services to Whitebox. Coordinator
 6. **Missing config fields** — `multi_agent_stagger_ms`, `delegate_timeout_ms`, `trust_level` required by coordinator but absent from config. Added from Blackbox reference
 7. **Env var naming** — Coordinator had `MATRIX_TOKEN_COORD_PAN` hardcoded; fixed to `MATRIX_TOKEN_PAN_COORD` matching BWS convention
 8. **auth.py bcrypt** — System Python on Whitebox is managed (PEP 668). Created `.auth-venv` with bcrypt
+9. **`--permission-mode delegate`** — unsupported in Claude Code 2.1.79. Changed to `auto`
+10. **`claude` CLI not found** — launchd PATH didn't include `/opt/homebrew/bin`. Added `PATH` to coordinator plist EnvironmentVariables
+11. **ANTHROPIC_API_KEY missing** — Claude CLI exited immediately. Added API key UUID to BWS injection list in coordinator plist
+12. **macOS firewall** — blocked Tailscale inbound to Caddy. User added firewall allow rule for `/opt/homebrew/bin/caddy`
+
+## Late-Session Wins
+
+- **Blackbox coordinator stopped and disabled** (`systemctl stop && disable matrix-coordinator`)
+- **Boot responding in Element DMs** — Claude initialized on Whitebox, near-zero latency
+- All 3 agents session-initialized; Boot confirmed live with haiku model
 
 ## Remaining for Session 4
 
-- [ ] Stop Blackbox coordinator to prevent dual-dispatch (48h parallel window)
-- [ ] Install Claude CLI on Whitebox (agents currently can't spawn locally)
-- [ ] Set up matrix-mcp with manual `.env` when ready
+- [x] ~~Stop Blackbox coordinator~~ (done — disabled)
+- [x] ~~Install Claude CLI on Whitebox~~ (was already installed)
+- [ ] Verify all 3 agent devices in Element (cross-signing)
+- [ ] `~/projects/ig88/` worker_cwd — should not exist on Whitebox; update room config cwds
+- [ ] Set up matrix-mcp with manual `.env` when ready (Matrix passwords kept out of BWS by design)
 - [ ] Graphiti secret rotation via Docker Compose (running with 3-day-old secrets)
 - [ ] Degradation testing (kill/restart individual services)
 - [ ] Set up GitHub SSH key on Whitebox for direct git operations
 - [ ] BWS snake_case audit (check `graphiti_auth_token`, `qdrant_api_key`)
+- [ ] Jupiter connectivity test (B5 — IG-88 Training room)
 
 ## Commits
 
-- `1b5878f` (ig88 submodule) — feat(config): migrate agent-config to Whitebox
-- `d4197cd` (factory) — feat(infra): Whitebox migration — 12 launchd plists, config updates
+- `157e5ac` fix(coordinator): auto permission mode, PATH in plist, API key injection
+- `8b5b77e` docs(fct): FCT036 Phase C sprint report
+- `d4197cd` feat(infra): Whitebox migration — 12 launchd plists, config updates
+- `1b5878f` (ig88 submodule) feat(config): migrate agent-config to Whitebox
 
 ## References
 
