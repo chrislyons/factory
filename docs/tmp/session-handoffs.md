@@ -175,7 +175,8 @@ You are executing Phase 2c.2 through 2c.7 of FCT033 — migrating all remaining 
 
 Read these documents first:
 1. docs/fct/FCT033 Definitive Execution Plan — Agent Equipping, Blackbox Retirement, and Trading Validation.md (Section 4: Migration Manifest, Section 6: Launchd Plists)
-2. ~/dev/whitebox/CLAUDE.md (Whitebox machine identity and conventions)
+2. docs/fct/FCT035 Phase B Sprint Report — BWS Setup and Secret Rotation.md (UUID mapping table, mcp-env.sh details, rotation incident, pre-flight notes)
+3. ~/dev/whitebox/CLAUDE.md (Whitebox machine identity and conventions)
 
 PRE-FLIGHT:
 - git pull to get Sessions 1-2 commits
@@ -196,18 +197,43 @@ IMPORTANT CONTEXT:
 - Whitebox username is `nesbitt`. All plist paths use /Users/nesbitt/.
 - Factory repo is at ~/dev/factory/ (git remote: github.com/chrislyons/factory.git)
 - Coordinator-rs was hardened in Session 1: read_token_env() replaces read_token(). The token_file field in agent-config.yaml must be updated to token_env before deploying on Whitebox. The env vars are injected by mcp-env.sh via BWS.
-- All Matrix passwords were freshly rotated. Pan tokens in BW items: verify exact names with `bws secret list`.
+- All Matrix passwords were freshly rotated. All 13 BWS secrets were rotated 2026-03-23 (see FCT035). Do NOT use `bws secret list` to view secrets — it outputs values in plaintext. Use UUID mapping from FCT035 directly.
 - No cargo on Whitebox — install Rust as a prerequisite (Tier 0).
 - Caddy is NOT installed on Whitebox — must be installed (brew install caddy).
 - Blackbox portal deployment is at /home/nesbitt/projects/factory-portal/ on Blackbox.
+- bws requires `--server-url https://vault.bitwarden.eu` on EVERY command.
+- Keychain `-w` retrieval is blocked over SSH — all BWS-dependent services must run locally on Whitebox, NOT via SSH from Cloudkicker.
+- mcp-env.sh usage: `mcp-env.sh VAR_NAME=UUID [VAR_NAME=UUID ...] -- command [args...]`
+- mcp-env.sh location: `~/.config/ig88/mcp-env.sh` on Whitebox
+- BWS secret naming is kebab-case. Verify with FCT035 UUID table — some may still be snake_case and need renaming.
+- Solana wallet JSON files were deleted from disk. Keys recoverable from BW seed phrases + BIP39 passphrases only (BW item: `solana-keypair-ig88`).
+
+SERVER CONFIGS NEEDING ROTATED VALUES (deferred from Session 2):
+- Graphiti config on Whitebox: needs new graphiti-auth-token value
+- Qdrant config on Whitebox: needs new qdrant-api-key value
+- These should be injected via BWS/mcp-env.sh in the launchd plists, NOT written to config files.
 
 EXECUTE in dependency order per FCT033 Section 4.2:
 
 TIER 0 — PREREQUISITES:
 - mkdir -p ~/Library/Logs/factory
+- Restart MLX-LM servers (were DOWN during Session 2):
+    Kill any stale processes, then start fresh:
+    mlx_lm.server --model ~/models/Nanbeige4.1-3B-8bit --port 8080 &
+    mlx_lm.server --model ~/models/Qwen3.5-4B-MLX-8bit --port 8081 &
+    mlx_lm.server --model ~/models/LFM2.5-1.2B-Thinking-MLX-6bit --port 8082 &
+    mlx_lm.server --model ~/models/Qwen3.5-9B-MLX-6bit --port 8083 &
+    Verify: curl http://localhost:8080/v1/models (repeat 8081-8083)
+    These will be replaced by launchd plists in Tier 1.
+- Update server configs with rotated secret values (FCT035):
+    Graphiti and Qdrant configs on Whitebox need the new rotated values.
+    Identify where these configs live and update them. Prefer BWS injection via launchd plists
+    over hardcoded config values wherever possible.
+- Verify Graphiti healthy after MLX-LM restart: curl http://localhost:8444/sse
 - Install Caddy: brew install caddy
 - Install Rust if not present: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 - Verify: caddy version, cargo --version
+- Verify BWS secret names are kebab-case (FCT035 note 6): run `bws secret list --server-url https://vault.bitwarden.eu 2>&1 | python3 -c "import sys,json; [print(s['key']) for s in json.load(sys.stdin)]"` and rename any snake_case entries
 
 TIER 1 — CREATE LAUNCHD PLISTS FOR MLX-LM (4 plists):
 Follow FCT033 Section 6.2 template. Create:
@@ -222,14 +248,18 @@ Verify each: curl http://localhost:8080/v1/models (repeat 8081-8083)
 TIER 1 CONTINUED — MCP PROXIES (2 plists):
 - com.bootindustries.qdrant-mcp.plist (port 8446)
 - com.bootindustries.research-mcp.plist (port 8447)
-These need QDRANT_API_KEY via mcp-env.sh. Use the bws variant from Session 2.
+These need QDRANT_API_KEY via mcp-env.sh. Use UUID from FCT035: `QDRANT_API_KEY=3f9dcc24-7137-4cf2-916f-b416011fbc03`
+mcp-env.sh call: `~/.config/ig88/mcp-env.sh QDRANT_API_KEY=3f9dcc24-7137-4cf2-916f-b416011fbc03 -- <command>`
 Gate: test Qdrant search via the new Whitebox endpoint.
 
 TIER 2 — MATRIX MCP (2 plists):
 - Copy IdentityRegistry state from Blackbox: scp -r blackbox:/home/nesbitt/.local/state/matrix-mcp/ ~/.local/state/matrix-mcp/ (if state dir exists on Blackbox)
 - com.bootindustries.matrix-mcp-boot.plist (port 8445)
 - com.bootindustries.matrix-mcp-coord.plist (port 8448)
-Both need Matrix tokens via mcp-env.sh. LISTEN_HOST=100.88.222.111.
+Both need Matrix tokens via mcp-env.sh. UUIDs from FCT035:
+- Boot: `MATRIX_TOKEN_PAN_BOOT=8e9bcc76-a4fc-4b7f-88c2-b416011f40cb`
+- Coord: `MATRIX_TOKEN_PAN_COORD=31d23df6-f50f-43d3-99c0-b416011f7024`
+LISTEN_HOST=100.88.222.111.
 Gate: test message round-trip via Whitebox matrix-mcp.
 
 TIER 3 — COORDINATOR:
@@ -240,7 +270,13 @@ TIER 3 — COORDINATOR:
   - Add devices.whitebox block with Tailscale IP 100.88.222.111
   - All agents: default_device → whitebox
   - All agents: token_file → token_env (Session 1 hardened coordinator to env-only via read_token_env())
-  - The token env vars (MATRIX_TOKEN_BOOT_PAN, etc.) are injected by mcp-env.sh via BWS
+  - The token env vars are injected by mcp-env.sh via BWS. UUIDs from FCT035:
+    MATRIX_TOKEN_PAN_BOOT=8e9bcc76-a4fc-4b7f-88c2-b416011f40cb
+    MATRIX_TOKEN_PAN_COORD=31d23df6-f50f-43d3-99c0-b416011f7024
+    MATRIX_TOKEN_PAN_IG88=3ad5ea9f-de29-4f5e-ab6f-b416011f7e0e
+    MATRIX_TOKEN_PAN_KELK=0fe1c283-a1ef-42ea-b645-b416011f928b
+    GRAPHITI_AUTH_TOKEN=99e55357-7977-4925-8671-b416011fac6a
+    OPENROUTER_API_KEY=ee959bd0-ee17-4328-a4eb-b416012d217f
 - Create com.bootindustries.coordinator-rs.plist per FCT033 Section 6.3
 - Load plist. Watch logs: tail -f ~/Library/Logs/factory/coordinator.log
 
@@ -261,7 +297,8 @@ JUPITER CONNECTIVITY (B5, deferred from Session 2):
 - Begin 48h parallel: Whitebox coordinator handles dispatch; Blackbox coordinator remains running but should be paused or de-privileged to prevent dual-dispatch.
 
 TIER 4 — PORTAL STACK (3 plists):
-- com.bootindustries.auth-sidecar.plist (port 41914, needs AUTH_SECRET + AUTH_BCRYPT_HASH via mcp-env.sh)
+- com.bootindustries.auth-sidecar.plist (port 41914, needs AUTH_SECRET + AUTH_BCRYPT via mcp-env.sh)
+    UUIDs: AUTH_SECRET=297da199-6348-4ba4-b368-b416011ffbc0, AUTH_BCRYPT=a574a840-bb94-44a7-bf15-b416011fe96f
 - com.bootindustries.gsd-sidecar.plist (port 41911, copy server.py + jobs.json from Blackbox)
 - com.bootindustries.portal-caddy.plist (port 41910, update Caddyfile bind to 100.88.222.111:41910)
 - Copy portal dist/ from Blackbox: scp -r blackbox:/home/nesbitt/projects/factory-portal/dist ~/dev/factory/portal/dist-production (or equivalent)
