@@ -70,8 +70,8 @@ curl -sf -o /dev/null --max-time 3 "http://$WHITEBOX:8444/sse" 2>/dev/null || ec
 [[ "$ec" == "0" || "$ec" == "28" ]] && ok=1 || ok=0
 check_service "graphiti" "$ok" "exit-$ec"
 
-# Pantalaimon TCP (:8009)
-if (echo >/dev/tcp/$WHITEBOX/8009) 2>/dev/null; then
+# Pantalaimon TCP (:8009) — Pan binds to loopback on Whitebox, check via SSH
+if ssh -o ConnectTimeout=5 -o BatchMode=yes -o StrictHostKeyChecking=no whitebox '(echo >/dev/tcp/127.0.0.1/8009) 2>/dev/null' 2>/dev/null; then
   ok=1
 else
   ok=0
@@ -85,7 +85,7 @@ code=$(curl -sf -o /dev/null -w '%{http_code}' --max-time 5 \
 check_service "portal" "$ok" "$code"
 
 # Coordinator log freshness (via SSH)
-fresh=$(ssh -o ConnectTimeout=5 -o BatchMode=yes whitebox \
+fresh=$(ssh -o ConnectTimeout=5 -o BatchMode=yes -o StrictHostKeyChecking=no whitebox \
   'find ~/Library/Logs/factory/coordinator.log -mmin -5 2>/dev/null' 2>/dev/null || true)
 [[ -n "$fresh" ]] && ok=1 || ok=0
 check_service "coordinator-log" "$ok" "stale"
