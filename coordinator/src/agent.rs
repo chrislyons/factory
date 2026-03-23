@@ -612,7 +612,7 @@ async fn spawn_claude(
         "--output-format".to_string(),
         "stream-json".to_string(),
         "--permission-mode".to_string(),
-        "delegate".to_string(),
+        "auto".to_string(),
         "--verbose".to_string(),
         "--model".to_string(),
         provider.model.clone(),
