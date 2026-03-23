@@ -34,82 +34,27 @@ Before pasting each handoff prompt:
 
 ---
 
-## Session 1: Restore Agent Health (Phase A)
+## Session 1: Restore Agent Health (Phase A) — COMPLETE
 
-**Run from:** Cloudkicker, `~/dev/factory/`
+**Status:** Completed 2026-03-23. Commits: `694834d`, `063f6a6`.
 
-```
-You are executing Phase A of FCT033 — Restore Agent Health. This is Day 1, Session 1 of a 4-session execution plan.
+**What was done:**
+- MLX-LM :8080-8083 started manually on Whitebox (all verified)
+- Graphiti :8444 verified healthy
+- Fresh Pantalaimon tokens generated for all 4 identities, stored in Bitwarden
+- All Matrix passwords rotated — all are fresh in BW
+- Coordinator-rs hardened: `read_token_env()` replaces `read_token()`, plaintext token file fallback removed
+- Portal deployed to Blackbox with corrected auth gate (`header_regexp` replacing `forward_auth`)
+- FCT034 sprint report committed
 
-Read these documents first (in this order):
-1. docs/fct/FCT033 Definitive Execution Plan — Agent Equipping, Blackbox Retirement, and Trading Validation.md (Section 2: Current State, Section 11: Phase A)
-2. docs/fct/FCT029 Factory Consolidated Plan — Architecture, Recovery, and Roadmap.md (Section 5: Recovery Priorities)
-3. docs/fct/FCT027 Post-Deployment Recovery and Next Steps.md (token restoration procedure)
+**Deferred to Session 3 (Whitebox migration):**
+- Coordinator restart with fresh tokens (requires BWS-injected env vars, not Blackbox age store)
+- Agent Matrix verification (@ig88, @kelk responding to messages)
+- `agent-config.yaml` schema update (`token_file` → `token_env`)
+- Plaintext token file deletion on Blackbox
+- Kelk Matrix password was reset — flag for password rotation tracking
 
-SYSTEM STATE as of session start:
-- Whitebox (100.88.222.111, user: nesbitt): Pantalaimon :8009 LIVE (launchd), Qdrant :6333 LIVE, FalkorDB :6379 LIVE, Ollama :11434 LIVE. MLX-LM :8080-8083 are DOWN (no launchd plists — manual start required). Graphiti :8444 is DOWN because MLX-LM :8081 isn't running.
-- Blackbox (100.87.53.109, user: nesbitt): coordinator-rs BROKEN (sync fails every ~90s — MATRIX_TOKEN_COORD_PAN not in systemd env). matrix-mcp Boot :8445 LIVE. matrix-mcp Coord :8448 LIVE. Portal Caddy :41910 LIVE. IG-88 and Kelk OFFLINE (token files lost).
-- Cloudkicker has Bitwarden CLI (`bw`) with active BW_SESSION. SSH aliases `whitebox` and `blackbox` are configured.
-
-EXECUTE these steps in order. Do not skip steps. Confirm each step's result before proceeding:
-
-A1. SSH to Whitebox and start all four MLX-LM inference servers:
-    ssh whitebox
-    mlx_lm.server --model ~/models/Nanbeige4.1-3B-8bit --port 8080 &
-    mlx_lm.server --model ~/models/Qwen3.5-4B-MLX-8bit --port 8081 &
-    mlx_lm.server --model ~/models/LFM2.5-1.2B-Thinking-MLX-6bit --port 8082 &
-    mlx_lm.server --model ~/models/Qwen3.5-9B-MLX-6bit --port 8083 &
-    Verify each is listening: curl http://localhost:8080/v1/models (repeat for 8081-8083)
-
-A2. Verify Graphiti recovers now that :8081 is running:
-    curl http://100.88.222.111:8444/sse (from Cloudkicker)
-    If Graphiti does not recover, check its logs. It may need a restart.
-
-A3. Restore IG-88 and Kelk Pantalaimon tokens:
-    - On Cloudkicker, retrieve Matrix passwords from Bitwarden:
-      bw get password "matrix-password-ig88" (or whatever the item name is — search with: bw list items --search ig88 | jq '.[].name')
-      bw get password "matrix-password-kelk" (same pattern)
-    - Login each identity to Pantalaimon on WHITEBOX :8009:
-      curl -X POST http://100.88.222.111:8009/_matrix/client/r0/login -H "Content-Type: application/json" -d '{"type":"m.login.password","user":"@ig88bot:matrix.org","password":"<PASSWORD>"}'
-      (repeat for @sir.kelk:matrix.org)
-    - Extract the access_token from each response
-    - Write token files to BLACKBOX:
-      ssh blackbox "echo '<TOKEN>' > ~/.config/ig88/matrix_token_ig88_pan && chmod 600 ~/.config/ig88/matrix_token_ig88_pan"
-      (repeat for kelk)
-    NEVER echo tokens into the conversation. Use variables or write directly to files.
-
-A4. Fix coordinator systemd token injection on Blackbox:
-    ssh blackbox
-    - Find the systemd service file: systemctl cat matrix-coordinator
-    - Add MATRIX_TOKEN_COORD_PAN to the Environment or EnvironmentFile
-    - The coord token should already exist — check: ls -la ~/.config/ig88/matrix_token_coord_pan
-    - If missing, restore it the same way as A3 (login @coord identity to Pantalaimon)
-    - sudo systemctl daemon-reload
-
-A5. Restart coordinator-rs on Blackbox:
-    ssh blackbox "sudo systemctl restart matrix-coordinator"
-    Watch logs for 30 seconds: ssh blackbox "journalctl -u matrix-coordinator -f --no-pager" (Ctrl+C after confirming startup)
-    The ~90s sync failure should stop.
-
-A6. Verify all three agents respond:
-    Send a test message to each agent's DM room in Element (or via curl to Matrix).
-    Confirm @boot, @ig88, and @kelk all respond.
-
-A7. Deploy portal security fixes to Blackbox:
-    cd ~/dev/factory/portal && make sync
-    SSH to Blackbox and generate AUTH_SECRET if not already set:
-    ssh blackbox "openssl rand -hex 32" → add to /home/nesbitt/projects/factory-portal/.env as AUTH_SECRET=<value>
-    Restart Caddy and auth service on Blackbox.
-
-A8. Commit and push all outstanding changes:
-    In ~/dev/factory/ on Cloudkicker:
-    - git add docs/fct/FCT031* docs/fct/FCT032* docs/fct/FCT033* docs/fct/FCT.md
-    - Also add FCT030 rename if needed (the old filename was deleted, new one untracked)
-    - Commit: type(scope) format, e.g. "docs(fct): FCT031-033 agent equipping plan + research review"
-    - git push
-
-EXIT CONDITION: All three agents online and responding in Matrix. Portal serving with security fixes. No uncommitted changes. Report what was done and any issues encountered.
-```
+**Note:** `jobs/` directory doesn't exist locally on Cloudkicker (jobs.json build fails) — may need restoring from Blackbox during Session 3.
 
 ---
 
@@ -124,49 +69,51 @@ Read these documents first:
 1. docs/fct/FCT033 Definitive Execution Plan — Agent Equipping, Blackbox Retirement, and Trading Validation.md (Section 5: BWS Setup, Section 7: API Key Wiring)
 2. ~/dev/blackbox/docs/bkx/BKX122 Secrets Manager Headless Machine Credentials Whitebox.md
 3. agents/ig88/docs/ig88/IG88029 Jupiter Integration — Execution Capabilities.md
+4. docs/fct/FCT034 Phase A Sprint Report — Agent Health Restoration.md (for Session 1 outcomes)
 
-PRE-FLIGHT: Verify Phase A exit condition:
-- ssh blackbox "systemctl is-active matrix-coordinator" → should be "active"
-- Confirm all 3 agents responded in Matrix in Session 1 (ask the user if unsure)
+PRE-FLIGHT:
 - git pull to get Session 1's commits
+- Verify MLX-LM servers still running on Whitebox: ssh whitebox "curl -s http://localhost:8080/v1/models | head -1" (repeat 8081-8083)
+- Verify Graphiti healthy: curl http://100.88.222.111:8444/sse (should connect)
+- Note: Agents are NOT yet verified on Matrix. IG-88 and Kelk tokens are in Bitwarden but NOT yet injected into coordinator env. Agent verification is deferred to Session 3 when coordinator moves to Whitebox with BWS-injected tokens.
 
-SYSTEM STATE: All 3 agents online. MLX-LM servers running manually on Whitebox. Graphiti operational. Coordinator sync working.
+SYSTEM STATE after Session 1:
+- Whitebox: MLX-LM :8080-8083 running (manually started), Graphiti :8444 LIVE, Pantalaimon :8009 LIVE, Qdrant :6333 LIVE, FalkorDB :6379 LIVE, Ollama :11434 LIVE
+- Blackbox: coordinator-rs running but tokens NOT refreshed (still using stale env). Portal Caddy :41910 deployed with auth fixes.
+- Bitwarden: Fresh Pantalaimon tokens for all 4 identities stored. All Matrix passwords freshly rotated.
+- Coordinator hardened: read_token_env() replaces read_token(), plaintext fallback removed. Schema needs token_file → token_env update in agent-config.yaml (deferred to Session 3).
+- jobs/ directory doesn't exist locally on Cloudkicker — jobs.json build will fail. May need restoring from Blackbox.
 
 PART 1 — JUPITER API KEY WIRING (Phase B):
 
 B1. Guide the user to obtain a Jupiter API key from portal.jup.ag. Do NOT navigate there yourself. Tell the user what to do and wait for the key.
 
-B2. Generate Solana trading keypair on Blackbox:
-    ssh blackbox "solana-keygen new -o ~/.config/ig88/trading_wallet.json"
-    ssh blackbox "chmod 600 ~/.config/ig88/trading_wallet.json"
-    ssh blackbox "solana-keygen pubkey ~/.config/ig88/trading_wallet.json" → note the public key for funding
+B2. Generate Solana trading keypair. Since Blackbox is being retired, generate on WHITEBOX:
+    ssh whitebox "mkdir -p ~/.config/ig88 && solana-keygen new -o ~/.config/ig88/trading_wallet.json"
+    ssh whitebox "chmod 600 ~/.config/ig88/trading_wallet.json"
+    ssh whitebox "solana-keygen pubkey ~/.config/ig88/trading_wallet.json" → note the public key for funding
+    If solana-keygen is not installed on Whitebox: ssh whitebox "brew install solana" (or sh -c "$(curl -sSfL https://release.anza.xyz/stable/install)")
     NEVER read the private key contents. NEVER cat the wallet file.
 
-B3. Store Jupiter API key:
+B3. Store Jupiter API key in Bitwarden:
     - Add to Bitwarden on Cloudkicker:
       bw create item (or use the web vault) — item name: "jupiter-api-key", in factory/agents collection
-    - Add to Blackbox age store:
-      ssh blackbox — add JUPITER_API_KEY=<value> to ~/.config/ig88/.env
-      Re-encrypt with age if the .env is age-encrypted
+    - Do NOT store in Blackbox age — Blackbox is being retired. The key will be available on Whitebox via BWS after Part 2 is complete.
     NEVER echo the API key in conversation.
 
 B4. The user will fund the hot wallet externally ($200-800 USDC + ~0.05 SOL to the public key from B2). This is async — proceed to Part 2 while waiting.
 
-B5. AFTER Phase A is fully confirmed AND B3 is done: verify Jupiter connectivity via IG-88.
-    This requires dispatching to IG-88 through the coordinator. The simplest test:
-    - Send a message in IG-88's Matrix room asking it to call jupiter_price for SOL
-    - Or test the MCP server directly if accessible:
-      ssh blackbox "cd ~/factory/agents/ig88 && node mcp-servers/jupiter-mcp/dist/index.js" (stdio test)
-    Confirm: jupiter_price returns a valid SOL price. jupiter_quote returns a quote with priceImpactPct.
+B5. SKIP in this session. Jupiter connectivity verification requires IG-88 responding on Matrix, which is deferred to Session 3 (after coordinator migrates to Whitebox with BWS-injected tokens). Session 3 will pick up B5.
 
 PART 2 — BITWARDEN SECRETS MANAGER SETUP (Phase 2c.1):
 
-This follows BKX122 exactly. The purpose is to give Whitebox launchd plists a way to inject credentials at unattended startup.
+This follows BKX122 exactly. The purpose is to give Whitebox launchd plists a way to inject credentials at unattended startup. This is the CRITICAL PATH prerequisite for Session 3.
 
 2c.1.1. Guide the user through the Bitwarden web vault setup:
     - Log into vault.bitwarden.eu → Boot Industries org → Secrets Manager tab
     - Create project: "factory/agents"
-    - Populate all secrets from FCT033 Section 5.3 (14 entries)
+    - Populate all secrets from FCT033 Section 5.3 (14 entries). Include JUPITER_API_KEY from B3.
+    - Also add the 4 freshly-rotated Matrix Pan tokens (matrix-token-pan-ig88, matrix-token-pan-kelk, matrix-token-pan-boot, matrix-token-pan-coord — verify exact BW item names with user)
     - Create service account: "whitebox-factory-agents", read-only access to factory/agents
     - Generate access token — user copies it immediately
 
@@ -175,22 +122,26 @@ This follows BKX122 exactly. The purpose is to give Whitebox launchd plists a wa
     Verify retrieval: ssh whitebox "security find-generic-password -s 'bitwarden-secrets-manager' -a 'whitebox-factory-agents' -w"
     NEVER echo the token in conversation.
 
-2c.1.3. Verify bws CLI works on Whitebox:
+2c.1.3. Install bws CLI on Whitebox if not present:
+    ssh whitebox "which bws || brew install bitwarden/tap/bws"
+
+2c.1.4. Verify bws CLI works on Whitebox:
     ssh whitebox "BWS_ACCESS_TOKEN=\$(security find-generic-password -s 'bitwarden-secrets-manager' -a 'whitebox-factory-agents' -w) bws secret list"
     This should return the populated secrets.
 
-2c.1.4. Write the Whitebox variant of mcp-env.sh:
+2c.1.5. Write the Whitebox variant of mcp-env.sh:
     Create ~/.config/ig88/mcp-env.sh on Whitebox. Follow BKX122 Step 5 pattern:
-    - Retrieve BWS_ACCESS_TOKEN from Keychain
+    - Retrieve BWS_ACCESS_TOKEN from Keychain via `security find-generic-password`
     - For each requested env var, fetch via `bws secret get <UUID>`
     - Export and exec the wrapped command
     - chmod 755
+    Record the UUID mapping for each secret (needed for the script and for Session 3 plists).
 
-2c.1.5. Smoke test: manually invoke mcp-env.sh with one secret to confirm the full chain works.
+2c.1.6. Smoke test: manually invoke mcp-env.sh with one secret to confirm the full chain works.
 
 Commit any factory repo changes (config updates, doc corrections discovered during this work).
 
-EXIT CONDITION: Jupiter API key wired and verified (price + quote calls work). BWS operational on Whitebox — mcp-env.sh variant tested. Secrets Manager project populated with all 14 entries. Report what was done, any issues, and the Jupiter connectivity test results.
+EXIT CONDITION: Jupiter API key stored in Bitwarden. Solana keypair generated on Whitebox. BWS operational on Whitebox — bws secret list returns all entries, mcp-env.sh variant tested and working. Secret UUID mapping documented. Report what was done and any issues. Note that B5 (Jupiter connectivity) and agent Matrix verification are deferred to Session 3.
 ```
 
 ---
@@ -212,14 +163,23 @@ PRE-FLIGHT:
 - git pull to get Sessions 1-2 commits
 - Verify BWS is operational: BWS_ACCESS_TOKEN=$(security find-generic-password -s 'bitwarden-secrets-manager' -a 'whitebox-factory-agents' -w) bws secret list
 - Verify MLX-LM servers still running: curl http://localhost:8080/v1/models (8080-8083)
-- Verify coordinator on Blackbox is still healthy: ssh blackbox "systemctl is-active matrix-coordinator"
+- Verify coordinator on Blackbox is still running: ssh blackbox "systemctl is-active matrix-coordinator"
 
-SYSTEM STATE: All agents online (via Blackbox coordinator). BWS operational. MLX-LM running manually. Jupiter API key wired. You are on Whitebox as user `nesbitt`, HOME=/Users/nesbitt.
+SYSTEM STATE after Sessions 1-2:
+- Whitebox: MLX-LM :8080-8083 running (manually started, no plists yet). Graphiti :8444 LIVE. Pantalaimon :8009 LIVE. Qdrant :6333 LIVE. FalkorDB :6379 LIVE. Ollama :11434 LIVE. Solana trading keypair at ~/.config/ig88/trading_wallet.json. BWS operational with mcp-env.sh variant tested.
+- Blackbox: coordinator-rs running with STALE tokens (not restarted since Session 1 hardening). Agents NOT yet verified on Matrix — token injection deferred to this session. Portal Caddy :41910 deployed with auth fixes.
+- Bitwarden Secrets Manager: All secrets populated including fresh Pan tokens and Jupiter API key. Service account "whitebox-factory-agents" active.
+- DEFERRED from Sessions 1-2: Agent Matrix verification, Jupiter connectivity test (B5), agent-config.yaml token_file → token_env update, Blackbox plaintext token file deletion.
+- jobs/ directory doesn't exist locally on Cloudkicker — may need restoring from Blackbox.
+
+You are on Whitebox as user `nesbitt`, HOME=/Users/nesbitt.
 
 IMPORTANT CONTEXT:
 - Whitebox username is `nesbitt`. All plist paths use /Users/nesbitt/.
 - Factory repo is at ~/dev/factory/ (git remote: github.com/chrislyons/factory.git)
-- No cargo on Whitebox — coordinator-rs must be cross-compiled on Cloudkicker (cargo build --release --target aarch64-apple-darwin) OR compiled on Whitebox after installing Rust.
+- Coordinator-rs was hardened in Session 1: read_token_env() replaces read_token(). The token_file field in agent-config.yaml must be updated to token_env before deploying on Whitebox. The env vars are injected by mcp-env.sh via BWS.
+- All Matrix passwords were freshly rotated. Pan tokens in BW items: verify exact names with `bws secret list`.
+- No cargo on Whitebox — install Rust as a prerequisite (Tier 0).
 - Caddy is NOT installed on Whitebox — must be installed (brew install caddy).
 - Blackbox portal deployment is at /home/nesbitt/projects/factory-portal/ on Blackbox.
 
@@ -257,9 +217,29 @@ Gate: test message round-trip via Whitebox matrix-mcp.
 TIER 3 — COORDINATOR:
 - Install Rust on Whitebox if not done in Tier 0
 - cd ~/dev/factory/coordinator && cargo build --release
-- Update agent-config.yaml: graphiti_url → http://127.0.0.1:8444/sse; add devices.whitebox block; default_device → whitebox
+- Update agent-config.yaml:
+  - graphiti_url → http://127.0.0.1:8444/sse
+  - Add devices.whitebox block with Tailscale IP 100.88.222.111
+  - All agents: default_device → whitebox
+  - All agents: token_file → token_env (Session 1 hardened coordinator to env-only via read_token_env())
+  - The token env vars (MATRIX_TOKEN_BOOT_PAN, etc.) are injected by mcp-env.sh via BWS
 - Create com.bootindustries.coordinator-rs.plist per FCT033 Section 6.3
-- Load plist. Verify coordinator starts and all 3 agents connect.
+- Load plist. Watch logs: tail -f ~/Library/Logs/factory/coordinator.log
+
+AGENT VERIFICATION (deferred from Session 1):
+- After Whitebox coordinator starts, verify all 3 agents respond on Matrix:
+  - Ask user to send a test DM to @boot, @ig88, and @kelk in Element
+  - @coord can send to Backrooms to test coordinator-agent paths
+  - Confirm all 3 respond. This is the first time IG-88 and Kelk have been online since FCT022.
+
+JUPITER CONNECTIVITY (B5, deferred from Session 2):
+- After agents are verified, test Jupiter MCP via IG-88:
+  - Send a message in IG-88's Matrix room asking it to call jupiter_price for SOL
+  - Confirm: jupiter_price returns a valid SOL price
+  - Confirm: jupiter_quote returns a quote with priceImpactPct
+  - If jupiter-mcp is not yet deployed as an MCP server for IG-88, test directly:
+    ssh whitebox (or wherever the MCP server binary lives) and invoke via stdio
+
 - Begin 48h parallel: Whitebox coordinator handles dispatch; Blackbox coordinator remains running but should be paused or de-privileged to prevent dual-dispatch.
 
 TIER 4 — PORTAL STACK (3 plists):
@@ -281,7 +261,7 @@ Restore each service after testing. Document results.
 
 Commit all changes (plists, config updates, Caddyfile) to factory repo on Whitebox. Push to origin.
 
-EXIT CONDITION: All 12 launchd plists created and loaded. All services running on Whitebox. 48h parallel window initiated. Degradation testing plan documented. Cloudkicker ~/.mcp.json updated. Report all service statuses and any issues.
+EXIT CONDITION: All 12 launchd plists created and loaded. All services running on Whitebox. All 3 agents verified responding on Matrix via Whitebox coordinator. Jupiter connectivity verified (B5 complete). agent-config.yaml updated with token_env fields. 48h parallel window initiated. Degradation testing plan documented. Cloudkicker ~/.mcp.json updated. Report all service statuses and any issues.
 ```
 
 ---
