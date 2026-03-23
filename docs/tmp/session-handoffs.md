@@ -164,11 +164,45 @@ EXIT CONDITION: Jupiter API key confirmed in Bitwarden. Solana keypair generated
 
 ---
 
-## Session 3: Blackbox Retirement Migration (Phase 2c.2-2c.7)
+## Session 3: Blackbox Retirement Migration (Phase 2c.2-2c.7) — COMPLETE
 
-**Run from:** Whitebox, `~/dev/factory/`
+**Status:** Completed 2026-03-23. Sprint report: FCT036. Commits: `d4197cd` through `a63297d`.
 
-**Important:** This session runs on Whitebox because all launchd plists, service deployments, and cargo builds happen locally there. The agent needs SSH back to Cloudkicker only for `~/.mcp.json` updates.
+**Run from:** Cloudkicker (not Whitebox as planned — SSH to Whitebox for remote ops, scp for file deployment).
+
+**What was done:**
+- 10 of 12 launchd plists created and running on Whitebox (matrix-mcp x2 deferred)
+- MLX-LM ports changed to 41960-41963 (factory port scheme)
+- mcp-env.sh patched with absolute paths for launchd compatibility
+- Coordinator-rs built, configured, and running — all 3 agents responding to DMs and room mentions
+- Portal live at 100.88.222.111:41910
+- MCP proxies (qdrant :8446, research :8447) operational
+- Cross-sign toolkit migrated to factory/scripts/, all 4 accounts cross-signed
+- Blackbox coordinator stopped and disabled
+- Cloudkicker ~/.mcp.json updated to Whitebox IPs
+- DM routing bug fixed (was hardcoded to Boot only)
+
+**Deferred to Session 4:**
+- matrix-mcp plists (need manual .env with Matrix passwords — kept out of BWS by design)
+- `coord sync failed` — coordinator's approval-room polling broken (doesn't affect agent routing)
+- Agent identity confusion in shared rooms (Boot/Kelk confuse each other's identities)
+- Conversational room behavior: agents only respond to explicit tags, no ambient listening + selective response yet
+- `worker_cwd` paths stale (reference Blackbox `~/projects/ig88/`)
+- Graphiti secret rotation via Docker Compose
+- Degradation testing
+- GitHub SSH key on Whitebox
+- BWS snake_case audit
+- Jupiter connectivity test (B5)
+- panctl non-functional on Whitebox (PyGObject missing — cross-signing works without it)
+
+**Important for Session 4:**
+- Whitebox has no GitHub SSH key — use `scp` from Cloudkicker for source deployment, or set up key
+- Python is managed (PEP 668) on Whitebox — use venvs, not `pip install`
+- `thedotmack/claude-mem` plugin was removed from Whitebox `known_marketplaces.json` (was blocking Claude init)
+- Coord Pan token was rotated mid-session after cross-sign tool invalidated it
+- Stale sync tokens deleted from `~/.config/ig88/sync-tokens.json` — will regenerate on restart
+
+**Original handoff prompt (for reference):**
 
 ```
 You are executing Phase 2c.2 through 2c.7 of FCT033 — migrating all remaining Blackbox services to Whitebox and running the 48h parallel validation window. This is Session 3 of 4.
@@ -321,41 +355,92 @@ EXIT CONDITION: All 12 launchd plists created and loaded. All services running o
 
 ---
 
-## Session 4: Cutover, Decommission, Watchdog, Docs (Phase 2c.8-2c.11)
+## Session 4: Stabilization, Conversational Design, Watchdog, Docs (Phase 2c.8-2c.11)
 
 **Run from:** Cloudkicker, `~/dev/factory/` with `--add-dir ~/dev/blackbox`
 
 ```
-You are executing the final migration steps: Blackbox cutover, decommission, RP5 watchdog deployment, and documentation updates. This is Session 4 of 4, completing Phase 2c.
+You are executing Session 4 of FCT033 — stabilization, conversational multi-agent design, RP5 watchdog deployment, and documentation updates.
 
 Read these documents first:
-1. docs/fct/FCT033 Definitive Execution Plan — Agent Equipping, Blackbox Retirement, and Trading Validation.md (Section 4.2 Tier 5, Section 4.3 RP5 Watchdog, Section 9: Doc Updates)
-2. docs/fct/FCT029 Factory Consolidated Plan — Architecture, Recovery, and Roadmap.md (Section 11: Open Decisions — for status updates)
+1. docs/fct/FCT033 Definitive Execution Plan — Agent Equipping, Blackbox Retirement, and Trading Validation.md
+2. docs/fct/FCT036 Phase C Sprint Report — Whitebox Migration Execution.md (Session 3 outcomes + known issues)
 
 PRE-FLIGHT:
 - git pull to get Session 3's commits
-- Verify 48h parallel window has passed and all services are stable on Whitebox:
-  curl http://100.88.222.111:41910/jobs.json (portal)
-  curl http://100.88.222.111:8444/sse (graphiti)
-  curl http://100.88.222.111:8080/v1/models (MLX-LM)
-  Send test message to each agent via Matrix — confirm responses route through Whitebox coordinator
-- Verify degradation test results from Session 3 are acceptable (ask user if needed)
+- Verify all Whitebox services running:
+  curl http://100.88.222.111:41910/ (portal — expect 302 redirect to login)
+  curl http://100.88.222.111:8446/mcp (qdrant MCP — expect JSON-RPC error, means alive)
+  curl http://100.88.222.111:41960/v1/models (MLX-LM — expect model JSON)
+  ssh whitebox "tail -5 ~/Library/Logs/factory/coordinator.log" (coordinator running)
+- Send test DM to each agent via Matrix — confirm all 3 respond
+- Blackbox coordinator is ALREADY stopped and disabled (done in Session 3)
 
-SYSTEM STATE: All services running on both Whitebox (primary) and Blackbox (paused/shadow). 48h window complete. Degradation testing done.
+SYSTEM STATE after Session 3:
+- Whitebox: 10 launchd services running (see FCT036 service table). All 3 agents responding to DMs and room mentions. MLX-LM on ports 41960-41963 (NOT 8080-8083). Portal on :41910. MCP proxies on :8446/:8447.
+- Blackbox: coordinator stopped and disabled. All other services still running but NOT being used.
+- matrix-mcp (boot :8445, coord :8448): plists exist on Whitebox but NOT loaded. Deferred — requires manual .env with Matrix passwords (kept out of BWS by design).
+- Cloudkicker ~/.mcp.json: already updated to Whitebox IPs.
+- Known issue: `coord sync failed` in coordinator log — approval-room polling broken. Does NOT affect agent routing.
+- Known issue: Agent identity confusion in shared rooms (Boot calls itself Kelk, etc.)
+- Known issue: No ambient listening — agents only respond to explicit @tags or when they're the room default.
 
-PART 1 — BLACKBOX CUTOVER (Phase 2c.8):
+PART 0 — STABILIZATION (carry-forward from Session 3):
 
-Stop all Blackbox services in this order:
+0.1 Fix coord sync failure:
+    The coordinator's own Matrix sync (for approval room reactions) fails with "sync request failed".
+    Agent routing is unaffected (uses per-agent sync loops). Diagnose and fix.
+    Likely cause: stale coord sync token or Pantalaimon session issue.
+
+0.2 Fix agent identity confusion:
+    In Backrooms, Boot responded as "Kelk" and Kelk as "Boot". System prompts need stronger
+    identity anchoring. Each agent's system_prompt in agent-config.yaml should include:
+    - "Your name is {NAME}. You are NOT {other agents}."
+    - Awareness of other agents in the room and what they do
+    - Instruction: "Never claim to be another agent."
+
+0.3 Conversational room behavior (DESIGN REQUIRED):
+    Current: agents only respond when explicitly @tagged or are the room default.
+    Desired: agents read all room messages, follow the conversation, and use judgment
+    about when to contribute — without needing explicit tags.
+    This requires architectural work in the coordinator:
+    a) Inject recent room history into each agent's context (the multi_agent_context
+       system partially exists for this)
+    b) Add a "should I respond?" decision — either via system prompt instruction
+       ("respond only if the conversation is relevant to your expertise") or a
+       lightweight pre-check before relaying
+    c) Ensure the sync loop filter allows non-tagged agents to see messages
+    NOTE: This is the biggest design item. May warrant its own FCT doc.
+
+0.4 Update worker_cwd paths:
+    Room configs reference ~/projects/ig88/ (Blackbox path). Update to Whitebox equivalents.
+    Review all worker_cwd entries in agent-config.yaml rooms section.
+
+0.5 Jupiter connectivity test (B5, deferred from Session 2):
+    Send message in IG-88 Training room: ask IG-88 to call jupiter_price for SOL.
+    Confirm price returned. This validates the full agent→MCP→Jupiter chain.
+
+0.6 Graphiti secret rotation:
+    Graphiti Docker Compose on Whitebox is running with 3-day-old secrets.
+    User must run locally on Whitebox (Keychain blocked over SSH):
+    cd ~/projects/graphiti && ~/.config/ig88/mcp-env.sh \
+      GRAPHITI_AUTH_TOKEN=<uuid> ANTHROPIC_API_KEY=<uuid> \
+      OPENROUTER_API_KEY=<uuid> -- docker compose up -d
+
+0.7 GitHub SSH key on Whitebox:
+    Currently no SSH key for GitHub — can't git pull. Set up for direct operations.
+
+0.8 BWS snake_case audit:
+    Verify all BWS secret names are kebab-case. Rename any snake_case entries.
+
+PART 1 — BLACKBOX SERVICE CLEANUP (Phase 2c.8):
+
+Coordinator already stopped (Session 3). Stop remaining Blackbox services:
 ssh blackbox
-sudo systemctl stop matrix-coordinator
-sudo systemctl stop factory-portal
-sudo systemctl stop gsd-backend (or whatever the GSD service is named)
-sudo systemctl stop factory-auth
-sudo systemctl stop qdrant-mcp research-mcp
-# Disable all so they don't restart on reboot:
-sudo systemctl disable matrix-coordinator factory-portal gsd-backend factory-auth qdrant-mcp research-mcp
+sudo systemctl stop factory-portal gsd-backend factory-auth qdrant-mcp research-mcp
+sudo systemctl disable factory-portal gsd-backend factory-auth qdrant-mcp research-mcp
 
-Verify Whitebox is now the sole service host — all agent messages route correctly, portal loads, MCP tools work from Cloudkicker.
+Verify Whitebox is the sole service host.
 
 PART 2 — BKX119 CLEANUP:
 
@@ -443,6 +528,15 @@ The system is in a clean state for two independent workstreams:
 
 **Phase D (megOLM Cutover)** — Cannot start until 7 consecutive days of agent stability post-migration. Track from the date Session 4 completes. When the gate is met, start from Cloudkicker `~/dev/factory/` with `--add-dir ~/dev/blackbox`. Read FCT033 Section 10 as the procedure.
 
-### Whitebox Username Resolution
+### Whitebox Facts (confirmed Session 3)
 
-Session 3 needs this resolved before it begins. The answer is `nesbitt` (confirmed via SSH: `whoami` returns `nesbitt`, HOME=/Users/nesbitt). All plist templates in Session 3 should use `/Users/nesbitt/`.
+- Username: `nesbitt`, HOME: `/Users/nesbitt`
+- Claude Code: v2.1.79 at `/opt/homebrew/bin/claude` (was already installed)
+- No GitHub SSH key — use `scp` from Cloudkicker for source deployment
+- Python is PEP 668 managed — always use venvs
+- `known_marketplaces.json` had `thedotmack/claude-mem` — removed (was blocking all Claude init)
+- panctl broken (PyGObject/GLib missing) — cross-signing works server-side without it
+- Keychain `-w` blocked over SSH — BWS consumers must run locally or via launchd (which has GUI session access)
+- mcp-env.sh uses absolute paths: `/opt/homebrew/bin/bws`, `/opt/homebrew/bin/python3`, `/usr/bin/security`
+- Coordinator plist needs `PATH=/opt/homebrew/bin:...` in EnvironmentVariables (launchd has minimal PATH)
+- Cross-sign tool invalidates Pan tokens on logout — must re-login through Pantalaimon and update BWS after running

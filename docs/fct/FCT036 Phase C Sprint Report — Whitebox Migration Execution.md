@@ -2,12 +2,12 @@
 
 **Session:** FCT033 Session 3 of 4
 **Date:** 2026-03-23
-**Duration:** ~90 minutes
+**Duration:** ~3 hours
 **Objective:** Migrate all factory services from Blackbox (RP5) to Whitebox (Mac Mini)
 
 ## Summary
 
-Successfully migrated 10 of 12 planned launchd services to Whitebox. Coordinator-rs running, sending startup messages to Matrix. Portal live and accessible. MCP proxies operational. MLX-LM inference on dedicated ports.
+Successfully migrated 10 of 12 planned launchd services to Whitebox. All 3 agents (Boot, Kelk, IG-88) responding to DMs and room mentions. Portal live. MCP proxies operational. MLX-LM inference on dedicated ports. Blackbox coordinator stopped and disabled.
 
 ## Completed
 
@@ -27,38 +27,50 @@ Successfully migrated 10 of 12 planned launchd services to Whitebox. Coordinator
 - [x] qdrant-mcp and research-mcp copied from Blackbox
 - [x] Fresh macOS venvs created (Linux venvs incompatible)
 - [x] Dependencies installed: qdrant-client, fastembed, mcp[cli]
-- [x] mcp-env.sh patched with absolute paths (`/opt/homebrew/bin/bws`, `/opt/homebrew/bin/python3`, `/usr/bin/security`) for launchd compatibility
+- [x] mcp-env.sh patched with absolute paths for launchd compatibility
 - [x] Hardcoded `/home/nesbitt` paths fixed to `/Users/nesbitt`
 - [x] Both serving on :8446 (projects-vault) and :8447 (research-vault)
-- [x] Embedding model: `sentence-transformers/all-MiniLM-L6-v2` (matches existing Qdrant collections)
 
 ### TIER 2 — Matrix MCP (DEFERRED)
-- [ ] **Deferred by user decision** — matrix-mcp requires `MATRIX_PASSWORD` (password-based login), and Matrix account passwords are intentionally kept out of BWS for security
+- **Deferred by user decision** — matrix-mcp requires `MATRIX_PASSWORD` (password-based login), and Matrix account passwords are intentionally kept out of BWS for security
 - Plists created and deployed to Whitebox for future manual `.env` setup
-- Not a blocker — coordinator handles all Matrix comms directly
 
 ### TIER 3 — Coordinator-rs
 - [x] Source synced from Cloudkicker (Whitebox git has no GitHub SSH key)
-- [x] Built in release mode (22s incremental)
-- [x] Config updated: trust_level, multi_agent_stagger, delegate, lifecycle, timer settings
-- [x] `MATRIX_TOKEN_COORD_PAN` → `MATRIX_TOKEN_PAN_COORD` in coordinator.rs (consistent with BWS kebab-case convention)
-- [x] Running: 3 agents, 13 rooms, startup message sent to Matrix Status room
-- [x] Expected errors: "Failed to spawn Claude" — claude CLI not installed on Whitebox (agents dispatch to Cloudkicker)
+- [x] Built in release mode, rebuilt 3x for iterative fixes
+- [x] Config updated: trust_level, multi_agent_stagger, delegate, lifecycle, timer, mention_aliases
+- [x] `MATRIX_TOKEN_PAN_COORD` env var naming fixed (consistent with BWS convention)
+- [x] `--permission-mode delegate` → `auto` (delegate unsupported in Claude 2.1.79)
+- [x] PATH added to plist EnvironmentVariables for `/opt/homebrew/bin` discovery
+- [x] ANTHROPIC_API_KEY added to BWS injection list
+- [x] DM routing fixed: was hardcoded to Boot only (`get_dm_agent` Phase 1 stub)
+- [x] ig88 mention_aliases added: `ig-88`, `iggy`
+- [x] ig88 added to Backrooms `agents` list
+- [x] Running: 3 agents, 13 rooms, all responding to DMs and room mentions
 
 ### TIER 4 — Portal Stack (3 plists)
 - [x] Portal Caddy running on :41910
 - [x] GSD sidecar on :41911
-- [x] Factory-auth on :41914 (with bcrypt venv)
-- [x] dist-production copied from Blackbox
-- [x] jobs.json, repos/, index.json copied
+- [x] Factory-auth on :41914 (with `.auth-venv` for bcrypt)
+- [x] dist-production, jobs.json, repos/, index.json copied from Blackbox
 - [x] Caddyfile updated: Blackbox IP → Whitebox, Linux paths → macOS
 - [x] macOS firewall rule added for Caddy (user action)
-- [x] Portal accessible from Cloudkicker: `http://100.88.222.111:41910` (302 → login)
+- [x] Portal accessible from Cloudkicker
+
+### Cross-Signing
+- [x] Cross-sign toolkit migrated from blackbox to `factory/scripts/matrix-cross-sign/`
+- [x] All Blackbox references updated to Whitebox (panctl, pan.db path, systemd → launchd)
+- [x] Credential helpers updated for BWS env vars (no more plaintext token files)
+- [x] All 4 accounts cross-signed: boot, ig88, kelk, coord
+- [x] Coord Pan token rotated after cross-sign tool invalidated it
+- [x] Stale sync tokens deleted (`~/.config/ig88/sync-tokens.json`)
+- [x] `thedotmack/claude-mem` plugin removed from Whitebox (was blocking Claude init)
 
 ### Post-Migration
 - [x] `~/.mcp.json` on Cloudkicker updated: all 4 MCP URLs → Whitebox IPs
+- [x] Blackbox coordinator stopped and disabled
 
-## Service Status (Final)
+## Service Status (End of Session)
 
 | Service | Port | Status | Plist |
 |---------|------|--------|-------|
@@ -75,44 +87,58 @@ Successfully migrated 10 of 12 planned launchd services to Whitebox. Coordinator
 | GSD Sidecar | :41911 | Running | gsd-sidecar |
 | Portal Caddy | :41910 | Running | portal-caddy |
 
+## Agent Status (End of Session)
+
+| Agent | DMs | Room Mentions | Room Default | Claude Init |
+|-------|-----|---------------|--------------|-------------|
+| Boot | Working | Working | Backrooms default | Confirmed |
+| Kelk | Working | Working (@kelk) | — | Confirmed |
+| IG-88 | Working | Working (@ig88, @iggy) | IG-88 Training default | Confirmed |
+
 ## Issues Encountered & Resolved
 
-1. **mcp-env.sh PATH issue** — launchd doesn't inherit Homebrew PATH. Fixed with absolute paths for `bws`, `python3`, `security`
-2. **Linux venvs on macOS** — Blackbox venvs copied but non-functional. Recreated fresh
-3. **Hardcoded `/home/nesbitt` paths** — in qdrant-daemon.py `cache_dir`. Patched to `/Users/nesbitt`
-4. **HuggingFace cache dir missing** — MLX-LM `/v1/models` returned empty. Created `~/.cache/huggingface/hub/`
-5. **Coordinator config drift** — Whitebox source was stale (no GitHub SSH key for git pull). Manually scp'd all source files
-6. **Missing config fields** — `multi_agent_stagger_ms`, `delegate_timeout_ms`, `trust_level` required by coordinator but absent from config. Added from Blackbox reference
-7. **Env var naming** — Coordinator had `MATRIX_TOKEN_COORD_PAN` hardcoded; fixed to `MATRIX_TOKEN_PAN_COORD` matching BWS convention
-8. **auth.py bcrypt** — System Python on Whitebox is managed (PEP 668). Created `.auth-venv` with bcrypt
-9. **`--permission-mode delegate`** — unsupported in Claude Code 2.1.79. Changed to `auto`
-10. **`claude` CLI not found** — launchd PATH didn't include `/opt/homebrew/bin`. Added `PATH` to coordinator plist EnvironmentVariables
-11. **ANTHROPIC_API_KEY missing** — Claude CLI exited immediately. Added API key UUID to BWS injection list in coordinator plist
-12. **macOS firewall** — blocked Tailscale inbound to Caddy. User added firewall allow rule for `/opt/homebrew/bin/caddy`
+1. **mcp-env.sh PATH** — launchd doesn't inherit Homebrew PATH. Fixed with absolute paths for `bws`, `python3`, `security`
+2. **Linux venvs on macOS** — Blackbox venvs non-functional. Recreated fresh
+3. **Hardcoded `/home/nesbitt` paths** — in qdrant-daemon.py. Patched to `/Users/nesbitt`
+4. **HuggingFace cache dir missing** — Created `~/.cache/huggingface/hub/`
+5. **Coordinator source drift** — No GitHub SSH key on Whitebox. Manually scp'd all source files
+6. **Missing config fields** — `multi_agent_stagger_ms`, `delegate_timeout_ms`, `trust_level`. Added from Blackbox reference
+7. **Env var naming** — `MATRIX_TOKEN_COORD_PAN` → `MATRIX_TOKEN_PAN_COORD` (BWS convention)
+8. **auth.py bcrypt** — PEP 668 managed Python. Created `.auth-venv`
+9. **`--permission-mode delegate`** — Unsupported in Claude 2.1.79. Changed to `auto`
+10. **`claude` CLI not found** — Added `PATH` to coordinator plist
+11. **ANTHROPIC_API_KEY missing** — Added to BWS injection list
+12. **macOS firewall** — User added Caddy allow rule
+13. **Cross-sign token invalidation** — Coord Pan token invalidated by cross-sign tool logout. Rotated in BWS.
+14. **Stale sync tokens** — Old Blackbox Pantalaimon sync cursors. Deleted `sync-tokens.json`.
+15. **`thedotmack/claude-mem` plugin** — Blocking Claude init on all agents. Removed from `known_marketplaces.json` and filesystem.
+16. **DM routing hardcoded to Boot** — `get_dm_agent()` was a Phase 1 stub returning only `["boot"]`. Fixed to return all agents.
+17. **panctl not functional** — PyGObject/GLib missing on Whitebox. Cross-signing works server-side without panctl.
 
-## Late-Session Wins
+## Known Issues (Carry Forward)
 
-- **Blackbox coordinator stopped and disabled** (`systemctl stop && disable matrix-coordinator`)
-- **Boot responding in Element DMs** — Claude initialized on Whitebox, near-zero latency
-- All 3 agents session-initialized; Boot confirmed live with haiku model
+### `coord sync failed: sync request failed`
+The coordinator's own sync (used for approval room reactions) fails intermittently. Does NOT affect agent DM/room routing — those use per-agent sync loops. Likely a Pantalaimon session issue with the coord account. Low priority.
 
-## Remaining for Session 4
+### Agent Identity Confusion in Shared Rooms
+When multiple agents are in a room (Backrooms), they confuse each other's identities. Boot responded as "Kelk" and vice versa. Root cause: agents see each other's messages but system prompts don't strongly anchor identity. Needs stronger identity reinforcement in system prompts and/or context injection architecture.
 
-- [x] ~~Stop Blackbox coordinator~~ (done — disabled)
-- [x] ~~Install Claude CLI on Whitebox~~ (was already installed)
-- [ ] Verify all 3 agent devices in Element (cross-signing)
-- [ ] `~/projects/ig88/` worker_cwd — should not exist on Whitebox; update room config cwds
-- [ ] Set up matrix-mcp with manual `.env` when ready (Matrix passwords kept out of BWS by design)
-- [ ] Graphiti secret rotation via Docker Compose (running with 3-day-old secrets)
-- [ ] Degradation testing (kill/restart individual services)
-- [ ] Set up GitHub SSH key on Whitebox for direct git operations
-- [ ] BWS snake_case audit (check `graphiti_auth_token`, `qdrant_api_key`)
-- [ ] Jupiter connectivity test (B5 — IG-88 Training room)
+### Conversational Room Behavior Not Implemented
+Current architecture: agents only respond when explicitly tagged or are the room's default agent. Desired: agents read all messages in shared rooms and use judgment about when to contribute (ambient listening + selective response). This requires:
+1. Room history context injection into each agent's Claude session
+2. A "should I respond?" decision layer
+3. Stronger identity boundaries in system prompts
+
+### `worker_cwd` Paths Stale
+Room configs reference `~/projects/ig88/` which is a Blackbox path. On Whitebox this dir is nearly empty. Needs updating to appropriate Whitebox paths.
 
 ## Commits
 
+- `a63297d` fix(config): ig88 aliases + Backrooms membership
+- `ec0f78b` fix(coordinator): route DMs to all agents, not just Boot
+- `711cef3` feat(scripts): migrate matrix cross-sign toolkit from blackbox
 - `157e5ac` fix(coordinator): auto permission mode, PATH in plist, API key injection
-- `8b5b77e` docs(fct): FCT036 Phase C sprint report
+- `8b5b77e` docs(fct): FCT036 Phase C sprint report (initial)
 - `d4197cd` feat(infra): Whitebox migration — 12 launchd plists, config updates
 - `1b5878f` (ig88 submodule) feat(config): migrate agent-config to Whitebox
 
