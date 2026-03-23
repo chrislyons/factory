@@ -58,9 +58,28 @@ Before pasting each handoff prompt:
 
 ---
 
-## Session 2: Jupiter Wiring + Secrets Manager (Phase B + 2c.1)
+## Session 2: Jupiter Wiring + Secrets Manager (Phase B + 2c.1) — COMPLETE
 
-**Run from:** Cloudkicker, `~/dev/factory/` with `--add-dir ~/dev/factory/agents/ig88`
+**Status:** Completed 2026-03-23. Sprint report: FCT035.
+
+**What was done:**
+- Three Solana wallets generated on Whitebox (trading, funding, alt) with BIP39 passphrases
+- JSON wallet files deleted from disk — seed phrases + passphrases in BW only
+- BWS project `factory-agents` created with 13 secrets (kebab-case naming)
+- Machine account `factory-agents` with access token in Whitebox Keychain
+- `mcp-env.sh` deployed to `~/.config/ig88/mcp-env.sh` on Whitebox, smoke tested
+- **All 11 secrets rotated** due to accidental `bws secret list` plaintext exposure
+- `openrouter-api-key` and `jupiter-api-key` added to BWS (not leaked, no rotation needed)
+- UUID mapping documented in FCT035
+
+**Important for Session 3:**
+- `bws` requires `--server-url https://vault.bitwarden.eu` on every call
+- Keychain `-w` retrieval blocked over SSH — all BWS-dependent services must run locally on Whitebox
+- MLX-LM servers were DOWN this session — restart before Session 3
+- Server configs (Graphiti, Qdrant, auth.py) need updating with rotated values
+- Verify BWS secret names are all kebab-case (graphiti-auth-token, qdrant-api-key)
+
+**Original handoff prompt (for reference):**
 
 ```
 You are executing Phase B (IG-88 API Key Wiring) and Phase 2c.1 (Bitwarden Secrets Manager setup) of FCT033. This is Session 2 of 4.
@@ -86,7 +105,8 @@ SYSTEM STATE after Session 1:
 
 PART 1 — JUPITER API KEY WIRING (Phase B):
 
-B1. Guide the user to obtain a Jupiter API key from portal.jup.ag. Do NOT navigate there yourself. Tell the user what to do and wait for the key.
+B1. Jupiter API key already exists in Bitwarden as "jupiter-api-key" in factory/agents collection. No action needed — verify it's present:
+    bw get password "jupiter-api-key" (should return a value; do NOT echo it)
 
 B2. Generate Solana trading keypair. Since Blackbox is being retired, generate on WHITEBOX:
     ssh whitebox "mkdir -p ~/.config/ig88 && solana-keygen new -o ~/.config/ig88/trading_wallet.json"
@@ -95,11 +115,7 @@ B2. Generate Solana trading keypair. Since Blackbox is being retired, generate o
     If solana-keygen is not installed on Whitebox: ssh whitebox "brew install solana" (or sh -c "$(curl -sSfL https://release.anza.xyz/stable/install)")
     NEVER read the private key contents. NEVER cat the wallet file.
 
-B3. Store Jupiter API key in Bitwarden:
-    - Add to Bitwarden on Cloudkicker:
-      bw create item (or use the web vault) — item name: "jupiter-api-key", in factory/agents collection
-    - Do NOT store in Blackbox age — Blackbox is being retired. The key will be available on Whitebox via BWS after Part 2 is complete.
-    NEVER echo the API key in conversation.
+B3. Jupiter API key is already in Bitwarden (confirmed B1). It will be available on Whitebox via BWS after Part 2 is complete. No additional storage needed.
 
 B4. The user will fund the hot wallet externally ($200-800 USDC + ~0.05 SOL to the public key from B2). This is async — proceed to Part 2 while waiting.
 
@@ -112,21 +128,23 @@ This follows BKX122 exactly. The purpose is to give Whitebox launchd plists a wa
 2c.1.1. Guide the user through the Bitwarden web vault setup:
     - Log into vault.bitwarden.eu → Boot Industries org → Secrets Manager tab
     - Create project: "factory/agents"
-    - Populate all secrets from FCT033 Section 5.3 (14 entries). Include JUPITER_API_KEY from B3.
+    - Populate all secrets from FCT033 Section 5.3 (14 entries). Also include these keys already in BW but not listed in FCT033:
+      - JUPITER_API_KEY (already in BW as "jupiter-api-key")
+      - COINGECKO_API_KEY (already in BW as "coingecko-api-key")
     - Also add the 4 freshly-rotated Matrix Pan tokens (matrix-token-pan-ig88, matrix-token-pan-kelk, matrix-token-pan-boot, matrix-token-pan-coord — verify exact BW item names with user)
     - Create service account: "whitebox-factory-agents", read-only access to factory/agents
     - Generate access token — user copies it immediately
 
 2c.1.2. Store the access token in Whitebox Keychain:
-    ssh whitebox "security add-generic-password -s 'bitwarden-secrets-manager' -a 'whitebox-factory-agents' -w '<TOKEN>'"
-    Verify retrieval: ssh whitebox "security find-generic-password -s 'bitwarden-secrets-manager' -a 'whitebox-factory-agents' -w"
+    ssh whitebox "security add-generic-password -s 'bws-factory-agents' -a 'factory-agents' -w '<TOKEN>'"
+    Verify retrieval: ssh whitebox "security find-generic-password -s 'bws-factory-agents' -a 'factory-agents' -w"
     NEVER echo the token in conversation.
 
 2c.1.3. Install bws CLI on Whitebox if not present:
     ssh whitebox "which bws || brew install bitwarden/tap/bws"
 
 2c.1.4. Verify bws CLI works on Whitebox:
-    ssh whitebox "BWS_ACCESS_TOKEN=\$(security find-generic-password -s 'bitwarden-secrets-manager' -a 'whitebox-factory-agents' -w) bws secret list"
+    ssh whitebox "BWS_ACCESS_TOKEN=\$(security find-generic-password -s 'bws-factory-agents' -a 'factory-agents' -w) bws secret list"
     This should return the populated secrets.
 
 2c.1.5. Write the Whitebox variant of mcp-env.sh:
@@ -141,7 +159,7 @@ This follows BKX122 exactly. The purpose is to give Whitebox launchd plists a wa
 
 Commit any factory repo changes (config updates, doc corrections discovered during this work).
 
-EXIT CONDITION: Jupiter API key stored in Bitwarden. Solana keypair generated on Whitebox. BWS operational on Whitebox — bws secret list returns all entries, mcp-env.sh variant tested and working. Secret UUID mapping documented. Report what was done and any issues. Note that B5 (Jupiter connectivity) and agent Matrix verification are deferred to Session 3.
+EXIT CONDITION: Jupiter API key confirmed in Bitwarden. Solana keypair generated on Whitebox. BWS operational on Whitebox — bws secret list returns all entries, mcp-env.sh variant tested and working. Secret UUID mapping documented. Report what was done and any issues. Note that B5 (Jupiter connectivity) and agent Matrix verification are deferred to Session 3.
 ```
 
 ---
@@ -161,14 +179,14 @@ Read these documents first:
 
 PRE-FLIGHT:
 - git pull to get Sessions 1-2 commits
-- Verify BWS is operational: BWS_ACCESS_TOKEN=$(security find-generic-password -s 'bitwarden-secrets-manager' -a 'whitebox-factory-agents' -w) bws secret list
+- Verify BWS is operational: BWS_ACCESS_TOKEN=$(security find-generic-password -s 'bws-factory-agents' -a 'factory-agents' -w) bws secret list
 - Verify MLX-LM servers still running: curl http://localhost:8080/v1/models (8080-8083)
 - Verify coordinator on Blackbox is still running: ssh blackbox "systemctl is-active matrix-coordinator"
 
 SYSTEM STATE after Sessions 1-2:
-- Whitebox: MLX-LM :8080-8083 running (manually started, no plists yet). Graphiti :8444 LIVE. Pantalaimon :8009 LIVE. Qdrant :6333 LIVE. FalkorDB :6379 LIVE. Ollama :11434 LIVE. Solana trading keypair at ~/.config/ig88/trading_wallet.json. BWS operational with mcp-env.sh variant tested.
+- Whitebox: MLX-LM :8080-8083 DOWN (need restarting). Graphiti :8444 LIVE. Pantalaimon :8009 LIVE. Qdrant :6333 LIVE. FalkorDB :6379 LIVE. Ollama :11434 LIVE. Solana wallet JSON files DELETED (keys recoverable from BW seed phrases). BWS operational with mcp-env.sh at ~/.config/ig88/mcp-env.sh (smoke tested). bws requires --server-url https://vault.bitwarden.eu.
 - Blackbox: coordinator-rs running with STALE tokens (not restarted since Session 1 hardening). Agents NOT yet verified on Matrix — token injection deferred to this session. Portal Caddy :41910 deployed with auth fixes.
-- Bitwarden Secrets Manager: All secrets populated including fresh Pan tokens and Jupiter API key. Service account "whitebox-factory-agents" active.
+- Bitwarden Secrets Manager: 13 secrets in project "factory-agents" (ALL ROTATED 2026-03-23 — see FCT035). Machine account "factory-agents" (not "whitebox-factory-agents"). Keychain entry: service=bws-factory-agents, account=factory-agents. Keychain values CANNOT be read over SSH — all BWS consumers must run locally on Whitebox.
 - DEFERRED from Sessions 1-2: Agent Matrix verification, Jupiter connectivity test (B5), agent-config.yaml token_file → token_env update, Blackbox plaintext token file deletion.
 - jobs/ directory doesn't exist locally on Cloudkicker — may need restoring from Blackbox.
 
