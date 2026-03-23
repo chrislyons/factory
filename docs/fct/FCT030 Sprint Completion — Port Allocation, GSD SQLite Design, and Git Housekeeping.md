@@ -1,4 +1,4 @@
-# FCT030 FCT029 Sprint Completion — Port Allocation, GSD SQLite Design, and Git Housekeeping
+# FCT030 Sprint Completion — Port Allocation, GSD SQLite Design, and Git Housekeeping
 
 **Date:** 2026-03-22
 **Status:** Complete

@@ -4,12 +4,12 @@ Project documentation index for factory.
 
 ## Recent Documents
 
+- [[FCT033 Definitive Execution Plan — Agent Equipping, Blackbox Retirement, and Trading Validation]]
+- [[FCT032 Strategy Vet Research Vault Findings vs Compiled Assessment]]
+- [[FCT031 Next Steps Forward]]
 - [[FCT030 FCT029 Sprint Completion — Port Allocation, GSD SQLite Design, and Git Housekeeping]]
 - [[FCT029 Factory Consolidated Plan — Architecture, Recovery, and Roadmap]]
 - [[FCT028 v0 Factory Jobs Audit Report]]
-- [[FCT027 Post-Deployment Recovery and Next Steps]]
-- [[FCT026 Three Integration Seams- Jobs ↔ Matrix, Approval Convergence, Transcript Printing]]
-- [[FCT025 The Compound Interface- Why Factory Has Two Faces]]
 
 ## All Documents
 
@@ -43,6 +43,9 @@ Project documentation index for factory.
 - [[FCT028 v0 Factory Jobs Audit Report]]
 - [[FCT029 Factory Consolidated Plan — Architecture, Recovery, and Roadmap]]
 - [[FCT030 FCT029 Sprint Completion — Port Allocation, GSD SQLite Design, and Git Housekeeping]]
+- [[FCT031 Next Steps Forward]]
+- [[FCT032 Strategy Vet Research Vault Findings vs Compiled Assessment]]
+- [[FCT033 Definitive Execution Plan — Agent Equipping, Blackbox Retirement, and Trading Validation]]
 
 ## Navigation
 
@@ -56,4 +59,4 @@ Project documentation index for factory.
 
 ---
 
-**Last Generated:** 2026-03-22
+**Last Generated:** 2026-03-23
