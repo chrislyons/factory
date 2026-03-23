@@ -21,7 +21,7 @@ factory/
 
 - **Stack:** Vite + React + TypeScript, pnpm
 - **Fonts:** Geist Pixel Square (display), Geist Mono UltraLight (body/mono)
-- **Deploy:** `make sync` from `portal/` — rsyncs to Blackbox :41910
+- **Deploy:** `make sync` from `portal/` — rsyncs to Whitebox :41910
 - **Tests:** `pnpm test` (vitest, 17 tests across 9 files)
 - **Build:** `pnpm build` — outputs to `portal/dist/`
 - **Brand:** "dreamfactory" (hero header, 16px/10px)
@@ -61,30 +61,21 @@ factory/
 
 > Full master table: `~/dev/docs/ports.md`
 
-**Factory Application Ports (Blackbox 100.87.53.109):**
+**Factory Services (Whitebox 100.88.222.111):**
 
 | Port | Service |
 |------|---------|
 | :41910 | Portal Caddy (live) |
 | :41911 | GSD sidecar (jobs.json + status) |
+| :41914 | Auth sidecar (cookie auth) |
 | :41920-41939 | Preview slots |
 | :41940-41949 | Development |
 | :41950-41959 | Coordinator HTTP API (planned) |
-
-**Inference + Database Ports (Whitebox 100.88.222.111):**
-
-| Port | Service |
-|------|---------|
-| :4000 | LiteLLM proxy (planned) |
+| :41960-41963 | MLX-LM inference (4 model slots) |
 | :6333-6334 | Qdrant (HTTP + gRPC) |
-| :8080-8083 | MLX-LM inference (4 model slots) |
-| :11434 | Ollama embeddings |
+| :8009 | Pantalaimon (E2EE proxy) |
+| :8444 | Graphiti MCP |
+| :8446 | Qdrant MCP (projects-vault) |
+| :8447 | Research MCP (research-vault) |
 
-**MCP + Infrastructure Ports (Blackbox 100.87.53.109):**
-
-| Port | Service |
-|------|---------|
-| :6379 | FalkorDB (migrating to Whitebox) |
-| :8009 | Pantalaimon (migrating to Whitebox) |
-| :8444 | Graphiti MCP (migrating to Whitebox) |
-| :8445-8448 | matrix-mcp + Qdrant MCP + Research MCP |
+> **Blackbox retired 2026-03-23.** RP5 serves as dumb watchdog only (cron health checks → Matrix alerts).

@@ -1,7 +1,7 @@
-# Factory Portal — React build, local preview, and Blackbox deploy
+# Factory Portal — React build, local preview, and Whitebox deploy
 
-BLACKBOX    := blackbox
-REMOTE      := /home/nesbitt/projects/factory-portal
+WHITEBOX    := whitebox
+REMOTE      := /Users/nesbitt/projects/factory-portal
 REMOTE_DIST := $(REMOTE)/dist
 LOCAL_DEV   := /Users/chrislyons/dev
 DIST        := dist
@@ -15,31 +15,31 @@ SHELL       := /bin/bash
 # ---------------------------------------------------------------------------
 
 .PHONY: deploy
-deploy: sync install  ## Build, sync, and install the Blackbox services
+deploy: sync install  ## Build, sync, and install the Whitebox services
 
 .PHONY: build
 build:  ## Build the React multi-page portal into dist/
 	$(PNPM) build
 
 .PHONY: sync
-sync: build sync-dist sync-runtime sync-gsd sync-repos ssh-normalize ssh-generate-index  ## Sync build output, runtime helpers, repo docs, and live task data to Blackbox
+sync: build sync-dist sync-runtime sync-gsd sync-repos ssh-normalize ssh-generate-index  ## Sync build output, runtime helpers, repo docs, and live task data to Whitebox
 
 .PHONY: sync-dist
-sync-dist:  ## Rsync dist/ to Blackbox
-	ssh $(BLACKBOX) 'mkdir -p $(REMOTE_DIST)'
-	rsync -avz --delete $(DIST)/ $(BLACKBOX):$(REMOTE_DIST)/
+sync-dist:  ## Rsync dist/ to Whitebox
+	ssh $(WHITEBOX) 'mkdir -p $(REMOTE_DIST)'
+	rsync -avz --delete $(DIST)/ $(WHITEBOX):$(REMOTE_DIST)/
 
 .PHONY: sync-runtime
 sync-runtime:  ## Sync local runtime helpers needed by serve.sh and the index generator
-	ssh $(BLACKBOX) 'mkdir -p $(REMOTE)/src'
-	rsync -avz Makefile serve.sh server.py $(BLACKBOX):$(REMOTE)/
-	rsync -avz src/generate_index.py src/normalize_fonts.py $(BLACKBOX):$(REMOTE)/src/
-	ssh $(BLACKBOX) 'chmod +x $(REMOTE)/serve.sh $(REMOTE)/server.py'
+	ssh $(WHITEBOX) 'mkdir -p $(REMOTE)/src'
+	rsync -avz Makefile serve.sh server.py $(WHITEBOX):$(REMOTE)/
+	rsync -avz src/generate_index.py src/normalize_fonts.py $(WHITEBOX):$(REMOTE)/src/
+	ssh $(WHITEBOX) 'chmod +x $(REMOTE)/serve.sh $(REMOTE)/server.py'
 
 .PHONY: sync-gsd
 sync-gsd:  ## Seed live jobs.json + status/ into the task/status sidecar data root
-	rsync -avz $(LOCAL_DEV)/factory/jobs.json $(BLACKBOX):$(REMOTE)/jobs.json
-	rsync -avz $(LOCAL_DEV)/get-shit-done/status/ $(BLACKBOX):$(REMOTE)/status/
+	rsync -avz $(LOCAL_DEV)/factory/jobs.json $(WHITEBOX):$(REMOTE)/jobs.json
+	rsync -avz $(LOCAL_DEV)/get-shit-done/status/ $(WHITEBOX):$(REMOTE)/status/
 
 .PHONY: sync-repos
 sync-repos:  ## Sync the repo corpus used by explainers-v4 and index.json
@@ -55,52 +55,52 @@ sync-repos:  ## Sync the repo corpus used by explainers-v4 and index.json
 	  --filter='+ */docs/repo-commands.html' \
 	  --filter='+ */docs/repo-commands-v2.html' \
 	  --filter='- *' \
-	  $(LOCAL_DEV)/ $(BLACKBOX):$(REMOTE)/repos/
+	  $(LOCAL_DEV)/ $(WHITEBOX):$(REMOTE)/repos/
 
 .PHONY: ssh-normalize
-ssh-normalize:  ## Normalize repo-corpus font paths on Blackbox
-	ssh $(BLACKBOX) 'cd $(REMOTE) && python3 src/normalize_fonts.py --repos-dir repos/ --verbose'
+ssh-normalize:  ## Normalize repo-corpus font paths on Whitebox
+	ssh $(WHITEBOX) 'cd $(REMOTE) && python3 src/normalize_fonts.py --repos-dir repos/ --verbose'
 
 .PHONY: ssh-generate-index
 ssh-generate-index:  ## Rebuild dist/index.json from the synced repo corpus
-	ssh $(BLACKBOX) 'cd $(REMOTE) && mkdir -p dist && python3 src/generate_index.py --repos-dir repos/ --output dist/index.json'
+	ssh $(WHITEBOX) 'cd $(REMOTE) && mkdir -p dist && python3 src/generate_index.py --repos-dir repos/ --output dist/index.json'
 
 .PHONY: install
-install: sync-runtime  ## Install or refresh the Blackbox systemd services
-	ssh $(BLACKBOX) 'cd $(REMOTE) && ./serve.sh --systemd'
+install: sync-runtime  ## Install or refresh the Whitebox launchd services
+	ssh $(WHITEBOX) 'cd $(REMOTE) && ./serve.sh --systemd'
 
 # ---------------------------------------------------------------------------
-# Service management (Blackbox)
+# Service management (Whitebox)
 # ---------------------------------------------------------------------------
 
 .PHONY: logs
-logs:  ## Follow Caddy service logs on Blackbox
-	ssh $(BLACKBOX) 'sudo journalctl -u factory-portal.service -f'
+logs:  ## Follow Caddy service logs on Whitebox
+	ssh $(WHITEBOX) 'tail -f ~/Library/Logs/factory/portal.log'
 
 .PHONY: logs-gsd
-logs-gsd:  ## Follow the task/status sidecar logs on Blackbox
-	ssh $(BLACKBOX) 'sudo journalctl -u gsd-backend.service -f'
+logs-gsd:  ## Follow the task/status sidecar logs on Whitebox
+	ssh $(WHITEBOX) 'tail -f ~/Library/Logs/factory/gsd.log'
 
 .PHONY: status
-status:  ## Show both systemd units on Blackbox
-	@ssh $(BLACKBOX) 'sudo systemctl status factory-portal.service --no-pager; echo "---"; sudo systemctl status gsd-backend.service --no-pager'
+status:  ## Show both launchd services on Whitebox
+	@ssh $(WHITEBOX) 'launchctl print system/com.factory.portal 2>&1 | head -5; echo "---"; launchctl print system/com.factory.gsd 2>&1 | head -5'
 
 .PHONY: restart
-restart:  ## Restart the Blackbox Caddy and task/status sidecar services
-	ssh $(BLACKBOX) 'sudo systemctl restart gsd-backend.service && sudo systemctl restart factory-portal.service'
+restart:  ## Restart the Whitebox Caddy and task/status sidecar services
+	ssh $(WHITEBOX) 'launchctl kickstart -k system/com.factory.gsd && launchctl kickstart -k system/com.factory.portal'
 
 .PHONY: uninstall
-uninstall:  ## Stop, disable, and remove the Blackbox services
-	ssh $(BLACKBOX) 'sudo systemctl stop factory-portal.service gsd-backend.service; sudo systemctl disable factory-portal.service gsd-backend.service; sudo rm -f /etc/systemd/system/factory-portal.service /etc/systemd/system/gsd-backend.service; sudo systemctl daemon-reload'
-	@echo "ok Removed factory-portal.service + gsd-backend.service"
+uninstall:  ## Stop, disable, and remove the Whitebox services
+	ssh $(WHITEBOX) 'launchctl bootout system/com.factory.portal; launchctl bootout system/com.factory.gsd'
+	@echo "ok Removed com.factory.portal + com.factory.gsd"
 
 .PHONY: verify
 verify:  ## Smoke-test the live portal via Tailnet
 	@echo "Testing live server..."
-	@ssh $(BLACKBOX) 'curl -sf -u admin:$$PORTAL_PASSWORD http://100.87.53.109:41910/ > /dev/null' && echo "ok / (portal.html) OK"
-	@ssh $(BLACKBOX) 'curl -sf -u admin:$$PORTAL_PASSWORD http://100.87.53.109:41910/pages/dashboard-v4.html > /dev/null' && echo "ok dashboard-v4.html OK"
-	@ssh $(BLACKBOX) 'curl -sf -u admin:$$PORTAL_PASSWORD http://100.87.53.109:41910/index.json | python3 -m json.tool > /dev/null' && echo "ok index.json OK"
-	@ssh $(BLACKBOX) 'curl -sf -u admin:$$PORTAL_PASSWORD http://100.87.53.109:41910/jobs.json | python3 -m json.tool > /dev/null' && echo "ok jobs.json OK"
+	@ssh $(WHITEBOX) 'curl -sf -u admin:$$PORTAL_PASSWORD http://100.88.222.111:41910/ > /dev/null' && echo "ok / (portal.html) OK"
+	@ssh $(WHITEBOX) 'curl -sf -u admin:$$PORTAL_PASSWORD http://100.88.222.111:41910/pages/dashboard-v4.html > /dev/null' && echo "ok dashboard-v4.html OK"
+	@ssh $(WHITEBOX) 'curl -sf -u admin:$$PORTAL_PASSWORD http://100.88.222.111:41910/index.json | python3 -m json.tool > /dev/null' && echo "ok index.json OK"
+	@ssh $(WHITEBOX) 'curl -sf -u admin:$$PORTAL_PASSWORD http://100.88.222.111:41910/jobs.json | python3 -m json.tool > /dev/null' && echo "ok jobs.json OK"
 	@echo "Done."
 
 # ---------------------------------------------------------------------------

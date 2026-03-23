@@ -389,9 +389,9 @@ These decisions are captured but not yet resolved. Each affects downstream archi
 | Decision | Options Under Consideration | Impact |
 |----------|---------------------------|--------|
 | Class index finalization | Keep current 8-class scheme vs. restructure based on usage patterns | Affects all job IDs if classes change |
-| Blackbox post-Whitebox role | (a) Backup/failover, (b) Edge node for lightweight tasks, (c) Full retirement | Determines Phase 2c scope and timeline |
+| ~~Blackbox post-Whitebox role~~ | **RESOLVED — Full retirement. RP5 repurposed as dumb watchdog. See FCT033.** | — |
 | GSD sidecar naming | Keep "GSD" label or rename to something more descriptive | Cosmetic but affects all documentation and code references |
-| Pantalaimon vs. E2EE timing | (a) Cutover to native E2EE before Whitebox migration (simpler — no Pantalaimon to migrate), (b) Migrate Pantalaimon first, cutover later (safer — known-working stack) | Determines whether Phase 2b includes Pantalaimon migration |
+| ~~Pantalaimon vs. E2EE timing~~ | **RESOLVED — Migrate Pan first (done WHB006), cutover later (FCT033 Phase D).** | — |
 | Factory rebrand | "DreamFactory" has trademark collision risk — may need unique name | Deferred, low priority |
 | Job sync transport | (a) Tailscale-native API calls between hosts, (b) rsync fallback for offline resilience | Affects offline capability and sync latency |
 
