@@ -432,12 +432,10 @@ impl CoordinatorState {
         agents
     }
 
-    fn get_dm_agent(&self, _room_id: &str) -> Vec<&str> {
-        // Phase 1: return boot as default DM agent
-        if self.config.agents.contains_key("boot") {
-            return vec!["boot"];
-        }
-        vec![]
+    fn get_dm_agent<'b>(&'b self, _room_id: &str) -> Vec<&'b str> {
+        // All agents handle their own DMs — the sync loop filter
+        // (line ~1067) ensures only the owning agent processes each event.
+        self.config.agents.keys().map(|k| k.as_str()).collect()
     }
 }
 
