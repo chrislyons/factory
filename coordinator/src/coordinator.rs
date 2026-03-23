@@ -266,7 +266,7 @@ impl CoordinatorState {
         );
 
         // Load coord token (env-only, no plaintext file fallback)
-        let coord_token = std::env::var("MATRIX_TOKEN_COORD_PAN").ok();
+        let coord_token = std::env::var("MATRIX_TOKEN_PAN_COORD").ok();
 
         Ok(Self {
             config,

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.bootindustries.coordinator-rs</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/nesbitt/.config/ig88/mcp-env.sh</string>
+    <string>MATRIX_TOKEN_PAN_BOOT=8e9bcc76-a4fc-4b7f-88c2-b416011f40cb</string>
+    <string>MATRIX_TOKEN_PAN_COORD=31d23df6-f50f-43d3-99c0-b416011f7024</string>
+    <string>MATRIX_TOKEN_PAN_IG88=3ad5ea9f-de29-4f5e-ab6f-b416011f7e0e</string>
+    <string>MATRIX_TOKEN_PAN_KELK=0fe1c283-a1ef-42ea-b645-b416011f928b</string>
+    <string>GRAPHITI_AUTH_TOKEN=99e55357-7977-4925-8671-b416011fac6a</string>
+    <string>OPENROUTER_API_KEY=ee959bd0-ee17-4328-a4eb-b416012d217f</string>
+    <string>--</string>
+    <string>/Users/nesbitt/dev/factory/coordinator/target/release/coordinator-rs</string>
+  </array>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>RUST_LOG</key>
+    <string>coordinator_rs=info,warn</string>
+    <key>CONFIG_PATH</key>
+    <string>/Users/nesbitt/dev/factory/agents/ig88/config/agent-config.yaml</string>
+  </dict>
+  <key>KeepAlive</key>
+  <true/>
+  <key>ThrottleInterval</key>
+  <integer>15</integer>
+  <key>StandardOutPath</key>
+  <string>/Users/nesbitt/Library/Logs/factory/coordinator.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/nesbitt/Library/Logs/factory/coordinator.log</string>
+</dict>
+</plist>

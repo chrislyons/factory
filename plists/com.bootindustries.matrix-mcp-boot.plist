@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.bootindustries.matrix-mcp-boot</string>
+  <key>WorkingDirectory</key>
+  <string>/Users/nesbitt/projects/matrix-mcp</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/nesbitt/.config/ig88/mcp-env.sh</string>
+    <string>MATRIX_ACCESS_TOKEN=8e9bcc76-a4fc-4b7f-88c2-b416011f40cb</string>
+    <string>--</string>
+    <string>/opt/homebrew/bin/node</string>
+    <string>dist/http-server.js</string>
+  </array>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>MATRIX_USER_ID</key>
+    <string>@boot.industries:matrix.org</string>
+    <key>MATRIX_HOMESERVER_URL</key>
+    <string>http://127.0.0.1:8009</string>
+    <key>MATRIX_STATE_DIR</key>
+    <string>/Users/nesbitt/.local/state/matrix-mcp/boot</string>
+    <key>PORT</key>
+    <string>8445</string>
+    <key>HOST</key>
+    <string>100.88.222.111</string>
+  </dict>
+  <key>KeepAlive</key>
+  <true/>
+  <key>ThrottleInterval</key>
+  <integer>10</integer>
+  <key>StandardOutPath</key>
+  <string>/Users/nesbitt/Library/Logs/factory/matrix-mcp-boot.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/nesbitt/Library/Logs/factory/matrix-mcp-boot.log</string>
+</dict>
+</plist>

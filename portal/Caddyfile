@@ -2,7 +2,7 @@
 	admin off
 }
 
-http://100.87.53.109:41910 {
+http://100.88.222.111:41910 {
 	encode gzip
 
 	header {
@@ -14,7 +14,7 @@ http://100.87.53.109:41910 {
 
 	# ── Public routes ────────────────────────────────────────────────
 	handle /login {
-		root * /home/nesbitt/projects/factory-portal/dist/pages
+		root * /Users/nesbitt/dev/factory/portal/dist-production/pages
 		rewrite * /login.html
 		file_server
 	}
@@ -27,7 +27,7 @@ http://100.87.53.109:41910 {
 		path /fonts/*
 	}
 	handle @fonts_public {
-		root * /home/nesbitt/projects/factory-portal/dist
+		root * /Users/nesbitt/dev/factory/portal/dist-production
 		header Cache-Control "public, max-age=31536000, immutable"
 		file_server
 	}
@@ -57,12 +57,12 @@ http://100.87.53.109:41910 {
 	}
 
 	handle /repos/* {
-		root * /home/nesbitt/projects/factory-portal
+		root * /Users/nesbitt/dev/factory/portal
 		file_server
 	}
 
 	handle {
-		root * /home/nesbitt/projects/factory-portal/dist
+		root * /Users/nesbitt/dev/factory/portal/dist-production
 
 		@html {
 			path *.html

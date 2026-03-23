@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.bootindustries.qdrant-mcp</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/nesbitt/.config/ig88/mcp-env.sh</string>
+    <string>QDRANT_API_KEY=3f9dcc24-7137-4cf2-916f-b416011fbc03</string>
+    <string>--</string>
+    <string>/Users/nesbitt/services/qdrant-mcp/.venv/bin/python3</string>
+    <string>/Users/nesbitt/services/qdrant-mcp/qdrant-daemon.py</string>
+  </array>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>QDRANT_URL</key>
+    <string>http://127.0.0.1:6333</string>
+    <key>COLLECTION_NAME</key>
+    <string>projects-vault</string>
+    <key>EMBEDDING_MODEL</key>
+    <string>sentence-transformers/all-MiniLM-L6-v2</string>
+    <key>PORT</key>
+    <string>8446</string>
+    <key>HOST</key>
+    <string>100.88.222.111</string>
+  </dict>
+  <key>KeepAlive</key>
+  <true/>
+  <key>ThrottleInterval</key>
+  <integer>10</integer>
+  <key>StandardOutPath</key>
+  <string>/Users/nesbitt/Library/Logs/factory/qdrant-mcp.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/nesbitt/Library/Logs/factory/qdrant-mcp.log</string>
+</dict>
+</plist>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.bootindustries.factory-auth</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/nesbitt/.config/ig88/mcp-env.sh</string>
+    <string>AUTH_SECRET=297da199-6348-4ba4-b368-b416011ffbc0</string>
+    <string>AUTH_BCRYPT_HASH=a574a840-bb94-44a7-bf15-b416011fe96f</string>
+    <string>--</string>
+    <string>/Users/nesbitt/dev/factory/portal/.auth-venv/bin/python3</string>
+    <string>/Users/nesbitt/dev/factory/portal/auth.py</string>
+  </array>
+  <key>KeepAlive</key>
+  <true/>
+  <key>ThrottleInterval</key>
+  <integer>10</integer>
+  <key>StandardOutPath</key>
+  <string>/Users/nesbitt/Library/Logs/factory/factory-auth.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/nesbitt/Library/Logs/factory/factory-auth.log</string>
+</dict>
+</plist>
