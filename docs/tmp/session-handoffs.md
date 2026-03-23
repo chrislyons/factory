@@ -355,9 +355,36 @@ EXIT CONDITION: All 12 launchd plists created and loaded. All services running o
 
 ---
 
-## Session 4: Stabilization, Conversational Design, Watchdog, Docs (Phase 2c.8-2c.11)
+## Session 4: Stabilization, Conversational Design, Watchdog, Docs (Phase 2c.8-2c.11) — COMPLETE
+
+**Status:** Completed 2026-03-23. Sprint report: FCT039. Commits: `e06f3d0`, `21cd5b3` (factory), `4943496` (blackbox).
 
 **Run from:** Cloudkicker, `~/dev/factory/` with `--add-dir ~/dev/blackbox`
+
+**What was done:**
+- Identity anchoring deployed (identity_files + IDENTITY BOUNDARY prompts) for all 3 agents
+- Agent sync timeout fixed: 30s→3s per agent (was causing 90s unresponsive cycles)
+- DM routing fix: `get_dm_agent()` regression from SCP overwrite — fixed to all agents
+- Blackbox services stopped, disabled, ports clear. `/home/nesbitt/projects/ig88/` removed.
+- RP5 watchdog deployed with cron (*/2, 8 endpoints, Matrix alerts)
+- Graphiti token rotated via BWS web vault
+- Documentation: factory/CLAUDE.md, blackbox/CLAUDE.md, Makefile, FCT029, FCT038, FCT039, MEMORY.md
+- All 3 agents confirmed responding via Matrix DM
+
+**Deferred:**
+- coord sync still broken (approval room only, low priority)
+- Jupiter MCP tools not wired to agent sessions (Phase C)
+- GitHub SSH key on Whitebox
+- BWS kebab-case audit
+- Watchdog SSH checks (Blackbox→Whitebox key auth not set up)
+
+**Important for future sessions:**
+- Whitebox coordinator source DIVERGES from Cloudkicker. Never SCP coordinator.rs blindly — apply targeted fixes via python3 on Whitebox.
+- BWS machine account is READ-ONLY. Use Bitwarden web vault to edit secrets.
+- Coordinator plist label: `com.bootindustries.coordinator-rs` (not `com.factory.coordinator`)
+- Agent sync timeout is 3s (Some(3000)) — don't revert to None (30s long-poll)
+
+**Original handoff prompt (for reference):**
 
 ```
 You are executing Session 4 of FCT033 — stabilization, conversational multi-agent design, RP5 watchdog deployment, and documentation updates.
