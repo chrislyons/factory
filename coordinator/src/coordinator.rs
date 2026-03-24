@@ -1233,6 +1233,17 @@ async fn dispatch_to_agent(
             if res.subtype == "error" {
                 let err_str = res.result.trim().to_string();
                 if !err_str.is_empty() {
+                    // If the relay loop already delivered a successful response this turn,
+                    // the error is a trailing artifact (e.g. session init noise after recovery).
+                    // Suppress it — the turn already completed successfully.
+                    let relay_delivered = state.sessions.get(agent_name)
+                        .map(|s| s.relay_delivered)
+                        .unwrap_or(false);
+                    if relay_delivered {
+                        warn!("[{}] Suppressing subtype=error — relay already delivered this turn: {}", agent_name, err_str);
+                        return;
+                    }
+
                     let is_auth_error = err_str.to_lowercase().contains("invalid api key")
                         || err_str.to_lowercase().contains("invalid_api_key")
                         || err_str.to_lowercase().contains("authentication")
