@@ -101,3 +101,14 @@ factory/
 **Caddy binary:** Whitebox runs `~/bin/caddy-forward-auth` (xcaddy-built with forward_auth support). Plist updated. Homebrew caddy kept as fallback at `/opt/homebrew/bin/caddy`.
 
 **Remaining open:** F-04–F-25 (Rust changes, 0.0.0.0 binding, etc.) — see FCT040 for full list.
+
+## Resilience Notes (FCT041)
+
+**Power outage hardening — 2026-03-24:**
+
+- **RunAtLoad** added to all 12 bootindustries LaunchAgents — Whitebox now self-heals after reboot
+- **Pantalaimon** (`com.pantalaimon`) already had RunAtLoad + KeepAlive (separate plist, not in plists/)
+- **Coordinator error relay** is now context-aware: auth errors suppressed during network degradation, flushed as single summary on recovery; non-auth errors always relay
+- **Sync backoff**: exponential 1s→16s on consecutive failures (was: 3s flat with no backoff)
+- **HUD label**: "Whitebox Status HUD" (was "Blackbox")
+- **Deferred**: CircuitBreaker wiring to send path, task lease persistence, startup ordering (WaitForDependencies), ThrottleInterval tuning

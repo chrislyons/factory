@@ -4,12 +4,13 @@ Project documentation index for factory.
 
 ## Recent Documents
 
+- [[FCT041 Power Outage Post-Mortem and Resilience Hardening]]
+- [[FCT040 Red-Team Security Audit — Auth, Coordinator, and Infrastructure]]
 - [[FCT039 Stream 2 Sprint Report — Agent Readiness, Paper Trading, and Infrastructure]]
 - [[FCT038 Conversational Room Behavior — Design Spec]]
 - [[FCT037 Phase D Sprint Report — Session 4 Stabilization and Blackbox Retirement]]
 - [[FCT036 Phase C Sprint Report — Whitebox Migration Execution]]
 - [[FCT033 Definitive Execution Plan — Agent Equipping, Blackbox Retirement, and Trading Validation]]
-- [[FCT032 Strategy Vet Research Vault Findings vs Compiled Assessment]]
 
 ## All Documents
 
@@ -52,6 +53,8 @@ Project documentation index for factory.
 - [[FCT037 Phase D Sprint Report — Session 4 Stabilization and Blackbox Retirement]]
 - [[FCT038 Conversational Room Behavior — Design Spec]]
 - [[FCT039 Stream 2 Sprint Report — Agent Readiness, Paper Trading, and Infrastructure]]
+- [[FCT040 Red-Team Security Audit — Auth, Coordinator, and Infrastructure]]
+- [[FCT041 Power Outage Post-Mortem and Resilience Hardening]]
 
 ## Navigation
 
@@ -65,4 +68,4 @@ Project documentation index for factory.
 
 ---
 
-**Last Generated:** 2026-03-23
+**Last Generated:** 2026-03-24
