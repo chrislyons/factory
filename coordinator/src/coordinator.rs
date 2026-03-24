@@ -2542,7 +2542,7 @@ async fn send_startup_message(state: &CoordinatorState) {
     };
 
     let agent_count = state.sessions.len();
-    let msg = format!("Blackbox online (coordinator-rs v{}, {} agents)", env!("CARGO_PKG_VERSION"), agent_count);
+    let msg = format!("Whitebox online (coordinator-rs v{}, {} agents)", env!("CARGO_PKG_VERSION"), agent_count);
 
     match client.send_message(STATUS_ROOM_ID, &msg, None).await {
         Ok(_) => info!("Startup message sent to Status room"),
