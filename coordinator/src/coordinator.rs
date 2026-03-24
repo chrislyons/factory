@@ -248,6 +248,12 @@ struct CoordinatorState {
     task_lease: TaskLeaseManager,
     /// Slash command rate limiter (per-user)
     command_rate_limiter: ApprovalRateLimiter,
+    /// Consecutive sync failures across all agents — used to detect network outages
+    sync_consecutive_failures: u32,
+    /// Timestamp of last successful sync (any agent)
+    last_sync_success: Instant,
+    /// Per-agent suppressed error counts during network degradation (agent -> count)
+    suppressed_error_counts: HashMap<String, u32>,
 }
 
 impl CoordinatorState {
@@ -321,6 +327,9 @@ impl CoordinatorState {
             run_event_log: RunEventLog::new(PathBuf::from(format!("{}/runs", state_dir))),
             task_lease: TaskLeaseManager::new(std::time::Duration::from_secs(300)),
             command_rate_limiter: ApprovalRateLimiter::new(10, 60_000),
+            sync_consecutive_failures: 0,
+            last_sync_success: Instant::now(),
+            suppressed_error_counts: HashMap::new(),
         })
     }
 
@@ -859,10 +868,20 @@ async fn poll_once(state: &mut CoordinatorState) {
         let sync_result = matrix_client.sync(since.as_deref(), filter_id.as_deref(), None).await;
         match sync_result {
             Err(e) => {
-                warn!("[{}] Sync failed: {}", agent_name, e);
+                state.sync_consecutive_failures += 1;
+                // Exponential backoff: 1s, 2s, 4s, 8s, 16s (capped)
+                let backoff_secs = (1u64 << state.sync_consecutive_failures.min(4)) as u64;
+                warn!("[{}] Sync failed (failure #{}, backoff {}s): {}", agent_name, state.sync_consecutive_failures, backoff_secs, e);
+                tokio::time::sleep(Duration::from_secs(backoff_secs)).await;
                 continue;
             }
             Ok(sync_resp) => {
+                // Network recovered — reset degradation state and flush suppressed counts
+                if state.sync_consecutive_failures > 0 {
+                    info!("Network recovered after {} consecutive sync failures", state.sync_consecutive_failures);
+                    state.sync_consecutive_failures = 0;
+                }
+                state.last_sync_success = Instant::now();
                 // Update sync token
                 let next_batch = sync_resp.next_batch.clone();
                 let session = state.sessions.get_mut(&agent_name).unwrap();
@@ -1294,8 +1313,41 @@ async fn dispatch_to_agent(
                 proc.health.record_incident(incident, Some(&e.to_string()), None);
             }
 
-            let msg = format!("_(Error: {})_", e);
-            let _ = matrix_client.send_message(room_id, &msg, None).await;
+            // Context-aware error relay:
+            // During a network outage (sync_consecutive_failures > 0), auth errors are
+            // almost certainly caused by the outage rather than a genuine agent problem.
+            // Suppress them and send a single summary when the network recovers instead.
+            let err_str = e.to_string();
+            let is_auth_error = err_str.contains("invalid api key")
+                || err_str.contains("invalid_api_key")
+                || err_str.contains("authentication")
+                || err_str.contains("401")
+                || err_str.contains("403")
+                || err_str.contains("Unauthorized")
+                || err_str.contains("Permission denied");
+            let network_degraded = state.sync_consecutive_failures > 0
+                || state.last_sync_success.elapsed().as_secs() > 30;
+
+            if network_degraded && is_auth_error {
+                // Suppress — count for later summary
+                let count = state.suppressed_error_counts
+                    .entry(agent_name.to_string())
+                    .or_insert(0);
+                *count += 1;
+                warn!("[{}] Suppressing auth error during network degradation (suppressed: {}): {}", agent_name, count, err_str);
+            } else {
+                // Network healthy or non-auth error — relay immediately
+                // Flush any suppressed count for this agent first
+                if let Some(suppressed) = state.suppressed_error_counts.remove(agent_name) {
+                    let summary = format!(
+                        "_(Note: {} auth error(s) suppressed during recent network outage)_",
+                        suppressed
+                    );
+                    let _ = matrix_client.send_message(room_id, &summary, None).await;
+                }
+                let msg = format!("_(Error: {})_", e);
+                let _ = matrix_client.send_message(room_id, &msg, None).await;
+            }
         }
     }
 }
@@ -2612,7 +2664,7 @@ async fn update_status_hud(state: &mut CoordinatorState) {
 
     let mut lines = vec![
         format!(
-            "**Blackbox Status HUD** (coordinator-rs v{})",
+            "**Whitebox Status HUD** (coordinator-rs v{})",
             env!("CARGO_PKG_VERSION")
         ),
         String::new(),
