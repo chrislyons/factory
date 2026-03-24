@@ -1871,8 +1871,20 @@ async fn drain_agent_activity(state: &mut CoordinatorState) {
         // Skip if relay loop already delivered the final response for this turn —
         // flag-based check is deterministic, unlike content-hash dedup which breaks
         // on truncation differences or partial text blocks.
-        if !activity.text_blocks.is_empty() && !relay_delivered {
-            let text = activity.text_blocks.join("\n\n");
+        // Also filter auth error text blocks — these are emitted by the CLI during
+        // session init/resume and are not meaningful agent output.
+        let filtered_blocks: Vec<String> = activity.text_blocks.iter()
+            .filter(|t| {
+                let lower = t.to_lowercase();
+                !lower.contains("invalid api key")
+                    && !lower.contains("invalid_api_key")
+                    && !lower.contains("authentication_error")
+                    && !(lower.contains("401") && lower.contains("unauthorized"))
+            })
+            .cloned()
+            .collect();
+        if !filtered_blocks.is_empty() && !relay_delivered {
+            let text = filtered_blocks.join("\n\n");
             let truncated = if text.len() > 1000 {
                 format!("{}…", &text[..1000])
             } else {
