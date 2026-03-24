@@ -1228,6 +1228,42 @@ async fn dispatch_to_agent(
 
     match result {
         Ok(res) => {
+            // If Claude returned subtype="error", route through the context-aware error relay
+            // rather than broadcasting raw error text as a normal agent response.
+            if res.subtype == "error" {
+                let err_str = res.result.trim().to_string();
+                if !err_str.is_empty() {
+                    let is_auth_error = err_str.to_lowercase().contains("invalid api key")
+                        || err_str.to_lowercase().contains("invalid_api_key")
+                        || err_str.to_lowercase().contains("authentication")
+                        || err_str.contains("401")
+                        || err_str.contains("403")
+                        || err_str.to_lowercase().contains("unauthorized");
+                    let network_degraded = state.sync_consecutive_failures > 0
+                        || state.last_sync_success.elapsed().as_secs() > 30;
+
+                    if network_degraded && is_auth_error {
+                        let count = state.suppressed_error_counts
+                            .entry(agent_name.to_string())
+                            .or_insert(0);
+                        *count += 1;
+                        warn!("[{}] Suppressing auth error (subtype=error) during network degradation (suppressed: {}): {}", agent_name, count, err_str);
+                    } else {
+                        if let Some(suppressed) = state.suppressed_error_counts.remove(agent_name) {
+                            let summary = format!(
+                                "_(Note: {} auth error(s) suppressed during recent network outage)_",
+                                suppressed
+                            );
+                            let _ = matrix_client.send_message(room_id, &summary, None).await;
+                        }
+                        error!("[{}] Agent returned subtype=error: {}", agent_name, err_str);
+                        let msg = format!("_(Error: {})_", err_str);
+                        let _ = matrix_client.send_message(room_id, &msg, None).await;
+                    }
+                }
+                return;
+            }
+
             if !res.result.trim().is_empty() {
                 // Relay loop output dedup — check if this response matches recent agent output
                 if state.is_duplicate_output(room_id, &res.result) {
