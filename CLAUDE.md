@@ -108,7 +108,8 @@ factory/
 
 - **RunAtLoad** added to all 12 bootindustries LaunchAgents — Whitebox now self-heals after reboot
 - **Pantalaimon** (`com.pantalaimon`) already had RunAtLoad + KeepAlive (separate plist, not in plists/)
-- **Coordinator error relay** is now context-aware: auth errors suppressed during network degradation, flushed as single summary on recovery; non-auth errors always relay
+- **Coordinator error relay** hardened: centralized `is_suppressed_error()` filter covers all 4 output paths (Ok result, subtype=error, activity drain, timer); CLI auth/init errors (invalid API key, authentication_error, fix external API key) are always suppressed regardless of network state
+- **Thread strategy overhaul**: DM rooms use plain messages (no threading — avoids MSC3440 relation conflicts); group rooms thread correctly with fallback to existing thread root when incoming event already has a relation; activity drain skipped entirely for DMs
 - **Sync backoff**: exponential 1s→16s on consecutive failures (was: 3s flat with no backoff)
 - **HUD label**: "Whitebox Status HUD" (was "Blackbox")
 - **Deferred**: CircuitBreaker wiring to send path, task lease persistence, startup ordering (WaitForDependencies), ThrottleInterval tuning

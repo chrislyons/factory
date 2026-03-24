@@ -164,6 +164,17 @@ fn generate_thread_id() -> String {
     id
 }
 
+/// Returns true if the text looks like a CLI auth/init error that should
+/// never be relayed to Matrix rooms.
+fn is_suppressed_error(text: &str) -> bool {
+    let lower = text.to_lowercase();
+    lower.contains("invalid api key")
+        || lower.contains("invalid_api_key")
+        || lower.contains("authentication_error")
+        || lower.contains("fix external api key")
+        || (lower.contains("401") && lower.contains("unauthorized"))
+}
+
 /// Agent output hash entry for relay loop output dedup.
 #[derive(Debug, Clone)]
 struct OutputHashEntry {
@@ -1206,7 +1217,29 @@ async fn dispatch_to_agent(
     session.current_thread_id = Some(dispatch_thread_id);
     session.thread_header_posted = false;
     session.relay_delivered = false;
-    session.current_thread_root_event_id = Some(event.event_id.clone());
+    // DM rooms: no threading (visual noise, relation conflicts per MSC3440)
+    // Group rooms: thread off the user's message, but guard against relation errors
+    let is_dm = state.dm_room_cache.get(room_id).copied().unwrap_or(false);
+    if is_dm {
+        session.current_thread_root_event_id = None;
+    } else {
+        // Check if the incoming event already has a relation (MSC3440 forbids threading off relations)
+        let has_relation = event.content.get("m.relates_to").is_some();
+        if has_relation {
+            // Try to use the existing thread root if this is itself a thread reply
+            let existing_thread_root = event.content.get("m.relates_to")
+                .and_then(|r| r.get("rel_type"))
+                .and_then(|rt| rt.as_str())
+                .filter(|&rt| rt == "m.thread")
+                .and_then(|_| event.content.get("m.relates_to"))
+                .and_then(|r| r.get("event_id"))
+                .and_then(|eid| eid.as_str())
+                .map(|s| s.to_string());
+            session.current_thread_root_event_id = existing_thread_root;
+        } else {
+            session.current_thread_root_event_id = Some(event.event_id.clone());
+        }
+    }
 
     let timeout_ms = state.config.settings.claude_timeout_ms;
     let result = send_to_agent(
@@ -1244,9 +1277,13 @@ async fn dispatch_to_agent(
                         return;
                     }
 
-                    let is_auth_error = err_str.to_lowercase().contains("invalid api key")
-                        || err_str.to_lowercase().contains("invalid_api_key")
-                        || err_str.to_lowercase().contains("authentication")
+                    // Always suppress CLI auth/init errors regardless of network state
+                    if is_suppressed_error(&err_str) {
+                        warn!("[{}] Suppressed CLI error in subtype=error: {}", agent_name, err_str);
+                        return;
+                    }
+
+                    let is_auth_error = err_str.to_lowercase().contains("authentication")
                         || err_str.contains("401")
                         || err_str.contains("403")
                         || err_str.to_lowercase().contains("unauthorized");
@@ -1276,6 +1313,12 @@ async fn dispatch_to_agent(
             }
 
             if !res.result.trim().is_empty() {
+                // Suppress CLI auth/init errors that leak through with subtype=success
+                if is_suppressed_error(&res.result) {
+                    warn!("[{}] Suppressed CLI error in Ok result text: {}", agent_name, res.result);
+                    return;
+                }
+
                 // Relay loop output dedup — check if this response matches recent agent output
                 if state.is_duplicate_output(room_id, &res.result) {
                     warn!(
@@ -1360,14 +1403,16 @@ async fn dispatch_to_agent(
                 proc.health.record_incident(incident, Some(&e.to_string()), None);
             }
 
-            // Context-aware error relay:
-            // During a network outage (sync_consecutive_failures > 0), auth errors are
-            // almost certainly caused by the outage rather than a genuine agent problem.
-            // Suppress them and send a single summary when the network recovers instead.
+            // Always suppress CLI auth/init errors — these are never useful to relay
             let err_str = e.to_string();
-            let is_auth_error = err_str.contains("invalid api key")
-                || err_str.contains("invalid_api_key")
-                || err_str.contains("authentication")
+            if is_suppressed_error(&err_str) {
+                warn!("[{}] Suppressed CLI error in Err branch: {}", agent_name, err_str);
+                return;
+            }
+
+            // Context-aware error relay for remaining errors:
+            // During a network outage, auth-adjacent errors are suppressed and summarized on recovery.
+            let is_auth_error = err_str.contains("authentication")
                 || err_str.contains("401")
                 || err_str.contains("403")
                 || err_str.contains("Unauthorized")
@@ -1844,6 +1889,12 @@ async fn drain_agent_activity(state: &mut CoordinatorState) {
     }
 
     for activity in activities {
+        // In DMs, skip verbose tool activity thread posts entirely — they add noise
+        let is_dm = state.dm_room_cache.get(&activity.room_id).copied().unwrap_or(false);
+        if is_dm {
+            continue;
+        }
+
         // Extract session fields in a scoped borrow, then drop before async work
         let (is_first, thread_id, relay_delivered, token, user_id) = {
             let session = match state.sessions.get_mut(&activity.agent_name) {
@@ -1875,11 +1926,12 @@ async fn drain_agent_activity(state: &mut CoordinatorState) {
         // session init/resume and are not meaningful agent output.
         let filtered_blocks: Vec<String> = activity.text_blocks.iter()
             .filter(|t| {
-                let lower = t.to_lowercase();
-                !lower.contains("invalid api key")
-                    && !lower.contains("invalid_api_key")
-                    && !lower.contains("authentication_error")
-                    && !(lower.contains("401") && lower.contains("unauthorized"))
+                if is_suppressed_error(t) {
+                    warn!("[{}] Suppressed CLI error in activity text_block: {}", activity.agent_name, t);
+                    false
+                } else {
+                    true
+                }
             })
             .cloned()
             .collect();
@@ -2985,7 +3037,7 @@ async fn check_and_fire_timers(state: &mut CoordinatorState) {
 
         match result {
             Ok(res) => {
-                if !res.result.trim().is_empty() {
+                if !res.result.trim().is_empty() && !is_suppressed_error(&res.result) {
                     let pantalaimon_url = state.config.settings.pantalaimon_url.clone();
                     let session = state.sessions.get(&t.agent).unwrap();
                     let client = MatrixClient::new(
@@ -2996,6 +3048,8 @@ async fn check_and_fire_timers(state: &mut CoordinatorState) {
                     if let Ok(c) = client {
                         let _ = c.send_message(&t.room_id, &res.result, None).await;
                     }
+                } else if is_suppressed_error(&res.result) {
+                    warn!("[{}] Suppressed CLI error in timer result: {}", t.agent, res.result);
                 }
             }
             Err(e) => {
@@ -3318,4 +3372,33 @@ fn now_ms() -> u64 {
         .duration_since(std::time::UNIX_EPOCH)
         .unwrap_or_default()
         .as_millis() as u64
+}
+
+// ============================================================================
+// Tests
+// ============================================================================
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn suppressed_error_catches_invalid_api_key() {
+        assert!(is_suppressed_error("Invalid API key · Fix external API key"));
+        assert!(is_suppressed_error("invalid api key provided"));
+        assert!(is_suppressed_error("invalid_api_key"));
+        assert!(is_suppressed_error("authentication_error from provider"));
+        assert!(is_suppressed_error("fix external api key"));
+        assert!(is_suppressed_error("HTTP 401 Unauthorized"));
+    }
+
+    #[test]
+    fn suppressed_error_allows_normal_text() {
+        assert!(!is_suppressed_error("Hello, how can I help?"));
+        assert!(!is_suppressed_error("The API returned a 200 OK"));
+        assert!(!is_suppressed_error(""));
+        assert!(!is_suppressed_error("Error: file not found"));
+        // 401 alone without "unauthorized" should pass through
+        assert!(!is_suppressed_error("status code 401"));
+    }
 }
