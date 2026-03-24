@@ -4,6 +4,7 @@ Project documentation index for factory.
 
 ## Recent Documents
 
+- [[FCT042 Error Filter Centralization and Thread Strategy Overhaul]]
 - [[FCT041 Power Outage Post-Mortem and Resilience Hardening]]
 - [[FCT040 Red-Team Security Audit — Auth, Coordinator, and Infrastructure]]
 - [[FCT039 Stream 2 Sprint Report — Agent Readiness, Paper Trading, and Infrastructure]]
@@ -55,6 +56,7 @@ Project documentation index for factory.
 - [[FCT039 Stream 2 Sprint Report — Agent Readiness, Paper Trading, and Infrastructure]]
 - [[FCT040 Red-Team Security Audit — Auth, Coordinator, and Infrastructure]]
 - [[FCT041 Power Outage Post-Mortem and Resilience Hardening]]
+- [[FCT042 Error Filter Centralization and Thread Strategy Overhaul]]
 
 ## Navigation
 
