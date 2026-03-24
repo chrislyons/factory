@@ -102,6 +102,8 @@ factory/
 
 **Remaining open:** F-04–F-25 (Rust changes, 0.0.0.0 binding, etc.) — see FCT040 for full list.
 
+**Hook: `ps -E` prevention (2026-03-24):** `block-secrets.sh` blocks `ps -E`, `ps eww`, and `/proc/*/environ` reads to prevent process environment variable exposure. Deployed on both Cloudkicker and Whitebox.
+
 ## Resilience Notes (FCT041)
 
 **Power outage hardening — 2026-03-24:**
