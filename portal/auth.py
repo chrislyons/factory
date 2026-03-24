@@ -24,10 +24,11 @@ import bcrypt
 PORT = 41914
 COOKIE_NAME = "factory_session"
 COOKIE_MAX_AGE = 30 * 24 * 3600  # 30 days
-BCRYPT_HASH = os.environ.get(
-    "AUTH_BCRYPT_HASH",
-    "$2a$14$EpVwjmAQzSbVuQwxr3MFhunjzx2HnUqRJBgjC8qKVC5GOb9.ypEKm",
-)
+BCRYPT_HASH = os.environ.get("AUTH_BCRYPT_HASH", "")
+if not BCRYPT_HASH:
+    import sys
+    print("FATAL: AUTH_BCRYPT_HASH environment variable is required.", file=sys.stderr)
+    sys.exit(1)
 AUTH_USER = os.environ.get("AUTH_USER", "nesbitt")
 SECRET_KEY = os.environ.get("AUTH_SECRET", "")
 if not SECRET_KEY:

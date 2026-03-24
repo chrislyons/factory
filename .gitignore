@@ -15,3 +15,7 @@ portal/.env
 jobs/
 jobs.json
 jobs.json.bak-*
+scripts/matrix-cross-sign/node_modules/
+
+# Plists contain BWS secret UUIDs — never commit
+plists/

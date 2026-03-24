@@ -20,10 +20,12 @@ send_matrix() {
   [[ -z "$TOKEN" ]] && return 0
   local txn_id
   txn_id="wd_$(date +%s%N)"
+  local body
+  body=$(jq -n --arg m "$msg" '{"msgtype":"m.text","body":$m}')
   curl -sf -X PUT \
     -H "Authorization: Bearer $TOKEN" \
     -H "Content-Type: application/json" \
-    -d "{\"msgtype\":\"m.text\",\"body\":\"$msg\"}" \
+    -d "$body" \
     "https://matrix.org/_matrix/client/v3/rooms/$ROOM_ID_ENC/send/m.room.message/$txn_id" \
     >/dev/null 2>&1 || true
 }
@@ -71,7 +73,7 @@ curl -sf -o /dev/null --max-time 3 "http://$WHITEBOX:8444/sse" 2>/dev/null || ec
 check_service "graphiti" "$ok" "exit-$ec"
 
 # Pantalaimon TCP (:8009) — Pan binds to loopback on Whitebox, check via SSH
-if ssh -o ConnectTimeout=5 -o BatchMode=yes -o StrictHostKeyChecking=no whitebox '(echo >/dev/tcp/127.0.0.1/8009) 2>/dev/null' 2>/dev/null; then
+if ssh -o ConnectTimeout=5 -o BatchMode=yes -o StrictHostKeyChecking=accept-new whitebox '(echo >/dev/tcp/127.0.0.1/8009) 2>/dev/null' 2>/dev/null; then
   ok=1
 else
   ok=0
@@ -85,7 +87,7 @@ code=$(curl -sf -o /dev/null -w '%{http_code}' --max-time 5 \
 check_service "portal" "$ok" "$code"
 
 # Coordinator log freshness (via SSH)
-fresh=$(ssh -o ConnectTimeout=5 -o BatchMode=yes -o StrictHostKeyChecking=no whitebox \
+fresh=$(ssh -o ConnectTimeout=5 -o BatchMode=yes -o StrictHostKeyChecking=accept-new whitebox \
   'find ~/Library/Logs/factory/coordinator.log -mmin -5 2>/dev/null' 2>/dev/null || true)
 [[ -n "$fresh" ]] && ok=1 || ok=0
 check_service "coordinator-log" "$ok" "stale"
