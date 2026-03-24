@@ -4,12 +4,12 @@ Project documentation index for factory.
 
 ## Recent Documents
 
+- [[FCT039 Stream 2 Sprint Report — Agent Readiness, Paper Trading, and Infrastructure]]
+- [[FCT038 Conversational Room Behavior — Design Spec]]
+- [[FCT037 Phase D Sprint Report — Session 4 Stabilization and Blackbox Retirement]]
+- [[FCT036 Phase C Sprint Report — Whitebox Migration Execution]]
 - [[FCT033 Definitive Execution Plan — Agent Equipping, Blackbox Retirement, and Trading Validation]]
 - [[FCT032 Strategy Vet Research Vault Findings vs Compiled Assessment]]
-- [[FCT031 Next Steps Forward]]
-- [[FCT030 FCT029 Sprint Completion — Port Allocation, GSD SQLite Design, and Git Housekeeping]]
-- [[FCT029 Factory Consolidated Plan — Architecture, Recovery, and Roadmap]]
-- [[FCT028 v0 Factory Jobs Audit Report]]
 
 ## All Documents
 
@@ -46,6 +46,12 @@ Project documentation index for factory.
 - [[FCT031 Next Steps Forward]]
 - [[FCT032 Strategy Vet Research Vault Findings vs Compiled Assessment]]
 - [[FCT033 Definitive Execution Plan — Agent Equipping, Blackbox Retirement, and Trading Validation]]
+- [[FCT034 Phase A Sprint Report — Agent Health Restoration]]
+- [[FCT035 Phase B Sprint Report — BWS Setup and Secret Rotation]]
+- [[FCT036 Phase C Sprint Report — Whitebox Migration Execution]]
+- [[FCT037 Phase D Sprint Report — Session 4 Stabilization and Blackbox Retirement]]
+- [[FCT038 Conversational Room Behavior — Design Spec]]
+- [[FCT039 Stream 2 Sprint Report — Agent Readiness, Paper Trading, and Infrastructure]]
 
 ## Navigation
 
