@@ -1,0 +1,20 @@
+port,service,host,bind,status,launchd_label,notes
+6333,Qdrant HTTP,whitebox,0.0.0.0,live,,Vector DB (SSH tunnel from Lima VM)
+6334,Qdrant gRPC,whitebox,0.0.0.0,live,,Vector DB gRPC (SSH tunnel from Lima VM)
+6379,FalkorDB,whitebox,127.0.0.1,live,,Graph DB for Graphiti (Lima VM)
+8009,Pantalaimon,whitebox,127.0.0.1,live,,Matrix E2EE proxy
+8440,Matrix MCP Coord,whitebox,0.0.0.0,live,com.bootindustries.matrix-mcp-coord,@coord:matrix.org via Pan
+8442,Qdrant MCP (projects-vault),whitebox,0.0.0.0,live,com.bootindustries.qdrant-mcp,SSE MCP daemon
+8443,Research MCP (research-vault),whitebox,0.0.0.0,live,com.bootindustries.research-mcp,SSE MCP daemon
+8444,Graphiti MCP,whitebox,0.0.0.0,live,,Knowledge graph MCP (SSH tunnel from Lima VM)
+8448,Matrix MCP Boot,whitebox,0.0.0.0,live,com.bootindustries.matrix-mcp-boot,@boot.industries:matrix.org via Pan
+41910,Portal Caddy,whitebox,0.0.0.0,live,com.bootindustries.portal-caddy,Static site + reverse proxy
+41911,GSD sidecar,whitebox,127.0.0.1,live,com.bootindustries.gsd-sidecar,jobs.json + status API
+41914,Auth sidecar,whitebox,127.0.0.1,live,com.bootindustries.factory-auth,Cookie auth (bcrypt + HMAC)
+41920-41939,Preview slots,whitebox,,reserved,,A/B deploys and version comparison
+41940-41949,Development,whitebox,,reserved,,Local dev servers
+41950-41959,Coordinator HTTP API,whitebox,,planned,,coordinator-rs REST endpoints
+41960,MLX-LM Nanbeige 3B,whitebox,0.0.0.0,live,com.bootindustries.mlx-lm-41960,Boot + IG-88 fallback
+41961,MLX-LM Qwen 4B,whitebox,0.0.0.0,live,com.bootindustries.mlx-lm-41961,Kelk + expert queries
+41962,MLX-LM LFM Thinking,whitebox,0.0.0.0,live,com.bootindustries.mlx-lm-41962,Nan lightweight
+41963,MLX-LM Qwen 9B,whitebox,0.0.0.0,live,com.bootindustries.mlx-lm-41963,On-demand reasoning (heavy)
