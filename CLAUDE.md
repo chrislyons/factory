@@ -95,12 +95,9 @@ factory/
 | ✅ Fixed | F-17: `StrictHostKeyChecking=no` | Changed to `accept-new` |
 | ✅ Fixed | F-24: Docker `:latest` tag | Pinned to sha256 digest |
 | ✅ Fixed | F-25: `npm install` in deploy script | Changed to `npm ci` |
-| ⏳ Deferred | F-03: Caddy cookie presence ≠ validity | Needs Caddy upgrade / nginx migration |
-| ⏳ Deferred | F-01 history purge | `git filter-repo` + force-push — confirm with user first |
+| ✅ Fixed | F-03: Caddy cookie bypass → forward_auth | xcaddy build + Caddyfile rewrite |
+| ⏳ Deferred | F-01 history purge | `git filter-repo` would rewrite all SHAs — deferred as low-risk (UUIDs only) |
 
-**Whitebox deploy required after `git pull`:**
-1. `launchctl kickstart -k gui/501/com.bootindustries.factory-auth` — auth.py fix
-2. `make sync` from `portal/` — login.html fix
-3. `ssh blackbox "cat > ~/scripts/watchdog.sh" < scripts/watchdog.sh` — watchdog fix
+**Caddy binary:** Whitebox runs `~/bin/caddy-forward-auth` (xcaddy-built with forward_auth support). Plist updated. Homebrew caddy kept as fallback at `/opt/homebrew/bin/caddy`.
 
-**Critical open issue (F-03):** Portal auth gate validates cookie *presence* only — any `factory_session=x` bypasses login redirect. Tailscale isolation is the only real access control until Caddy is upgraded. See FCT040 for full deferred item list.
+**Remaining open:** F-04–F-25 (Rust changes, 0.0.0.0 binding, etc.) — see FCT040 for full list.

@@ -656,7 +656,7 @@ Until resolved, the portal relies on Tailscale network isolation as its primary 
 
 ## Remediation Status (2026-03-24)
 
-7 of 25 findings remediated in this session. Commits: `fix(auth)`, `fix(portal)`, `fix(watchdog)`, `fix(infra)`, `chore(security)`.
+8 of 25 findings remediated in this session. Commits: `fix(auth)` x2, `fix(portal)`, `fix(watchdog)`, `fix(infra)`, `chore(security)`.
 
 | ID | Finding | Status | Commit scope |
 |----|---------|--------|-------------|
@@ -667,7 +667,7 @@ Until resolved, the portal relies on Tailscale network isolation as its primary 
 | F-17 | StrictHostKeyChecking=no | ✅ Fixed — accept-new | `fix(watchdog)` |
 | F-24 | Docker :latest tag | ✅ Fixed — sha256 pinned | `fix(infra)` |
 | F-25 | npm install (no lockfile) | ✅ Fixed — npm ci | `fix(infra)` |
-| F-03 | Caddy auth bypass (root cause) | ⏳ Deferred — needs Caddy upgrade | — |
+| F-03 | Caddy cookie bypass → forward_auth | ✅ Fixed — xcaddy build + Caddyfile rewrite | `fix(auth)` |
 | F-04 | Delegate symlink traversal | ⏳ Deferred — Rust + rebuild | — |
 | F-05 | Frozen harness bypass | ⏳ Deferred — Rust + rebuild | — |
 | F-06 | --permission-mode auto | ⏳ Deferred — architectural | — |
@@ -686,4 +686,6 @@ Until resolved, the portal relies on Tailscale network isolation as its primary 
 | F-22 | glob_match single-star | ⏳ Deferred — Rust + rebuild | — |
 | F-23 | DM routing fragile design | ⏳ Deferred — architectural | — |
 
-**History purge (F-01 completion):** Requires user confirmation before executing `git filter-repo --path plists/ --invert-paths --force` + force-push + Whitebox re-sync.
+**History purge (F-01):** Deferred — `git filter-repo` rewrites all commit SHAs on main, breaking clones on Whitebox and any other checkouts. Risk is low (BWS UUIDs are lookup keys, not secrets; machine account token was already rotated 2026-03-23). Plists are untracked going forward.
+
+**Caddy binary (F-03):** Whitebox now runs `~/bin/caddy-forward-auth` (xcaddy-built, includes `forward_auth` directive). Plist `com.bootindustries.portal-caddy` updated to point to this binary. Original Homebrew caddy at `/opt/homebrew/bin/caddy` kept as rollback.
