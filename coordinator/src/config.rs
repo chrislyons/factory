@@ -112,6 +112,16 @@ pub struct Settings {
 
     #[serde(default)]
     pub e2ee: Option<E2eeSettings>,
+
+    // Infrastructure health check targets (platform-aware, FCT043)
+    #[serde(default)]
+    pub infra_docker_containers: Option<Vec<String>>,
+    #[serde(default)]
+    pub infra_systemd_services: Option<Vec<String>>,
+    #[serde(default)]
+    pub infra_launchd_services: Option<Vec<String>>,
+    #[serde(default)]
+    pub infra_tailscale_peers: Option<Vec<String>>,
 }
 
 #[derive(Debug, Clone, Deserialize)]

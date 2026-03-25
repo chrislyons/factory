@@ -113,3 +113,11 @@ factory/
 - **Sync backoff**: exponential 1s→16s on consecutive failures (was: 3s flat with no backoff)
 - **HUD label**: "Whitebox Status HUD" (was "Blackbox")
 - **Deferred**: CircuitBreaker wiring to send path, task lease persistence, startup ordering (WaitForDependencies), ThrottleInterval tuning
+
+## Matrix Mechanisms (FCT043)
+
+**Implemented 2026-03-24:**
+
+- **m.mentions**: `Mentions` struct in matrix_legacy.rs; approval requests ping `approval_owner`, all other messages emit empty `m.mentions: {}` (no pings); `send_message` and `send_thread_reply` accept `mentions: Option<&Mentions>`
+- **Task-per-thread anchors**: `send_anchor()` sends relation-free `m.notice`, coordinator threads off anchor event_id; eliminates MSC3440 relation conflicts permanently; DMs unchanged (no threading)
+- **Infra checks platform fix**: `infra.rs` now config-driven (`infra_docker_containers`, `infra_systemd_services`, `infra_launchd_services`, `infra_tailscale_peers` in Settings); binary resolution probes multiple paths; `check_launchd_services()` added for macOS; Whitebox agent-config.yaml needs `infra_launchd_services` populated

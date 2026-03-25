@@ -28,7 +28,7 @@ use crate::delegate;
 use crate::health::IncidentType;
 use crate::infra::InfraChecker;
 use crate::lifecycle::{AgentLifecycleManager, BreakerAction, TrustLevel};
-use crate::matrix::{MatrixClient, SyncTokenStore};
+use crate::matrix::{MatrixClient, Mentions, SyncTokenStore};
 use crate::memory;
 use crate::timer;
 
@@ -293,6 +293,8 @@ impl CoordinatorState {
         // Load coord token (env-only, no plaintext file fallback)
         let coord_token = std::env::var("MATRIX_TOKEN_PAN_COORD").ok();
 
+        let infra_checker = InfraChecker::new(&config.settings);
+
         Ok(Self {
             config,
             sessions: HashMap::new(),
@@ -318,7 +320,7 @@ impl CoordinatorState {
             // Phase 3
             status_hud_event_id: None,
             last_hud_update: Instant::now(),
-            infra_checker: InfraChecker::new(),
+            infra_checker,
             last_infra_check: Instant::now(),
             last_infra_health: None,
             identity_hashes: HashMap::new(),
@@ -1147,7 +1149,7 @@ async fn dispatch_to_agent(
         if let Ok(p) = proc {
             if !p.is_ready {
                 if let Err(e) = matrix_client
-                    .send_message(room_id, "_(Agent session starting…)_", None)
+                    .send_message(room_id, "_(Agent session starting…)_", None, None)
                     .await
                 {
                     warn!("[{}] Failed to send 'starting' message: {}", agent_name, e);
@@ -1218,26 +1220,23 @@ async fn dispatch_to_agent(
     session.thread_header_posted = false;
     session.relay_delivered = false;
     // DM rooms: no threading (visual noise, relation conflicts per MSC3440)
-    // Group rooms: thread off the user's message, but guard against relation errors
+    // Group rooms: task-per-thread anchor pattern — send a fresh m.notice anchor
+    // and thread off it. This avoids MSC3440 relation conflicts because the anchor
+    // is a new event we control, guaranteed relation-free.
     let is_dm = state.dm_room_cache.get(room_id).copied().unwrap_or(false);
     if is_dm {
         session.current_thread_root_event_id = None;
     } else {
-        // Check if the incoming event already has a relation (MSC3440 forbids threading off relations)
-        let has_relation = event.content.get("m.relates_to").is_some();
-        if has_relation {
-            // Try to use the existing thread root if this is itself a thread reply
-            let existing_thread_root = event.content.get("m.relates_to")
-                .and_then(|r| r.get("rel_type"))
-                .and_then(|rt| rt.as_str())
-                .filter(|&rt| rt == "m.thread")
-                .and_then(|_| event.content.get("m.relates_to"))
-                .and_then(|r| r.get("event_id"))
-                .and_then(|eid| eid.as_str())
-                .map(|s| s.to_string());
-            session.current_thread_root_event_id = existing_thread_root;
-        } else {
-            session.current_thread_root_event_id = Some(event.event_id.clone());
+        // Task-per-thread: send a clean anchor message, thread off it.
+        let anchor_body = format!("\u{26a1} {}", agent_name);
+        match matrix_client.send_anchor(room_id, &anchor_body).await {
+            Ok(anchor_event_id) => {
+                session.current_thread_root_event_id = Some(anchor_event_id);
+            }
+            Err(e) => {
+                warn!("[{}] Failed to send thread anchor, falling back to plain messages: {}", agent_name, e);
+                session.current_thread_root_event_id = None;
+            }
         }
     }
 
@@ -1302,11 +1301,11 @@ async fn dispatch_to_agent(
                                 "_(Note: {} auth error(s) suppressed during recent network outage)_",
                                 suppressed
                             );
-                            let _ = matrix_client.send_message(room_id, &summary, None).await;
+                            let _ = matrix_client.send_message(room_id, &summary, None, None).await;
                         }
                         error!("[{}] Agent returned subtype=error: {}", agent_name, err_str);
                         let msg = format!("_(Error: {})_", err_str);
-                        let _ = matrix_client.send_message(room_id, &msg, None).await;
+                        let _ = matrix_client.send_message(room_id, &msg, None, None).await;
                     }
                 }
                 return;
@@ -1352,9 +1351,9 @@ async fn dispatch_to_agent(
 
                 let session = state.sessions.get(agent_name).unwrap();
                 let send_result = if let Some(ref thread_root) = session.current_thread_root_event_id {
-                    matrix_client.send_thread_reply(room_id, thread_root, &res.result).await
+                    matrix_client.send_thread_reply(room_id, thread_root, &res.result, None).await
                 } else {
-                    matrix_client.send_message(room_id, &res.result, None).await
+                    matrix_client.send_message(room_id, &res.result, None, None).await
                 };
                 match send_result {
                     Ok(_event_id) => {
@@ -1435,10 +1434,10 @@ async fn dispatch_to_agent(
                         "_(Note: {} auth error(s) suppressed during recent network outage)_",
                         suppressed
                     );
-                    let _ = matrix_client.send_message(room_id, &summary, None).await;
+                    let _ = matrix_client.send_message(room_id, &summary, None, None).await;
                 }
                 let msg = format!("_(Error: {})_", e);
-                let _ = matrix_client.send_message(room_id, &msg, None).await;
+                let _ = matrix_client.send_message(room_id, &msg, None, None).await;
             }
         }
     }
@@ -1642,7 +1641,8 @@ async fn process_pending_approvals(state: &mut CoordinatorState) {
             );
 
             match matrix_client
-                .send_message(COORD_APPROVAL_ROOM, &approval_msg, None)
+                .send_message(COORD_APPROVAL_ROOM, &approval_msg, None,
+                    Some(&Mentions { user_ids: vec![state.config.settings.approval_owner.clone()], room: false }))
                 .await
             {
                 Ok(event_id) => {
@@ -1683,7 +1683,8 @@ async fn process_pending_approvals(state: &mut CoordinatorState) {
                     };
                     match MatrixClient::new(pantalaimon_url.as_deref(), fb_token, fb_user_id) {
                         Ok(fb_client) => {
-                            match fb_client.send_message(&fallback_room, &approval_msg, None).await {
+                            match fb_client.send_message(&fallback_room, &approval_msg, None,
+                                    Some(&Mentions { user_ids: vec![state.config.settings.approval_owner.clone()], room: false })).await {
                                 Ok(event_id) => {
                                     info!("[{}] Posted approval via agent token to {} (event: {})", agent_name, fallback_room, event_id);
                                     state.pending_matrix_approvals.insert(
@@ -2204,7 +2205,8 @@ async fn scan_filesystem_approvals(state: &mut CoordinatorState) {
         );
 
         match matrix_client
-            .send_message(&approval_room_id, &approval_msg, None)
+            .send_message(&approval_room_id, &approval_msg, None,
+                Some(&Mentions { user_ids: vec![state.config.settings.approval_owner.clone()], room: false }))
             .await
         {
             Ok(event_id) => {
@@ -2349,7 +2351,7 @@ async fn handle_command(
     // M5: Rate limit slash commands — max 10 per user per 60s
     if state.command_rate_limiter.check_and_increment(sender) {
         let _ = matrix_client
-            .send_message(room_id, "Rate limited — too many commands. Try again shortly.", None)
+            .send_message(room_id, "Rate limited — too many commands. Try again shortly.", None, None)
             .await;
         return true;
     }
@@ -2359,7 +2361,7 @@ async fn handle_command(
         let is_owner = sender == state.config.settings.approval_owner;
         if !is_owner {
             let _ = matrix_client
-                .send_message(room_id, "Permission denied — this command requires owner privileges.", None)
+                .send_message(room_id, "Permission denied — this command requires owner privileges.", None, None)
                 .await;
             return true;
         }
@@ -2497,7 +2499,7 @@ async fn handle_command(
     };
 
     if let Some(msg) = response {
-        let _ = matrix_client.send_message(room_id, &msg, None).await;
+        let _ = matrix_client.send_message(room_id, &msg, None, None).await;
         true
     } else {
         false
@@ -2707,7 +2709,7 @@ async fn send_startup_message(state: &CoordinatorState) {
     let agent_count = state.sessions.len();
     let msg = format!("Whitebox online (coordinator-rs v{}, {} agents)", env!("CARGO_PKG_VERSION"), agent_count);
 
-    match client.send_message(STATUS_ROOM_ID, &msg, None).await {
+    match client.send_message(STATUS_ROOM_ID, &msg, None, None).await {
         Ok(_) => info!("Startup message sent to Status room"),
         Err(e) => warn!("Failed to send startup message: {}", e),
     }
@@ -2857,7 +2859,7 @@ async fn update_status_hud(state: &mut CoordinatorState) {
                 Ok(_) => debug!("HUD updated"),
                 Err(e) => {
                     warn!("HUD edit failed, sending new: {}", e);
-                    if let Ok(new_id) = client.send_message(STATUS_ROOM_ID, &hud_text, None).await {
+                    if let Ok(new_id) = client.send_message(STATUS_ROOM_ID, &hud_text, None, None).await {
                         state.status_hud_event_id = Some(new_id);
                     }
                 }
@@ -2865,7 +2867,7 @@ async fn update_status_hud(state: &mut CoordinatorState) {
         }
         None => {
             // First HUD message
-            match client.send_message(STATUS_ROOM_ID, &hud_text, None).await {
+            match client.send_message(STATUS_ROOM_ID, &hud_text, None, None).await {
                 Ok(event_id) => {
                     info!("Status HUD created: {}", event_id);
                     state.status_hud_event_id = Some(event_id);
@@ -2905,7 +2907,7 @@ async fn check_infra_health(state: &mut CoordinatorState) {
 
     // Use a tight CommonMark list — each item on its own line in Element.
     let alert_msg = format!("**Infra Alert**\n\n{}", alerts.join("\n\n"));
-    let _ = client.send_message(STATUS_ROOM_ID, &alert_msg, None).await;
+    let _ = client.send_message(STATUS_ROOM_ID, &alert_msg, None, None).await;
 }
 
 // ============================================================================
@@ -2996,7 +2998,7 @@ async fn check_identity_drift(state: &mut CoordinatorState) {
                 .collect::<Vec<_>>()
                 .join("\n")
         );
-        let _ = client.send_message(STATUS_ROOM_ID, &alert, None).await;
+        let _ = client.send_message(STATUS_ROOM_ID, &alert, None, None).await;
     }
 
     // Update baseline
@@ -3046,7 +3048,7 @@ async fn check_and_fire_timers(state: &mut CoordinatorState) {
                         session.matrix_user_id.clone(),
                     );
                     if let Ok(c) = client {
-                        let _ = c.send_message(&t.room_id, &res.result, None).await;
+                        let _ = c.send_message(&t.room_id, &res.result, None, None).await;
                     }
                 } else if is_suppressed_error(&res.result) {
                     warn!("[{}] Suppressed CLI error in timer result: {}", t.agent, res.result);
@@ -3212,7 +3214,7 @@ async fn check_llm_health(state: &mut CoordinatorState) {
                             "**⚠️ LLM Failover**\n`{}` → `{}` (primary unhealthy)",
                             provider.name, next_provider.name
                         );
-                        let _ = c.send_message(STATUS_ROOM_ID, &alert, None).await;
+                        let _ = c.send_message(STATUS_ROOM_ID, &alert, None, None).await;
                     }
                 }
             }
@@ -3242,6 +3244,7 @@ async fn handle_delegate_command(
                 state.config.settings.delegate_device, repo, model,
                 loop_spec_path.map(|p| format!(" loop_spec={}", p)).unwrap_or_default()
             ),
+            None,
             None,
         )
         .await;

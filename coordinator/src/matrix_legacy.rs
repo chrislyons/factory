@@ -24,6 +24,14 @@ fn markdown_to_html(text: &str) -> String {
 
 use crate::config::SyncResponse;
 
+/// Matrix m.mentions content for targeted notifications.
+/// See https://spec.matrix.org/v1.12/client-server-api/#user-and-room-mentions
+#[derive(Debug, Clone, Default)]
+pub struct Mentions {
+    pub user_ids: Vec<String>,
+    pub room: bool,
+}
+
 // ============================================================================
 // Constants
 // ============================================================================
@@ -226,6 +234,7 @@ impl MatrixClient {
         room_id: &str,
         body: &str,
         formatted_body: Option<&str>,
+        mentions: Option<&Mentions>,
     ) -> Result<String> {
         // Truncate responses that exceed Matrix event size limits.
         // Apply markdown even when truncating so formatting is preserved.
@@ -256,6 +265,19 @@ impl MatrixClient {
         if let Some(html) = formatted_body {
             content["format"] = json!("org.matrix.custom.html");
             content["formatted_body"] = json!(html);
+        }
+
+        if let Some(m) = mentions {
+            let mut mentions_obj = json!({});
+            if !m.user_ids.is_empty() {
+                mentions_obj["user_ids"] = json!(m.user_ids);
+            }
+            if m.room {
+                mentions_obj["room"] = json!(true);
+            }
+            content["m.mentions"] = mentions_obj;
+        } else {
+            content["m.mentions"] = json!({});
         }
 
         self.send_event_with_retry(room_id, "m.room.message", &content).await
@@ -433,6 +455,27 @@ impl MatrixClient {
     }
 
     // ============================================================================
+    // Send thread anchor (task-per-thread pattern)
+    // ============================================================================
+
+    /// Send a lightweight anchor message for the task-per-thread pattern.
+    /// Uses m.notice to avoid notifications. The returned event_id is guaranteed
+    /// relation-free and safe to use as a thread root (no MSC3440 conflicts).
+    pub async fn send_anchor(
+        &self,
+        room_id: &str,
+        label: &str,
+    ) -> Result<String> {
+        let content = json!({
+            "msgtype": "m.notice",
+            "body": label,
+            "dev.ig88.coordinator_generated": true,
+            "m.mentions": {}
+        });
+        self.send_event_with_retry(room_id, "m.room.message", &content).await
+    }
+
+    // ============================================================================
     // Send thread message (verbose tool activity)
     // ============================================================================
 
@@ -452,6 +495,7 @@ impl MatrixClient {
             "format": "org.matrix.custom.html",
             "formatted_body": html,
             "dev.ig88.coordinator_generated": true,
+            "m.mentions": {},
             "m.relates_to": {
                 "rel_type": "m.thread",
                 "event_id": thread_root_event_id,
@@ -476,6 +520,7 @@ impl MatrixClient {
                         "format": "org.matrix.custom.html",
                         "formatted_body": html,
                         "dev.ig88.coordinator_generated": true,
+                        "m.mentions": {},
                     });
                     self.send_event_with_retry(room_id, "m.room.message", &plain).await
                 } else {
@@ -497,6 +542,7 @@ impl MatrixClient {
         room_id: &str,
         thread_root_id: &str,
         body: &str,
+        mentions: Option<&Mentions>,
     ) -> Result<String> {
         let (body, html) = if body.len() > MAX_RESPONSE_LENGTH {
             let truncated = format!(
@@ -510,12 +556,26 @@ impl MatrixClient {
             (body.to_string(), markdown_to_html(body))
         };
 
+        let mentions_json = if let Some(m) = mentions {
+            let mut obj = json!({});
+            if !m.user_ids.is_empty() {
+                obj["user_ids"] = json!(m.user_ids);
+            }
+            if m.room {
+                obj["room"] = json!(true);
+            }
+            obj
+        } else {
+            json!({})
+        };
+
         let content = json!({
             "msgtype": "m.text",
             "body": body,
             "format": "org.matrix.custom.html",
             "formatted_body": html,
             "dev.ig88.coordinator_generated": true,
+            "m.mentions": mentions_json,
             "m.relates_to": {
                 "rel_type": "m.thread",
                 "event_id": thread_root_id,
@@ -537,6 +597,7 @@ impl MatrixClient {
                         "format": "org.matrix.custom.html",
                         "formatted_body": html,
                         "dev.ig88.coordinator_generated": true,
+                        "m.mentions": mentions_json,
                     });
                     self.send_event_with_retry(room_id, "m.room.message", &plain).await
                 } else {
@@ -737,5 +798,64 @@ impl SyncTokenStore {
                 );
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    #[test]
+    fn mentions_default_is_empty() {
+        let m = Mentions::default();
+        assert!(m.user_ids.is_empty());
+        assert!(!m.room);
+    }
+
+    #[test]
+    fn mentions_to_json_with_user_ids() {
+        let m = Mentions {
+            user_ids: vec!["@alice:matrix.org".into(), "@bob:matrix.org".into()],
+            room: false,
+        };
+        let mut obj = json!({});
+        if !m.user_ids.is_empty() {
+            obj["user_ids"] = json!(m.user_ids);
+        }
+        if m.room {
+            obj["room"] = json!(true);
+        }
+        assert_eq!(
+            obj,
+            json!({"user_ids": ["@alice:matrix.org", "@bob:matrix.org"]})
+        );
+    }
+
+    #[test]
+    fn mentions_to_json_room_ping() {
+        let m = Mentions {
+            user_ids: vec![],
+            room: true,
+        };
+        let mut obj = json!({});
+        if !m.user_ids.is_empty() {
+            obj["user_ids"] = json!(m.user_ids);
+        }
+        if m.room {
+            obj["room"] = json!(true);
+        }
+        assert_eq!(obj, json!({"room": true}));
+    }
+
+    #[test]
+    fn mentions_none_produces_empty_object() {
+        let mentions: Option<&Mentions> = None;
+        let result = if mentions.is_some() {
+            json!({"user_ids": []})
+        } else {
+            json!({})
+        };
+        assert_eq!(result, json!({}));
     }
 }

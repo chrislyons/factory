@@ -1,16 +1,19 @@
-/// Infrastructure health checks — Docker containers, systemd services, Tailscale peers.
+/// Infrastructure health checks — Docker containers, platform services, Tailscale peers.
 /// Phase 3F: Runs every 5 minutes, feeds data into Status HUD, alerts on state changes.
+/// Platform-aware: uses launchd on macOS, systemd on Linux. Targets are config-driven
+/// with hardcoded fallbacks for backward compatibility.
+use crate::config::Settings;
 use std::collections::HashMap;
 use tokio::process::Command;
 use tracing::{debug, warn};
 
 // ============================================================================
-// Health check targets
+// Fallback targets (used when config fields are None)
 // ============================================================================
 
-const DOCKER_CONTAINERS: &[&str] = &["qdrant", "graphiti-mcp", "falkordb"];
-const SYSTEMD_SERVICES: &[&str] = &["ollama", "qdrant-mcp"];
-const TAILSCALE_PEERS: &[&str] = &["cloudkicker", "greybox"];
+const DEFAULT_DOCKER_CONTAINERS: &[&str] = &["qdrant", "graphiti-mcp", "falkordb"];
+const DEFAULT_SYSTEMD_SERVICES: &[&str] = &["ollama", "qdrant-mcp"];
+const DEFAULT_TAILSCALE_PEERS: &[&str] = &["cloudkicker", "greybox"];
 
 /// How many consecutive checks a state must persist before alerting.
 const FLAP_SUPPRESSION_COUNT: u8 = 2;
@@ -30,6 +33,7 @@ pub struct ServiceStatus {
 pub enum ServiceType {
     Docker,
     Systemd,
+    Launchd,
     Tailscale,
 }
 
@@ -38,6 +42,7 @@ impl std::fmt::Display for ServiceType {
         match self {
             Self::Docker => write!(f, "docker"),
             Self::Systemd => write!(f, "systemd"),
+            Self::Launchd => write!(f, "launchd"),
             Self::Tailscale => write!(f, "tailscale"),
         }
     }
@@ -79,12 +84,29 @@ struct FlapEntry {
 
 pub struct InfraChecker {
     last_state: HashMap<String, FlapEntry>,
+    docker_containers: Vec<String>,
+    systemd_services: Vec<String>,
+    launchd_services: Vec<String>,
+    tailscale_peers: Vec<String>,
 }
 
 impl InfraChecker {
-    pub fn new() -> Self {
+    pub fn new(settings: &Settings) -> Self {
+        let docker_containers = settings.infra_docker_containers.clone()
+            .unwrap_or_else(|| DEFAULT_DOCKER_CONTAINERS.iter().map(|s| s.to_string()).collect());
+        let systemd_services = settings.infra_systemd_services.clone()
+            .unwrap_or_else(|| DEFAULT_SYSTEMD_SERVICES.iter().map(|s| s.to_string()).collect());
+        let launchd_services = settings.infra_launchd_services.clone()
+            .unwrap_or_else(Vec::new);
+        let tailscale_peers = settings.infra_tailscale_peers.clone()
+            .unwrap_or_else(|| DEFAULT_TAILSCALE_PEERS.iter().map(|s| s.to_string()).collect());
+
         Self {
             last_state: HashMap::new(),
+            docker_containers,
+            systemd_services,
+            launchd_services,
+            tailscale_peers,
         }
     }
 
@@ -93,15 +115,18 @@ impl InfraChecker {
         let mut services = Vec::new();
 
         // Docker containers
-        let docker_status = check_docker_containers().await;
+        let docker_status = check_docker_containers(&self.docker_containers).await;
         services.extend(docker_status);
 
-        // Systemd services
-        let systemd_status = check_systemd_services().await;
-        services.extend(systemd_status);
+        // Platform services (launchd on macOS, systemd on Linux)
+        let platform_status = check_platform_services(
+            &self.systemd_services,
+            &self.launchd_services,
+        ).await;
+        services.extend(platform_status);
 
         // Tailscale peers
-        let tailscale_status = check_tailscale_peers().await;
+        let tailscale_status = check_tailscale_peers(&self.tailscale_peers).await;
         services.extend(tailscale_status);
 
         // Flap suppression + alert generation
@@ -150,11 +175,43 @@ impl InfraChecker {
 }
 
 // ============================================================================
+// Binary resolution
+// ============================================================================
+
+fn find_docker() -> &'static str {
+    if std::path::Path::new("/opt/homebrew/bin/docker").exists() {
+        "/opt/homebrew/bin/docker"
+    } else if std::path::Path::new("/usr/local/bin/docker").exists() {
+        "/usr/local/bin/docker"
+    } else if std::path::Path::new("/usr/bin/docker").exists() {
+        "/usr/bin/docker"
+    } else {
+        "docker"
+    }
+}
+
+fn find_tailscale() -> &'static str {
+    if std::path::Path::new("/opt/homebrew/bin/tailscale").exists() {
+        "/opt/homebrew/bin/tailscale"
+    } else if std::path::Path::new("/usr/local/bin/tailscale").exists() {
+        "/usr/local/bin/tailscale"
+    } else if std::path::Path::new("/usr/bin/tailscale").exists() {
+        "/usr/bin/tailscale"
+    } else {
+        "tailscale"
+    }
+}
+
+// ============================================================================
 // Docker health check
 // ============================================================================
 
-async fn check_docker_containers() -> Vec<ServiceStatus> {
-    let output = Command::new("/usr/bin/docker")
+async fn check_docker_containers(targets: &[String]) -> Vec<ServiceStatus> {
+    if targets.is_empty() {
+        return Vec::new();
+    }
+
+    let output = Command::new(find_docker())
         .args(["ps", "--format", "{{.Names}}\t{{.Status}}"])
         .output()
         .await;
@@ -183,24 +240,43 @@ async fn check_docker_containers() -> Vec<ServiceStatus> {
         }
     };
 
-    DOCKER_CONTAINERS
+    targets
         .iter()
         .map(|name| ServiceStatus {
             name: name.to_string(),
-            healthy: running_containers.iter().any(|c| c.contains(name)),
+            healthy: running_containers.iter().any(|c| c.contains(name.as_str())),
             service_type: ServiceType::Docker,
         })
         .collect()
 }
 
 // ============================================================================
-// Systemd health check
+// Platform-aware service checks
 // ============================================================================
 
-async fn check_systemd_services() -> Vec<ServiceStatus> {
+async fn check_platform_services(
+    systemd_targets: &[String],
+    launchd_targets: &[String],
+) -> Vec<ServiceStatus> {
     let mut results = Vec::new();
 
-    for name in SYSTEMD_SERVICES {
+    // macOS: check launchd services
+    if !launchd_targets.is_empty() {
+        results.extend(check_launchd_services(launchd_targets).await);
+    }
+
+    // Linux: check systemd services (skip on macOS — systemctl doesn't exist)
+    if !systemd_targets.is_empty() && std::path::Path::new("/usr/bin/systemctl").exists() {
+        results.extend(check_systemd_services(systemd_targets).await);
+    }
+
+    results
+}
+
+async fn check_systemd_services(targets: &[String]) -> Vec<ServiceStatus> {
+    let mut results = Vec::new();
+
+    for name in targets {
         let output = Command::new("/usr/bin/systemctl")
             .args(["is-active", "--quiet", name])
             .output()
@@ -224,19 +300,46 @@ async fn check_systemd_services() -> Vec<ServiceStatus> {
     results
 }
 
+async fn check_launchd_services(targets: &[String]) -> Vec<ServiceStatus> {
+    let mut results = Vec::new();
+
+    for name in targets {
+        let output = Command::new("/bin/launchctl")
+            .args(["list", name])
+            .output()
+            .await;
+
+        let healthy = match output {
+            Ok(out) => out.status.success(),
+            Err(e) => {
+                debug!("launchctl check failed for {}: {}", name, e);
+                false
+            }
+        };
+
+        results.push(ServiceStatus {
+            name: name.to_string(),
+            healthy,
+            service_type: ServiceType::Launchd,
+        });
+    }
+
+    results
+}
+
 // ============================================================================
 // Tailscale peer check
 // ============================================================================
 
-async fn check_tailscale_peers() -> Vec<ServiceStatus> {
-    // Use `tailscale ping` instead of parsing `status --json`.
-    // The `Online` field in the JSON reflects coordination-server presence, not data-plane
-    // reachability — it can report false for a fully healthy peer with no recent keepalive.
-    // `tailscale ping --c 1` actually traverses the data plane and is the correct check.
+async fn check_tailscale_peers(targets: &[String]) -> Vec<ServiceStatus> {
+    if targets.is_empty() {
+        return Vec::new();
+    }
+
     let mut results = Vec::new();
 
-    for name in TAILSCALE_PEERS {
-        let output = Command::new("/usr/bin/tailscale")
+    for name in targets {
+        let output = Command::new(find_tailscale())
             .args(["ping", "--c", "1", "--timeout", "5s", name])
             .output()
             .await;
