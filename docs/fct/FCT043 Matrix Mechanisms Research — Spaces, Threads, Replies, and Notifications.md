@@ -357,6 +357,12 @@ Matrix provides the structural primitives (Spaces for organization, threads for 
 - DM rooms unchanged (no threading)
 - Existing relation-conflict fallback in `send_thread_message`/`send_thread_reply` kept as defense-in-depth
 
+**"Invalid API key" root cause (DONE)**
+- `/Users/nesbitt/.mcp.json` on Whitebox had 4 MCP servers pointing at retired Blackbox (100.87.53.109): qdrant-mcp (:8446), research-mcp (:8447), matrix-boot (:8445), matrix-coord (:8448)
+- Fixed to Whitebox localhost (100.88.222.111): qdrant-mcp (:8442), research-mcp (:8443), matrix-boot (:8448), matrix-coord (:8440)
+- The error was NOT coming through the coordinator's relay paths — Boot's Claude CLI was hitting dead Blackbox endpoints and emitting "Invalid API key" as a text block, which Boot then sent to Matrix via its own MCP
+- Blackbox coordinator also killed (was still running despite being "retired")
+
 **Infra checks platform fix (DONE — bonus)**
 - Root cause: `infra.rs` hardcoded `/usr/bin/docker`, `/usr/bin/systemctl`, `/usr/bin/tailscale` — all missing on macOS (Whitebox)
 - Added config fields: `infra_docker_containers`, `infra_systemd_services`, `infra_launchd_services`, `infra_tailscale_peers` (all `Option<Vec<String>>`, fallback to hardcoded defaults)
