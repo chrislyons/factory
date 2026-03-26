@@ -6,7 +6,7 @@ Runs on :41912. Caddy forward_auth sends every request here.
 - Missing/invalid cookie → 401 with redirect to /login
 - POST /auth/login → validate u/pw, set signed cookie, redirect
 
-Cookie: HMAC-SHA256 signed, 30-day expiry, HttpOnly + SameSite=Strict.
+Cookie: HMAC-SHA256 signed, 30-day expiry, HttpOnly + SameSite=Lax.
 """
 
 import hashlib
@@ -38,14 +38,22 @@ if not SECRET_KEY:
 
 
 def sign_cookie(payload: str) -> str:
+    import base64
     sig = hmac.new(SECRET_KEY.encode(), payload.encode(), hashlib.sha256).hexdigest()
-    return f"{payload}.{sig}"
+    encoded = base64.urlsafe_b64encode(payload.encode()).decode()
+    return f"{encoded}.{sig}"
 
 
 def verify_cookie(cookie_val: str) -> bool:
+    import base64
     if "." not in cookie_val:
         return False
-    payload, sig = cookie_val.rsplit(".", 1)
+    encoded, sig = cookie_val.rsplit(".", 1)
+    # Decode base64 payload for HMAC verification
+    try:
+        payload = base64.urlsafe_b64decode(encoded.encode()).decode()
+    except Exception:
+        return False
     expected = hmac.new(SECRET_KEY.encode(), payload.encode(), hashlib.sha256).hexdigest()
     if not hmac.compare_digest(sig, expected):
         return False
@@ -77,7 +85,7 @@ def make_session_cookie() -> str:
         f"Path=/; "
         f"Max-Age={COOKIE_MAX_AGE}; "
         f"HttpOnly; "
-        f"SameSite=Strict"
+        f"SameSite=Lax"
     )
 
 

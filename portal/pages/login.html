@@ -164,15 +164,6 @@
     <div class="login-error" id="error-msg">Invalid username or password.</div>
   </form>
 
-  <script>
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("error")) {
-      document.getElementById("error-msg").classList.add("is-visible");
-    }
-    const redirect = params.get("redirect");
-    if (redirect && redirect.startsWith("/") && !redirect.startsWith("//")) {
-      document.getElementById("redirect").value = redirect;
-    }
-  </script>
+  <script src="login.js"></script>
 </body>
 </html>
