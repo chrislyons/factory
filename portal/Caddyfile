@@ -19,6 +19,11 @@ http://100.88.222.111:41910 {
 		file_server
 	}
 
+	handle /login.js {
+		root * /Users/nesbitt/dev/factory/portal/dist-production/pages
+		file_server
+	}
+
 	handle /auth/* {
 		reverse_proxy 127.0.0.1:41914
 	}
@@ -34,7 +39,6 @@ http://100.88.222.111:41910 {
 	route /jobs.json {
 		forward_auth 127.0.0.1:41914 {
 			uri /auth/validate
-			header_up Cookie {>Cookie}
 			@error status 4xx
 			handle_response @error {
 				redir * /login?redirect={http.request.uri} 302
@@ -46,7 +50,6 @@ http://100.88.222.111:41910 {
 	route /tasks.json {
 		forward_auth 127.0.0.1:41914 {
 			uri /auth/validate
-			header_up Cookie {>Cookie}
 			@error status 4xx
 			handle_response @error {
 				redir * /login?redirect={http.request.uri} 302
@@ -58,7 +61,6 @@ http://100.88.222.111:41910 {
 	route /status/* {
 		forward_auth 127.0.0.1:41914 {
 			uri /auth/validate
-			header_up Cookie {>Cookie}
 			@error status 4xx
 			handle_response @error {
 				redir * /login?redirect={http.request.uri} 302
@@ -70,7 +72,6 @@ http://100.88.222.111:41910 {
 	route /repos/* {
 		forward_auth 127.0.0.1:41914 {
 			uri /auth/validate
-			header_up Cookie {>Cookie}
 			@error status 4xx
 			handle_response @error {
 				redir * /login?redirect={http.request.uri} 302
@@ -80,10 +81,22 @@ http://100.88.222.111:41910 {
 		file_server
 	}
 
+	route /galleries/* {
+		forward_auth 127.0.0.1:41914 {
+			uri /auth/validate
+			@error status 4xx
+			handle_response @error {
+				redir * /login?redirect={http.request.uri} 302
+			}
+		}
+		header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; frame-ancestors 'none'; object-src 'none'"
+		root * /Users/nesbitt/dev/factory/portal/dist-production
+		file_server
+	}
+
 	route {
 		forward_auth 127.0.0.1:41914 {
 			uri /auth/validate
-			header_up Cookie {>Cookie}
 			@error status 4xx
 			handle_response @error {
 				redir * /login?redirect={http.request.uri} 302
