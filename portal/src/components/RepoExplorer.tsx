@@ -33,7 +33,7 @@ const CommandsIcon = () => (
 
 const HAS_GALLERY = new Set([
   "2110-audio-io","aes70","autoresearch","chainly","claudezilla",
-  "claudezilla-docs","git-av","grafana","hotbox","listmaker",
+  "claudezilla-docs","factory","git-av","grafana","hotbox","listmaker",
   "max4live-mcp","memex-mcp","narwhal","nmos","ondina",
   "orpheus-sdk","osd-v2","research-vault","strudel","tooltime","vmotes",
 ]);
