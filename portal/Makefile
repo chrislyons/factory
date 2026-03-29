@@ -25,9 +25,9 @@ build:  ## Build the React multi-page portal into dist/
 sync: build sync-dist sync-runtime sync-gsd sync-repos ssh-normalize ssh-generate-index  ## Sync build output, runtime helpers, repo docs, and live task data to Whitebox
 
 .PHONY: sync-dist
-sync-dist:  ## Rsync dist/ to Whitebox
+sync-dist:  ## Rsync dist/ to Whitebox (preserves server-generated index.json and jobs.json)
 	ssh $(WHITEBOX) 'mkdir -p $(REMOTE_DIST)'
-	rsync -avz --delete $(DIST)/ $(WHITEBOX):$(REMOTE_DIST)/
+	rsync -avz --delete --exclude='index.json' --exclude='jobs.json' $(DIST)/ $(WHITEBOX):$(REMOTE_DIST)/
 
 .PHONY: sync-runtime
 sync-runtime:  ## Sync local runtime helpers needed by serve.sh and the index generator
