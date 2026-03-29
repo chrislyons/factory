@@ -1,9 +1,8 @@
 # Factory Portal — React build, local preview, and Whitebox deploy
 
 WHITEBOX    := whitebox
-REMOTE      := /Users/nesbitt/projects/factory-portal
-REMOTE_LIVE := /Users/nesbitt/dev/factory/portal
-REMOTE_DIST := $(REMOTE_LIVE)/dist-production
+REMOTE      := /Users/nesbitt/dev/factory/portal
+REMOTE_DIST := $(REMOTE)/dist-production
 LOCAL_DEV   := /Users/chrislyons/dev
 DIST        := dist
 PNPM        := pnpm
@@ -39,8 +38,8 @@ sync-runtime:  ## Sync local runtime helpers needed by serve.sh and the index ge
 
 .PHONY: sync-gsd
 sync-gsd:  ## Seed live jobs.json + status/ into the task/status sidecar data root
-	rsync -avz $(LOCAL_DEV)/factory/jobs.json $(WHITEBOX):$(REMOTE)/jobs.json
-	rsync -avz $(LOCAL_DEV)/get-shit-done/status/ $(WHITEBOX):$(REMOTE)/status/
+	rsync -avz $(LOCAL_DEV)/factory/jobs/jobs.json $(WHITEBOX):$(REMOTE)/dist-production/jobs.json
+	-rsync -avz $(LOCAL_DEV)/get-shit-done/status/ $(WHITEBOX):$(REMOTE)/status/
 
 .PHONY: sync-repos
 sync-repos:  ## Sync the repo corpus used by explainers-v4 and index.json
@@ -63,8 +62,8 @@ ssh-normalize:  ## Normalize repo-corpus font paths on Whitebox
 	ssh $(WHITEBOX) 'cd $(REMOTE) && python3 src/normalize_fonts.py --repos-dir repos/ --verbose'
 
 .PHONY: ssh-generate-index
-ssh-generate-index:  ## Rebuild dist/index.json from the synced repo corpus
-	ssh $(WHITEBOX) 'cd $(REMOTE) && mkdir -p dist && python3 src/generate_index.py --repos-dir repos/ --output dist/index.json'
+ssh-generate-index:  ## Rebuild index.json from the synced repo corpus into dist-production
+	ssh $(WHITEBOX) 'cd $(REMOTE) && python3 src/generate_index.py --repos-dir repos/ --output $(REMOTE_DIST)/index.json'
 
 .PHONY: install
 install: sync-runtime  ## Install or refresh the Whitebox launchd services
