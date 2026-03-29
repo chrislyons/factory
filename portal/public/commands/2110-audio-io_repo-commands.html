@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>2110-audio-io - Repository Commands</title>
+<title>2110-audio-io - Command Reference</title>
 <style>
 @font-face {
   font-family: "Geist Pixel Square";
@@ -284,15 +284,9 @@ main {
 }
 
 @keyframes export-confirm {
-  0% {
-    transform: translateY(0) scale(1);
-  }
-  40% {
-    transform: translateY(-1px) scale(1.03);
-  }
-  100% {
-    transform: translateY(0) scale(1);
-  }
+  0% { transform: translateY(0) scale(1); }
+  40% { transform: translateY(-1px) scale(1.03); }
+  100% { transform: translateY(0) scale(1); }
 }
 
 .surface-card {
@@ -339,9 +333,7 @@ main {
   overflow-wrap: anywhere;
 }
 
-.search-wrap {
-  position: relative;
-}
+.search-wrap { position: relative; }
 
 .search-input {
   width: 100%;
@@ -398,10 +390,7 @@ main {
   color: var(--text);
 }
 
-.callout-grid {
-  display: grid;
-  gap: 12px;
-}
+.callout-grid { display: grid; gap: 12px; }
 
 .callout {
   padding: 16px 18px;
@@ -422,17 +411,9 @@ main {
   white-space: pre-wrap;
 }
 
-.callout--info {
-  box-shadow: var(--callout-info-ring);
-}
-
-.callout--warning {
-  box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.16);
-}
-
-.callout--success {
-  box-shadow: inset 0 0 0 1px rgba(52, 211, 153, 0.16);
-}
+.callout--info { box-shadow: var(--callout-info-ring); }
+.callout--warning { box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.16); }
+.callout--success { box-shadow: inset 0 0 0 1px rgba(52, 211, 153, 0.16); }
 
 .section-card {
   overflow: hidden;
@@ -444,9 +425,7 @@ main {
   box-shadow: var(--section-card-focus-shadow);
 }
 
-.section-card.is-hidden {
-  display: none;
-}
+.section-card.is-hidden { display: none; }
 
 .section-header {
   width: 100%;
@@ -464,9 +443,7 @@ main {
   transition: background var(--transition), border-radius var(--transition), box-shadow var(--transition);
 }
 
-.section-header:hover {
-  background: var(--bg-panel-hover);
-}
+.section-header:hover { background: var(--bg-panel-hover); }
 
 .section-header:focus,
 .section-header:focus-visible {
@@ -486,14 +463,10 @@ main {
   transition: transform var(--transition);
 }
 
-.section-header.collapsed .section-arrow {
-  transform: rotate(-90deg);
-}
+.section-header.collapsed .section-arrow { transform: rotate(-90deg); }
 
 .section-header:focus .section-arrow,
-.section-header:focus-visible .section-arrow {
-  color: var(--accent);
-}
+.section-header:focus-visible .section-arrow { color: var(--accent); }
 
 .section-title {
   flex: 1;
@@ -526,18 +499,10 @@ main {
   color: var(--text);
 }
 
-.section-body {
-  display: block;
-}
+.section-body { display: block; }
+.section-body.collapsed { display: none; }
 
-.section-body.collapsed {
-  display: none;
-}
-
-.command-table {
-  width: 100%;
-  border-collapse: collapse;
-}
+.command-table { width: 100%; border-collapse: collapse; }
 
 .command-table th {
   padding: 8px 12px;
@@ -554,17 +519,9 @@ main {
 .command-table th:nth-child(2) { width: 38%; }
 .command-table th:nth-child(3) { width: 38%; }
 
-.command-row {
-  border-bottom: 1px solid var(--row-divider);
-}
-
-.command-row:last-child {
-  border-bottom: none;
-}
-
-.command-row.hidden {
-  display: none;
-}
+.command-row { border-bottom: 1px solid var(--row-divider); }
+.command-row:last-child { border-bottom: none; }
+.command-row.hidden { display: none; }
 
 .command-row td {
   padding: 10px 12px;
@@ -572,34 +529,13 @@ main {
   font-size: 11px;
 }
 
-.command-row td:first-child {
-  padding-left: 40px;
-}
+.command-row td:first-child { padding-left: 40px; }
 
 .task-text {
   color: var(--text);
   display: flex;
   align-items: center;
   min-height: 44px;
-}
-
-.row-badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 7px;
-}
-
-.row-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 7px;
-  border-radius: 999px;
-  border: 1px solid var(--accent-border);
-  background: var(--accent-soft);
-  color: var(--accent);
-  font-size: 10px;
-  line-height: 1.2;
 }
 
 .value-block {
@@ -634,44 +570,6 @@ main {
   color: var(--accent);
   white-space: pre-wrap;
   word-break: break-word;
-}
-
-.value-block--keys .value-text {
-  color: var(--text);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.value-block--osc .value-text {
-  color: var(--osc-text);
-}
-
-.inline-key {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 22px;
-  padding: 2px 7px;
-  border-radius: 6px;
-  border: 1px solid var(--accent-border);
-  background: var(--accent-soft);
-  color: var(--text);
-  font-family: var(--font-body);
-  font-size: 11px;
-}
-
-.key-combo {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.key-join,
-.key-note {
-  color: var(--text-muted);
-  font-size: 11px;
 }
 
 .desc-text {
@@ -724,9 +622,7 @@ footer .inner {
 }
 
 @media (max-width: 900px) {
-  .hero-row {
-    flex-direction: column;
-  }
+  .hero-row { flex-direction: column; }
 
   .site-header__inner {
     flex-direction: column;
@@ -753,56 +649,25 @@ footer .inner {
     width: 100%;
   }
 
-  .command-table thead {
-    display: none;
-  }
+  .command-table thead { display: none; }
 
-  .command-row td {
-    padding-top: 8px;
-    padding-bottom: 8px;
-  }
+  .command-row td { padding-top: 8px; padding-bottom: 8px; }
+  .command-row td:first-child { padding-left: 12px; }
+  .command-row td:first-child { padding-bottom: 0; }
+  .command-row td:nth-child(2) { padding-top: 8px; padding-bottom: 0; }
 
-  .command-row td:first-child {
-    padding-left: 12px;
-  }
-
-  .command-row td:first-child {
-    padding-bottom: 0;
-  }
-
-  .command-row td:nth-child(2) {
-    padding-top: 8px;
-    padding-bottom: 0;
-  }
-
-  footer .inner {
-    flex-direction: column;
-  }
+  footer .inner { flex-direction: column; }
 
   main,
   .site-header__inner,
   .footer-notes,
-  footer .inner {
-    width: 96vw;
-  }
+  footer .inner { width: 96vw; }
 
-  .hero-meta {
-    display: none;
-  }
+  .hero-meta { display: none; }
 
-  .value-block {
-    max-width: 100%;
-    overflow-x: auto;
-  }
-
-  .value-text {
-    word-break: break-all;
-  }
-
-  .desc-text {
-    display: block;
-    padding: 4px 12px 8px;
-  }
+  .value-block { max-width: 100%; overflow-x: auto; }
+  .value-text { word-break: break-all; }
+  .desc-text { display: block; padding: 4px 12px 8px; }
 }
 </style>
 </head>
@@ -821,23 +686,19 @@ footer .inner {
     <div class="hero">
       <span class="hero-eyebrow">COMMAND REFERENCE</span>
       <h1>2110-audio-io</h1>
-      <p>Quick reference for common development operations</p>
+      <p>ST2110 audio I/O topology vault — Obsidian + Python scripts</p>
     </div>
-    <div class="hero-meta"><div class="meta-chip"><span class="meta-chip__label">UPDATED</span><span class="meta-chip__value">Last updated: 2026-01-19 | Version: 1.0.0</span></div><div class="meta-chip"><span class="meta-chip__label">PROJECT ROOT</span><span class="meta-chip__value">~/dev/2110-audio-io</span></div><div class="meta-chip"><span class="meta-chip__label">NMOS-VAULT-SYNC</span><span class="meta-chip__value">~/dev/2110-audio-io/nmos-vault-sync</span></div></div>
+    <div class="hero-meta"><div class="meta-chip"><span class="meta-chip__label">UPDATED</span><span class="meta-chip__value">2026-03-29</span></div><div class="meta-chip"><span class="meta-chip__label">REPO</span><span class="meta-chip__value">~/dev/2110-audio-io</span></div></div>
   </div>
-  <div class="search-wrap"><span class="search-icon">⌕</span><input class="search-input" type="text" placeholder="Search commands, snippets, or notes…" id="search" autocomplete="off" spellcheck="false"><span class="search-count" id="search-count"></span><button class="search-clear" id="search-clear" title="Clear search">×</button></div>
-  <section class="surface-card section-card" data-section="nmos-sync-1"><button class="section-header" type="button" aria-expanded="true"><span class="section-arrow">▼</span><span class="section-title">nmos-vault-sync Commands — Installation</span><span class="section-count">2</span></button><div class="section-body"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="install dependencies cd nmos-vault-sync &amp;&amp; npm install installation"><td><div class="task-text">Install dependencies</div></td><td><button class="value-block value-block--shell" data-copy="cd nmos-vault-sync &amp;&amp; npm install" title="Copy value"><code class="value-text">cd nmos-vault-sync &amp;&amp; npm install</code></button></td><td class="desc-text">Installation</td></tr><tr class="command-row" data-search="build typescript npm run build installation"><td><div class="task-text">Build TypeScript</div></td><td><button class="value-block value-block--shell" data-copy="npm run build" title="Copy value"><code class="value-text">npm run build</code></button></td><td class="desc-text">Installation</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="nmos-sync-2"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">nmos-vault-sync Commands — Sync Operations</span><span class="section-count">4</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="one-time sync npm run sync sync operations safe"><td><div class="task-text">One-time sync</div><div class="row-badges"><span class="row-badge">SAFE</span></div></td><td><button class="value-block value-block--shell" data-copy="npm run sync" title="Copy value"><code class="value-text">npm run sync</code></button></td><td class="desc-text">Sync Operations</td></tr><tr class="command-row" data-search="dry run (preview changes) npm run sync -- --dry-run sync operations safe"><td><div class="task-text">Dry run (preview changes)</div><div class="row-badges"><span class="row-badge">SAFE</span></div></td><td><button class="value-block value-block--shell" data-copy="npm run sync -- --dry-run" title="Copy value"><code class="value-text">npm run sync -- --dry-run</code></button></td><td class="desc-text">Sync Operations</td></tr><tr class="command-row" data-search="watch mode (continuous sync) npm run dev -- watch sync operations modifies vault"><td><div class="task-text">Watch mode (continuous sync)</div><div class="row-badges"><span class="row-badge">MODIFIES VAULT</span></div></td><td><button class="value-block value-block--shell" data-copy="npm run dev -- watch" title="Copy value"><code class="value-text">npm run dev -- watch</code></button></td><td class="desc-text">Sync Operations</td></tr><tr class="command-row" data-search="custom config file npm run sync -- --config ./config/custom.yaml sync operations"><td><div class="task-text">Custom config file</div></td><td><button class="value-block value-block--shell" data-copy="npm run sync -- --config ./config/custom.yaml" title="Copy value"><code class="value-text">npm run sync -- --config ./config/custom.yaml</code></button></td><td class="desc-text">Sync Operations</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="nmos-sync-3"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">nmos-vault-sync Commands — Discovery &amp; Debugging</span><span class="section-count">3</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="discover nmos/vsm endpoints npm run sync -- discover discovery &amp; debugging safe"><td><div class="task-text">Discover NMOS/VSM endpoints</div><div class="row-badges"><span class="row-badge">SAFE</span></div></td><td><button class="value-block value-block--shell" data-copy="npm run sync -- discover" title="Copy value"><code class="value-text">npm run sync -- discover</code></button></td><td class="desc-text">Discovery &amp; Debugging</td></tr><tr class="command-row" data-search="dump nmos state to json npm run sync -- dump --output data/samples/state.json discovery &amp; debugging safe"><td><div class="task-text">Dump NMOS state to JSON</div><div class="row-badges"><span class="row-badge">SAFE</span></div></td><td><button class="value-block value-block--shell" data-copy="npm run sync -- dump --output data/samples/state.json" title="Copy value"><code class="value-text">npm run sync -- dump --output data/samples/state.json</code></button></td><td class="desc-text">Discovery &amp; Debugging</td></tr><tr class="command-row" data-search="run tests npm test discovery &amp; debugging"><td><div class="task-text">Run tests</div></td><td><button class="value-block value-block--shell" data-copy="npm test" title="Copy value"><code class="value-text">npm test</code></button></td><td class="desc-text">Discovery &amp; Debugging</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="python-scripts-1"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Python Scripts (Legacy)</span><span class="section-count">4</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="rebuild all streams python3 scripts/rebuild_streams_complete.py python scripts (legacy) modifies vault"><td><div class="task-text">Rebuild all streams</div><div class="row-badges"><span class="row-badge">MODIFIES VAULT</span></div></td><td><button class="value-block value-block--shell" data-copy="python3 scripts/rebuild_streams_complete.py" title="Copy value"><code class="value-text">python3 scripts/rebuild_streams_complete.py</code></button></td><td class="desc-text">Python Scripts (Legacy)</td></tr><tr class="command-row" data-search="create agw entities python3 scripts/create_agw_entities.py python scripts (legacy) modifies vault"><td><div class="task-text">Create AGW entities</div><div class="row-badges"><span class="row-badge">MODIFIES VAULT</span></div></td><td><button class="value-block value-block--shell" data-copy="python3 scripts/create_agw_entities.py" title="Copy value"><code class="value-text">python3 scripts/create_agw_entities.py</code></button></td><td class="desc-text">Python Scripts (Legacy)</td></tr><tr class="command-row" data-search="create card children python3 scripts/create_card_children.py python scripts (legacy) modifies vault"><td><div class="task-text">Create card children</div><div class="row-badges"><span class="row-badge">MODIFIES VAULT</span></div></td><td><button class="value-block value-block--shell" data-copy="python3 scripts/create_card_children.py" title="Copy value"><code class="value-text">python3 scripts/create_card_children.py</code></button></td><td class="desc-text">Python Scripts (Legacy)</td></tr><tr class="command-row" data-search="add router targets python3 scripts/add_router_targets.py python scripts (legacy) modifies vault"><td><div class="task-text">Add router targets</div><div class="row-badges"><span class="row-badge">MODIFIES VAULT</span></div></td><td><button class="value-block value-block--shell" data-copy="python3 scripts/add_router_targets.py" title="Copy value"><code class="value-text">python3 scripts/add_router_targets.py</code></button></td><td class="desc-text">Python Scripts (Legacy)</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="vault-ops-1"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Vault Operations — File Statistics</span><span class="section-count">3</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="count all markdown files find . -name &quot;*.md&quot; -type f | wc -l file statistics safe"><td><div class="task-text">Count all markdown files</div><div class="row-badges"><span class="row-badge">SAFE</span></div></td><td><button class="value-block value-block--shell" data-copy="find . -name &quot;*.md&quot; -type f | wc -l" title="Copy value"><code class="value-text">find . -name "*.md" -type f | wc -l</code></button></td><td class="desc-text">File Statistics</td></tr><tr class="command-row" data-search="count streams by router for r in amx101 amx102 amx103 amx104; do echo -n &quot;$r: &quot;; ls streams/stream-$r-*.md 2&gt;/dev/null | wc -l; done file statistics safe"><td><div class="task-text">Count streams by router</div><div class="row-badges"><span class="row-badge">SAFE</span></div></td><td><button class="value-block value-block--shell" data-copy="for r in AMX101 AMX102 AMX103 AMX104; do echo -n &quot;$r: &quot;; ls streams/Stream-$r-*.md 2&gt;/dev/null | wc -l; done" title="Copy value"><code class="value-text">for r in AMX101 AMX102 AMX103 AMX104; do echo -n "$r: "; ls streams/Stream-$r-*.md 2&gt;/dev/null | wc -l; done</code></button></td><td class="desc-text">File Statistics</td></tr><tr class="command-row" data-search="list gateways ls -1 gateways/ file statistics safe"><td><div class="task-text">List gateways</div><div class="row-badges"><span class="row-badge">SAFE</span></div></td><td><button class="value-block value-block--shell" data-copy="ls -1 gateways/" title="Copy value"><code class="value-text">ls -1 gateways/</code></button></td><td class="desc-text">File Statistics</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="vault-ops-2"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Vault Operations — Search Operations</span><span class="section-count">2</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="find streams by gateway grep -l &quot;tormpxagw005&quot; streams/*.md search operations safe"><td><div class="task-text">Find streams by gateway</div><div class="row-badges"><span class="row-badge">SAFE</span></div></td><td><button class="value-block value-block--shell" data-copy="grep -l &quot;TORMPXAGW005&quot; streams/*.md" title="Copy value"><code class="value-text">grep -l "TORMPXAGW005" streams/*.md</code></button></td><td class="desc-text">Search Operations</td></tr><tr class="command-row" data-search="find acr40 entities grep -l &quot;acr: acr40&quot; streams/*.md router-cards/*.md search operations safe"><td><div class="task-text">Find ACR40 entities</div><div class="row-badges"><span class="row-badge">SAFE</span></div></td><td><button class="value-block value-block--shell" data-copy="grep -l &quot;acr: ACR40&quot; streams/*.md router-cards/*.md" title="Copy value"><code class="value-text">grep -l "acr: ACR40" streams/*.md router-cards/*.md</code></button></td><td class="desc-text">Search Operations</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="git-1"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Git Operations</span><span class="section-count">3</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="status check git status git operations safe"><td><div class="task-text">Status check</div><div class="row-badges"><span class="row-badge">SAFE</span></div></td><td><button class="value-block value-block--shell" data-copy="git status" title="Copy value"><code class="value-text">git status</code></button></td><td class="desc-text">Git Operations</td></tr><tr class="command-row" data-search="commit vault changes git add . &amp;&amp; git commit -m &quot;chore: sync vault from nmos&quot; git operations local"><td><div class="task-text">Commit vault changes</div><div class="row-badges"><span class="row-badge">LOCAL</span></div></td><td><button class="value-block value-block--shell" data-copy="git add . &amp;&amp; git commit -m &quot;chore: Sync vault from NMOS&quot;" title="Copy value"><code class="value-text">git add . &amp;&amp; git commit -m "chore: Sync vault from NMOS"</code></button></td><td class="desc-text">Git Operations</td></tr><tr class="command-row" data-search="create save point git checkout -b save/description-$(date +%y%m%d-%h%m) git operations safe"><td><div class="task-text">Create save point</div><div class="row-badges"><span class="row-badge">SAFE</span></div></td><td><button class="value-block value-block--shell" data-copy="git checkout -b save/description-$(date +%Y%m%d-%H%M)" title="Copy value"><code class="value-text">git checkout -b save/description-$(date +%Y%m%d-%H%M)</code></button></td><td class="desc-text">Git Operations</td></tr></tbody></table></div></section>
-  <section class="callout-grid"><article class="surface-card callout callout--info"><h2>Project Root</h2><p>~/dev/2110-audio-io</p><p>nmos-vault-sync: ~/dev/2110-audio-io/nmos-vault-sync</p></article></section>
+  <div class="search-wrap"><span class="search-icon">&#x2315;</span><input class="search-input" type="text" placeholder="Search commands, snippets, or notes…" id="search" autocomplete="off" spellcheck="false"><span class="search-count" id="search-count"></span><button class="search-clear" id="search-clear" title="Clear search">&#xd7;</button></div>
+  <section class="surface-card section-card" data-section="obsidian"><button class="section-header" type="button" aria-expanded="true"><span class="section-arrow">&#x25BC;</span><span class="section-title">Obsidian Navigation</span><span class="section-count">5</span></button><div class="section-body"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="open index open index.md central hub with 272 streams, 5248 paths"><td><div class="task-text">Open INDEX</div></td><td><button class="value-block value-block--shell" data-copy="Open INDEX.md" title="Copy value"><code class="value-text">Open INDEX.md</code></button></td><td class="desc-text">Central hub with 272 streams, 5248 paths</td></tr><tr class="command-row" data-search="browse router cards open router-cards/amx101.md browse router entry points (amx101-104)"><td><div class="task-text">Browse router cards</div></td><td><button class="value-block value-block--shell" data-copy="Open router-cards/AMX101.md" title="Copy value"><code class="value-text">Open router-cards/AMX101.md</code></button></td><td class="desc-text">Browse router entry points (AMX101-104)</td></tr><tr class="command-row" data-search="filter by acr graph search [acr:acr40] filter equipment by audio control room"><td><div class="task-text">Filter by ACR</div></td><td><button class="value-block value-block--shell" data-copy="Graph search [acr:ACR40]" title="Copy value"><code class="value-text">Graph search [acr:ACR40]</code></button></td><td class="desc-text">Filter equipment by Audio Control Room</td></tr><tr class="command-row" data-search="isolate entity types graph search [type:stream] isolate entity types for topology"><td><div class="task-text">Isolate entity types</div></td><td><button class="value-block value-block--shell" data-copy="Graph search [type:stream]" title="Copy value"><code class="value-text">Graph search [type:stream]</code></button></td><td class="desc-text">Isolate entity types for topology</td></tr><tr class="command-row" data-search="enable acr hub nodes graph settings toggle tags enable acr hub nodes"><td><div class="task-text">Enable ACR hub nodes</div></td><td><button class="value-block value-block--shell" data-copy="Graph settings → toggle Tags" title="Copy value"><code class="value-text">Graph settings → toggle Tags</code></button></td><td class="desc-text">Enable ACR hub nodes</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="scripts"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">&#x25BC;</span><span class="section-title">Data Generation Scripts</span><span class="section-count">5</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="rebuild streams python3 scripts/rebuild_streams_complete.py rebuild all 272 stream files from csv"><td><div class="task-text">Rebuild streams</div></td><td><button class="value-block value-block--shell" data-copy="python3 scripts/rebuild_streams_complete.py" title="Copy value"><code class="value-text">python3 scripts/rebuild_streams_complete.py</code></button></td><td class="desc-text">Rebuild all 272 stream files from CSV</td></tr><tr class="command-row" data-search="rebuild modbox python3 scripts/rebuild_modbox_content.py regenerate modbox files with slot assignments"><td><div class="task-text">Rebuild MODBOX</div></td><td><button class="value-block value-block--shell" data-copy="python3 scripts/rebuild_modbox_content.py" title="Copy value"><code class="value-text">python3 scripts/rebuild_modbox_content.py</code></button></td><td class="desc-text">Regenerate MODBOX files with slot assignments</td></tr><tr class="command-row" data-search="create card children python3 scripts/create_card_children.py generate card files for each slot"><td><div class="task-text">Create card children</div></td><td><button class="value-block value-block--shell" data-copy="python3 scripts/create_card_children.py" title="Copy value"><code class="value-text">python3 scripts/create_card_children.py</code></button></td><td class="desc-text">Generate Card files for each slot</td></tr><tr class="command-row" data-search="add router targets python3 scripts/add_router_targets.py add source/target info from ip csv"><td><div class="task-text">Add router targets</div></td><td><button class="value-block value-block--shell" data-copy="python3 scripts/add_router_targets.py" title="Copy value"><code class="value-text">python3 scripts/add_router_targets.py</code></button></td><td class="desc-text">Add source/target info from IP CSV</td></tr><tr class="command-row" data-search="link streams to cards python3 scripts/add_streams_to_cards.py link streams to cards"><td><div class="task-text">Link streams to cards</div></td><td><button class="value-block value-block--shell" data-copy="python3 scripts/add_streams_to_cards.py" title="Copy value"><code class="value-text">python3 scripts/add_streams_to_cards.py</code></button></td><td class="desc-text">Link streams to cards</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="docs"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">&#x25BC;</span><span class="section-title">Documentation</span><span class="section-count">3</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="architecture reference open docs/21io/mco007 architecture reference.md system-level hierarchy docs"><td><div class="task-text">Architecture reference</div></td><td><button class="value-block value-block--shell" data-copy="Open docs/21io/MCO007 Architecture Reference.md" title="Copy value"><code class="value-text">Open docs/21io/MCO007 Architecture Reference.md</code></button></td><td class="desc-text">System-level hierarchy docs</td></tr><tr class="command-row" data-search="card children system open docs/21io/mco015 card children system.md audio path organization"><td><div class="task-text">Card children system</div></td><td><button class="value-block value-block--shell" data-copy="Open docs/21io/MCO015 Card Children System.md" title="Copy value"><code class="value-text">Open docs/21io/MCO015 Card Children System.md</code></button></td><td class="desc-text">Audio path organization</td></tr><tr class="command-row" data-search="stream router docs open docs/21io/mco018 stream router documentation.md stream transport layer"><td><div class="task-text">Stream router docs</div></td><td><button class="value-block value-block--shell" data-copy="Open docs/21io/MCO018 Stream Router Documentation.md" title="Copy value"><code class="value-text">Open docs/21io/MCO018 Stream Router Documentation.md</code></button></td><td class="desc-text">Stream transport layer</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="analysis"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">&#x25BC;</span><span class="section-title">Vault Analysis</span><span class="section-count">3</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="find acr40 equipment grep -r 'acr: acr40' . find all acr40 equipment"><td><div class="task-text">Find ACR40 equipment</div></td><td><button class="value-block value-block--shell" data-copy="grep -r 'acr: ACR40' ." title="Copy value"><code class="value-text">grep -r 'acr: ACR40' .</code></button></td><td class="desc-text">Find all ACR40 equipment</td></tr><tr class="command-row" data-search="inventory card types ls -1 cards/ | sort | uniq -c inventory card types"><td><div class="task-text">Inventory card types</div></td><td><button class="value-block value-block--shell" data-copy="ls -1 cards/ | sort | uniq -c" title="Copy value"><code class="value-text">ls -1 cards/ | sort | uniq -c</code></button></td><td class="desc-text">Inventory card types</td></tr><tr class="command-row" data-search="count modbox chassis ls -1 boxes/ | grep modbox | wc -l count physical i/o chassis"><td><div class="task-text">Count MODBOX chassis</div></td><td><button class="value-block value-block--shell" data-copy="ls -1 boxes/ | grep MODBOX | wc -l" title="Copy value"><code class="value-text">ls -1 boxes/ | grep MODBOX | wc -l</code></button></td><td class="desc-text">Count physical I/O chassis</td></tr></tbody></table></div></section>
 </main>
 
 <footer>
   <div class="inner">
-    <span>Local command sheet generated from source content in <code>to-fix/</code>.</span>
-    <span>2110-audio-io_docs_repo-commands.html</span>
+    <span>2110-audio-io | PREFIX: 21IO/MCO | Obsidian + Python | 272 streams, 5248 paths</span>
+    <span>2110-audio-io_repo-commands.html</span>
   </div>
-  <div class="footer-notes"><p>Project: 2110-audio-io |
-Docs: 21io INDEX |
-Architecture: Architecture Gallery</p><p>Systems: Calrec Impulse Core, Lawo VSM, SMPTE ST2110, AMWA NMOS</p></div>
 </footer>
 
 <script>
@@ -1076,7 +937,7 @@ function exportToMarkdown() {
     return;
   }
 
-  let md = `# 2110-audio-io - Repository Commands\n\n`;
+  let md = `# 2110-audio-io - Command Reference\n\n`;
   sections.forEach((card) => {
     md += `## ${card.title}\n\n`;
     md += "| Task | Command / Snippet | Description |\n";
@@ -1087,7 +948,7 @@ function exportToMarkdown() {
     md += "\n";
   });
   copyMarkdown(md).then((success) => {
-    flashExportButton(success ? "✓ Copied Markdown" : "Copy failed", success ? "is-confirmed" : "is-error");
+    flashExportButton(success ? "\u2713 Copied Markdown" : "Copy failed", success ? "is-confirmed" : "is-error");
   });
 }
 

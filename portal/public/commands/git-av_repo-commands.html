@@ -284,15 +284,9 @@ main {
 }
 
 @keyframes export-confirm {
-  0% {
-    transform: translateY(0) scale(1);
-  }
-  40% {
-    transform: translateY(-1px) scale(1.03);
-  }
-  100% {
-    transform: translateY(0) scale(1);
-  }
+  0% { transform: translateY(0) scale(1); }
+  40% { transform: translateY(-1px) scale(1.03); }
+  100% { transform: translateY(0) scale(1); }
 }
 
 .surface-card {
@@ -339,9 +333,7 @@ main {
   overflow-wrap: anywhere;
 }
 
-.search-wrap {
-  position: relative;
-}
+.search-wrap { position: relative; }
 
 .search-input {
   width: 100%;
@@ -392,61 +384,17 @@ main {
 }
 
 .search-clear.visible { display: flex; }
+.search-clear:hover { background: var(--accent-soft); color: var(--text); }
 
-.search-clear:hover {
-  background: var(--accent-soft);
-  color: var(--text);
-}
+.callout-grid { display: grid; gap: 12px; }
+.callout { padding: 16px 18px; display: grid; gap: 8px; }
+.callout h2 { font-family: var(--font-display); font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; }
+.callout p { color: var(--text-dim); font-size: 11px; white-space: pre-wrap; }
+.callout--info { box-shadow: var(--callout-info-ring); }
 
-.callout-grid {
-  display: grid;
-  gap: 12px;
-}
-
-.callout {
-  padding: 16px 18px;
-  display: grid;
-  gap: 8px;
-}
-
-.callout h2 {
-  font-family: var(--font-display);
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-}
-
-.callout p {
-  color: var(--text-dim);
-  font-size: 11px;
-  white-space: pre-wrap;
-}
-
-.callout--info {
-  box-shadow: var(--callout-info-ring);
-}
-
-.callout--warning {
-  box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.16);
-}
-
-.callout--success {
-  box-shadow: inset 0 0 0 1px rgba(52, 211, 153, 0.16);
-}
-
-.section-card {
-  overflow: hidden;
-  transition: border-color var(--transition), box-shadow var(--transition);
-}
-
-.section-card.is-focused {
-  border-color: var(--accent-border);
-  box-shadow: var(--section-card-focus-shadow);
-}
-
-.section-card.is-hidden {
-  display: none;
-}
+.section-card { overflow: hidden; transition: border-color var(--transition), box-shadow var(--transition); }
+.section-card.is-focused { border-color: var(--accent-border); box-shadow: var(--section-card-focus-shadow); }
+.section-card.is-hidden { display: none; }
 
 .section-header {
   width: 100%;
@@ -464,143 +412,36 @@ main {
   transition: background var(--transition), border-radius var(--transition), box-shadow var(--transition);
 }
 
-.section-header:hover {
-  background: var(--bg-panel-hover);
-}
+.section-header:hover { background: var(--bg-panel-hover); }
+.section-header:focus, .section-header:focus-visible { outline: none; background: var(--section-header-focus-bg); box-shadow: var(--section-header-focus-shadow); }
+.section-header.collapsed { border-radius: calc(var(--radius) - 1px); border-bottom-color: transparent; }
 
-.section-header:focus,
-.section-header:focus-visible {
-  outline: none;
-  background: var(--section-header-focus-bg);
-  box-shadow: var(--section-header-focus-shadow);
-}
+.section-arrow { font-size: 9px; color: var(--text-muted); transition: transform var(--transition); }
+.section-header.collapsed .section-arrow { transform: rotate(-90deg); }
+.section-header:focus .section-arrow, .section-header:focus-visible .section-arrow { color: var(--accent); }
 
-.section-header.collapsed {
-  border-radius: calc(var(--radius) - 1px);
-  border-bottom-color: transparent;
-}
+.section-title { flex: 1; font-family: var(--font-display); font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); }
+.section-header:focus .section-title, .section-header:focus-visible .section-title { color: var(--text); text-shadow: var(--section-title-focus-shadow); }
 
-.section-arrow {
-  font-size: 9px;
-  color: var(--text-muted);
-  transition: transform var(--transition);
-}
+.section-count { padding: 1px 8px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg-deep); color: var(--text-muted); font-size: 10px; }
+.section-header:focus .section-count, .section-header:focus-visible .section-count { border-color: var(--accent-border); background: var(--section-count-focus-bg); color: var(--text); }
 
-.section-header.collapsed .section-arrow {
-  transform: rotate(-90deg);
-}
+.section-body { display: block; }
+.section-body.collapsed { display: none; }
 
-.section-header:focus .section-arrow,
-.section-header:focus-visible .section-arrow {
-  color: var(--accent);
-}
-
-.section-title {
-  flex: 1;
-  font-family: var(--font-display);
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--accent);
-}
-
-.section-header:focus .section-title,
-.section-header:focus-visible .section-title {
-  color: var(--text);
-  text-shadow: var(--section-title-focus-shadow);
-}
-
-.section-count {
-  padding: 1px 8px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: var(--bg-deep);
-  color: var(--text-muted);
-  font-size: 10px;
-}
-
-.section-header:focus .section-count,
-.section-header:focus-visible .section-count {
-  border-color: var(--accent-border);
-  background: var(--section-count-focus-bg);
-  color: var(--text);
-}
-
-.section-body {
-  display: block;
-}
-
-.section-body.collapsed {
-  display: none;
-}
-
-.command-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.command-table th {
-  padding: 8px 12px;
-  text-align: left;
-  font-size: 10px;
-  font-weight: 200;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-bottom: 1px solid var(--border);
-}
-
+.command-table { width: 100%; border-collapse: collapse; }
+.command-table th { padding: 8px 12px; text-align: left; font-size: 10px; font-weight: 200; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); }
 .command-table th:nth-child(1) { width: 24%; }
 .command-table th:nth-child(2) { width: 38%; }
 .command-table th:nth-child(3) { width: 38%; }
 
-.command-row {
-  border-bottom: 1px solid var(--row-divider);
-}
+.command-row { border-bottom: 1px solid var(--row-divider); }
+.command-row:last-child { border-bottom: none; }
+.command-row.hidden { display: none; }
+.command-row td { padding: 10px 12px; vertical-align: middle; font-size: 11px; }
+.command-row td:first-child { padding-left: 40px; }
 
-.command-row:last-child {
-  border-bottom: none;
-}
-
-.command-row.hidden {
-  display: none;
-}
-
-.command-row td {
-  padding: 10px 12px;
-  vertical-align: middle;
-  font-size: 11px;
-}
-
-.command-row td:first-child {
-  padding-left: 40px;
-}
-
-.task-text {
-  color: var(--text);
-  display: flex;
-  align-items: center;
-  min-height: 44px;
-}
-
-.row-badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 7px;
-}
-
-.row-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 7px;
-  border-radius: 999px;
-  border: 1px solid var(--accent-border);
-  background: var(--accent-soft);
-  color: var(--accent);
-  font-size: 10px;
-  line-height: 1.2;
-}
+.task-text { color: var(--text); display: flex; align-items: center; min-height: 44px; }
 
 .value-block {
   width: 100%;
@@ -617,87 +458,16 @@ main {
   transition: border-color var(--transition), background var(--transition), transform var(--transition);
 }
 
-.value-block:hover {
-  border-color: var(--accent-border);
-  background: var(--accent-soft);
-}
+.value-block:hover { border-color: var(--accent-border); background: var(--accent-soft); }
+.value-block.copied { border-color: rgba(52, 211, 153, 0.4); background: rgba(52, 211, 153, 0.12); }
 
-.value-block.copied {
-  border-color: rgba(52, 211, 153, 0.4);
-  background: rgba(52, 211, 153, 0.12);
-}
+.value-text { font-family: var(--font-body); font-size: 11px; line-height: 1.45; color: var(--accent); white-space: pre-wrap; word-break: break-word; }
 
-.value-text {
-  font-family: var(--font-body);
-  font-size: 11px;
-  line-height: 1.45;
-  color: var(--accent);
-  white-space: pre-wrap;
-  word-break: break-word;
-}
+.desc-text { color: var(--text-dim); line-height: 1.5; white-space: pre-wrap; }
 
-.value-block--keys .value-text {
-  color: var(--text);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.value-block--osc .value-text {
-  color: var(--osc-text);
-}
-
-.inline-key {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 22px;
-  padding: 2px 7px;
-  border-radius: 6px;
-  border: 1px solid var(--accent-border);
-  background: var(--accent-soft);
-  color: var(--text);
-  font-family: var(--font-body);
-  font-size: 11px;
-}
-
-.key-combo {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.key-join,
-.key-note {
-  color: var(--text-muted);
-  font-size: 11px;
-}
-
-.desc-text {
-  color: var(--text-dim);
-  line-height: 1.5;
-  white-space: pre-wrap;
-}
-
-.empty-state {
-  padding: 22px 20px;
-  display: grid;
-  gap: 8px;
-}
-
-.empty-state h2 {
-  font-family: var(--font-display);
-  font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--accent);
-}
-
-.empty-state p {
-  color: var(--text-dim);
-  max-width: 70ch;
-}
+.empty-state { padding: 22px 20px; display: grid; gap: 8px; }
+.empty-state h2 { font-family: var(--font-display); font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); }
+.empty-state p { color: var(--text-dim); max-width: 70ch; }
 
 footer {
   border-top: 1px solid var(--border-strong);
@@ -706,103 +476,27 @@ footer {
   padding: 12px 0 14px;
 }
 
-footer .inner {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  color: var(--text-muted);
-  font-size: 11px;
-}
+footer .inner { display: flex; justify-content: space-between; gap: 16px; color: var(--text-muted); font-size: 11px; }
 
-.footer-notes {
-  width: var(--shell-width);
-  margin: 10px auto 0;
-  display: grid;
-  gap: 6px;
-  color: var(--text-dim);
-  font-size: 11px;
-}
+.footer-notes { width: var(--shell-width); margin: 10px auto 0; display: grid; gap: 6px; color: var(--text-dim); font-size: 11px; }
 
 @media (max-width: 900px) {
-  .hero-row {
-    flex-direction: column;
-  }
-
-  .site-header__inner {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .header-actions {
-    justify-content: flex-start;
-    align-items: flex-start;
-  }
-
-  .hero-meta {
-    width: 100%;
-    justify-items: start;
-  }
-
-  .command-table,
-  .command-table thead,
-  .command-table tbody,
-  .command-table tr,
-  .command-table th,
-  .command-table td {
-    display: block;
-    width: 100%;
-  }
-
-  .command-table thead {
-    display: none;
-  }
-
-  .command-row td {
-    padding-top: 8px;
-    padding-bottom: 8px;
-  }
-
-  .command-row td:first-child {
-    padding-left: 12px;
-  }
-
-  .command-row td:first-child {
-    padding-bottom: 0;
-  }
-
-  .command-row td:nth-child(2) {
-    padding-top: 8px;
-    padding-bottom: 0;
-  }
-
-  footer .inner {
-    flex-direction: column;
-  }
-
-  main,
-  .site-header__inner,
-  .footer-notes,
-  footer .inner {
-    width: 96vw;
-  }
-
-  .hero-meta {
-    display: none;
-  }
-
-  .value-block {
-    max-width: 100%;
-    overflow-x: auto;
-  }
-
-  .value-text {
-    word-break: break-all;
-  }
-
-  .desc-text {
-    display: block;
-    padding: 4px 12px 8px;
-  }
+  .hero-row { flex-direction: column; }
+  .site-header__inner { flex-direction: column; align-items: stretch; }
+  .header-actions { justify-content: flex-start; align-items: flex-start; }
+  .hero-meta { width: 100%; justify-items: start; }
+  .command-table, .command-table thead, .command-table tbody, .command-table tr, .command-table th, .command-table td { display: block; width: 100%; }
+  .command-table thead { display: none; }
+  .command-row td { padding-top: 8px; padding-bottom: 8px; }
+  .command-row td:first-child { padding-left: 12px; }
+  .command-row td:first-child { padding-bottom: 0; }
+  .command-row td:nth-child(2) { padding-top: 8px; padding-bottom: 0; }
+  footer .inner { flex-direction: column; }
+  main, .site-header__inner, .footer-notes, footer .inner { width: 96vw; }
+  .hero-meta { display: none; }
+  .value-block { max-width: 100%; overflow-x: auto; }
+  .value-text { word-break: break-all; }
+  .desc-text { display: block; padding: 4px 12px 8px; }
 }
 </style>
 </head>
@@ -821,21 +515,19 @@ footer .inner {
     <div class="hero">
       <span class="hero-eyebrow">COMMAND REFERENCE</span>
       <h1>git-av</h1>
-      <p>Quick reference for git-av development tasks</p>
+      <p>Version control for audio-video post-production — blake3 + C2PA</p>
     </div>
-    <div class="hero-meta"><div class="meta-chip"><span class="meta-chip__label">UPDATED</span><span class="meta-chip__value">Last updated: 2026-02-01</span></div><div class="meta-chip"><span class="meta-chip__label">REPO</span><span class="meta-chip__value">~/dev/git-av</span></div></div>
+    <div class="hero-meta"><div class="meta-chip"><span class="meta-chip__label">UPDATED</span><span class="meta-chip__value">2026-03-29</span></div><div class="meta-chip"><span class="meta-chip__label">REPO</span><span class="meta-chip__value">~/dev/git-av</span></div></div>
   </div>
-  <div class="search-wrap"><span class="search-icon">⌕</span><input class="search-input" type="text" placeholder="Search commands, snippets, or notes…" id="search" autocomplete="off" spellcheck="false"><span class="search-count" id="search-count"></span><button class="search-clear" id="search-clear" title="Clear search">×</button></div>
-  <section class="surface-card section-card" data-section="setup"><button class="section-header" type="button" aria-expanded="true"><span class="section-arrow">▼</span><span class="section-title">Setup</span><span class="section-count">6</span></button><div class="section-body"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="install (standard) pip install -e . install git-av in editable/development mode"><td><div class="task-text">Install (standard)</div></td><td><button class="value-block value-block--shell" data-copy="pip install -e ." title="Copy value"><code class="value-text">pip install -e .</code></button></td><td class="desc-text">Install git-av in editable/development mode</td></tr><tr class="command-row" data-search="install (dev) pip install -e &quot;.[dev]&quot; install with dev dependencies (pytest, ruff, coverage)"><td><div class="task-text">Install (dev)</div></td><td><button class="value-block value-block--shell" data-copy="pip install -e &quot;.[dev]&quot;" title="Copy value"><code class="value-text">pip install -e ".[dev]"</code></button></td><td class="desc-text">Install with dev dependencies (pytest, ruff, coverage)</td></tr><tr class="command-row" data-search="install (c2pa) pip install -e &quot;.[c2pa]&quot; install with c2pa provenance dependencies"><td><div class="task-text">Install (C2PA)</div></td><td><button class="value-block value-block--shell" data-copy="pip install -e &quot;.[c2pa]&quot;" title="Copy value"><code class="value-text">pip install -e ".[c2pa]"</code></button></td><td class="desc-text">Install with C2PA provenance dependencies</td></tr><tr class="command-row" data-search="install (otio) pip install -e &quot;.[otio]&quot; install with opentimelineio support (phase 5)"><td><div class="task-text">Install (OTIO)</div></td><td><button class="value-block value-block--shell" data-copy="pip install -e &quot;.[otio]&quot;" title="Copy value"><code class="value-text">pip install -e ".[otio]"</code></button></td><td class="desc-text">Install with OpenTimelineIO support (Phase 5)</td></tr><tr class="command-row" data-search="verify install gav --version check installed version (should show 0.3.0-alpha)"><td><div class="task-text">Verify install</div></td><td><button class="value-block value-block--shell" data-copy="gav --version" title="Copy value"><code class="value-text">gav --version</code></button></td><td class="desc-text">Check installed version (should show 0.3.0-alpha)</td></tr><tr class="command-row" data-search="install hooks cp .git-hooks-template/pre-commit .git/hooks/ &amp;&amp; cp .git-hooks-template/post-commit .git/hooks/ &amp;&amp; chmod +x .git/hooks/{pre,post}-commit install c2pa git hooks (auto-manifest + metadata injection)"><td><div class="task-text">Install hooks</div></td><td><button class="value-block value-block--shell" data-copy="cp .git-hooks-template/pre-commit .git/hooks/ &amp;&amp; cp .git-hooks-template/post-commit .git/hooks/ &amp;&amp; chmod +x .git/hooks/{pre,post}-commit" title="Copy value"><code class="value-text">cp .git-hooks-template/pre-commit .git/hooks/ &amp;&amp; cp .git-hooks-template/post-commit .git/hooks/ &amp;&amp; chmod +x .git/hooks/{pre,post}-commit</code></button></td><td class="desc-text">Install C2PA git hooks (auto-manifest + metadata injection)</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="usage"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Usage (gav CLI)</span><span class="section-count">13</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="init gav init initialize a new gav repository in current directory"><td><div class="task-text">Init</div></td><td><button class="value-block value-block--shell" data-copy="gav init" title="Copy value"><code class="value-text">gav init</code></button></td><td class="desc-text">Initialize a new gav repository in current directory</td></tr><tr class="command-row" data-search="snapshot gav snapshot file.wav -m &quot;description&quot; create a versioned snapshot of a file"><td><div class="task-text">Snapshot</div></td><td><button class="value-block value-block--shell" data-copy="gav snapshot file.wav -m &quot;Description&quot;" title="Copy value"><code class="value-text">gav snapshot file.wav -m "Description"</code></button></td><td class="desc-text">Create a versioned snapshot of a file</td></tr><tr class="command-row" data-search="status gav status show working tree status (tracked files, changes)"><td><div class="task-text">Status</div></td><td><button class="value-block value-block--shell" data-copy="gav status" title="Copy value"><code class="value-text">gav status</code></button></td><td class="desc-text">Show working tree status (tracked files, changes)</td></tr><tr class="command-row" data-search="revert (list) gav revert file.wav --list list available versions for a file"><td><div class="task-text">Revert (list)</div></td><td><button class="value-block value-block--shell" data-copy="gav revert file.wav --list" title="Copy value"><code class="value-text">gav revert file.wav --list</code></button></td><td class="desc-text">List available versions for a file</td></tr><tr class="command-row" data-search="revert gav revert file.wav 2 revert file to version 2 (instant via symlink)"><td><div class="task-text">Revert</div></td><td><button class="value-block value-block--shell" data-copy="gav revert file.wav 2" title="Copy value"><code class="value-text">gav revert file.wav 2</code></button></td><td class="desc-text">Revert file to version 2 (instant via symlink)</td></tr><tr class="command-row" data-search="branch create gav branch feature create a new branch named &quot;feature&quot;"><td><div class="task-text">Branch create</div></td><td><button class="value-block value-block--shell" data-copy="gav branch feature" title="Copy value"><code class="value-text">gav branch feature</code></button></td><td class="desc-text">Create a new branch named "feature"</td></tr><tr class="command-row" data-search="checkout gav checkout feature switch branch via symlink swizzling (&lt;1s)"><td><div class="task-text">Checkout</div></td><td><button class="value-block value-block--shell" data-copy="gav checkout feature" title="Copy value"><code class="value-text">gav checkout feature</code></button></td><td class="desc-text">Switch branch via symlink swizzling (&lt;1s)</td></tr><tr class="command-row" data-search="c2pa generate gav c2pa generate &lt;blob_hash&gt; generate c2pa provenance manifest for a blob"><td><div class="task-text">C2PA generate</div></td><td><button class="value-block value-block--shell" data-copy="gav c2pa generate &lt;blob_hash&gt;" title="Copy value"><code class="value-text">gav c2pa generate &lt;blob_hash&gt;</code></button></td><td class="desc-text">Generate C2PA provenance manifest for a blob</td></tr><tr class="command-row" data-search="c2pa verify gav c2pa verify &lt;blob_hash&gt; verify c2pa manifest integrity"><td><div class="task-text">C2PA verify</div></td><td><button class="value-block value-block--shell" data-copy="gav c2pa verify &lt;blob_hash&gt;" title="Copy value"><code class="value-text">gav c2pa verify &lt;blob_hash&gt;</code></button></td><td class="desc-text">Verify C2PA manifest integrity</td></tr><tr class="command-row" data-search="c2pa inspect gav c2pa inspect &lt;blob_hash&gt; show detailed provenance information"><td><div class="task-text">C2PA inspect</div></td><td><button class="value-block value-block--shell" data-copy="gav c2pa inspect &lt;blob_hash&gt;" title="Copy value"><code class="value-text">gav c2pa inspect &lt;blob_hash&gt;</code></button></td><td class="desc-text">Show detailed provenance information</td></tr><tr class="command-row" data-search="c2pa audit gav c2pa audit full vault compliance report"><td><div class="task-text">C2PA audit</div></td><td><button class="value-block value-block--shell" data-copy="gav c2pa audit" title="Copy value"><code class="value-text">gav c2pa audit</code></button></td><td class="desc-text">Full vault compliance report</td></tr><tr class="command-row" data-search="c2pa status gav c2pa status show c2pa tooling status"><td><div class="task-text">C2PA status</div></td><td><button class="value-block value-block--shell" data-copy="gav c2pa status" title="Copy value"><code class="value-text">gav c2pa status</code></button></td><td class="desc-text">Show C2PA tooling status</td></tr><tr class="command-row" data-search="help gav --help show all available commands and options"><td><div class="task-text">Help</div></td><td><button class="value-block value-block--shell" data-copy="gav --help" title="Copy value"><code class="value-text">gav --help</code></button></td><td class="desc-text">Show all available commands and options</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="test"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Testing</span><span class="section-count">6</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="all tests pytest tests/ -v run full test suite (47 tests) with verbose output"><td><div class="task-text">All tests</div></td><td><button class="value-block value-block--shell" data-copy="pytest tests/ -v" title="Copy value"><code class="value-text">pytest tests/ -v</code></button></td><td class="desc-text">Run full test suite (47 tests) with verbose output</td></tr><tr class="command-row" data-search="unit tests pytest tests/unit/ -v run unit tests only (fast, isolated)"><td><div class="task-text">Unit tests</div></td><td><button class="value-block value-block--shell" data-copy="pytest tests/unit/ -v" title="Copy value"><code class="value-text">pytest tests/unit/ -v</code></button></td><td class="desc-text">Run unit tests only (fast, isolated)</td></tr><tr class="command-row" data-search="integration tests pytest tests/integration/ -v run integration tests (end-to-end workflows)"><td><div class="task-text">Integration tests</div></td><td><button class="value-block value-block--shell" data-copy="pytest tests/integration/ -v" title="Copy value"><code class="value-text">pytest tests/integration/ -v</code></button></td><td class="desc-text">Run integration tests (end-to-end workflows)</td></tr><tr class="command-row" data-search="coverage pytest tests/ --cov=src/gav --cov-report=html run tests with html coverage report"><td><div class="task-text">Coverage</div></td><td><button class="value-block value-block--shell" data-copy="pytest tests/ --cov=src/gav --cov-report=html" title="Copy value"><code class="value-text">pytest tests/ --cov=src/gav --cov-report=html</code></button></td><td class="desc-text">Run tests with HTML coverage report</td></tr><tr class="command-row" data-search="single file pytest tests/unit/test_symlink_manager.py -v run a single test file (replace filename as needed)"><td><div class="task-text">Single file</div></td><td><button class="value-block value-block--shell" data-copy="pytest tests/unit/test_symlink_manager.py -v" title="Copy value"><code class="value-text">pytest tests/unit/test_symlink_manager.py -v</code></button></td><td class="desc-text">Run a single test file (replace filename as needed)</td></tr><tr class="command-row" data-search="lint ruff check src/ run ruff linter on source code (line-length: 100)"><td><div class="task-text">Lint</div></td><td><button class="value-block value-block--shell" data-copy="ruff check src/" title="Copy value"><code class="value-text">ruff check src/</code></button></td><td class="desc-text">Run ruff linter on source code (line-length: 100)</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="debug"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Debugging</span><span class="section-count">5</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="direct invoke python -m gav.cli.main --help run cli directly via python module (for debugging)"><td><div class="task-text">Direct invoke</div></td><td><button class="value-block value-block--shell" data-copy="python -m gav.cli.main --help" title="Copy value"><code class="value-text">python -m gav.cli.main --help</code></button></td><td class="desc-text">Run CLI directly via Python module (for debugging)</td></tr><tr class="command-row" data-search="pdb debug python -m pdb -m gav.cli.main snapshot file.wav -m &quot;test&quot; run cli with python debugger attached"><td><div class="task-text">PDB debug</div></td><td><button class="value-block value-block--shell" data-copy="python -m pdb -m gav.cli.main snapshot file.wav -m &quot;Test&quot;" title="Copy value"><code class="value-text">python -m pdb -m gav.cli.main snapshot file.wav -m "Test"</code></button></td><td class="desc-text">Run CLI with Python debugger attached</td></tr><tr class="command-row" data-search="inspect db sqlite3 .gav_ledger.db open ledger database for manual inspection"><td><div class="task-text">Inspect DB</div></td><td><button class="value-block value-block--shell" data-copy="sqlite3 .gav_ledger.db" title="Copy value"><code class="value-text">sqlite3 .gav_ledger.db</code></button></td><td class="desc-text">Open ledger database for manual inspection</td></tr><tr class="command-row" data-search="list tables sqlite3 .gav_ledger.db &quot;.tables&quot; show all tables in the ledger database"><td><div class="task-text">List tables</div></td><td><button class="value-block value-block--shell" data-copy="sqlite3 .gav_ledger.db &quot;.tables&quot;" title="Copy value"><code class="value-text">sqlite3 .gav_ledger.db ".tables"</code></button></td><td class="desc-text">Show all tables in the ledger database</td></tr><tr class="command-row" data-search="show branches sqlite3 .gav_ledger.db &quot;select * from branches;&quot; query all branches from ledger"><td><div class="task-text">Show branches</div></td><td><button class="value-block value-block--shell" data-copy="sqlite3 .gav_ledger.db &quot;SELECT * FROM branches;&quot;" title="Copy value"><code class="value-text">sqlite3 .gav_ledger.db "SELECT * FROM branches;"</code></button></td><td class="desc-text">Query all branches from ledger</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="git"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Git</span><span class="section-count">6</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="status git status show working tree status"><td><div class="task-text">Status</div></td><td><button class="value-block value-block--shell" data-copy="git status" title="Copy value"><code class="value-text">git status</code></button></td><td class="desc-text">Show working tree status</td></tr><tr class="command-row" data-search="diff git diff show unstaged changes"><td><div class="task-text">Diff</div></td><td><button class="value-block value-block--shell" data-copy="git diff" title="Copy value"><code class="value-text">git diff</code></button></td><td class="desc-text">Show unstaged changes</td></tr><tr class="command-row" data-search="diff staged git diff --staged show staged changes"><td><div class="task-text">Diff staged</div></td><td><button class="value-block value-block--shell" data-copy="git diff --staged" title="Copy value"><code class="value-text">git diff --staged</code></button></td><td class="desc-text">Show staged changes</td></tr><tr class="command-row" data-search="log git log --oneline -20 show last 20 commits (compact)"><td><div class="task-text">Log</div></td><td><button class="value-block value-block--shell" data-copy="git log --oneline -20" title="Copy value"><code class="value-text">git log --oneline -20</code></button></td><td class="desc-text">Show last 20 commits (compact)</td></tr><tr class="command-row" data-search="fetch git fetch --all fetch all remotes"><td><div class="task-text">Fetch</div></td><td><button class="value-block value-block--shell" data-copy="git fetch --all" title="Copy value"><code class="value-text">git fetch --all</code></button></td><td class="desc-text">Fetch all remotes</td></tr><tr class="command-row" data-search="pull git pull --rebase pull with rebase to keep history linear"><td><div class="task-text">Pull</div></td><td><button class="value-block value-block--shell" data-copy="git pull --rebase" title="Copy value"><code class="value-text">git pull --rebase</code></button></td><td class="desc-text">Pull with rebase to keep history linear</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="docs"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Documentation</span><span class="section-count">6</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="list docs ls -1 docs/gav/gav*.md list all gav prefix documentation files"><td><div class="task-text">List docs</div></td><td><button class="value-block value-block--shell" data-copy="ls -1 docs/gav/GAV*.md" title="Copy value"><code class="value-text">ls -1 docs/gav/GAV*.md</code></button></td><td class="desc-text">List all GAV PREFIX documentation files</td></tr><tr class="command-row" data-search="latest docs ls -1 docs/gav/gav*.md | sort -v | tail -6 show 6 most recent prefix docs"><td><div class="task-text">Latest docs</div></td><td><button class="value-block value-block--shell" data-copy="ls -1 docs/gav/GAV*.md | sort -V | tail -6" title="Copy value"><code class="value-text">ls -1 docs/gav/GAV*.md | sort -V | tail -6</code></button></td><td class="desc-text">Show 6 most recent PREFIX docs</td></tr><tr class="command-row" data-search="search docs grep -rl &quot;keyword&quot; docs/gav/ search docs for a keyword (replace &quot;keyword&quot;)"><td><div class="task-text">Search docs</div></td><td><button class="value-block value-block--shell" data-copy="grep -rl &quot;keyword&quot; docs/gav/" title="Copy value"><code class="value-text">grep -rl "keyword" docs/gav/</code></button></td><td class="desc-text">Search docs for a keyword (replace "keyword")</td></tr><tr class="command-row" data-search="view readme cat readme.md display project readme"><td><div class="task-text">View README</div></td><td><button class="value-block value-block--shell" data-copy="cat README.md" title="Copy value"><code class="value-text">cat README.md</code></button></td><td class="desc-text">Display project README</td></tr><tr class="command-row" data-search="cli reference cat docs/gav/gav005* view cli reference documentation (gav005)"><td><div class="task-text">CLI reference</div></td><td><button class="value-block value-block--shell" data-copy="cat docs/gav/GAV005*" title="Copy value"><code class="value-text">cat docs/gav/GAV005*</code></button></td><td class="desc-text">View CLI Reference documentation (GAV005)</td></tr><tr class="command-row" data-search="dev guide cat docs/gav/gav006* view developer guide documentation (gav006)"><td><div class="task-text">Dev guide</div></td><td><button class="value-block value-block--shell" data-copy="cat docs/gav/GAV006*" title="Copy value"><code class="value-text">cat docs/gav/GAV006*</code></button></td><td class="desc-text">View Developer Guide documentation (GAV006)</td></tr></tbody></table></div></section>
-  <section class="callout-grid"><article class="surface-card callout callout--info"><h2>Tech Stack</h2><p>Python 3.10+ | Click CLI | Rich terminal UI | BLAKE3 hashing | SQLite | C2PA provenance</p></article><article class="surface-card callout callout--success"><h2>Status: Phase 4 Complete</h2><p>Core architecture (10 modules, ~5,000 LOC) | 47 tests passing | 7 command groups (init, snapshot, revert, status, branch, checkout, c2pa)</p></article></section>
+  <div class="search-wrap"><span class="search-icon">&#x2315;</span><input class="search-input" type="text" placeholder="Search commands, snippets, or notes…" id="search" autocomplete="off" spellcheck="false"><span class="search-count" id="search-count"></span><button class="search-clear" id="search-clear" title="Clear search">&times;</button></div>
+  <section class="surface-card section-card" data-section="setup"><button class="section-header" type="button" aria-expanded="true"><span class="section-arrow">&#x25BC;</span><span class="section-title">Installation</span><span class="section-count">3</span></button><div class="section-body"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="install cli in development mode pip install -e ."><td><div class="task-text">Install CLI in development mode</div></td><td><button class="value-block value-block--shell" data-copy="pip install -e ." title="Copy value"><code class="value-text">pip install -e .</code></button></td><td class="desc-text">Install CLI in development mode</td></tr><tr class="command-row" data-search="include pytest, ruff for development pip install -e &quot;.[dev]&quot;"><td><div class="task-text">Include pytest, ruff for development</div></td><td><button class="value-block value-block--shell" data-copy="pip install -e &quot;.[dev]&quot;" title="Copy value"><code class="value-text">pip install -e ".[dev]"</code></button></td><td class="desc-text">Include pytest, ruff for development</td></tr><tr class="command-row" data-search="include c2pa provenance support pip install -e &quot;.[c2pa]&quot;"><td><div class="task-text">Include C2PA provenance support</div></td><td><button class="value-block value-block--shell" data-copy="pip install -e &quot;.[c2pa]&quot;" title="Copy value"><code class="value-text">pip install -e ".[c2pa]"</code></button></td><td class="desc-text">Include C2PA provenance support</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="project"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">&#x25BC;</span><span class="section-title">Project Management</span><span class="section-count">3</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="create .gav_vault/ and .gav_ledger.db gav init"><td><div class="task-text">Create .gav_vault/ and .gav_ledger.db</div></td><td><button class="value-block value-block--shell" data-copy="gav init" title="Copy value"><code class="value-text">gav init</code></button></td><td class="desc-text">Create .gav_vault/ and .gav_ledger.db</td></tr><tr class="command-row" data-search="show branch, file state, vault stats gav status"><td><div class="task-text">Show branch, file state, vault stats</div></td><td><button class="value-block value-block--shell" data-copy="gav status" title="Copy value"><code class="value-text">gav status</code></button></td><td class="desc-text">Show branch, file state, vault stats</td></tr><tr class="command-row" data-search="verbose file-by-file info gav status -v"><td><div class="task-text">Verbose file-by-file info</div></td><td><button class="value-block value-block--shell" data-copy="gav status -v" title="Copy value"><code class="value-text">gav status -v</code></button></td><td class="desc-text">Verbose file-by-file info</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="versioning"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">&#x25BC;</span><span class="section-title">Version Control</span><span class="section-count">4</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="hash, vault, symlink, log version gav snapshot audio.wav -m &quot;initial recording&quot;"><td><div class="task-text">Hash, vault, symlink, log version</div></td><td><button class="value-block value-block--shell" data-copy="gav snapshot audio.wav -m &quot;Initial recording&quot;" title="Copy value"><code class="value-text">gav snapshot audio.wav -m "Initial recording"</code></button></td><td class="desc-text">Hash, vault, symlink, log version</td></tr><tr class="command-row" data-search="show version history gav revert audio.wav --list"><td><div class="task-text">Show version history</div></td><td><button class="value-block value-block--shell" data-copy="gav revert audio.wav --list" title="Copy value"><code class="value-text">gav revert audio.wav --list</code></button></td><td class="desc-text">Show version history</td></tr><tr class="command-row" data-search="restore version by number (instant) gav revert audio.wav 2"><td><div class="task-text">Restore version by number (instant)</div></td><td><button class="value-block value-block--shell" data-copy="gav revert audio.wav 2" title="Copy value"><code class="value-text">gav revert audio.wav 2</code></button></td><td class="desc-text">Restore version by number (instant)</td></tr><tr class="command-row" data-search="restore by hash prefix gav revert audio.wav abc123"><td><div class="task-text">Restore by hash prefix</div></td><td><button class="value-block value-block--shell" data-copy="gav revert audio.wav abc123" title="Copy value"><code class="value-text">gav revert audio.wav abc123</code></button></td><td class="desc-text">Restore by hash prefix</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="branching"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">&#x25BC;</span><span class="section-title">Branching</span><span class="section-count">4</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="list branches gav branch"><td><div class="task-text">List branches</div></td><td><button class="value-block value-block--shell" data-copy="gav branch" title="Copy value"><code class="value-text">gav branch</code></button></td><td class="desc-text">List branches</td></tr><tr class="command-row" data-search="create branch from head gav branch experimental"><td><div class="task-text">Create branch from HEAD</div></td><td><button class="value-block value-block--shell" data-copy="gav branch experimental" title="Copy value"><code class="value-text">gav branch experimental</code></button></td><td class="desc-text">Create branch from HEAD</td></tr><tr class="command-row" data-search="delete branch gav branch -d experimental"><td><div class="task-text">Delete branch</div></td><td><button class="value-block value-block--shell" data-copy="gav branch -d experimental" title="Copy value"><code class="value-text">gav branch -d experimental</code></button></td><td class="desc-text">Delete branch</td></tr><tr class="command-row" data-search="switch branch (instant symlink swizzle) gav checkout experimental"><td><div class="task-text">Switch branch (instant symlink swizzle)</div></td><td><button class="value-block value-block--shell" data-copy="gav checkout experimental" title="Copy value"><code class="value-text">gav checkout experimental</code></button></td><td class="desc-text">Switch branch (instant symlink swizzle)</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="c2pa"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">&#x25BC;</span><span class="section-title">C2PA Provenance</span><span class="section-count">4</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="verify c2patool availability gav c2pa status"><td><div class="task-text">Verify c2patool availability</div></td><td><button class="value-block value-block--shell" data-copy="gav c2pa status" title="Copy value"><code class="value-text">gav c2pa status</code></button></td><td class="desc-text">Verify c2patool availability</td></tr><tr class="command-row" data-search="create manifest for blob gav c2pa generate <hash>"><td><div class="task-text">Create manifest for blob</div></td><td><button class="value-block value-block--shell" data-copy="gav c2pa generate <hash>" title="Copy value"><code class="value-text">gav c2pa generate &lt;hash&gt;</code></button></td><td class="desc-text">Create manifest for blob</td></tr><tr class="command-row" data-search="check manifest authenticity gav c2pa verify <hash>"><td><div class="task-text">Check manifest authenticity</div></td><td><button class="value-block value-block--shell" data-copy="gav c2pa verify <hash>" title="Copy value"><code class="value-text">gav c2pa verify &lt;hash&gt;</code></button></td><td class="desc-text">Check manifest authenticity</td></tr><tr class="command-row" data-search="full vault compliance report gav c2pa audit"><td><div class="task-text">Full vault compliance report</div></td><td><button class="value-block value-block--shell" data-copy="gav c2pa audit" title="Copy value"><code class="value-text">gav c2pa audit</code></button></td><td class="desc-text">Full vault compliance report</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="testing"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">&#x25BC;</span><span class="section-title">Testing</span><span class="section-count">2</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="run 42+ tests pytest tests/ -v"><td><div class="task-text">Run 42+ tests</div></td><td><button class="value-block value-block--shell" data-copy="pytest tests/ -v" title="Copy value"><code class="value-text">pytest tests/ -v</code></button></td><td class="desc-text">Run 42+ tests</td></tr><tr class="command-row" data-search="coverage report pytest tests/ --cov=src"><td><div class="task-text">Coverage report</div></td><td><button class="value-block value-block--shell" data-copy="pytest tests/ --cov=src" title="Copy value"><code class="value-text">pytest tests/ --cov=src</code></button></td><td class="desc-text">Coverage report</td></tr></tbody></table></div></section>
 </main>
 
 <footer>
   <div class="inner">
-    <span>Local command sheet generated from source content in <code>to-fix/</code>.</span>
-    <span>git-av_docs_repo-commands.html</span>
+    <span>git-av | Python 3.10+ | blake3 + C2PA | 42+ tests</span>
+    <span>git-av_repo-commands.html</span>
   </div>
-  
 </footer>
 
 <script>
@@ -1085,7 +777,7 @@ function exportToMarkdown() {
     md += "\n";
   });
   copyMarkdown(md).then((success) => {
-    flashExportButton(success ? "✓ Copied Markdown" : "Copy failed", success ? "is-confirmed" : "is-error");
+    flashExportButton(success ? "Copied Markdown" : "Copy failed", success ? "is-confirmed" : "is-error");
   });
 }
 

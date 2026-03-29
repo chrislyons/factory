@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Max4Live MCP - Command Reference</title>
+<title>max4live-mcp - Command Reference</title>
 <style>
 @font-face {
   font-family: "Geist Pixel Square";
@@ -284,15 +284,9 @@ main {
 }
 
 @keyframes export-confirm {
-  0% {
-    transform: translateY(0) scale(1);
-  }
-  40% {
-    transform: translateY(-1px) scale(1.03);
-  }
-  100% {
-    transform: translateY(0) scale(1);
-  }
+  0% { transform: translateY(0) scale(1); }
+  40% { transform: translateY(-1px) scale(1.03); }
+  100% { transform: translateY(0) scale(1); }
 }
 
 .surface-card {
@@ -339,9 +333,7 @@ main {
   overflow-wrap: anywhere;
 }
 
-.search-wrap {
-  position: relative;
-}
+.search-wrap { position: relative; }
 
 .search-input {
   width: 100%;
@@ -398,10 +390,7 @@ main {
   color: var(--text);
 }
 
-.callout-grid {
-  display: grid;
-  gap: 12px;
-}
+.callout-grid { display: grid; gap: 12px; }
 
 .callout {
   padding: 16px 18px;
@@ -422,17 +411,9 @@ main {
   white-space: pre-wrap;
 }
 
-.callout--info {
-  box-shadow: var(--callout-info-ring);
-}
-
-.callout--warning {
-  box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.16);
-}
-
-.callout--success {
-  box-shadow: inset 0 0 0 1px rgba(52, 211, 153, 0.16);
-}
+.callout--info { box-shadow: var(--callout-info-ring); }
+.callout--warning { box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.16); }
+.callout--success { box-shadow: inset 0 0 0 1px rgba(52, 211, 153, 0.16); }
 
 .section-card {
   overflow: hidden;
@@ -444,9 +425,7 @@ main {
   box-shadow: var(--section-card-focus-shadow);
 }
 
-.section-card.is-hidden {
-  display: none;
-}
+.section-card.is-hidden { display: none; }
 
 .section-header {
   width: 100%;
@@ -464,9 +443,7 @@ main {
   transition: background var(--transition), border-radius var(--transition), box-shadow var(--transition);
 }
 
-.section-header:hover {
-  background: var(--bg-panel-hover);
-}
+.section-header:hover { background: var(--bg-panel-hover); }
 
 .section-header:focus,
 .section-header:focus-visible {
@@ -486,14 +463,10 @@ main {
   transition: transform var(--transition);
 }
 
-.section-header.collapsed .section-arrow {
-  transform: rotate(-90deg);
-}
+.section-header.collapsed .section-arrow { transform: rotate(-90deg); }
 
 .section-header:focus .section-arrow,
-.section-header:focus-visible .section-arrow {
-  color: var(--accent);
-}
+.section-header:focus-visible .section-arrow { color: var(--accent); }
 
 .section-title {
   flex: 1;
@@ -526,18 +499,10 @@ main {
   color: var(--text);
 }
 
-.section-body {
-  display: block;
-}
+.section-body { display: block; }
+.section-body.collapsed { display: none; }
 
-.section-body.collapsed {
-  display: none;
-}
-
-.command-table {
-  width: 100%;
-  border-collapse: collapse;
-}
+.command-table { width: 100%; border-collapse: collapse; }
 
 .command-table th {
   padding: 8px 12px;
@@ -554,17 +519,9 @@ main {
 .command-table th:nth-child(2) { width: 38%; }
 .command-table th:nth-child(3) { width: 38%; }
 
-.command-row {
-  border-bottom: 1px solid var(--row-divider);
-}
-
-.command-row:last-child {
-  border-bottom: none;
-}
-
-.command-row.hidden {
-  display: none;
-}
+.command-row { border-bottom: 1px solid var(--row-divider); }
+.command-row:last-child { border-bottom: none; }
+.command-row.hidden { display: none; }
 
 .command-row td {
   padding: 10px 12px;
@@ -572,34 +529,13 @@ main {
   font-size: 11px;
 }
 
-.command-row td:first-child {
-  padding-left: 40px;
-}
+.command-row td:first-child { padding-left: 40px; }
 
 .task-text {
   color: var(--text);
   display: flex;
   align-items: center;
   min-height: 44px;
-}
-
-.row-badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 7px;
-}
-
-.row-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 7px;
-  border-radius: 999px;
-  border: 1px solid var(--accent-border);
-  background: var(--accent-soft);
-  color: var(--accent);
-  font-size: 10px;
-  line-height: 1.2;
 }
 
 .value-block {
@@ -634,44 +570,6 @@ main {
   color: var(--accent);
   white-space: pre-wrap;
   word-break: break-word;
-}
-
-.value-block--keys .value-text {
-  color: var(--text);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.value-block--osc .value-text {
-  color: var(--osc-text);
-}
-
-.inline-key {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 22px;
-  padding: 2px 7px;
-  border-radius: 6px;
-  border: 1px solid var(--accent-border);
-  background: var(--accent-soft);
-  color: var(--text);
-  font-family: var(--font-body);
-  font-size: 11px;
-}
-
-.key-combo {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.key-join,
-.key-note {
-  color: var(--text-muted);
-  font-size: 11px;
 }
 
 .desc-text {
@@ -724,9 +622,7 @@ footer .inner {
 }
 
 @media (max-width: 900px) {
-  .hero-row {
-    flex-direction: column;
-  }
+  .hero-row { flex-direction: column; }
 
   .site-header__inner {
     flex-direction: column;
@@ -753,56 +649,25 @@ footer .inner {
     width: 100%;
   }
 
-  .command-table thead {
-    display: none;
-  }
+  .command-table thead { display: none; }
 
-  .command-row td {
-    padding-top: 8px;
-    padding-bottom: 8px;
-  }
+  .command-row td { padding-top: 8px; padding-bottom: 8px; }
+  .command-row td:first-child { padding-left: 12px; }
+  .command-row td:first-child { padding-bottom: 0; }
+  .command-row td:nth-child(2) { padding-top: 8px; padding-bottom: 0; }
 
-  .command-row td:first-child {
-    padding-left: 12px;
-  }
-
-  .command-row td:first-child {
-    padding-bottom: 0;
-  }
-
-  .command-row td:nth-child(2) {
-    padding-top: 8px;
-    padding-bottom: 0;
-  }
-
-  footer .inner {
-    flex-direction: column;
-  }
+  footer .inner { flex-direction: column; }
 
   main,
   .site-header__inner,
   .footer-notes,
-  footer .inner {
-    width: 96vw;
-  }
+  footer .inner { width: 96vw; }
 
-  .hero-meta {
-    display: none;
-  }
+  .hero-meta { display: none; }
 
-  .value-block {
-    max-width: 100%;
-    overflow-x: auto;
-  }
-
-  .value-text {
-    word-break: break-all;
-  }
-
-  .desc-text {
-    display: block;
-    padding: 4px 12px 8px;
-  }
+  .value-block { max-width: 100%; overflow-x: auto; }
+  .value-text { word-break: break-all; }
+  .desc-text { display: block; padding: 4px 12px 8px; }
 }
 </style>
 </head>
@@ -820,22 +685,20 @@ footer .inner {
   <div class="hero-row">
     <div class="hero">
       <span class="hero-eyebrow">COMMAND REFERENCE</span>
-      <h1>Max4Live MCP</h1>
-      <p>Quick reference for Max4Live MCP server development</p>
+      <h1>max4live-mcp</h1>
+      <p>MCP server for Ableton Live control — TypeScript + OSC + Max/MSP</p>
     </div>
-    <div class="hero-meta"><div class="meta-chip"><span class="meta-chip__label">UPDATED</span><span class="meta-chip__value">Last updated: 2026-02-01</span></div><div class="meta-chip"><span class="meta-chip__label">REPO</span><span class="meta-chip__value">~/dev/max4live-mcp</span></div></div>
+    <div class="hero-meta"><div class="meta-chip"><span class="meta-chip__label">UPDATED</span><span class="meta-chip__value">2026-03-29</span></div><div class="meta-chip"><span class="meta-chip__label">REPO</span><span class="meta-chip__value">~/dev/max4live-mcp</span></div></div>
   </div>
-  <div class="search-wrap"><span class="search-icon">⌕</span><input class="search-input" type="text" placeholder="Search commands, snippets, or notes…" id="search" autocomplete="off" spellcheck="false"><span class="search-count" id="search-count"></span><button class="search-clear" id="search-clear" title="Clear search">×</button></div>
-  <section class="surface-card section-card" data-section="dev"><button class="section-header" type="button" aria-expanded="true"><span class="section-arrow">▼</span><span class="section-title">Development</span><span class="section-count">7</span></button><div class="section-body"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="dev server npm run dev start dev server with tsx (hot reload)"><td><div class="task-text">Dev server</div></td><td><button class="value-block value-block--shell" data-copy="npm run dev" title="Copy value"><code class="value-text">npm run dev</code></button></td><td class="desc-text">Start dev server with tsx (hot reload)</td></tr><tr class="command-row" data-search="build npm run build compile typescript to dist/"><td><div class="task-text">Build</div></td><td><button class="value-block value-block--shell" data-copy="npm run build" title="Copy value"><code class="value-text">npm run build</code></button></td><td class="desc-text">Compile TypeScript to dist/</td></tr><tr class="command-row" data-search="start npm run start run compiled server from dist/index.js"><td><div class="task-text">Start</div></td><td><button class="value-block value-block--shell" data-copy="npm run start" title="Copy value"><code class="value-text">npm run start</code></button></td><td class="desc-text">Run compiled server from dist/index.js</td></tr><tr class="command-row" data-search="watch npm run watch watch mode — recompile on file changes"><td><div class="task-text">Watch</div></td><td><button class="value-block value-block--shell" data-copy="npm run watch" title="Copy value"><code class="value-text">npm run watch</code></button></td><td class="desc-text">Watch mode — recompile on file changes</td></tr><tr class="command-row" data-search="type check npm run type-check run typescript type checker without emitting"><td><div class="task-text">Type check</div></td><td><button class="value-block value-block--shell" data-copy="npm run type-check" title="Copy value"><code class="value-text">npm run type-check</code></button></td><td class="desc-text">Run TypeScript type checker without emitting</td></tr><tr class="command-row" data-search="clean npm run clean remove dist/ build output"><td><div class="task-text">Clean</div></td><td><button class="value-block value-block--shell" data-copy="npm run clean" title="Copy value"><code class="value-text">npm run clean</code></button></td><td class="desc-text">Remove dist/ build output</td></tr><tr class="command-row" data-search="install deps npm install install all dependencies from package.json"><td><div class="task-text">Install deps</div></td><td><button class="value-block value-block--shell" data-copy="npm install" title="Copy value"><code class="value-text">npm install</code></button></td><td class="desc-text">Install all dependencies from package.json</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="test"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Testing</span><span class="section-count">3</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="run tests npm run test run test suite once with vitest"><td><div class="task-text">Run tests</div></td><td><button class="value-block value-block--shell" data-copy="npm run test" title="Copy value"><code class="value-text">npm run test</code></button></td><td class="desc-text">Run test suite once with Vitest</td></tr><tr class="command-row" data-search="watch tests npm run test:watch run vitest in watch mode (re-run on changes)"><td><div class="task-text">Watch tests</div></td><td><button class="value-block value-block--shell" data-copy="npm run test:watch" title="Copy value"><code class="value-text">npm run test:watch</code></button></td><td class="desc-text">Run Vitest in watch mode (re-run on changes)</td></tr><tr class="command-row" data-search="coverage npm run test:coverage run tests with v8 coverage report"><td><div class="task-text">Coverage</div></td><td><button class="value-block value-block--shell" data-copy="npm run test:coverage" title="Copy value"><code class="value-text">npm run test:coverage</code></button></td><td class="desc-text">Run tests with v8 coverage report</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="git"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Git</span><span class="section-count">6</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="status git status show working tree status"><td><div class="task-text">Status</div></td><td><button class="value-block value-block--shell" data-copy="git status" title="Copy value"><code class="value-text">git status</code></button></td><td class="desc-text">Show working tree status</td></tr><tr class="command-row" data-search="diff git diff show unstaged changes"><td><div class="task-text">Diff</div></td><td><button class="value-block value-block--shell" data-copy="git diff" title="Copy value"><code class="value-text">git diff</code></button></td><td class="desc-text">Show unstaged changes</td></tr><tr class="command-row" data-search="diff staged git diff --staged show staged changes"><td><div class="task-text">Diff staged</div></td><td><button class="value-block value-block--shell" data-copy="git diff --staged" title="Copy value"><code class="value-text">git diff --staged</code></button></td><td class="desc-text">Show staged changes</td></tr><tr class="command-row" data-search="log git log --oneline -20 show last 20 commits (compact)"><td><div class="task-text">Log</div></td><td><button class="value-block value-block--shell" data-copy="git log --oneline -20" title="Copy value"><code class="value-text">git log --oneline -20</code></button></td><td class="desc-text">Show last 20 commits (compact)</td></tr><tr class="command-row" data-search="fetch git fetch --all fetch all remotes"><td><div class="task-text">Fetch</div></td><td><button class="value-block value-block--shell" data-copy="git fetch --all" title="Copy value"><code class="value-text">git fetch --all</code></button></td><td class="desc-text">Fetch all remotes</td></tr><tr class="command-row" data-search="pull git pull --rebase pull with rebase to keep history linear"><td><div class="task-text">Pull</div></td><td><button class="value-block value-block--shell" data-copy="git pull --rebase" title="Copy value"><code class="value-text">git pull --rebase</code></button></td><td class="desc-text">Pull with rebase to keep history linear</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="docs"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Documentation</span><span class="section-count">4</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="list docs ls -1 docs/m4l/m4l*.md list all m4l prefix documentation files"><td><div class="task-text">List docs</div></td><td><button class="value-block value-block--shell" data-copy="ls -1 docs/m4l/M4L*.md" title="Copy value"><code class="value-text">ls -1 docs/m4l/M4L*.md</code></button></td><td class="desc-text">List all M4L PREFIX documentation files</td></tr><tr class="command-row" data-search="latest docs ls -1 docs/m4l/m4l*.md | sort -v | tail -6 show 6 most recent prefix docs"><td><div class="task-text">Latest docs</div></td><td><button class="value-block value-block--shell" data-copy="ls -1 docs/m4l/M4L*.md | sort -V | tail -6" title="Copy value"><code class="value-text">ls -1 docs/m4l/M4L*.md | sort -V | tail -6</code></button></td><td class="desc-text">Show 6 most recent PREFIX docs</td></tr><tr class="command-row" data-search="search docs grep -rl &quot;keyword&quot; docs/m4l/ search docs for a keyword (replace &quot;keyword&quot;)"><td><div class="task-text">Search docs</div></td><td><button class="value-block value-block--shell" data-copy="grep -rl &quot;keyword&quot; docs/m4l/" title="Copy value"><code class="value-text">grep -rl "keyword" docs/m4l/</code></button></td><td class="desc-text">Search docs for a keyword (replace "keyword")</td></tr><tr class="command-row" data-search="view readme cat readme.md display project readme"><td><div class="task-text">View README</div></td><td><button class="value-block value-block--shell" data-copy="cat README.md" title="Copy value"><code class="value-text">cat README.md</code></button></td><td class="desc-text">Display project README</td></tr></tbody></table></div></section>
-  <section class="callout-grid"><article class="surface-card callout callout--info"><h2>Tech Stack</h2><p>Node.js + TypeScript | MCP Protocol | Max/MSP + Ableton Live API | OSC (Open Sound Control)</p></article><article class="surface-card callout callout--warning"><h2>OSC Ports</h2><p>Check for conflicts with other audio apps before starting the dev server. Live API connection must be enabled in Ableton Live preferences.</p></article></section>
+  <div class="search-wrap"><span class="search-icon">&#x2315;</span><input class="search-input" type="text" placeholder="Search commands, snippets, or notes…" id="search" autocomplete="off" spellcheck="false"><span class="search-count" id="search-count"></span><button class="search-clear" id="search-clear" title="Clear search">&#xd7;</button></div>
+  <section class="surface-card section-card" data-section="setup"><button class="section-header" type="button" aria-expanded="true"><span class="section-arrow">&#x25BC;</span><span class="section-title">Setup</span><span class="section-count">3</span></button><div class="section-body"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="install npm install install mcp sdk, osc, typescript"><td><div class="task-text">Install</div></td><td><button class="value-block value-block--shell" data-copy="npm install" title="Copy value"><code class="value-text">npm install</code></button></td><td class="desc-text">Install MCP SDK, OSC, TypeScript</td></tr><tr class="command-row" data-search="build npm run build compile src/ to dist/"><td><div class="task-text">Build</div></td><td><button class="value-block value-block--shell" data-copy="npm run build" title="Copy value"><code class="value-text">npm run build</code></button></td><td class="desc-text">Compile src/ to dist/</td></tr><tr class="command-row" data-search="clean npm run clean remove dist/"><td><div class="task-text">Clean</div></td><td><button class="value-block value-block--shell" data-copy="npm run clean" title="Copy value"><code class="value-text">npm run clean</code></button></td><td class="desc-text">Remove dist/</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="development"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">&#x25BC;</span><span class="section-title">Development</span><span class="section-count">3</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="dev npm run dev tsx live reload (no compilation)"><td><div class="task-text">Dev</div></td><td><button class="value-block value-block--shell" data-copy="npm run dev" title="Copy value"><code class="value-text">npm run dev</code></button></td><td class="desc-text">tsx live reload (no compilation)</td></tr><tr class="command-row" data-search="watch npm run watch continuous tsc --watch"><td><div class="task-text">Watch</div></td><td><button class="value-block value-block--shell" data-copy="npm run watch" title="Copy value"><code class="value-text">npm run watch</code></button></td><td class="desc-text">Continuous tsc --watch</td></tr><tr class="command-row" data-search="type check npm run type-check validate typescript (tsc --noemit)"><td><div class="task-text">Type check</div></td><td><button class="value-block value-block--shell" data-copy="npm run type-check" title="Copy value"><code class="value-text">npm run type-check</code></button></td><td class="desc-text">Validate TypeScript (tsc --noEmit)</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="runtime"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">&#x25BC;</span><span class="section-title">Running the Server</span><span class="section-count">2</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="start npm run start run pre-built dist/index.js"><td><div class="task-text">Start</div></td><td><button class="value-block value-block--shell" data-copy="npm run start" title="Copy value"><code class="value-text">npm run start</code></button></td><td class="desc-text">Run pre-built dist/index.js</td></tr><tr class="command-row" data-search="dev mode npm run dev run src/index.ts directly via tsx"><td><div class="task-text">Dev mode</div></td><td><button class="value-block value-block--shell" data-copy="npm run dev" title="Copy value"><code class="value-text">npm run dev</code></button></td><td class="desc-text">Run src/index.ts directly via tsx</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="testing"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">&#x25BC;</span><span class="section-title">Testing</span><span class="section-count">3</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="test npm run test vitest single run"><td><div class="task-text">Test</div></td><td><button class="value-block value-block--shell" data-copy="npm run test" title="Copy value"><code class="value-text">npm run test</code></button></td><td class="desc-text">Vitest single run</td></tr><tr class="command-row" data-search="test watch npm run test:watch watch mode tdd"><td><div class="task-text">Test watch</div></td><td><button class="value-block value-block--shell" data-copy="npm run test:watch" title="Copy value"><code class="value-text">npm run test:watch</code></button></td><td class="desc-text">Watch mode TDD</td></tr><tr class="command-row" data-search="test coverage npm run test:coverage coverage with @vitest/coverage-v8"><td><div class="task-text">Test coverage</div></td><td><button class="value-block value-block--shell" data-copy="npm run test:coverage" title="Copy value"><code class="value-text">npm run test:coverage</code></button></td><td class="desc-text">Coverage with @vitest/coverage-v8</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="integration"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">&#x25BC;</span><span class="section-title">Claude Integration</span><span class="section-count">2</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="register mcp server add mcpservers max4live command node args dist/index.js to .mcp.json register mcp server in claude code"><td><div class="task-text">Register MCP server</div></td><td><button class="value-block value-block--shell" data-copy='{"mcpServers":{"max4live":{"command":"node","args":["dist/index.js"]}}}' title="Copy value"><code class="value-text">{"mcpServers":{"max4live":{"command":"node","args":["dist/index.js"]}}}</code></button></td><td class="desc-text">Add to .mcp.json — Register MCP server in Claude Code</td></tr><tr class="command-row" data-search="verify bridge verify with ping tool confirm max device bridge is active"><td><div class="task-text">Verify bridge</div></td><td><button class="value-block value-block--shell" data-copy="ping" title="Copy value"><code class="value-text">ping</code></button></td><td class="desc-text">Confirm Max device bridge is active</td></tr></tbody></table></div></section>
 </main>
 
 <footer>
   <div class="inner">
-    <span>Local command sheet generated from source content in <code>to-fix/</code>.</span>
-    <span>max4live-mcp_docs_repo-commands.html</span>
+    <span>max4live-mcp | PREFIX: M4L | npm | 60 tools, 4 resources, 5 prompts</span>
+    <span>max4live-mcp_repo-commands.html</span>
   </div>
-  
 </footer>
 
 <script>
@@ -1074,7 +937,7 @@ function exportToMarkdown() {
     return;
   }
 
-  let md = `# Max4Live MCP - Command Reference\n\n`;
+  let md = `# max4live-mcp - Command Reference\n\n`;
   sections.forEach((card) => {
     md += `## ${card.title}\n\n`;
     md += "| Task | Command / Snippet | Description |\n";
@@ -1085,7 +948,7 @@ function exportToMarkdown() {
     md += "\n";
   });
   copyMarkdown(md).then((success) => {
-    flashExportButton(success ? "✓ Copied Markdown" : "Copy failed", success ? "is-confirmed" : "is-error");
+    flashExportButton(success ? "\u2713 Copied Markdown" : "Copy failed", success ? "is-confirmed" : "is-error");
   });
 }
 

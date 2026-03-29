@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Freqfinder Repository Commands</title>
+<title>freqfinder - Command Reference</title>
 <style>
 @font-face {
   font-family: "Geist Pixel Square";
@@ -284,15 +284,9 @@ main {
 }
 
 @keyframes export-confirm {
-  0% {
-    transform: translateY(0) scale(1);
-  }
-  40% {
-    transform: translateY(-1px) scale(1.03);
-  }
-  100% {
-    transform: translateY(0) scale(1);
-  }
+  0% { transform: translateY(0) scale(1); }
+  40% { transform: translateY(-1px) scale(1.03); }
+  100% { transform: translateY(0) scale(1); }
 }
 
 .surface-card {
@@ -339,9 +333,7 @@ main {
   overflow-wrap: anywhere;
 }
 
-.search-wrap {
-  position: relative;
-}
+.search-wrap { position: relative; }
 
 .search-input {
   width: 100%;
@@ -398,10 +390,7 @@ main {
   color: var(--text);
 }
 
-.callout-grid {
-  display: grid;
-  gap: 12px;
-}
+.callout-grid { display: grid; gap: 12px; }
 
 .callout {
   padding: 16px 18px;
@@ -422,17 +411,9 @@ main {
   white-space: pre-wrap;
 }
 
-.callout--info {
-  box-shadow: var(--callout-info-ring);
-}
-
-.callout--warning {
-  box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.16);
-}
-
-.callout--success {
-  box-shadow: inset 0 0 0 1px rgba(52, 211, 153, 0.16);
-}
+.callout--info { box-shadow: var(--callout-info-ring); }
+.callout--warning { box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.16); }
+.callout--success { box-shadow: inset 0 0 0 1px rgba(52, 211, 153, 0.16); }
 
 .section-card {
   overflow: hidden;
@@ -444,9 +425,7 @@ main {
   box-shadow: var(--section-card-focus-shadow);
 }
 
-.section-card.is-hidden {
-  display: none;
-}
+.section-card.is-hidden { display: none; }
 
 .section-header {
   width: 100%;
@@ -464,9 +443,7 @@ main {
   transition: background var(--transition), border-radius var(--transition), box-shadow var(--transition);
 }
 
-.section-header:hover {
-  background: var(--bg-panel-hover);
-}
+.section-header:hover { background: var(--bg-panel-hover); }
 
 .section-header:focus,
 .section-header:focus-visible {
@@ -486,14 +463,10 @@ main {
   transition: transform var(--transition);
 }
 
-.section-header.collapsed .section-arrow {
-  transform: rotate(-90deg);
-}
+.section-header.collapsed .section-arrow { transform: rotate(-90deg); }
 
 .section-header:focus .section-arrow,
-.section-header:focus-visible .section-arrow {
-  color: var(--accent);
-}
+.section-header:focus-visible .section-arrow { color: var(--accent); }
 
 .section-title {
   flex: 1;
@@ -526,18 +499,10 @@ main {
   color: var(--text);
 }
 
-.section-body {
-  display: block;
-}
+.section-body { display: block; }
+.section-body.collapsed { display: none; }
 
-.section-body.collapsed {
-  display: none;
-}
-
-.command-table {
-  width: 100%;
-  border-collapse: collapse;
-}
+.command-table { width: 100%; border-collapse: collapse; }
 
 .command-table th {
   padding: 8px 12px;
@@ -554,17 +519,9 @@ main {
 .command-table th:nth-child(2) { width: 38%; }
 .command-table th:nth-child(3) { width: 38%; }
 
-.command-row {
-  border-bottom: 1px solid var(--row-divider);
-}
-
-.command-row:last-child {
-  border-bottom: none;
-}
-
-.command-row.hidden {
-  display: none;
-}
+.command-row { border-bottom: 1px solid var(--row-divider); }
+.command-row:last-child { border-bottom: none; }
+.command-row.hidden { display: none; }
 
 .command-row td {
   padding: 10px 12px;
@@ -572,34 +529,13 @@ main {
   font-size: 11px;
 }
 
-.command-row td:first-child {
-  padding-left: 40px;
-}
+.command-row td:first-child { padding-left: 40px; }
 
 .task-text {
   color: var(--text);
   display: flex;
   align-items: center;
   min-height: 44px;
-}
-
-.row-badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 7px;
-}
-
-.row-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 7px;
-  border-radius: 999px;
-  border: 1px solid var(--accent-border);
-  background: var(--accent-soft);
-  color: var(--accent);
-  font-size: 10px;
-  line-height: 1.2;
 }
 
 .value-block {
@@ -634,44 +570,6 @@ main {
   color: var(--accent);
   white-space: pre-wrap;
   word-break: break-word;
-}
-
-.value-block--keys .value-text {
-  color: var(--text);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.value-block--osc .value-text {
-  color: var(--osc-text);
-}
-
-.inline-key {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 22px;
-  padding: 2px 7px;
-  border-radius: 6px;
-  border: 1px solid var(--accent-border);
-  background: var(--accent-soft);
-  color: var(--text);
-  font-family: var(--font-body);
-  font-size: 11px;
-}
-
-.key-combo {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.key-join,
-.key-note {
-  color: var(--text-muted);
-  font-size: 11px;
 }
 
 .desc-text {
@@ -724,9 +622,7 @@ footer .inner {
 }
 
 @media (max-width: 900px) {
-  .hero-row {
-    flex-direction: column;
-  }
+  .hero-row { flex-direction: column; }
 
   .site-header__inner {
     flex-direction: column;
@@ -753,56 +649,25 @@ footer .inner {
     width: 100%;
   }
 
-  .command-table thead {
-    display: none;
-  }
+  .command-table thead { display: none; }
 
-  .command-row td {
-    padding-top: 8px;
-    padding-bottom: 8px;
-  }
+  .command-row td { padding-top: 8px; padding-bottom: 8px; }
+  .command-row td:first-child { padding-left: 12px; }
+  .command-row td:first-child { padding-bottom: 0; }
+  .command-row td:nth-child(2) { padding-top: 8px; padding-bottom: 0; }
 
-  .command-row td:first-child {
-    padding-left: 12px;
-  }
-
-  .command-row td:first-child {
-    padding-bottom: 0;
-  }
-
-  .command-row td:nth-child(2) {
-    padding-top: 8px;
-    padding-bottom: 0;
-  }
-
-  footer .inner {
-    flex-direction: column;
-  }
+  footer .inner { flex-direction: column; }
 
   main,
   .site-header__inner,
   .footer-notes,
-  footer .inner {
-    width: 96vw;
-  }
+  footer .inner { width: 96vw; }
 
-  .hero-meta {
-    display: none;
-  }
+  .hero-meta { display: none; }
 
-  .value-block {
-    max-width: 100%;
-    overflow-x: auto;
-  }
-
-  .value-text {
-    word-break: break-all;
-  }
-
-  .desc-text {
-    display: block;
-    padding: 4px 12px 8px;
-  }
+  .value-block { max-width: 100%; overflow-x: auto; }
+  .value-text { word-break: break-all; }
+  .desc-text { display: block; padding: 4px 12px 8px; }
 }
 </style>
 </head>
@@ -820,22 +685,20 @@ footer .inner {
   <div class="hero-row">
     <div class="hero">
       <span class="hero-eyebrow">COMMAND REFERENCE</span>
-      <h1>Freqfinder</h1>
-      <p>Freqfinder v0.2.1 - JUCE Audio Plugin</p>
+      <h1>freqfinder</h1>
+      <p>Real-time frequency analysis audio plugin — C++20 + JUCE + CMake</p>
     </div>
-    <div class="hero-meta"><div class="meta-chip"><span class="meta-chip__label">UPDATED</span><span class="meta-chip__value">Last updated: 2025-11-04 | Freqfinder v0.2.1</span></div><div class="meta-chip"><span class="meta-chip__label">REPO</span><span class="meta-chip__value">~/dev/freqfinder</span></div></div>
+    <div class="hero-meta"><div class="meta-chip"><span class="meta-chip__label">UPDATED</span><span class="meta-chip__value">2026-03-29</span></div><div class="meta-chip"><span class="meta-chip__label">REPO</span><span class="meta-chip__value">~/dev/freqfinder</span></div></div>
   </div>
-  <div class="search-wrap"><span class="search-icon">⌕</span><input class="search-input" type="text" placeholder="Search commands, snippets, or notes…" id="search" autocomplete="off" spellcheck="false"><span class="search-count" id="search-count"></span><button class="search-clear" id="search-clear" title="Clear search">×</button></div>
-  <section class="surface-card section-card" data-section="build-commands"><button class="section-header" type="button" aria-expanded="true"><span class="section-arrow">▼</span><span class="section-title">Build Commands</span><span class="section-count">4</span></button><div class="section-body"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="initial setup (first build) cd ~/dev/freqfinder&#10;rm -rf build&#10;mkdir build &amp;&amp; cd build&#10;cmake -dcmake_build_type=release ..&#10;cmake --build . --config release -j8 note: first build takes 10-15 minutes as juce downloads and compiles. subsequent builds are much faster (&lt;1 minute)."><td><div class="task-text">Initial Setup (First Build)</div></td><td><button class="value-block value-block--snippet" data-copy="cd ~/dev/freqfinder&#10;rm -rf build&#10;mkdir build &amp;&amp; cd build&#10;cmake -DCMAKE_BUILD_TYPE=Release ..&#10;cmake --build . --config Release -j8" title="Copy value"><code class="value-text">cd ~/dev/freqfinder<br>rm -rf build<br>mkdir build &amp;&amp; cd build<br>cmake -DCMAKE_BUILD_TYPE=Release ..<br>cmake --build . --config Release -j8</code></button></td><td class="desc-text">Note: First build takes 10-15 minutes as JUCE downloads and compiles. Subsequent builds are much faster (&lt;1 minute).</td></tr><tr class="command-row" data-search="clean rebuild cd ~/dev/freqfinder&#10;rm -rf build&#10;mkdir build &amp;&amp; cd build&#10;cmake -dcmake_build_type=release ..&#10;cmake --build . --config release -j8"><td><div class="task-text">Clean Rebuild</div></td><td><button class="value-block value-block--snippet" data-copy="cd ~/dev/freqfinder&#10;rm -rf build&#10;mkdir build &amp;&amp; cd build&#10;cmake -DCMAKE_BUILD_TYPE=Release ..&#10;cmake --build . --config Release -j8" title="Copy value"><code class="value-text">cd ~/dev/freqfinder<br>rm -rf build<br>mkdir build &amp;&amp; cd build<br>cmake -DCMAKE_BUILD_TYPE=Release ..<br>cmake --build . --config Release -j8</code></button></td><td class="desc-text"></td></tr><tr class="command-row" data-search="incremental build (after code changes) cd ~/dev/freqfinder/build&#10;cmake --build . --config release -j8"><td><div class="task-text">Incremental Build (after code changes)</div></td><td><button class="value-block value-block--snippet" data-copy="cd ~/dev/freqfinder/build&#10;cmake --build . --config Release -j8" title="Copy value"><code class="value-text">cd ~/dev/freqfinder/build<br>cmake --build . --config Release -j8</code></button></td><td class="desc-text"></td></tr><tr class="command-row" data-search="debug build cd ~/dev/freqfinder&#10;rm -rf build&#10;mkdir build &amp;&amp; cd build&#10;cmake -dcmake_build_type=debug ..&#10;cmake --build . --config debug -j8"><td><div class="task-text">Debug Build</div></td><td><button class="value-block value-block--snippet" data-copy="cd ~/dev/freqfinder&#10;rm -rf build&#10;mkdir build &amp;&amp; cd build&#10;cmake -DCMAKE_BUILD_TYPE=Debug ..&#10;cmake --build . --config Debug -j8" title="Copy value"><code class="value-text">cd ~/dev/freqfinder<br>rm -rf build<br>mkdir build &amp;&amp; cd build<br>cmake -DCMAKE_BUILD_TYPE=Debug ..<br>cmake --build . --config Debug -j8</code></button></td><td class="desc-text"></td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="running-testing"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Running &amp; Testing</span><span class="section-count">3</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="launch standalone app open ~/dev/freqfinder/build/freqfinder_artefacts/release/standalone/freqfinder.app"><td><div class="task-text">Launch Standalone App</div></td><td><button class="value-block value-block--snippet" data-copy="open ~/dev/freqfinder/build/FreqFinder_artefacts/Release/Standalone/Freqfinder.app" title="Copy value"><code class="value-text">open ~/dev/freqfinder/build/FreqFinder_artefacts/Release/Standalone/Freqfinder.app</code></button></td><td class="desc-text"></td></tr><tr class="command-row" data-search="run from terminal (see console output) ~/dev/freqfinder/build/freqfinder_artefacts/release/standalone/freqfinder.app/contents/macos/freqfinder"><td><div class="task-text">Run from Terminal (see console output)</div></td><td><button class="value-block value-block--snippet" data-copy="~/dev/freqfinder/build/FreqFinder_artefacts/Release/Standalone/Freqfinder.app/Contents/MacOS/Freqfinder" title="Copy value"><code class="value-text">~/dev/freqfinder/build/FreqFinder_artefacts/Release/Standalone/Freqfinder.app/Contents/MacOS/Freqfinder</code></button></td><td class="desc-text"></td></tr><tr class="command-row" data-search="check build outputs ls -lh ~/dev/freqfinder/build/freqfinder_artefacts/release/"><td><div class="task-text">Check Build Outputs</div></td><td><button class="value-block value-block--snippet" data-copy="ls -lh ~/dev/freqfinder/build/FreqFinder_artefacts/Release/" title="Copy value"><code class="value-text">ls -lh ~/dev/freqfinder/build/FreqFinder_artefacts/Release/</code></button></td><td class="desc-text"></td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="installation"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Installation</span><span class="section-count">3</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="install vst3 plugin cp -r ~/dev/freqfinder/build/freqfinder_artefacts/release/vst3/freqfinder.vst3 \&#10;~/library/audio/plug-ins/vst3/"><td><div class="task-text">Install VST3 Plugin</div></td><td><button class="value-block value-block--snippet" data-copy="cp -r ~/dev/freqfinder/build/FreqFinder_artefacts/Release/VST3/Freqfinder.vst3 \&#10;~/Library/Audio/Plug-Ins/VST3/" title="Copy value"><code class="value-text">cp -r ~/dev/freqfinder/build/FreqFinder_artefacts/Release/VST3/Freqfinder.vst3 \<br>~/Library/Audio/Plug-Ins/VST3/</code></button></td><td class="desc-text"></td></tr><tr class="command-row" data-search="install au plugin cp -r ~/dev/freqfinder/build/freqfinder_artefacts/release/au/freqfinder.component \&#10;~/library/audio/plug-ins/components/"><td><div class="task-text">Install AU Plugin</div></td><td><button class="value-block value-block--snippet" data-copy="cp -r ~/dev/freqfinder/build/FreqFinder_artefacts/Release/AU/Freqfinder.component \&#10;~/Library/Audio/Plug-Ins/Components/" title="Copy value"><code class="value-text">cp -r ~/dev/freqfinder/build/FreqFinder_artefacts/Release/AU/Freqfinder.component \<br>~/Library/Audio/Plug-Ins/Components/</code></button></td><td class="desc-text"></td></tr><tr class="command-row" data-search="uninstall plugins rm -rf ~/library/audio/plug-ins/vst3/freqfinder.vst3&#10;rm -rf ~/library/audio/plug-ins/components/freqfinder.component"><td><div class="task-text">Uninstall Plugins</div></td><td><button class="value-block value-block--snippet" data-copy="rm -rf ~/Library/Audio/Plug-Ins/VST3/Freqfinder.vst3&#10;rm -rf ~/Library/Audio/Plug-Ins/Components/Freqfinder.component" title="Copy value"><code class="value-text">rm -rf ~/Library/Audio/Plug-Ins/VST3/Freqfinder.vst3<br>rm -rf ~/Library/Audio/Plug-Ins/Components/Freqfinder.component</code></button></td><td class="desc-text"></td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="development"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Development</span><span class="section-count">3</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="generate compile commands (for ides) cd ~/dev/freqfinder/build&#10;cmake -dcmake_export_compile_commands=on .."><td><div class="task-text">Generate Compile Commands (for IDEs)</div></td><td><button class="value-block value-block--snippet" data-copy="cd ~/dev/freqfinder/build&#10;cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON .." title="Copy value"><code class="value-text">cd ~/dev/freqfinder/build<br>cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..</code></button></td><td class="desc-text"></td></tr><tr class="command-row" data-search="check for warnings cd ~/dev/freqfinder/build&#10;cmake --build . --config release 2&gt;&amp;1 | grep warning"><td><div class="task-text">Check for Warnings</div></td><td><button class="value-block value-block--snippet" data-copy="cd ~/dev/freqfinder/build&#10;cmake --build . --config Release 2&gt;&amp;1 | grep warning" title="Copy value"><code class="value-text">cd ~/dev/freqfinder/build<br>cmake --build . --config Release 2&gt;&amp;1 | grep warning</code></button></td><td class="desc-text"></td></tr><tr class="command-row" data-search="run clang-format (code formatting) cd ~/dev/freqfinder&#10;find src -name &quot;*.h&quot; -o -name &quot;*.cpp&quot; | xargs clang-format -i"><td><div class="task-text">Run clang-format (code formatting)</div></td><td><button class="value-block value-block--snippet" data-copy="cd ~/dev/freqfinder&#10;find src -name &quot;*.h&quot; -o -name &quot;*.cpp&quot; | xargs clang-format -i" title="Copy value"><code class="value-text">cd ~/dev/freqfinder<br>find src -name "*.h" -o -name "*.cpp" | xargs clang-format -i</code></button></td><td class="desc-text"></td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="documentation"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Documentation</span><span class="section-count">2</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="find next prefix number ls -1 ~/dev/freqfinder/docs/frq/ | grep -e &#x27;^frq[0-9]{3}&#x27; | \&#10;sed -e &#x27;s/frq([0-9]+).*/\1/&#x27; | sort -n | tail -1"><td><div class="task-text">Find Next PREFIX Number</div></td><td><button class="value-block value-block--snippet" data-copy="ls -1 ~/dev/freqfinder/docs/frq/ | grep -E &#x27;^FRQ[0-9]{3}&#x27; | \&#10;sed -E &#x27;s/FRQ([0-9]+).*/\1/&#x27; | sort -n | tail -1" title="Copy value"><code class="value-text">ls -1 ~/dev/freqfinder/docs/frq/ | grep -E '^FRQ[0-9]{3}' | \<br>sed -E 's/FRQ([0-9]+).*/\1/' | sort -n | tail -1</code></button></td><td class="desc-text"></td></tr><tr class="command-row" data-search="create new documentation # get next number (add 1 to result above)&#10;nano ~/dev/freqfinder/docs/frq/frq002\ your\ title\ here.md"><td><div class="task-text">Create New Documentation</div></td><td><button class="value-block value-block--snippet" data-copy="# Get next number (add 1 to result above)&#10;nano ~/dev/freqfinder/docs/frq/FRQ002\ Your\ Title\ Here.md" title="Copy value"><code class="value-text"># Get next number (add 1 to result above)<br>nano ~/dev/freqfinder/docs/frq/FRQ002\ Your\ Title\ Here.md</code></button></td><td class="desc-text"></td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="debugging"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Debugging</span><span class="section-count">3</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="view crash logs ls -lt ~/library/logs/diagnosticreports/freqfinder*.crash | head -1"><td><div class="task-text">View Crash Logs</div></td><td><button class="value-block value-block--snippet" data-copy="ls -lt ~/Library/Logs/DiagnosticReports/Freqfinder*.crash | head -1" title="Copy value"><code class="value-text">ls -lt ~/Library/Logs/DiagnosticReports/Freqfinder*.crash | head -1</code></button></td><td class="desc-text"></td></tr><tr class="command-row" data-search="view system logs log show --predicate &#x27;process == &quot;freqfinder&quot;&#x27; --last 10m --style compact"><td><div class="task-text">View System Logs</div></td><td><button class="value-block value-block--snippet" data-copy="log show --predicate &#x27;process == &quot;Freqfinder&quot;&#x27; --last 10m --style compact" title="Copy value"><code class="value-text">log show --predicate 'process == "Freqfinder"' --last 10m --style compact</code></button></td><td class="desc-text"></td></tr><tr class="command-row" data-search="check plugin validation # vst3&#10;pluginval --strictness-level 5 --validate \&#10;~/dev/freqfinder/build/freqfinder_artefacts/release/vst3/freqfinder.vst3&#10;&#10;# au (macos)&#10;auval -v aufx freq orph note: pluginval must be installed separately: brew install pluginval"><td><div class="task-text">Check Plugin Validation</div></td><td><button class="value-block value-block--snippet" data-copy="# VST3&#10;pluginval --strictness-level 5 --validate \&#10;~/dev/freqfinder/build/FreqFinder_artefacts/Release/VST3/Freqfinder.vst3&#10;&#10;# AU (macOS)&#10;auval -v aufx Freq Orph" title="Copy value"><code class="value-text"># VST3<br>pluginval --strictness-level 5 --validate \<br>~/dev/freqfinder/build/FreqFinder_artefacts/Release/VST3/Freqfinder.vst3<br><br># AU (macOS)<br>auval -v aufx Freq Orph</code></button></td><td class="desc-text">Note: pluginval must be installed separately: brew install pluginval</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="performance-testing"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Performance Testing</span><span class="section-count">2</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="profile cpu usage instruments -t &quot;time profiler&quot; \&#10;~/dev/freqfinder/build/freqfinder_artefacts/release/standalone/freqfinder.app"><td><div class="task-text">Profile CPU Usage</div></td><td><button class="value-block value-block--snippet" data-copy="instruments -t &quot;Time Profiler&quot; \&#10;~/dev/freqfinder/build/FreqFinder_artefacts/Release/Standalone/Freqfinder.app" title="Copy value"><code class="value-text">instruments -t "Time Profiler" \<br>~/dev/freqfinder/build/FreqFinder_artefacts/Release/Standalone/Freqfinder.app</code></button></td><td class="desc-text"></td></tr><tr class="command-row" data-search="check binary size du -h ~/dev/freqfinder/build/freqfinder_artefacts/release/standalone/freqfinder.app"><td><div class="task-text">Check Binary Size</div></td><td><button class="value-block value-block--snippet" data-copy="du -h ~/dev/freqfinder/build/FreqFinder_artefacts/Release/Standalone/Freqfinder.app" title="Copy value"><code class="value-text">du -h ~/dev/freqfinder/build/FreqFinder_artefacts/Release/Standalone/Freqfinder.app</code></button></td><td class="desc-text"></td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="git-workflow"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Git Workflow</span><span class="section-count">2</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="common workflow cd ~/dev/freqfinder&#10;&#10;# check status&#10;git status&#10;&#10;# stage changes&#10;git add src/&#10;&#10;# commit with descriptive message&#10;git commit -m &quot;feat: add frequency portamento with adaptive glide times&#10;&#10;- implemented portamentoramp dsp utility&#10;- adaptive glide: 13.33ms (low freq) to 66.7ms (high freq)&#10;- exponential ramping for smooth transitions&#10;&#10;🤖 generated with claude code&#10;co-authored-by: claude &quot;&#10;&#10;# push to remote&#10;git push origin main"><td><div class="task-text">Common Workflow</div></td><td><button class="value-block value-block--snippet" data-copy="cd ~/dev/freqfinder&#10;&#10;# Check status&#10;git status&#10;&#10;# Stage changes&#10;git add src/&#10;&#10;# Commit with descriptive message&#10;git commit -m &quot;feat: Add frequency portamento with adaptive glide times&#10;&#10;- Implemented PortamentoRamp DSP utility&#10;- Adaptive glide: 13.33ms (low freq) to 66.7ms (high freq)&#10;- Exponential ramping for smooth transitions&#10;&#10;🤖 Generated with Claude Code&#10;Co-Authored-By: Claude &quot;&#10;&#10;# Push to remote&#10;git push origin main" title="Copy value"><code class="value-text">cd ~/dev/freqfinder<br><br># Check status<br>git status<br><br># Stage changes<br>git add src/<br><br># Commit with descriptive message<br>git commit -m "feat: Add frequency portamento with adaptive glide times<br><br>- Implemented PortamentoRamp DSP utility<br>- Adaptive glide: 13.33ms (low freq) to 66.7ms (high freq)<br>- Exponential ramping for smooth transitions<br><br>🤖 Generated with Claude Code<br>Co-Authored-By: Claude "<br><br># Push to remote<br>git push origin main</code></button></td><td class="desc-text"></td></tr><tr class="command-row" data-search="create feature branch git checkout -b feature/sidechain-input&#10;# ... make changes ...&#10;git add .&#10;git commit -m &quot;feat: add sidechain input for external analysis&quot;&#10;git push -u origin feature/sidechain-input"><td><div class="task-text">Create Feature Branch</div></td><td><button class="value-block value-block--snippet" data-copy="git checkout -b feature/sidechain-input&#10;# ... make changes ...&#10;git add .&#10;git commit -m &quot;feat: Add sidechain input for external analysis&quot;&#10;git push -u origin feature/sidechain-input" title="Copy value"><code class="value-text">git checkout -b feature/sidechain-input<br># ... make changes ...<br>git add .<br>git commit -m "feat: Add sidechain input for external analysis"<br>git push -u origin feature/sidechain-input</code></button></td><td class="desc-text"></td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="common-issues"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Common Issues</span><span class="section-count">3</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="build fails with &quot;juceheader.h not found&quot; #include &lt;juce_audio_processors/juce_audio_processors.h&gt;&#10;#include &lt;juce_dsp/juce_dsp.h&gt; solution: juce 8.x doesn&#x27;t use juceheader.h. use individual module headers instead: issue"><td><div class="task-text">Build Fails with "JuceHeader.h not found"</div><div class="row-badges"><span class="row-badge">Issue</span></div></td><td><button class="value-block value-block--snippet" data-copy="#include &lt;juce_audio_processors/juce_audio_processors.h&gt;&#10;#include &lt;juce_dsp/juce_dsp.h&gt;" title="Copy value"><code class="value-text">#include &lt;juce_audio_processors/juce_audio_processors.h&gt;<br>#include &lt;juce_dsp/juce_dsp.h&gt;</code></button></td><td class="desc-text">Solution: JUCE 8.x doesn't use JuceHeader.h. Use individual module headers instead:</td></tr><tr class="command-row" data-search="app crashes on launch ~/dev/freqfinder/build/freqfinder_artefacts/release/standalone/freqfinder.app/contents/macos/freqfinder solution: check crash logs and run from terminal to see console output: issue"><td><div class="task-text">App Crashes on Launch</div><div class="row-badges"><span class="row-badge">Issue</span></div></td><td><button class="value-block value-block--snippet" data-copy="~/dev/freqfinder/build/FreqFinder_artefacts/Release/Standalone/Freqfinder.app/Contents/MacOS/Freqfinder" title="Copy value"><code class="value-text">~/dev/freqfinder/build/FreqFinder_artefacts/Release/Standalone/Freqfinder.app/Contents/MacOS/Freqfinder</code></button></td><td class="desc-text">Solution: Check crash logs and run from terminal to see console output:</td></tr><tr class="command-row" data-search="cmake error: cmake_c_compile_object not set project(freqfinder version 0.2.1 languages c cxx) solution: ensure project declares both c and cxx languages: issue"><td><div class="task-text">CMake Error: CMAKE_C_COMPILE_OBJECT not set</div><div class="row-badges"><span class="row-badge">Issue</span></div></td><td><button class="value-block value-block--snippet" data-copy="project(FreqFinder VERSION 0.2.1 LANGUAGES C CXX)" title="Copy value"><code class="value-text">project(FreqFinder VERSION 0.2.1 LANGUAGES C CXX)</code></button></td><td class="desc-text">Solution: Ensure project declares both C and CXX languages:</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="build-targets"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Build Targets</span><span class="section-count">3</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="standalone build/freqfinder_artefacts/release/standalone/ extension: .app"><td><div class="task-text">Standalone</div></td><td><button class="value-block value-block--snippet" data-copy="build/FreqFinder_artefacts/Release/Standalone/" title="Copy value"><code class="value-text">build/FreqFinder_artefacts/Release/Standalone/</code></button></td><td class="desc-text">Extension: .app</td></tr><tr class="command-row" data-search="vst3 build/freqfinder_artefacts/release/vst3/ extension: .vst3"><td><div class="task-text">VST3</div></td><td><button class="value-block value-block--snippet" data-copy="build/FreqFinder_artefacts/Release/VST3/" title="Copy value"><code class="value-text">build/FreqFinder_artefacts/Release/VST3/</code></button></td><td class="desc-text">Extension: .vst3</td></tr><tr class="command-row" data-search="au build/freqfinder_artefacts/release/au/ extension: .component"><td><div class="task-text">AU</div></td><td><button class="value-block value-block--snippet" data-copy="build/FreqFinder_artefacts/Release/AU/" title="Copy value"><code class="value-text">build/FreqFinder_artefacts/Release/AU/</code></button></td><td class="desc-text">Extension: .component</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="quick-tests"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Quick Tests</span><span class="section-count">3</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="verify all oscillators work 1. launch standalone app&#10;2. click frequency display to start fundamental (should hear tone)&#10;3. click &quot;2&quot; in even column (should hear octave up)&#10;4. click &quot;3&quot; in odd column (should hear perfect fifth)&#10;5. verify vu meters show levels for active oscillators manual verification steps"><td><div class="task-text">Verify All Oscillators Work</div></td><td><button class="value-block value-block--snippet" data-copy="1. Launch standalone app&#10;2. Click frequency display to start fundamental (should hear tone)&#10;3. Click &quot;2&quot; in Even column (should hear octave up)&#10;4. Click &quot;3&quot; in Odd column (should hear perfect fifth)&#10;5. Verify VU meters show levels for active oscillators" title="Copy value"><code class="value-text">1. Launch standalone app<br>2. Click frequency display to start fundamental (should hear tone)<br>3. Click "2" in Even column (should hear octave up)<br>4. Click "3" in Odd column (should hear perfect fifth)<br>5. Verify VU meters show levels for active oscillators</code></button></td><td class="desc-text">Manual verification steps</td></tr><tr class="command-row" data-search="test midi input 1. connect midi keyboard&#10;2. launch standalone app&#10;3. settings → audio/midi settings → enable midi input device&#10;4. play midi note (frequency should change automatically) manual verification steps"><td><div class="task-text">Test MIDI Input</div></td><td><button class="value-block value-block--snippet" data-copy="1. Connect MIDI keyboard&#10;2. Launch standalone app&#10;3. Settings → Audio/MIDI Settings → Enable MIDI input device&#10;4. Play MIDI note (frequency should change automatically)" title="Copy value"><code class="value-text">1. Connect MIDI keyboard<br>2. Launch standalone app<br>3. Settings → Audio/MIDI Settings → Enable MIDI input device<br>4. Play MIDI note (frequency should change automatically)</code></button></td><td class="desc-text">Manual verification steps</td></tr><tr class="command-row" data-search="test parameter automation (daw) 1. load vst3 in daw (logic, ableton, reaper, etc.)&#10;2. automate &quot;master volume&quot; parameter&#10;3. play timeline - volume should change smoothly&#10;4. no clicks or pops should be audible manual verification steps"><td><div class="task-text">Test Parameter Automation (DAW)</div></td><td><button class="value-block value-block--snippet" data-copy="1. Load VST3 in DAW (Logic, Ableton, Reaper, etc.)&#10;2. Automate &quot;Master Volume&quot; parameter&#10;3. Play timeline - volume should change smoothly&#10;4. No clicks or pops should be audible" title="Copy value"><code class="value-text">1. Load VST3 in DAW (Logic, Ableton, Reaper, etc.)<br>2. Automate "Master Volume" parameter<br>3. Play timeline - volume should change smoothly<br>4. No clicks or pops should be audible</code></button></td><td class="desc-text">Manual verification steps</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="file-locations"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">File Locations</span><span class="section-count">7</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="source code ~/dev/freqfinder/src/ filesystem path"><td><div class="task-text">Source code</div></td><td><button class="value-block value-block--snippet" data-copy="~/dev/freqfinder/src/" title="Copy value"><code class="value-text">~/dev/freqfinder/src/</code></button></td><td class="desc-text">Filesystem path</td></tr><tr class="command-row" data-search="documentation ~/dev/freqfinder/docs/frq/ filesystem path"><td><div class="task-text">Documentation</div></td><td><button class="value-block value-block--snippet" data-copy="~/dev/freqfinder/docs/frq/" title="Copy value"><code class="value-text">~/dev/freqfinder/docs/frq/</code></button></td><td class="desc-text">Filesystem path</td></tr><tr class="command-row" data-search="build directory ~/dev/freqfinder/build/ filesystem path"><td><div class="task-text">Build directory</div></td><td><button class="value-block value-block--snippet" data-copy="~/dev/freqfinder/build/" title="Copy value"><code class="value-text">~/dev/freqfinder/build/</code></button></td><td class="desc-text">Filesystem path</td></tr><tr class="command-row" data-search="cmake config ~/dev/freqfinder/cmakelists.txt filesystem path"><td><div class="task-text">CMake config</div></td><td><button class="value-block value-block--snippet" data-copy="~/dev/freqfinder/CMakeLists.txt" title="Copy value"><code class="value-text">~/dev/freqfinder/CMakeLists.txt</code></button></td><td class="desc-text">Filesystem path</td></tr><tr class="command-row" data-search="implementation notes ~/dev/freqfinder/docs/implementation.md filesystem path"><td><div class="task-text">Implementation notes</div></td><td><button class="value-block value-block--snippet" data-copy="~/dev/freqfinder/docs/IMPLEMENTATION.md" title="Copy value"><code class="value-text">~/dev/freqfinder/docs/IMPLEMENTATION.md</code></button></td><td class="desc-text">Filesystem path</td></tr><tr class="command-row" data-search="installed vst3 ~/library/audio/plug-ins/vst3/ filesystem path"><td><div class="task-text">Installed VST3</div></td><td><button class="value-block value-block--snippet" data-copy="~/Library/Audio/Plug-Ins/VST3/" title="Copy value"><code class="value-text">~/Library/Audio/Plug-Ins/VST3/</code></button></td><td class="desc-text">Filesystem path</td></tr><tr class="command-row" data-search="installed au ~/library/audio/plug-ins/components/ filesystem path"><td><div class="task-text">Installed AU</div></td><td><button class="value-block value-block--snippet" data-copy="~/Library/Audio/Plug-Ins/Components/" title="Copy value"><code class="value-text">~/Library/Audio/Plug-Ins/Components/</code></button></td><td class="desc-text">Filesystem path</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="useful-links"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Useful Links</span><span class="section-count">4</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="juce documentation https://juce.com/learn/documentation reference link"><td><div class="task-text">JUCE Documentation</div></td><td><button class="value-block value-block--snippet" data-copy="https://juce.com/learn/documentation" title="Copy value"><code class="value-text">https://juce.com/learn/documentation</code></button></td><td class="desc-text">Reference link</td></tr><tr class="command-row" data-search="juce tutorials https://docs.juce.com/master/tutorial_new_projucer_project.html reference link"><td><div class="task-text">JUCE Tutorials</div></td><td><button class="value-block value-block--snippet" data-copy="https://docs.juce.com/master/tutorial_new_projucer_project.html" title="Copy value"><code class="value-text">https://docs.juce.com/master/tutorial_new_projucer_project.html</code></button></td><td class="desc-text">Reference link</td></tr><tr class="command-row" data-search="juce forum https://forum.juce.com/ reference link"><td><div class="task-text">JUCE Forum</div></td><td><button class="value-block value-block--snippet" data-copy="https://forum.juce.com/" title="Copy value"><code class="value-text">https://forum.juce.com/</code></button></td><td class="desc-text">Reference link</td></tr><tr class="command-row" data-search="cmake documentation https://cmake.org/cmake/help/latest/ reference link"><td><div class="task-text">CMake Documentation</div></td><td><button class="value-block value-block--snippet" data-copy="https://cmake.org/cmake/help/latest/" title="Copy value"><code class="value-text">https://cmake.org/cmake/help/latest/</code></button></td><td class="desc-text">Reference link</td></tr></tbody></table></div></section>
-  <section class="callout-grid"><article class="surface-card callout callout--info"><h2>Quick Reference</h2><p>For general Git/GitHub commands, see ~/dev/docs/git-commands.html. This file contains Freqfinder-specific build and development commands.</p></article></section>
+  <div class="search-wrap"><span class="search-icon">&#x2315;</span><input class="search-input" type="text" placeholder="Search commands, snippets, or notes…" id="search" autocomplete="off" spellcheck="false"><span class="search-count" id="search-count"></span><button class="search-clear" id="search-clear" title="Clear search">&#xd7;</button></div>
+  <section class="surface-card section-card" data-section="build"><button class="section-header" type="button" aria-expanded="true"><span class="section-arrow">&#x25BC;</span><span class="section-title">Build &amp; Compilation</span><span class="section-count">3</span></button><div class="section-body"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="debug build cmake -s . -b build -dcmake_build_type=debug && cmake --build build debug build"><td><div class="task-text">Debug build</div></td><td><button class="value-block value-block--shell" data-copy="cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug && cmake --build build" title="Copy value"><code class="value-text">cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug &amp;&amp; cmake --build build</code></button></td><td class="desc-text">Debug build</td></tr><tr class="command-row" data-search="release build cmake -s . -b build -dcmake_build_type=release && cmake --build build release build"><td><div class="task-text">Release build</div></td><td><button class="value-block value-block--shell" data-copy="cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build" title="Copy value"><code class="value-text">cmake -S . -B build -DCMAKE_BUILD_TYPE=Release &amp;&amp; cmake --build build</code></button></td><td class="desc-text">Release build</td></tr><tr class="command-row" data-search="build with auto-install cmake -s . -b build -dorpheus_install_targets=on && cmake --build build build with plugin auto-install"><td><div class="task-text">Build with auto-install</div></td><td><button class="value-block value-block--shell" data-copy="cmake -S . -B build -DORPHEUS_INSTALL_TARGETS=ON && cmake --build build" title="Copy value"><code class="value-text">cmake -S . -B build -DORPHEUS_INSTALL_TARGETS=ON &amp;&amp; cmake --build build</code></button></td><td class="desc-text">Build with plugin auto-install</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="testing"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">&#x25BC;</span><span class="section-title">Testing</span><span class="section-count">2</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="run tests cd build && ctest --output-on-failure run googletest suite"><td><div class="task-text">Run tests</div></td><td><button class="value-block value-block--shell" data-copy="cd build && ctest --output-on-failure" title="Copy value"><code class="value-text">cd build &amp;&amp; ctest --output-on-failure</code></button></td><td class="desc-text">Run GoogleTest suite</td></tr><tr class="command-row" data-search="run test executable ./build/tests/freqfindertests run test executable directly"><td><div class="task-text">Run test executable</div></td><td><button class="value-block value-block--shell" data-copy="./build/tests/FreqFinderTests" title="Copy value"><code class="value-text">./build/tests/FreqFinderTests</code></button></td><td class="desc-text">Run test executable directly</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="artifacts"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">&#x25BC;</span><span class="section-title">Plugin Paths</span><span class="section-count">3</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="au plugin ~/library/audio/plug-ins/components/ au plugin location (macos)"><td><div class="task-text">AU plugin</div></td><td><button class="value-block value-block--shell" data-copy="~/Library/Audio/Plug-Ins/Components/" title="Copy value"><code class="value-text">~/Library/Audio/Plug-Ins/Components/</code></button></td><td class="desc-text">AU plugin location (macOS)</td></tr><tr class="command-row" data-search="vst3 plugin ~/library/audio/plug-ins/vst3/ vst3 plugin location"><td><div class="task-text">VST3 plugin</div></td><td><button class="value-block value-block--shell" data-copy="~/Library/Audio/Plug-Ins/VST3/" title="Copy value"><code class="value-text">~/Library/Audio/Plug-Ins/VST3/</code></button></td><td class="desc-text">VST3 plugin location</td></tr><tr class="command-row" data-search="standalone app build/freqfinder_standalone.app standalone application"><td><div class="task-text">Standalone app</div></td><td><button class="value-block value-block--shell" data-copy="build/FreqFinder_Standalone.app" title="Copy value"><code class="value-text">build/FreqFinder_Standalone.app</code></button></td><td class="desc-text">Standalone application</td></tr></tbody></table></div></section>
 </main>
 
 <footer>
   <div class="inner">
-    <span>Local command sheet generated from source content in <code>to-fix/</code>.</span>
-    <span>freqfinder_docs_repo-commands.html</span>
+    <span>freqfinder | CMake + C++20 | JUCE 8.0.4 + Orpheus SDK</span>
+    <span>freqfinder_repo-commands.html</span>
   </div>
-  
 </footer>
 
 <script>
@@ -1074,7 +937,7 @@ function exportToMarkdown() {
     return;
   }
 
-  let md = `# Freqfinder Repository Commands\n\n`;
+  let md = `# freqfinder - Command Reference\n\n`;
   sections.forEach((card) => {
     md += `## ${card.title}\n\n`;
     md += "| Task | Command / Snippet | Description |\n";
@@ -1085,7 +948,7 @@ function exportToMarkdown() {
     md += "\n";
   });
   copyMarkdown(md).then((success) => {
-    flashExportButton(success ? "✓ Copied Markdown" : "Copy failed", success ? "is-confirmed" : "is-error");
+    flashExportButton(success ? "\u2713 Copied Markdown" : "Copy failed", success ? "is-confirmed" : "is-error");
   });
 }
 

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Orpheus SDK - Command Reference</title>
+<title>orpheus-sdk - Command Reference</title>
 <style>
 @font-face {
   font-family: "Geist Pixel Square";
@@ -284,15 +284,9 @@ main {
 }
 
 @keyframes export-confirm {
-  0% {
-    transform: translateY(0) scale(1);
-  }
-  40% {
-    transform: translateY(-1px) scale(1.03);
-  }
-  100% {
-    transform: translateY(0) scale(1);
-  }
+  0% { transform: translateY(0) scale(1); }
+  40% { transform: translateY(-1px) scale(1.03); }
+  100% { transform: translateY(0) scale(1); }
 }
 
 .surface-card {
@@ -339,9 +333,7 @@ main {
   overflow-wrap: anywhere;
 }
 
-.search-wrap {
-  position: relative;
-}
+.search-wrap { position: relative; }
 
 .search-input {
   width: 100%;
@@ -392,61 +384,19 @@ main {
 }
 
 .search-clear.visible { display: flex; }
+.search-clear:hover { background: var(--accent-soft); color: var(--text); }
 
-.search-clear:hover {
-  background: var(--accent-soft);
-  color: var(--text);
-}
+.callout-grid { display: grid; gap: 12px; }
+.callout { padding: 16px 18px; display: grid; gap: 8px; }
+.callout h2 { font-family: var(--font-display); font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; }
+.callout p { color: var(--text-dim); font-size: 11px; white-space: pre-wrap; }
+.callout--info { box-shadow: var(--callout-info-ring); }
+.callout--warning { box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.16); }
+.callout--success { box-shadow: inset 0 0 0 1px rgba(52, 211, 153, 0.16); }
 
-.callout-grid {
-  display: grid;
-  gap: 12px;
-}
-
-.callout {
-  padding: 16px 18px;
-  display: grid;
-  gap: 8px;
-}
-
-.callout h2 {
-  font-family: var(--font-display);
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-}
-
-.callout p {
-  color: var(--text-dim);
-  font-size: 11px;
-  white-space: pre-wrap;
-}
-
-.callout--info {
-  box-shadow: var(--callout-info-ring);
-}
-
-.callout--warning {
-  box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.16);
-}
-
-.callout--success {
-  box-shadow: inset 0 0 0 1px rgba(52, 211, 153, 0.16);
-}
-
-.section-card {
-  overflow: hidden;
-  transition: border-color var(--transition), box-shadow var(--transition);
-}
-
-.section-card.is-focused {
-  border-color: var(--accent-border);
-  box-shadow: var(--section-card-focus-shadow);
-}
-
-.section-card.is-hidden {
-  display: none;
-}
+.section-card { overflow: hidden; transition: border-color var(--transition), box-shadow var(--transition); }
+.section-card.is-focused { border-color: var(--accent-border); box-shadow: var(--section-card-focus-shadow); }
+.section-card.is-hidden { display: none; }
 
 .section-header {
   width: 100%;
@@ -464,143 +414,36 @@ main {
   transition: background var(--transition), border-radius var(--transition), box-shadow var(--transition);
 }
 
-.section-header:hover {
-  background: var(--bg-panel-hover);
-}
+.section-header:hover { background: var(--bg-panel-hover); }
+.section-header:focus, .section-header:focus-visible { outline: none; background: var(--section-header-focus-bg); box-shadow: var(--section-header-focus-shadow); }
+.section-header.collapsed { border-radius: calc(var(--radius) - 1px); border-bottom-color: transparent; }
 
-.section-header:focus,
-.section-header:focus-visible {
-  outline: none;
-  background: var(--section-header-focus-bg);
-  box-shadow: var(--section-header-focus-shadow);
-}
+.section-arrow { font-size: 9px; color: var(--text-muted); transition: transform var(--transition); }
+.section-header.collapsed .section-arrow { transform: rotate(-90deg); }
+.section-header:focus .section-arrow, .section-header:focus-visible .section-arrow { color: var(--accent); }
 
-.section-header.collapsed {
-  border-radius: calc(var(--radius) - 1px);
-  border-bottom-color: transparent;
-}
+.section-title { flex: 1; font-family: var(--font-display); font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); }
+.section-header:focus .section-title, .section-header:focus-visible .section-title { color: var(--text); text-shadow: var(--section-title-focus-shadow); }
 
-.section-arrow {
-  font-size: 9px;
-  color: var(--text-muted);
-  transition: transform var(--transition);
-}
+.section-count { padding: 1px 8px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg-deep); color: var(--text-muted); font-size: 10px; }
+.section-header:focus .section-count, .section-header:focus-visible .section-count { border-color: var(--accent-border); background: var(--section-count-focus-bg); color: var(--text); }
 
-.section-header.collapsed .section-arrow {
-  transform: rotate(-90deg);
-}
+.section-body { display: block; }
+.section-body.collapsed { display: none; }
 
-.section-header:focus .section-arrow,
-.section-header:focus-visible .section-arrow {
-  color: var(--accent);
-}
-
-.section-title {
-  flex: 1;
-  font-family: var(--font-display);
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--accent);
-}
-
-.section-header:focus .section-title,
-.section-header:focus-visible .section-title {
-  color: var(--text);
-  text-shadow: var(--section-title-focus-shadow);
-}
-
-.section-count {
-  padding: 1px 8px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: var(--bg-deep);
-  color: var(--text-muted);
-  font-size: 10px;
-}
-
-.section-header:focus .section-count,
-.section-header:focus-visible .section-count {
-  border-color: var(--accent-border);
-  background: var(--section-count-focus-bg);
-  color: var(--text);
-}
-
-.section-body {
-  display: block;
-}
-
-.section-body.collapsed {
-  display: none;
-}
-
-.command-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.command-table th {
-  padding: 8px 12px;
-  text-align: left;
-  font-size: 10px;
-  font-weight: 200;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-bottom: 1px solid var(--border);
-}
-
+.command-table { width: 100%; border-collapse: collapse; }
+.command-table th { padding: 8px 12px; text-align: left; font-size: 10px; font-weight: 200; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); }
 .command-table th:nth-child(1) { width: 24%; }
 .command-table th:nth-child(2) { width: 38%; }
 .command-table th:nth-child(3) { width: 38%; }
 
-.command-row {
-  border-bottom: 1px solid var(--row-divider);
-}
+.command-row { border-bottom: 1px solid var(--row-divider); }
+.command-row:last-child { border-bottom: none; }
+.command-row.hidden { display: none; }
+.command-row td { padding: 10px 12px; vertical-align: middle; font-size: 11px; }
+.command-row td:first-child { padding-left: 40px; }
 
-.command-row:last-child {
-  border-bottom: none;
-}
-
-.command-row.hidden {
-  display: none;
-}
-
-.command-row td {
-  padding: 10px 12px;
-  vertical-align: middle;
-  font-size: 11px;
-}
-
-.command-row td:first-child {
-  padding-left: 40px;
-}
-
-.task-text {
-  color: var(--text);
-  display: flex;
-  align-items: center;
-  min-height: 44px;
-}
-
-.row-badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 7px;
-}
-
-.row-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 7px;
-  border-radius: 999px;
-  border: 1px solid var(--accent-border);
-  background: var(--accent-soft);
-  color: var(--accent);
-  font-size: 10px;
-  line-height: 1.2;
-}
+.task-text { color: var(--text); display: flex; align-items: center; min-height: 44px; }
 
 .value-block {
   width: 100%;
@@ -617,87 +460,16 @@ main {
   transition: border-color var(--transition), background var(--transition), transform var(--transition);
 }
 
-.value-block:hover {
-  border-color: var(--accent-border);
-  background: var(--accent-soft);
-}
+.value-block:hover { border-color: var(--accent-border); background: var(--accent-soft); }
+.value-block.copied { border-color: rgba(52, 211, 153, 0.4); background: rgba(52, 211, 153, 0.12); }
 
-.value-block.copied {
-  border-color: rgba(52, 211, 153, 0.4);
-  background: rgba(52, 211, 153, 0.12);
-}
+.value-text { font-family: var(--font-body); font-size: 11px; line-height: 1.45; color: var(--accent); white-space: pre-wrap; word-break: break-word; }
 
-.value-text {
-  font-family: var(--font-body);
-  font-size: 11px;
-  line-height: 1.45;
-  color: var(--accent);
-  white-space: pre-wrap;
-  word-break: break-word;
-}
+.desc-text { color: var(--text-dim); line-height: 1.5; white-space: pre-wrap; }
 
-.value-block--keys .value-text {
-  color: var(--text);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.value-block--osc .value-text {
-  color: var(--osc-text);
-}
-
-.inline-key {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 22px;
-  padding: 2px 7px;
-  border-radius: 6px;
-  border: 1px solid var(--accent-border);
-  background: var(--accent-soft);
-  color: var(--text);
-  font-family: var(--font-body);
-  font-size: 11px;
-}
-
-.key-combo {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.key-join,
-.key-note {
-  color: var(--text-muted);
-  font-size: 11px;
-}
-
-.desc-text {
-  color: var(--text-dim);
-  line-height: 1.5;
-  white-space: pre-wrap;
-}
-
-.empty-state {
-  padding: 22px 20px;
-  display: grid;
-  gap: 8px;
-}
-
-.empty-state h2 {
-  font-family: var(--font-display);
-  font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--accent);
-}
-
-.empty-state p {
-  color: var(--text-dim);
-  max-width: 70ch;
-}
+.empty-state { padding: 22px 20px; display: grid; gap: 8px; }
+.empty-state h2 { font-family: var(--font-display); font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); }
+.empty-state p { color: var(--text-dim); max-width: 70ch; }
 
 footer {
   border-top: 1px solid var(--border-strong);
@@ -706,103 +478,27 @@ footer {
   padding: 12px 0 14px;
 }
 
-footer .inner {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  color: var(--text-muted);
-  font-size: 11px;
-}
+footer .inner { display: flex; justify-content: space-between; gap: 16px; color: var(--text-muted); font-size: 11px; }
 
-.footer-notes {
-  width: var(--shell-width);
-  margin: 10px auto 0;
-  display: grid;
-  gap: 6px;
-  color: var(--text-dim);
-  font-size: 11px;
-}
+.footer-notes { width: var(--shell-width); margin: 10px auto 0; display: grid; gap: 6px; color: var(--text-dim); font-size: 11px; }
 
 @media (max-width: 900px) {
-  .hero-row {
-    flex-direction: column;
-  }
-
-  .site-header__inner {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .header-actions {
-    justify-content: flex-start;
-    align-items: flex-start;
-  }
-
-  .hero-meta {
-    width: 100%;
-    justify-items: start;
-  }
-
-  .command-table,
-  .command-table thead,
-  .command-table tbody,
-  .command-table tr,
-  .command-table th,
-  .command-table td {
-    display: block;
-    width: 100%;
-  }
-
-  .command-table thead {
-    display: none;
-  }
-
-  .command-row td {
-    padding-top: 8px;
-    padding-bottom: 8px;
-  }
-
-  .command-row td:first-child {
-    padding-left: 12px;
-  }
-
-  .command-row td:first-child {
-    padding-bottom: 0;
-  }
-
-  .command-row td:nth-child(2) {
-    padding-top: 8px;
-    padding-bottom: 0;
-  }
-
-  footer .inner {
-    flex-direction: column;
-  }
-
-  main,
-  .site-header__inner,
-  .footer-notes,
-  footer .inner {
-    width: 96vw;
-  }
-
-  .hero-meta {
-    display: none;
-  }
-
-  .value-block {
-    max-width: 100%;
-    overflow-x: auto;
-  }
-
-  .value-text {
-    word-break: break-all;
-  }
-
-  .desc-text {
-    display: block;
-    padding: 4px 12px 8px;
-  }
+  .hero-row { flex-direction: column; }
+  .site-header__inner { flex-direction: column; align-items: stretch; }
+  .header-actions { justify-content: flex-start; align-items: flex-start; }
+  .hero-meta { width: 100%; justify-items: start; }
+  .command-table, .command-table thead, .command-table tbody, .command-table tr, .command-table th, .command-table td { display: block; width: 100%; }
+  .command-table thead { display: none; }
+  .command-row td { padding-top: 8px; padding-bottom: 8px; }
+  .command-row td:first-child { padding-left: 12px; }
+  .command-row td:first-child { padding-bottom: 0; }
+  .command-row td:nth-child(2) { padding-top: 8px; padding-bottom: 0; }
+  footer .inner { flex-direction: column; }
+  main, .site-header__inner, .footer-notes, footer .inner { width: 96vw; }
+  .hero-meta { display: none; }
+  .value-block { max-width: 100%; overflow-x: auto; }
+  .value-text { word-break: break-all; }
+  .desc-text { display: block; padding: 4px 12px 8px; }
 }
 </style>
 </head>
@@ -820,22 +516,20 @@ footer .inner {
   <div class="hero-row">
     <div class="hero">
       <span class="hero-eyebrow">COMMAND REFERENCE</span>
-      <h1>Orpheus SDK</h1>
-      <p>Quick reference for common development tasks</p>
+      <h1>orpheus-sdk</h1>
+      <p>Professional C++20 audio SDK — deterministic transport + real-time infrastructure</p>
     </div>
-    <div class="hero-meta"><div class="meta-chip"><span class="meta-chip__label">UPDATED</span><span class="meta-chip__value">Last updated: 2026-01-25</span></div><div class="meta-chip"><span class="meta-chip__label">REPO</span><span class="meta-chip__value">~/dev/orpheus-sdk</span></div></div>
+    <div class="hero-meta"><div class="meta-chip"><span class="meta-chip__label">UPDATED</span><span class="meta-chip__value">2026-03-29</span></div><div class="meta-chip"><span class="meta-chip__label">REPO</span><span class="meta-chip__value">~/dev/orpheus-sdk</span></div></div>
   </div>
-  <div class="search-wrap"><span class="search-icon">⌕</span><input class="search-input" type="text" placeholder="Search commands, snippets, or notes…" id="search" autocomplete="off" spellcheck="false"><span class="search-count" id="search-count"></span><button class="search-clear" id="search-clear" title="Clear search">×</button></div>
-  <section class="surface-card section-card" data-section="build"><button class="section-header" type="button" aria-expanded="true"><span class="section-arrow">▼</span><span class="section-title">Build &amp; Compile</span><span class="section-count">8</span></button><div class="section-body"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="configure cmake cmake -s . -b build -dcmake_build_type=debug configure cmake build system (debug mode)"><td><div class="task-text">Configure CMake</div></td><td><button class="value-block value-block--shell" data-copy="cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug" title="Copy value"><code class="value-text">cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug</code></button></td><td class="desc-text">Configure CMake build system (Debug mode)</td></tr><tr class="command-row" data-search="configure cmake (release) cmake -s . -b build -dcmake_build_type=release configure cmake build system (release mode, optimized)"><td><div class="task-text">Configure CMake (Release)</div></td><td><button class="value-block value-block--shell" data-copy="cmake -S . -B build -DCMAKE_BUILD_TYPE=Release" title="Copy value"><code class="value-text">cmake -S . -B build -DCMAKE_BUILD_TYPE=Release</code></button></td><td class="desc-text">Configure CMake build system (Release mode, optimized)</td></tr><tr class="command-row" data-search="build sdk cmake --build build build all sdk targets"><td><div class="task-text">Build SDK</div></td><td><button class="value-block value-block--shell" data-copy="cmake --build build" title="Copy value"><code class="value-text">cmake --build build</code></button></td><td class="desc-text">Build all SDK targets</td></tr><tr class="command-row" data-search="build sdk (parallel) cmake --build build -j$(sysctl -n hw.ncpu) build using all cpu cores for faster compilation"><td><div class="task-text">Build SDK (parallel)</div></td><td><button class="value-block value-block--shell" data-copy="cmake --build build -j$(sysctl -n hw.ncpu)" title="Copy value"><code class="value-text">cmake --build build -j$(sysctl -n hw.ncpu)</code></button></td><td class="desc-text">Build using all CPU cores for faster compilation</td></tr><tr class="command-row" data-search="build clip composer cmake --build build --target orpheus_clip_composer_app build only the clip composer application (debug)"><td><div class="task-text">Build Clip Composer</div></td><td><button class="value-block value-block--shell" data-copy="cmake --build build --target orpheus_clip_composer_app" title="Copy value"><code class="value-text">cmake --build build --target orpheus_clip_composer_app</code></button></td><td class="desc-text">Build only the Clip Composer application (Debug)</td></tr><tr class="command-row" data-search="build clip composer (release) cmake -s . -b build-release -dcmake_build_type=release &amp;&amp; cmake --build build-release --target orpheus_clip_composer_app build optimized release version of clip composer"><td><div class="task-text">Build Clip Composer (Release)</div></td><td><button class="value-block value-block--shell" data-copy="cmake -S . -B build-release -DCMAKE_BUILD_TYPE=Release &amp;&amp; cmake --build build-release --target orpheus_clip_composer_app" title="Copy value"><code class="value-text">cmake -S . -B build-release -DCMAKE_BUILD_TYPE=Release &amp;&amp; cmake --build build-release --target orpheus_clip_composer_app</code></button></td><td class="desc-text">Build optimized Release version of Clip Composer</td></tr><tr class="command-row" data-search="clean build rm -rf build &amp;&amp; cmake -s . -b build &amp;&amp; cmake --build build full clean rebuild (use when build is corrupted)"><td><div class="task-text">Clean build</div></td><td><button class="value-block value-block--shell" data-copy="rm -rf build &amp;&amp; cmake -S . -B build &amp;&amp; cmake --build build" title="Copy value"><code class="value-text">rm -rf build &amp;&amp; cmake -S . -B build &amp;&amp; cmake --build build</code></button></td><td class="desc-text">Full clean rebuild (use when build is corrupted)</td></tr><tr class="command-row" data-search="clean build clip composer rm -rf build/apps/clip-composer &amp;&amp; cmake --build build --target orpheus_clip_composer_app clean rebuild only clip composer (preserves sdk build)"><td><div class="task-text">Clean build Clip Composer</div></td><td><button class="value-block value-block--shell" data-copy="rm -rf build/apps/clip-composer &amp;&amp; cmake --build build --target orpheus_clip_composer_app" title="Copy value"><code class="value-text">rm -rf build/apps/clip-composer &amp;&amp; cmake --build build --target orpheus_clip_composer_app</code></button></td><td class="desc-text">Clean rebuild only Clip Composer (preserves SDK build)</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="testing"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Testing</span><span class="section-count">9</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="run all tests ctest --test-dir build --output-on-failure run all unit and integration tests"><td><div class="task-text">Run all tests</div></td><td><button class="value-block value-block--shell" data-copy="ctest --test-dir build --output-on-failure" title="Copy value"><code class="value-text">ctest --test-dir build --output-on-failure</code></button></td><td class="desc-text">Run all unit and integration tests</td></tr><tr class="command-row" data-search="run tests (verbose) ctest --test-dir build --output-on-failure --verbose run tests with detailed output"><td><div class="task-text">Run tests (verbose)</div></td><td><button class="value-block value-block--shell" data-copy="ctest --test-dir build --output-on-failure --verbose" title="Copy value"><code class="value-text">ctest --test-dir build --output-on-failure --verbose</code></button></td><td class="desc-text">Run tests with detailed output</td></tr><tr class="command-row" data-search="run specific test ctest --test-dir build -r testname --output-on-failure run only tests matching testname pattern"><td><div class="task-text">Run specific test</div></td><td><button class="value-block value-block--shell" data-copy="ctest --test-dir build -R TestName --output-on-failure" title="Copy value"><code class="value-text">ctest --test-dir build -R TestName --output-on-failure</code></button></td><td class="desc-text">Run only tests matching TestName pattern</td></tr><tr class="command-row" data-search="run clip composer tests ctest --test-dir build -r clipcomposer --output-on-failure run only clip composer-specific tests"><td><div class="task-text">Run Clip Composer tests</div></td><td><button class="value-block value-block--shell" data-copy="ctest --test-dir build -R ClipComposer --output-on-failure" title="Copy value"><code class="value-text">ctest --test-dir build -R ClipComposer --output-on-failure</code></button></td><td class="desc-text">Run only Clip Composer-specific tests</td></tr><tr class="command-row" data-search="run occ integration tests ctest --test-dir build -r occ_integration --output-on-failure run occ integration tests with sdk"><td><div class="task-text">Run OCC integration tests</div></td><td><button class="value-block value-block--shell" data-copy="ctest --test-dir build -R OCC_Integration --output-on-failure" title="Copy value"><code class="value-text">ctest --test-dir build -R OCC_Integration --output-on-failure</code></button></td><td class="desc-text">Run OCC integration tests with SDK</td></tr><tr class="command-row" data-search="run routing matrix tests ./build/tests/routing/routing_matrix_test run routing matrix tests (headroommode, true-peak metering)"><td><div class="task-text">Run routing matrix tests</div></td><td><button class="value-block value-block--shell" data-copy="./build/tests/routing/routing_matrix_test" title="Copy value"><code class="value-text">./build/tests/routing/routing_matrix_test</code></button></td><td class="desc-text">Run routing matrix tests (HeadroomMode, true-peak metering)</td></tr><tr class="command-row" data-search="run callback queue stress tests ./build/tests/transport/callback_queue_stress_test run spsc callback queue stress tests (lock-free verification)"><td><div class="task-text">Run callback queue stress tests</div></td><td><button class="value-block value-block--shell" data-copy="./build/tests/transport/callback_queue_stress_test" title="Copy value"><code class="value-text">./build/tests/transport/callback_queue_stress_test</code></button></td><td class="desc-text">Run SPSC callback queue stress tests (lock-free verification)</td></tr><tr class="command-row" data-search="run transport tests ctest --test-dir build -r transport --output-on-failure run all transport-related tests"><td><div class="task-text">Run transport tests</div></td><td><button class="value-block value-block--shell" data-copy="ctest --test-dir build -R transport --output-on-failure" title="Copy value"><code class="value-text">ctest --test-dir build -R transport --output-on-failure</code></button></td><td class="desc-text">Run all transport-related tests</td></tr><tr class="command-row" data-search="run tests (parallel) ctest --test-dir build --output-on-failure -j4 run tests in parallel (4 jobs)"><td><div class="task-text">Run tests (parallel)</div></td><td><button class="value-block value-block--shell" data-copy="ctest --test-dir build --output-on-failure -j4" title="Copy value"><code class="value-text">ctest --test-dir build --output-on-failure -j4</code></button></td><td class="desc-text">Run tests in parallel (4 jobs)</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="run"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Run Applications</span><span class="section-count">4</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="run clip composer open build/apps/clip-composer/orpheus_clip_composer_app_artefacts/debug/orpheusclipcomposer.app launch clip composer (macos debug build)"><td><div class="task-text">Run Clip Composer</div></td><td><button class="value-block value-block--shell" data-copy="open build/apps/clip-composer/orpheus_clip_composer_app_artefacts/Debug/OrpheusClipComposer.app" title="Copy value"><code class="value-text">open build/apps/clip-composer/orpheus_clip_composer_app_artefacts/Debug/OrpheusClipComposer.app</code></button></td><td class="desc-text">Launch Clip Composer (macOS Debug build)</td></tr><tr class="command-row" data-search="run clip composer (release) open build-release/apps/clip-composer/orpheus_clip_composer_app_artefacts/release/orpheusclipcomposer.app launch clip composer (macos release build)"><td><div class="task-text">Run Clip Composer (Release)</div></td><td><button class="value-block value-block--shell" data-copy="open build-release/apps/clip-composer/orpheus_clip_composer_app_artefacts/Release/OrpheusClipComposer.app" title="Copy value"><code class="value-text">open build-release/apps/clip-composer/orpheus_clip_composer_app_artefacts/Release/OrpheusClipComposer.app</code></button></td><td class="desc-text">Launch Clip Composer (macOS Release build)</td></tr><tr class="command-row" data-search="relaunch clip composer (clean) ./scripts/relaunch-occ.sh clear cache, rebuild, and relaunch clip composer (recommended development workflow)"><td><div class="task-text">Relaunch Clip Composer (clean)</div></td><td><button class="value-block value-block--shell" data-copy="./scripts/relaunch-occ.sh" title="Copy value"><code class="value-text">./scripts/relaunch-occ.sh</code></button></td><td class="desc-text">Clear cache, rebuild, and relaunch Clip Composer (recommended development workflow)</td></tr><tr class="command-row" data-search="start occ instance cd ~/dev/orpheus-sdk/apps/clip-composer &amp;&amp; claude-code start isolated claude code instance for occ development"><td><div class="task-text">Start OCC instance</div></td><td><button class="value-block value-block--shell" data-copy="cd ~/dev/orpheus-sdk/apps/clip-composer &amp;&amp; claude-code" title="Copy value"><code class="value-text">cd ~/dev/orpheus-sdk/apps/clip-composer &amp;&amp; claude-code</code></button></td><td class="desc-text">Start isolated Claude Code instance for OCC development</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="occ"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Clip Composer (OCC) Workflow</span><span class="section-count">8</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="full occ rebuild &amp; launch ./scripts/relaunch-occ.sh recommended workflow: clean, rebuild, launch occ"><td><div class="task-text">Full OCC rebuild &amp; launch</div></td><td><button class="value-block value-block--shell" data-copy="./scripts/relaunch-occ.sh" title="Copy value"><code class="value-text">./scripts/relaunch-occ.sh</code></button></td><td class="desc-text">Recommended workflow: clean, rebuild, launch OCC</td></tr><tr class="command-row" data-search="quick occ rebuild cmake --build build --target orpheus_clip_composer_app &amp;&amp; open build/apps/clip-composer/orpheus_clip_composer_app_artefacts/debug/orpheusclipcomposer.app fast rebuild and launch (no cache clear)"><td><div class="task-text">Quick OCC rebuild</div></td><td><button class="value-block value-block--shell" data-copy="cmake --build build --target orpheus_clip_composer_app &amp;&amp; open build/apps/clip-composer/orpheus_clip_composer_app_artefacts/Debug/OrpheusClipComposer.app" title="Copy value"><code class="value-text">cmake --build build --target orpheus_clip_composer_app &amp;&amp; open build/apps/clip-composer/orpheus_clip_composer_app_artefacts/Debug/OrpheusClipComposer.app</code></button></td><td class="desc-text">Fast rebuild and launch (no cache clear)</td></tr><tr class="command-row" data-search="view occ logs tail -f ~/library/logs/orpheusclipcomposer/*.log monitor occ application logs in real-time"><td><div class="task-text">View OCC logs</div></td><td><button class="value-block value-block--shell" data-copy="tail -f ~/Library/Logs/OrpheusClipComposer/*.log" title="Copy value"><code class="value-text">tail -f ~/Library/Logs/OrpheusClipComposer/*.log</code></button></td><td class="desc-text">Monitor OCC application logs in real-time</td></tr><tr class="command-row" data-search="clear occ preferences rm -rf ~/library/application\ support/orpheusclipcomposer/ reset occ to default settings (removes sessions)"><td><div class="task-text">Clear OCC preferences</div></td><td><button class="value-block value-block--shell" data-copy="rm -rf ~/Library/Application\ Support/OrpheusClipComposer/" title="Copy value"><code class="value-text">rm -rf ~/Library/Application\ Support/OrpheusClipComposer/</code></button></td><td class="desc-text">Reset OCC to default settings (removes sessions)</td></tr><tr class="command-row" data-search="occ development instance cd ~/dev/orpheus-sdk/apps/clip-composer &amp;&amp; claude-code start isolated claude code instance for occ work"><td><div class="task-text">OCC development instance</div></td><td><button class="value-block value-block--shell" data-copy="cd ~/dev/orpheus-sdk/apps/clip-composer &amp;&amp; claude-code" title="Copy value"><code class="value-text">cd ~/dev/orpheus-sdk/apps/clip-composer &amp;&amp; claude-code</code></button></td><td class="desc-text">Start isolated Claude Code instance for OCC work</td></tr><tr class="command-row" data-search="view occ docs index cat apps/clip-composer/docs/occ/index.md browse complete occ documentation catalog"><td><div class="task-text">View OCC docs index</div></td><td><button class="value-block value-block--shell" data-copy="cat apps/clip-composer/docs/occ/INDEX.md" title="Copy value"><code class="value-text">cat apps/clip-composer/docs/occ/INDEX.md</code></button></td><td class="desc-text">Browse complete OCC documentation catalog</td></tr><tr class="command-row" data-search="check occ version grep -a 3 &quot;project_version&quot; apps/clip-composer/cmakelists.txt show current occ version from cmake config"><td><div class="task-text">Check OCC version</div></td><td><button class="value-block value-block--shell" data-copy="grep -A 3 &quot;PROJECT_VERSION&quot; apps/clip-composer/CMakeLists.txt" title="Copy value"><code class="value-text">grep -A 3 "PROJECT_VERSION" apps/clip-composer/CMakeLists.txt</code></button></td><td class="desc-text">Show current OCC version from CMake config</td></tr><tr class="command-row" data-search="occ v0.2.0 qa checklist cat apps/clip-composer/docs/occ/occ104*.md view v0.2.0 sprint plan and qa checklist"><td><div class="task-text">OCC v0.2.0 QA checklist</div></td><td><button class="value-block value-block--shell" data-copy="cat apps/clip-composer/docs/occ/OCC104*.md" title="Copy value"><code class="value-text">cat apps/clip-composer/docs/occ/OCC104*.md</code></button></td><td class="desc-text">View v0.2.0 sprint plan and QA checklist</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="git"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Git Operations</span><span class="section-count">5</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="check status git status view current branch and changed files"><td><div class="task-text">Check status</div></td><td><button class="value-block value-block--shell" data-copy="git status" title="Copy value"><code class="value-text">git status</code></button></td><td class="desc-text">View current branch and changed files</td></tr><tr class="command-row" data-search="view diff git diff see unstaged changes"><td><div class="task-text">View diff</div></td><td><button class="value-block value-block--shell" data-copy="git diff" title="Copy value"><code class="value-text">git diff</code></button></td><td class="desc-text">See unstaged changes</td></tr><tr class="command-row" data-search="view recent commits git log --oneline -10 show last 10 commits"><td><div class="task-text">View recent commits</div></td><td><button class="value-block value-block--shell" data-copy="git log --oneline -10" title="Copy value"><code class="value-text">git log --oneline -10</code></button></td><td class="desc-text">Show last 10 commits</td></tr><tr class="command-row" data-search="fetch updates git fetch origin download latest changes from remote (doesn&#x27;t merge)"><td><div class="task-text">Fetch updates</div></td><td><button class="value-block value-block--shell" data-copy="git fetch origin" title="Copy value"><code class="value-text">git fetch origin</code></button></td><td class="desc-text">Download latest changes from remote (doesn't merge)</td></tr><tr class="command-row" data-search="pull latest git pull origin main fetch and merge latest changes from main branch"><td><div class="task-text">Pull latest</div></td><td><button class="value-block value-block--shell" data-copy="git pull origin main" title="Copy value"><code class="value-text">git pull origin main</code></button></td><td class="desc-text">Fetch and merge latest changes from main branch</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="quality"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Code Quality</span><span class="section-count">2</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="format all code find src apps -name &#x27;*.cpp&#x27; -o -name &#x27;*.h&#x27; | xargs clang-format -i auto-format all c++ source files"><td><div class="task-text">Format all code</div></td><td><button class="value-block value-block--shell" data-copy="find src apps -name &#x27;*.cpp&#x27; -o -name &#x27;*.h&#x27; | xargs clang-format -i" title="Copy value"><code class="value-text">find src apps -name '*.cpp' -o -name '*.h' | xargs clang-format -i</code></button></td><td class="desc-text">Auto-format all C++ source files</td></tr><tr class="command-row" data-search="check formatting find src apps -name &#x27;*.cpp&#x27; -o -name &#x27;*.h&#x27; | xargs clang-format --dry-run -werror verify code formatting without modifying files"><td><div class="task-text">Check formatting</div></td><td><button class="value-block value-block--shell" data-copy="find src apps -name &#x27;*.cpp&#x27; -o -name &#x27;*.h&#x27; | xargs clang-format --dry-run -Werror" title="Copy value"><code class="value-text">find src apps -name '*.cpp' -o -name '*.h' | xargs clang-format --dry-run -Werror</code></button></td><td class="desc-text">Verify code formatting without modifying files</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="docs"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Documentation</span><span class="section-count">11</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="view sdk progress cat .claude/implementation_progress.md view sdk implementation progress and orp121 status"><td><div class="task-text">View SDK progress</div></td><td><button class="value-block value-block--shell" data-copy="cat .claude/implementation_progress.md" title="Copy value"><code class="value-text">cat .claude/implementation_progress.md</code></button></td><td class="desc-text">View SDK implementation progress and ORP121 status</td></tr><tr class="command-row" data-search="view orp121 master plan cat &quot;docs/orp/orp121 audio backend refactoring master plan.md&quot; view audio backend refactoring master plan"><td><div class="task-text">View ORP121 master plan</div></td><td><button class="value-block value-block--shell" data-copy="cat &quot;docs/orp/ORP121 Audio Backend Refactoring Master Plan.md&quot;" title="Copy value"><code class="value-text">cat "docs/orp/ORP121 Audio Backend Refactoring Master Plan.md"</code></button></td><td class="desc-text">View audio backend refactoring master plan</td></tr><tr class="command-row" data-search="view gain staging docs cat docs/orp/gain_staging.md view gain staging model documentation"><td><div class="task-text">View gain staging docs</div></td><td><button class="value-block value-block--shell" data-copy="cat docs/orp/GAIN_STAGING.md" title="Copy value"><code class="value-text">cat docs/orp/GAIN_STAGING.md</code></button></td><td class="desc-text">View gain staging model documentation</td></tr><tr class="command-row" data-search="view wireframes ls -la wireframes/v2026-01-18/ list current architecture wireframe diagrams"><td><div class="task-text">View wireframes</div></td><td><button class="value-block value-block--shell" data-copy="ls -la wireframes/v2026-01-18/" title="Copy value"><code class="value-text">ls -la wireframes/v2026-01-18/</code></button></td><td class="desc-text">List current architecture wireframe diagrams</td></tr><tr class="command-row" data-search="view orp index cat docs/orp/index.md view orpheus sdk documentation index"><td><div class="task-text">View ORP index</div></td><td><button class="value-block value-block--shell" data-copy="cat docs/orp/INDEX.md" title="Copy value"><code class="value-text">cat docs/orp/INDEX.md</code></button></td><td class="desc-text">View Orpheus SDK documentation index</td></tr><tr class="command-row" data-search="find occ docs ls -1 apps/clip-composer/docs/occ/*.md list all clip composer design documents"><td><div class="task-text">Find OCC docs</div></td><td><button class="value-block value-block--shell" data-copy="ls -1 apps/clip-composer/docs/occ/*.md" title="Copy value"><code class="value-text">ls -1 apps/clip-composer/docs/occ/*.md</code></button></td><td class="desc-text">List all Clip Composer design documents</td></tr><tr class="command-row" data-search="view occ progress cat apps/clip-composer/.claude/implementation_progress.md view clip composer implementation progress"><td><div class="task-text">View OCC progress</div></td><td><button class="value-block value-block--shell" data-copy="cat apps/clip-composer/.claude/implementation_progress.md" title="Copy value"><code class="value-text">cat apps/clip-composer/.claude/implementation_progress.md</code></button></td><td class="desc-text">View Clip Composer implementation progress</td></tr><tr class="command-row" data-search="view occ architecture cat apps/clip-composer/docs/occ/occ023*.md view occ component architecture document"><td><div class="task-text">View OCC architecture</div></td><td><button class="value-block value-block--shell" data-copy="cat apps/clip-composer/docs/occ/OCC023*.md" title="Copy value"><code class="value-text">cat apps/clip-composer/docs/occ/OCC023*.md</code></button></td><td class="desc-text">View OCC Component Architecture document</td></tr><tr class="command-row" data-search="view occ api contracts cat apps/clip-composer/docs/occ/occ027*.md view occ api contracts and sdk integration"><td><div class="task-text">View OCC API contracts</div></td><td><button class="value-block value-block--shell" data-copy="cat apps/clip-composer/docs/occ/OCC027*.md" title="Copy value"><code class="value-text">cat apps/clip-composer/docs/occ/OCC027*.md</code></button></td><td class="desc-text">View OCC API Contracts and SDK integration</td></tr><tr class="command-row" data-search="list occ session reports ls -lt apps/clip-composer/docs/occ/occ*session*.md | head -5 show 5 most recent occ session reports"><td><div class="task-text">List OCC session reports</div></td><td><button class="value-block value-block--shell" data-copy="ls -lt apps/clip-composer/docs/occ/OCC*Session*.md | head -5" title="Copy value"><code class="value-text">ls -lt apps/clip-composer/docs/occ/OCC*Session*.md | head -5</code></button></td><td class="desc-text">Show 5 most recent OCC session reports</td></tr><tr class="command-row" data-search="view occ readme cat apps/clip-composer/claude.md view clip composer development guide"><td><div class="task-text">View OCC README</div></td><td><button class="value-block value-block--shell" data-copy="cat apps/clip-composer/CLAUDE.md" title="Copy value"><code class="value-text">cat apps/clip-composer/CLAUDE.md</code></button></td><td class="desc-text">View Clip Composer development guide</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="shmui"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">shmui-juce (Audio Visualization)</span><span class="section-count">5</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="sync shmui-juce rsync -av --delete ~/dev/shmui/juce/source/ ~/dev/orpheus-sdk/packages/shmui-juce/ sync shmui-juce from upstream repo (~/dev/shmui)"><td><div class="task-text">Sync shmui-juce</div></td><td><button class="value-block value-block--shell" data-copy="rsync -av --delete ~/dev/shmui/juce/Source/ ~/dev/orpheus-sdk/packages/shmui-juce/" title="Copy value"><code class="value-text">rsync -av --delete ~/dev/shmui/juce/Source/ ~/dev/orpheus-sdk/packages/shmui-juce/</code></button></td><td class="desc-text">Sync shmui-juce from upstream repo (~/dev/shmui)</td></tr><tr class="command-row" data-search="check shmui version grep -a 3 &quot;namespace version&quot; packages/shmui-juce/shmui.h show current shmui-juce version"><td><div class="task-text">Check shmui version</div></td><td><button class="value-block value-block--shell" data-copy="grep -A 3 &quot;namespace Version&quot; packages/shmui-juce/ShmUI.h" title="Copy value"><code class="value-text">grep -A 3 "namespace Version" packages/shmui-juce/ShmUI.h</code></button></td><td class="desc-text">Show current shmui-juce version</td></tr><tr class="command-row" data-search="list shmui components ls -1 packages/shmui-juce/components/ list available shmui visualization components"><td><div class="task-text">List shmui components</div></td><td><button class="value-block value-block--shell" data-copy="ls -1 packages/shmui-juce/Components/" title="Copy value"><code class="value-text">ls -1 packages/shmui-juce/Components/</code></button></td><td class="desc-text">List available shmui visualization components</td></tr><tr class="command-row" data-search="list shmui controls ls -1 packages/shmui-juce/controls/ list available shmui button/control components"><td><div class="task-text">List shmui controls</div></td><td><button class="value-block value-block--shell" data-copy="ls -1 packages/shmui-juce/Controls/" title="Copy value"><code class="value-text">ls -1 packages/shmui-juce/Controls/</code></button></td><td class="desc-text">List available shmui button/control components</td></tr><tr class="command-row" data-search="view shmui main header cat packages/shmui-juce/shmui.h view main shmui include header with all components"><td><div class="task-text">View shmui main header</div></td><td><button class="value-block value-block--shell" data-copy="cat packages/shmui-juce/ShmUI.h" title="Copy value"><code class="value-text">cat packages/shmui-juce/ShmUI.h</code></button></td><td class="desc-text">View main shmui include header with all components</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="diagnostics"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Diagnostics</span><span class="section-count">7</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="check cmake version cmake --version verify cmake installation"><td><div class="task-text">Check CMake version</div></td><td><button class="value-block value-block--shell" data-copy="cmake --version" title="Copy value"><code class="value-text">cmake --version</code></button></td><td class="desc-text">Verify CMake installation</td></tr><tr class="command-row" data-search="check build tree tree build -l 3 -d view build directory structure"><td><div class="task-text">Check build tree</div></td><td><button class="value-block value-block--shell" data-copy="tree build -L 3 -d" title="Copy value"><code class="value-text">tree build -L 3 -d</code></button></td><td class="desc-text">View build directory structure</td></tr><tr class="command-row" data-search="list build targets cmake --build build --target help show all available build targets"><td><div class="task-text">List build targets</div></td><td><button class="value-block value-block--shell" data-copy="cmake --build build --target help" title="Copy value"><code class="value-text">cmake --build build --target help</code></button></td><td class="desc-text">Show all available build targets</td></tr><tr class="command-row" data-search="check occ build artifacts ls -lh build/apps/clip-composer/orpheus_clip_composer_app_artefacts/debug/ list occ debug build artifacts and app bundle"><td><div class="task-text">Check OCC build artifacts</div></td><td><button class="value-block value-block--shell" data-copy="ls -lh build/apps/clip-composer/orpheus_clip_composer_app_artefacts/Debug/" title="Copy value"><code class="value-text">ls -lh build/apps/clip-composer/orpheus_clip_composer_app_artefacts/Debug/</code></button></td><td class="desc-text">List OCC Debug build artifacts and app bundle</td></tr><tr class="command-row" data-search="verify occ app bundle file build/apps/clip-composer/orpheus_clip_composer_app_artefacts/debug/orpheusclipcomposer.app/contents/macos/orpheusclipcomposer check occ executable type and architecture"><td><div class="task-text">Verify OCC app bundle</div></td><td><button class="value-block value-block--shell" data-copy="file build/apps/clip-composer/orpheus_clip_composer_app_artefacts/Debug/OrpheusClipComposer.app/Contents/MacOS/OrpheusClipComposer" title="Copy value"><code class="value-text">file build/apps/clip-composer/orpheus_clip_composer_app_artefacts/Debug/OrpheusClipComposer.app/Contents/MacOS/OrpheusClipComposer</code></button></td><td class="desc-text">Check OCC executable type and architecture</td></tr><tr class="command-row" data-search="check occ dependencies otool -l build/apps/clip-composer/orpheus_clip_composer_app_artefacts/debug/orpheusclipcomposer.app/contents/macos/orpheusclipcomposer list dynamic library dependencies for occ (macos)"><td><div class="task-text">Check OCC dependencies</div></td><td><button class="value-block value-block--shell" data-copy="otool -L build/apps/clip-composer/orpheus_clip_composer_app_artefacts/Debug/OrpheusClipComposer.app/Contents/MacOS/OrpheusClipComposer" title="Copy value"><code class="value-text">otool -L build/apps/clip-composer/orpheus_clip_composer_app_artefacts/Debug/OrpheusClipComposer.app/Contents/MacOS/OrpheusClipComposer</code></button></td><td class="desc-text">List dynamic library dependencies for OCC (macOS)</td></tr><tr class="command-row" data-search="view occ build log cmake --build build --target orpheus_clip_composer_app 2&gt;&amp;1 | tee occ-build.log build occ and save output to log file"><td><div class="task-text">View OCC build log</div></td><td><button class="value-block value-block--shell" data-copy="cmake --build build --target orpheus_clip_composer_app 2&gt;&amp;1 | tee occ-build.log" title="Copy value"><code class="value-text">cmake --build build --target orpheus_clip_composer_app 2&gt;&amp;1 | tee occ-build.log</code></button></td><td class="desc-text">Build OCC and save output to log file</td></tr></tbody></table></div></section>
-  
+  <div class="search-wrap"><span class="search-icon">&#x2315;</span><input class="search-input" type="text" placeholder="Search commands, snippets, or notes…" id="search" autocomplete="off" spellcheck="false"><span class="search-count" id="search-count"></span><button class="search-clear" id="search-clear" title="Clear search">&times;</button></div>
+  <section class="surface-card section-card" data-section="quickstart"><button class="section-header" type="button" aria-expanded="true"><span class="section-arrow">&#x25BC;</span><span class="section-title">Quick Start</span><span class="section-count">3</span></button><div class="section-body"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="configure and build debug cmake -s . -b build -dcmake_build_type=debug && cmake --build build -j8"><td><div class="task-text">Configure and build Debug</div></td><td><button class="value-block value-block--shell" data-copy="cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug && cmake --build build -j8" title="Copy value"><code class="value-text">cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug &amp;&amp; cmake --build build -j8</code></button></td><td class="desc-text">Configure and build Debug</td></tr><tr class="command-row" data-search="run 270+ unit tests ctest --test-dir build --output-on-failure"><td><div class="task-text">Run 270+ unit tests</div></td><td><button class="value-block value-block--shell" data-copy="ctest --test-dir build --output-on-failure" title="Copy value"><code class="value-text">ctest --test-dir build --output-on-failure</code></button></td><td class="desc-text">Run 270+ unit tests</td></tr><tr class="command-row" data-search="release build cmake -s . -b build -dcmake_build_type=release && cmake --build build"><td><div class="task-text">Release build</div></td><td><button class="value-block value-block--shell" data-copy="cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build" title="Copy value"><code class="value-text">cmake -S . -B build -DCMAKE_BUILD_TYPE=Release &amp;&amp; cmake --build build</code></button></td><td class="desc-text">Release build</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="options"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">&#x25BC;</span><span class="section-title">Build Options</span><span class="section-count">4</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="disable real-time for offline builds cmake -s . -b build -dorpheus_enable_realtime=off"><td><div class="task-text">Disable real-time for offline builds</div></td><td><button class="value-block value-block--shell" data-copy="cmake -S . -B build -DORPHEUS_ENABLE_REALTIME=OFF" title="Copy value"><code class="value-text">cmake -S . -B build -DORPHEUS_ENABLE_REALTIME=OFF</code></button></td><td class="desc-text">Disable real-time for offline builds</td></tr><tr class="command-row" data-search="build juce demo host cmake -s . -b build -dorpheus_enable_app_juce_host=on"><td><div class="task-text">Build JUCE demo host</div></td><td><button class="value-block value-block--shell" data-copy="cmake -S . -B build -DORPHEUS_ENABLE_APP_JUCE_HOST=ON" title="Copy value"><code class="value-text">cmake -S . -B build -DORPHEUS_ENABLE_APP_JUCE_HOST=ON</code></button></td><td class="desc-text">Build JUCE demo host</td></tr><tr class="command-row" data-search="build clip composer app cmake -s . -b build -dorpheus_enable_app_clip_composer=on"><td><div class="task-text">Build Clip Composer app</div></td><td><button class="value-block value-block--shell" data-copy="cmake -S . -B build -DORPHEUS_ENABLE_APP_CLIP_COMPOSER=ON" title="Copy value"><code class="value-text">cmake -S . -B build -DORPHEUS_ENABLE_APP_CLIP_COMPOSER=ON</code></button></td><td class="desc-text">Build Clip Composer app</td></tr><tr class="command-row" data-search="enable link-time optimization cmake -s . -b build -denable_lto=on"><td><div class="task-text">Enable link-time optimization</div></td><td><button class="value-block value-block--shell" data-copy="cmake -S . -B build -DENABLE_LTO=ON" title="Copy value"><code class="value-text">cmake -S . -B build -DENABLE_LTO=ON</code></button></td><td class="desc-text">Enable link-time optimization</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="testing"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">&#x25BC;</span><span class="section-title">Testing</span><span class="section-count">4</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="full test suite (32 tests) ctest --test-dir build --output-on-failure"><td><div class="task-text">Full test suite (32 tests)</div></td><td><button class="value-block value-block--shell" data-copy="ctest --test-dir build --output-on-failure" title="Copy value"><code class="value-text">ctest --test-dir build --output-on-failure</code></button></td><td class="desc-text">Full test suite (32 tests)</td></tr><tr class="command-row" data-search="gain control tests ./build/tests/transport/clip_gain_test"><td><div class="task-text">Gain control tests</div></td><td><button class="value-block value-block--shell" data-copy="./build/tests/transport/clip_gain_test" title="Copy value"><code class="value-text">./build/tests/transport/clip_gain_test</code></button></td><td class="desc-text">Gain control tests</td></tr><tr class="command-row" data-search="loop mode tests ./build/tests/transport/clip_loop_test"><td><div class="task-text">Loop mode tests</div></td><td><button class="value-block value-block--shell" data-copy="./build/tests/transport/clip_loop_test" title="Copy value"><code class="value-text">./build/tests/transport/clip_loop_test</code></button></td><td class="desc-text">Loop mode tests</td></tr><tr class="command-row" data-search="16-clip 60s stress test ./build/tests/transport/multi_clip_stress_test"><td><div class="task-text">16-clip 60s stress test</div></td><td><button class="value-block value-block--shell" data-copy="./build/tests/transport/multi_clip_stress_test" title="Copy value"><code class="value-text">./build/tests/transport/multi_clip_stress_test</code></button></td><td class="desc-text">16-clip 60s stress test</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="cli"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">&#x25BC;</span><span class="section-title">CLI Tools</span><span class="section-count">2</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="render click track ./build/orpheus_minhost --session tools/fixtures/solo_click.json --render click.wav --bars 2 --bpm 100"><td><div class="task-text">Render click track</div></td><td><button class="value-block value-block--shell" data-copy="./build/orpheus_minhost --session tools/fixtures/solo_click.json --render click.wav --bars 2 --bpm 100" title="Copy value"><code class="value-text">./build/orpheus_minhost --session tools/fixtures/solo_click.json --render click.wav --bars 2 --bpm 100</code></button></td><td class="desc-text">Render click track</td></tr><tr class="command-row" data-search="dry run transport simulation ./build/orpheus_minhost --session tools/fixtures/solo_click.json"><td><div class="task-text">Dry run transport simulation</div></td><td><button class="value-block value-block--shell" data-copy="./build/orpheus_minhost --session tools/fixtures/solo_click.json" title="Copy value"><code class="value-text">./build/orpheus_minhost --session tools/fixtures/solo_click.json</code></button></td><td class="desc-text">Dry run transport simulation</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="quality"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">&#x25BC;</span><span class="section-title">Code Quality</span><span class="section-count">2</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="apply clang-format pnpm run format:cpp"><td><div class="task-text">Apply clang-format</div></td><td><button class="value-block value-block--shell" data-copy="pnpm run format:cpp" title="Copy value"><code class="value-text">pnpm run format:cpp</code></button></td><td class="desc-text">Apply clang-format</td></tr><tr class="command-row" data-search="run clang-format checks pnpm run lint:cpp"><td><div class="task-text">Run clang-format checks</div></td><td><button class="value-block value-block--shell" data-copy="pnpm run lint:cpp" title="Copy value"><code class="value-text">pnpm run lint:cpp</code></button></td><td class="desc-text">Run clang-format checks</td></tr></tbody></table></div></section>
 </main>
 
 <footer>
   <div class="inner">
-    <span>Local command sheet generated from source content in <code>to-fix/</code>.</span>
-    <span>orpheus-sdk_docs_repo-commands.html</span>
+    <span>orpheus-sdk | PREFIX: ORP | CMake + C++20 | 270+ tests</span>
+    <span>orpheus-sdk_repo-commands.html</span>
   </div>
-  
 </footer>
 
 <script>
@@ -1074,7 +768,7 @@ function exportToMarkdown() {
     return;
   }
 
-  let md = `# Orpheus SDK - Command Reference\n\n`;
+  let md = `# orpheus-sdk - Command Reference\n\n`;
   sections.forEach((card) => {
     md += `## ${card.title}\n\n`;
     md += "| Task | Command / Snippet | Description |\n";
@@ -1085,7 +779,7 @@ function exportToMarkdown() {
     md += "\n";
   });
   copyMarkdown(md).then((success) => {
-    flashExportButton(success ? "✓ Copied Markdown" : "Copy failed", success ? "is-confirmed" : "is-error");
+    flashExportButton(success ? "Copied Markdown" : "Copy failed", success ? "is-confirmed" : "is-error");
   });
 }
 

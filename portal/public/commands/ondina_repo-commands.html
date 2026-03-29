@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ondina - Command Reference</title>
+<title>ondina - Command Reference</title>
 <style>
 @font-face {
   font-family: "Geist Pixel Square";
@@ -284,15 +284,9 @@ main {
 }
 
 @keyframes export-confirm {
-  0% {
-    transform: translateY(0) scale(1);
-  }
-  40% {
-    transform: translateY(-1px) scale(1.03);
-  }
-  100% {
-    transform: translateY(0) scale(1);
-  }
+  0% { transform: translateY(0) scale(1); }
+  40% { transform: translateY(-1px) scale(1.03); }
+  100% { transform: translateY(0) scale(1); }
 }
 
 .surface-card {
@@ -339,9 +333,7 @@ main {
   overflow-wrap: anywhere;
 }
 
-.search-wrap {
-  position: relative;
-}
+.search-wrap { position: relative; }
 
 .search-input {
   width: 100%;
@@ -398,42 +390,6 @@ main {
   color: var(--text);
 }
 
-.callout-grid {
-  display: grid;
-  gap: 12px;
-}
-
-.callout {
-  padding: 16px 18px;
-  display: grid;
-  gap: 8px;
-}
-
-.callout h2 {
-  font-family: var(--font-display);
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-}
-
-.callout p {
-  color: var(--text-dim);
-  font-size: 11px;
-  white-space: pre-wrap;
-}
-
-.callout--info {
-  box-shadow: var(--callout-info-ring);
-}
-
-.callout--warning {
-  box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.16);
-}
-
-.callout--success {
-  box-shadow: inset 0 0 0 1px rgba(52, 211, 153, 0.16);
-}
-
 .section-card {
   overflow: hidden;
   transition: border-color var(--transition), box-shadow var(--transition);
@@ -444,9 +400,7 @@ main {
   box-shadow: var(--section-card-focus-shadow);
 }
 
-.section-card.is-hidden {
-  display: none;
-}
+.section-card.is-hidden { display: none; }
 
 .section-header {
   width: 100%;
@@ -464,9 +418,7 @@ main {
   transition: background var(--transition), border-radius var(--transition), box-shadow var(--transition);
 }
 
-.section-header:hover {
-  background: var(--bg-panel-hover);
-}
+.section-header:hover { background: var(--bg-panel-hover); }
 
 .section-header:focus,
 .section-header:focus-visible {
@@ -486,14 +438,10 @@ main {
   transition: transform var(--transition);
 }
 
-.section-header.collapsed .section-arrow {
-  transform: rotate(-90deg);
-}
+.section-header.collapsed .section-arrow { transform: rotate(-90deg); }
 
 .section-header:focus .section-arrow,
-.section-header:focus-visible .section-arrow {
-  color: var(--accent);
-}
+.section-header:focus-visible .section-arrow { color: var(--accent); }
 
 .section-title {
   flex: 1;
@@ -526,13 +474,8 @@ main {
   color: var(--text);
 }
 
-.section-body {
-  display: block;
-}
-
-.section-body.collapsed {
-  display: none;
-}
+.section-body { display: block; }
+.section-body.collapsed { display: none; }
 
 .command-table {
   width: 100%;
@@ -554,17 +497,9 @@ main {
 .command-table th:nth-child(2) { width: 38%; }
 .command-table th:nth-child(3) { width: 38%; }
 
-.command-row {
-  border-bottom: 1px solid var(--row-divider);
-}
-
-.command-row:last-child {
-  border-bottom: none;
-}
-
-.command-row.hidden {
-  display: none;
-}
+.command-row { border-bottom: 1px solid var(--row-divider); }
+.command-row:last-child { border-bottom: none; }
+.command-row.hidden { display: none; }
 
 .command-row td {
   padding: 10px 12px;
@@ -572,34 +507,13 @@ main {
   font-size: 11px;
 }
 
-.command-row td:first-child {
-  padding-left: 40px;
-}
+.command-row td:first-child { padding-left: 40px; }
 
 .task-text {
   color: var(--text);
   display: flex;
   align-items: center;
   min-height: 44px;
-}
-
-.row-badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 7px;
-}
-
-.row-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 7px;
-  border-radius: 999px;
-  border: 1px solid var(--accent-border);
-  background: var(--accent-soft);
-  color: var(--accent);
-  font-size: 10px;
-  line-height: 1.2;
 }
 
 .value-block {
@@ -636,67 +550,10 @@ main {
   word-break: break-word;
 }
 
-.value-block--keys .value-text {
-  color: var(--text);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.value-block--osc .value-text {
-  color: var(--osc-text);
-}
-
-.inline-key {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 22px;
-  padding: 2px 7px;
-  border-radius: 6px;
-  border: 1px solid var(--accent-border);
-  background: var(--accent-soft);
-  color: var(--text);
-  font-family: var(--font-body);
-  font-size: 11px;
-}
-
-.key-combo {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.key-join,
-.key-note {
-  color: var(--text-muted);
-  font-size: 11px;
-}
-
 .desc-text {
   color: var(--text-dim);
   line-height: 1.5;
   white-space: pre-wrap;
-}
-
-.empty-state {
-  padding: 22px 20px;
-  display: grid;
-  gap: 8px;
-}
-
-.empty-state h2 {
-  font-family: var(--font-display);
-  font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--accent);
-}
-
-.empty-state p {
-  color: var(--text-dim);
-  max-width: 70ch;
 }
 
 footer {
@@ -724,9 +581,7 @@ footer .inner {
 }
 
 @media (max-width: 900px) {
-  .hero-row {
-    flex-direction: column;
-  }
+  .hero-row { flex-direction: column; }
 
   .site-header__inner {
     flex-direction: column;
@@ -753,31 +608,22 @@ footer .inner {
     width: 100%;
   }
 
-  .command-table thead {
-    display: none;
-  }
+  .command-table thead { display: none; }
 
   .command-row td {
     padding-top: 8px;
     padding-bottom: 8px;
   }
 
-  .command-row td:first-child {
-    padding-left: 12px;
-  }
-
-  .command-row td:first-child {
-    padding-bottom: 0;
-  }
+  .command-row td:first-child { padding-left: 12px; }
+  .command-row td:first-child { padding-bottom: 0; }
 
   .command-row td:nth-child(2) {
     padding-top: 8px;
     padding-bottom: 0;
   }
 
-  footer .inner {
-    flex-direction: column;
-  }
+  footer .inner { flex-direction: column; }
 
   main,
   .site-header__inner,
@@ -786,18 +632,14 @@ footer .inner {
     width: 96vw;
   }
 
-  .hero-meta {
-    display: none;
-  }
+  .hero-meta { display: none; }
 
   .value-block {
     max-width: 100%;
     overflow-x: auto;
   }
 
-  .value-text {
-    word-break: break-all;
-  }
+  .value-text { word-break: break-all; }
 
   .desc-text {
     display: block;
@@ -820,22 +662,24 @@ footer .inner {
   <div class="hero-row">
     <div class="hero">
       <span class="hero-eyebrow">COMMAND REFERENCE</span>
-      <h1>Ondina</h1>
-      <p>Quick reference for reflection-driven scheduling backend development</p>
+      <h1>ondina</h1>
+      <p>Reflection-driven scheduling system — Node.js + TypeScript + Hono</p>
     </div>
-    <div class="hero-meta"><div class="meta-chip"><span class="meta-chip__label">UPDATED</span><span class="meta-chip__value">Last updated: 2026-01-25</span></div><div class="meta-chip"><span class="meta-chip__label">REPO</span><span class="meta-chip__value">~/dev/ondina</span></div></div>
+    <div class="hero-meta"><div class="meta-chip"><span class="meta-chip__label">UPDATED</span><span class="meta-chip__value">2026-03-29</span></div><div class="meta-chip"><span class="meta-chip__label">REPO</span><span class="meta-chip__value">~/dev/ondina</span></div></div>
   </div>
-  <div class="search-wrap"><span class="search-icon">⌕</span><input class="search-input" type="text" placeholder="Search commands, snippets, or notes…" id="search" autocomplete="off" spellcheck="false"><span class="search-count" id="search-count"></span><button class="search-clear" id="search-clear" title="Clear search">×</button></div>
-  <section class="surface-card section-card" data-section="setup"><button class="section-header" type="button" aria-expanded="true"><span class="section-arrow">▼</span><span class="section-title">📦 Setup &amp; Installation</span><span class="section-count">3</span></button><div class="section-body"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="install dependencies pnpm install install all project dependencies"><td><div class="task-text">Install dependencies</div></td><td><button class="value-block value-block--shell" data-copy="pnpm install" title="Copy value"><code class="value-text">pnpm install</code></button></td><td class="desc-text">Install all project dependencies</td></tr><tr class="command-row" data-search="check environment node --version &amp;&amp; pnpm --version verify node.js (&gt;=20) and pnpm are installed"><td><div class="task-text">Check environment</div></td><td><button class="value-block value-block--shell" data-copy="node --version &amp;&amp; pnpm --version" title="Copy value"><code class="value-text">node --version &amp;&amp; pnpm --version</code></button></td><td class="desc-text">Verify Node.js (&gt;=20) and pnpm are installed</td></tr><tr class="command-row" data-search="build project pnpm build compile typescript to dist/"><td><div class="task-text">Build project</div></td><td><button class="value-block value-block--shell" data-copy="pnpm build" title="Copy value"><code class="value-text">pnpm build</code></button></td><td class="desc-text">Compile TypeScript to dist/</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="dev"><button class="section-header" type="button" aria-expanded="true"><span class="section-arrow">▼</span><span class="section-title">🚀 Development</span><span class="section-count">5</span></button><div class="section-body"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="start server (file storage) pnpm start start server with file-based storage (default, http://localhost:3000)"><td><div class="task-text">Start server (file storage)</div></td><td><button class="value-block value-block--shell" data-copy="pnpm start" title="Copy value"><code class="value-text">pnpm start</code></button></td><td class="desc-text">Start server with file-based storage (default, http://localhost:3000)</td></tr><tr class="command-row" data-search="start server (sqlite) storage_backend=sqlite pnpm start start server with sqlite storage (recommended for production) sqlite"><td><div class="task-text">Start server (SQLite)</div><div class="row-badges"><span class="row-badge">SQLITE</span></div></td><td><button class="value-block value-block--shell" data-copy="STORAGE_BACKEND=sqlite pnpm start" title="Copy value"><code class="value-text">STORAGE_BACKEND=sqlite pnpm start</code></button></td><td class="desc-text">Start server with SQLite storage (recommended for production)</td></tr><tr class="command-row" data-search="custom port port=3001 pnpm start start server on custom port (if 3000 is in use)"><td><div class="task-text">Custom port</div></td><td><button class="value-block value-block--shell" data-copy="PORT=3001 pnpm start" title="Copy value"><code class="value-text">PORT=3001 pnpm start</code></button></td><td class="desc-text">Start server on custom port (if 3000 is in use)</td></tr><tr class="command-row" data-search="dry run mode dry_run=true pnpm start start server without persisting changes (testing)"><td><div class="task-text">Dry run mode</div></td><td><button class="value-block value-block--shell" data-copy="DRY_RUN=true pnpm start" title="Copy value"><code class="value-text">DRY_RUN=true pnpm start</code></button></td><td class="desc-text">Start server without persisting changes (testing)</td></tr><tr class="command-row" data-search="health check curl http://localhost:3000/api/health verify server is running and healthy"><td><div class="task-text">Health check</div></td><td><button class="value-block value-block--shell" data-copy="curl http://localhost:3000/api/health" title="Copy value"><code class="value-text">curl http://localhost:3000/api/health</code></button></td><td class="desc-text">Verify server is running and healthy</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="build"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">🔨 Building</span><span class="section-count">5</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="build pnpm build compile typescript to javascript (dist/)"><td><div class="task-text">Build</div></td><td><button class="value-block value-block--shell" data-copy="pnpm build" title="Copy value"><code class="value-text">pnpm build</code></button></td><td class="desc-text">Compile TypeScript to JavaScript (dist/)</td></tr><tr class="command-row" data-search="type check pnpm type-check run typescript type checking without emitting files"><td><div class="task-text">Type check</div></td><td><button class="value-block value-block--shell" data-copy="pnpm type-check" title="Copy value"><code class="value-text">pnpm type-check</code></button></td><td class="desc-text">Run TypeScript type checking without emitting files</td></tr><tr class="command-row" data-search="lint pnpm lint run biome linter"><td><div class="task-text">Lint</div></td><td><button class="value-block value-block--shell" data-copy="pnpm lint" title="Copy value"><code class="value-text">pnpm lint</code></button></td><td class="desc-text">Run Biome linter</td></tr><tr class="command-row" data-search="format pnpm format auto-format code with biome"><td><div class="task-text">Format</div></td><td><button class="value-block value-block--shell" data-copy="pnpm format" title="Copy value"><code class="value-text">pnpm format</code></button></td><td class="desc-text">Auto-format code with Biome</td></tr><tr class="command-row" data-search="clean build rm -rf dist &amp;&amp; pnpm build remove dist/ and rebuild from scratch"><td><div class="task-text">Clean build</div></td><td><button class="value-block value-block--shell" data-copy="rm -rf dist &amp;&amp; pnpm build" title="Copy value"><code class="value-text">rm -rf dist &amp;&amp; pnpm build</code></button></td><td class="desc-text">Remove dist/ and rebuild from scratch</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="database"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">🗄️ Database (SQLite)</span><span class="section-count">8</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="start with custom db path storage_backend=sqlite db_path=./data/ondina.db pnpm start start server with specific sqlite database file sqlite"><td><div class="task-text">Start with custom DB path</div><div class="row-badges"><span class="row-badge">SQLITE</span></div></td><td><button class="value-block value-block--shell" data-copy="STORAGE_BACKEND=sqlite DB_PATH=./data/ondina.db pnpm start" title="Copy value"><code class="value-text">STORAGE_BACKEND=sqlite DB_PATH=./data/ondina.db pnpm start</code></button></td><td class="desc-text">Start server with specific SQLite database file</td></tr><tr class="command-row" data-search="view database sqlite3 ./data/ondina.db &quot;.tables&quot; list all tables in the database"><td><div class="task-text">View database</div></td><td><button class="value-block value-block--shell" data-copy="sqlite3 ./data/ondina.db &quot;.tables&quot;" title="Copy value"><code class="value-text">sqlite3 ./data/ondina.db ".tables"</code></button></td><td class="desc-text">List all tables in the database</td></tr><tr class="command-row" data-search="query time blocks sqlite3 ./data/ondina.db &quot;select id, title, date(start_time) as date from time_blocks limit 10;&quot; view recent time blocks"><td><div class="task-text">Query time blocks</div></td><td><button class="value-block value-block--shell" data-copy="sqlite3 ./data/ondina.db &quot;SELECT id, title, date(start_time) as date FROM time_blocks LIMIT 10;&quot;" title="Copy value"><code class="value-text">sqlite3 ./data/ondina.db "SELECT id, title, date(start_time) as date FROM time_blocks LIMIT 10;"</code></button></td><td class="desc-text">View recent time blocks</td></tr><tr class="command-row" data-search="check schema version sqlite3 ./data/ondina.db &quot;select * from schema_migrations order by version desc limit 5;&quot; view applied migrations"><td><div class="task-text">Check schema version</div></td><td><button class="value-block value-block--shell" data-copy="sqlite3 ./data/ondina.db &quot;SELECT * FROM schema_migrations ORDER BY version DESC LIMIT 5;&quot;" title="Copy value"><code class="value-text">sqlite3 ./data/ondina.db "SELECT * FROM schema_migrations ORDER BY version DESC LIMIT 5;"</code></button></td><td class="desc-text">View applied migrations</td></tr><tr class="command-row" data-search="backup database sqlite3 ./data/ondina.db &quot;.backup ./data/ondina-backup.db&quot; create a backup of the database (safe while server running with wal)"><td><div class="task-text">Backup database</div></td><td><button class="value-block value-block--shell" data-copy="sqlite3 ./data/ondina.db &quot;.backup ./data/ondina-backup.db&quot;" title="Copy value"><code class="value-text">sqlite3 ./data/ondina.db ".backup ./data/ondina-backup.db"</code></button></td><td class="desc-text">Create a backup of the database (safe while server running with WAL)</td></tr><tr class="command-row" data-search="view table schema sqlite3 ./data/ondina.db &quot;pragma table_info(time_blocks);&quot; show columns and types for time_blocks table"><td><div class="task-text">View table schema</div></td><td><button class="value-block value-block--shell" data-copy="sqlite3 ./data/ondina.db &quot;PRAGMA table_info(time_blocks);&quot;" title="Copy value"><code class="value-text">sqlite3 ./data/ondina.db "PRAGMA table_info(time_blocks);"</code></button></td><td class="desc-text">Show columns and types for time_blocks table</td></tr><tr class="command-row" data-search="count records sqlite3 ./data/ondina.db &quot;select &#x27;time_blocks&#x27;, count(*) from time_blocks union select &#x27;daily_reflections&#x27;, count(*) from daily_reflections union select &#x27;feedback_entries&#x27;, count(*) from feedback_entries;&quot; count records in key tables"><td><div class="task-text">Count records</div></td><td><button class="value-block value-block--shell" data-copy="sqlite3 ./data/ondina.db &quot;SELECT &#x27;time_blocks&#x27;, COUNT(*) FROM time_blocks UNION SELECT &#x27;daily_reflections&#x27;, COUNT(*) FROM daily_reflections UNION SELECT &#x27;feedback_entries&#x27;, COUNT(*) FROM feedback_entries;&quot;" title="Copy value"><code class="value-text">sqlite3 ./data/ondina.db "SELECT 'time_blocks', COUNT(*) FROM time_blocks UNION SELECT 'daily_reflections', COUNT(*) FROM daily_reflections UNION SELECT 'feedback_entries', COUNT(*) FROM feedback_entries;"</code></button></td><td class="desc-text">Count records in key tables</td></tr><tr class="command-row" data-search="check wal mode sqlite3 ./data/ondina.db &quot;pragma journal_mode;&quot; verify wal mode is enabled (should return &quot;wal&quot;)"><td><div class="task-text">Check WAL mode</div></td><td><button class="value-block value-block--shell" data-copy="sqlite3 ./data/ondina.db &quot;PRAGMA journal_mode;&quot;" title="Copy value"><code class="value-text">sqlite3 ./data/ondina.db "PRAGMA journal_mode;"</code></button></td><td class="desc-text">Verify WAL mode is enabled (should return "wal")</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="testing"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">🧪 Testing</span><span class="section-count">6</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="run all tests pnpm test run full test suite with vitest test"><td><div class="task-text">Run all tests</div><div class="row-badges"><span class="row-badge">TEST</span></div></td><td><button class="value-block value-block--shell" data-copy="pnpm test" title="Copy value"><code class="value-text">pnpm test</code></button></td><td class="desc-text">Run full test suite with Vitest</td></tr><tr class="command-row" data-search="run tests (watch mode) pnpm test:watch run tests and watch for changes"><td><div class="task-text">Run tests (watch mode)</div></td><td><button class="value-block value-block--shell" data-copy="pnpm test:watch" title="Copy value"><code class="value-text">pnpm test:watch</code></button></td><td class="desc-text">Run tests and watch for changes</td></tr><tr class="command-row" data-search="run sqlite tests only pnpm test tests/unit/core/sqlite-repositories.test.ts run sqlite repository tests (20 tests)"><td><div class="task-text">Run SQLite tests only</div></td><td><button class="value-block value-block--shell" data-copy="pnpm test tests/unit/core/sqlite-repositories.test.ts" title="Copy value"><code class="value-text">pnpm test tests/unit/core/sqlite-repositories.test.ts</code></button></td><td class="desc-text">Run SQLite repository tests (20 tests)</td></tr><tr class="command-row" data-search="run coverage pnpm test:coverage run tests with coverage report"><td><div class="task-text">Run coverage</div></td><td><button class="value-block value-block--shell" data-copy="pnpm test:coverage" title="Copy value"><code class="value-text">pnpm test:coverage</code></button></td><td class="desc-text">Run tests with coverage report</td></tr><tr class="command-row" data-search="run single test file pnpm test tests/unit/core/schemas.test.ts run a specific test file"><td><div class="task-text">Run single test file</div></td><td><button class="value-block value-block--shell" data-copy="pnpm test tests/unit/core/schemas.test.ts" title="Copy value"><code class="value-text">pnpm test tests/unit/core/schemas.test.ts</code></button></td><td class="desc-text">Run a specific test file</td></tr><tr class="command-row" data-search="run matching tests pnpm test -t &quot;policy&quot; run tests matching pattern &quot;policy&quot;"><td><div class="task-text">Run matching tests</div></td><td><button class="value-block value-block--shell" data-copy="pnpm test -t &quot;policy&quot;" title="Copy value"><code class="value-text">pnpm test -t "policy"</code></button></td><td class="desc-text">Run tests matching pattern "policy"</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="api"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">🌐 API Usage</span><span class="section-count">8</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="get policy curl http://localhost:3000/api/policy retrieve current user policy settings api"><td><div class="task-text">Get policy</div><div class="row-badges"><span class="row-badge">API</span></div></td><td><button class="value-block value-block--shell" data-copy="curl http://localhost:3000/api/policy" title="Copy value"><code class="value-text">curl http://localhost:3000/api/policy</code></button></td><td class="desc-text">Retrieve current user policy settings</td></tr><tr class="command-row" data-search="update policy curl -x put http://localhost:3000/api/policy -h &quot;content-type: application/json&quot; -d &#x27;{&quot;guardrails&quot;:{&quot;no_after_hour&quot;:&quot;21:00&quot;},&quot;energy_windows&quot;:{&quot;am&quot;:&quot;high&quot;,&quot;mid&quot;:&quot;medium&quot;,&quot;pm&quot;:&quot;low&quot;},&quot;churn_penalty&quot;:0.35,&quot;deepwork_bias&quot;:0.6}&#x27; update policy settings"><td><div class="task-text">Update policy</div></td><td><button class="value-block value-block--shell" data-copy="curl -X PUT http://localhost:3000/api/policy -H &quot;Content-Type: application/json&quot; -d &#x27;{&quot;guardrails&quot;:{&quot;no_after_hour&quot;:&quot;21:00&quot;},&quot;energy_windows&quot;:{&quot;am&quot;:&quot;high&quot;,&quot;mid&quot;:&quot;medium&quot;,&quot;pm&quot;:&quot;low&quot;},&quot;churn_penalty&quot;:0.35,&quot;deepwork_bias&quot;:0.6}&#x27;" title="Copy value"><code class="value-text">curl -X PUT http://localhost:3000/api/policy -H "Content-Type: application/json" -d '{"guardrails":{"no_after_hour":"21:00"},"energy_windows":{"am":"high","mid":"medium","pm":"low"},"churn_penalty":0.35,"deepwork_bias":0.6}'</code></button></td><td class="desc-text">Update policy settings</td></tr><tr class="command-row" data-search="submit am reflection curl -x post http://localhost:3000/api/reflection -h &quot;content-type: application/json&quot; -d &#x27;{&quot;serial&quot;:&quot;ond20260125&quot;,&quot;date&quot;:&quot;2026-01-25&quot;,&quot;am&quot;:{&quot;sleep_hours&quot;:7.5,&quot;sleep_quality&quot;:&quot;good&quot;,&quot;energy&quot;:&quot;high&quot;,&quot;focus&quot;:&quot;medium&quot;,&quot;mood&quot;:&quot;optimistic&quot;}}&#x27; submit morning reflection"><td><div class="task-text">Submit AM reflection</div></td><td><button class="value-block value-block--shell" data-copy="curl -X POST http://localhost:3000/api/reflection -H &quot;Content-Type: application/json&quot; -d &#x27;{&quot;serial&quot;:&quot;OND20260125&quot;,&quot;date&quot;:&quot;2026-01-25&quot;,&quot;am&quot;:{&quot;sleep_hours&quot;:7.5,&quot;sleep_quality&quot;:&quot;good&quot;,&quot;energy&quot;:&quot;high&quot;,&quot;focus&quot;:&quot;medium&quot;,&quot;mood&quot;:&quot;optimistic&quot;}}&#x27;" title="Copy value"><code class="value-text">curl -X POST http://localhost:3000/api/reflection -H "Content-Type: application/json" -d '{"serial":"OND20260125","date":"2026-01-25","am":{"sleep_hours":7.5,"sleep_quality":"good","energy":"high","focus":"medium","mood":"optimistic"}}'</code></button></td><td class="desc-text">Submit morning reflection</td></tr><tr class="command-row" data-search="get reflection curl http://localhost:3000/api/reflection/2025-01-20 get reflection for specific date"><td><div class="task-text">Get reflection</div></td><td><button class="value-block value-block--shell" data-copy="curl http://localhost:3000/api/reflection/2025-01-20" title="Copy value"><code class="value-text">curl http://localhost:3000/api/reflection/2025-01-20</code></button></td><td class="desc-text">Get reflection for specific date</td></tr><tr class="command-row" data-search="generate plan curl -x post http://localhost:3000/api/plan -h &quot;content-type: application/json&quot; -d &#x27;{&quot;date&quot;:&quot;2025-01-20&quot;}&#x27; generate daily plan for date"><td><div class="task-text">Generate plan</div></td><td><button class="value-block value-block--shell" data-copy="curl -X POST http://localhost:3000/api/plan -H &quot;Content-Type: application/json&quot; -d &#x27;{&quot;date&quot;:&quot;2025-01-20&quot;}&#x27;" title="Copy value"><code class="value-text">curl -X POST http://localhost:3000/api/plan -H "Content-Type: application/json" -d '{"date":"2025-01-20"}'</code></button></td><td class="desc-text">Generate daily plan for date</td></tr><tr class="command-row" data-search="execute plan curl -x post http://localhost:3000/api/plan/2025-01-20/execute -h &quot;content-type: application/json&quot; -d &#x27;{&quot;confirmed&quot;:true,&quot;rejectedactions&quot;:[]}&#x27; execute a generated plan"><td><div class="task-text">Execute plan</div></td><td><button class="value-block value-block--shell" data-copy="curl -X POST http://localhost:3000/api/plan/2025-01-20/execute -H &quot;Content-Type: application/json&quot; -d &#x27;{&quot;confirmed&quot;:true,&quot;rejectedActions&quot;:[]}&#x27;" title="Copy value"><code class="value-text">curl -X POST http://localhost:3000/api/plan/2025-01-20/execute -H "Content-Type: application/json" -d '{"confirmed":true,"rejectedActions":[]}'</code></button></td><td class="desc-text">Execute a generated plan</td></tr><tr class="command-row" data-search="import tasks curl -x post http://localhost:3000/api/ingest/tasks -h &quot;content-type: application/json&quot; -d &#x27;{&quot;tasks&quot;:[{&quot;title&quot;:&quot;write proposal&quot;,&quot;priority&quot;:&quot;high&quot;,&quot;duration_min&quot;:90,&quot;tags&quot;:[&quot;deepwork&quot;]}]}&#x27; import personal tasks as time blocks"><td><div class="task-text">Import tasks</div></td><td><button class="value-block value-block--shell" data-copy="curl -X POST http://localhost:3000/api/ingest/tasks -H &quot;Content-Type: application/json&quot; -d &#x27;{&quot;tasks&quot;:[{&quot;title&quot;:&quot;Write proposal&quot;,&quot;priority&quot;:&quot;high&quot;,&quot;duration_min&quot;:90,&quot;tags&quot;:[&quot;deepwork&quot;]}]}&#x27;" title="Copy value"><code class="value-text">curl -X POST http://localhost:3000/api/ingest/tasks -H "Content-Type: application/json" -d '{"tasks":[{"title":"Write proposal","priority":"high","duration_min":90,"tags":["deepwork"]}]}'</code></button></td><td class="desc-text">Import personal tasks as time blocks</td></tr><tr class="command-row" data-search="import work schedule curl -x post http://localhost:3000/api/ingest/schedule -h &quot;content-type: application/json&quot; -d &#x27;{&quot;csv&quot;:&quot;date,start,end,title\n2025-01-20,09:00,17:00,work&quot;,&quot;timezone&quot;:&quot;america/new_york&quot;}&#x27; import work schedule from csv"><td><div class="task-text">Import work schedule</div></td><td><button class="value-block value-block--shell" data-copy="curl -X POST http://localhost:3000/api/ingest/schedule -H &quot;Content-Type: application/json&quot; -d &#x27;{&quot;csv&quot;:&quot;date,start,end,title\n2025-01-20,09:00,17:00,Work&quot;,&quot;timezone&quot;:&quot;America/New_York&quot;}&#x27;" title="Copy value"><code class="value-text">curl -X POST http://localhost:3000/api/ingest/schedule -H "Content-Type: application/json" -d '{"csv":"date,start,end,title\n2025-01-20,09:00,17:00,Work","timezone":"America/New_York"}'</code></button></td><td class="desc-text">Import work schedule from CSV</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="git"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">🔀 Git &amp; Branching</span><span class="section-count">5</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="check status git status -sb show short status with branch name"><td><div class="task-text">Check status</div></td><td><button class="value-block value-block--shell" data-copy="git status -sb" title="Copy value"><code class="value-text">git status -sb</code></button></td><td class="desc-text">Show short status with branch name</td></tr><tr class="command-row" data-search="create feature branch git checkout -b feat/descriptive-name create and switch to new feature branch"><td><div class="task-text">Create feature branch</div></td><td><button class="value-block value-block--shell" data-copy="git checkout -b feat/descriptive-name" title="Copy value"><code class="value-text">git checkout -b feat/descriptive-name</code></button></td><td class="desc-text">Create and switch to new feature branch</td></tr><tr class="command-row" data-search="view commit history git log --oneline -10 show recent 10 commits"><td><div class="task-text">View commit history</div></td><td><button class="value-block value-block--shell" data-copy="git log --oneline -10" title="Copy value"><code class="value-text">git log --oneline -10</code></button></td><td class="desc-text">Show recent 10 commits</td></tr><tr class="command-row" data-search="push branch git push -u origin feat/descriptive-name push feature branch and set tracking"><td><div class="task-text">Push branch</div></td><td><button class="value-block value-block--shell" data-copy="git push -u origin feat/descriptive-name" title="Copy value"><code class="value-text">git push -u origin feat/descriptive-name</code></button></td><td class="desc-text">Push feature branch and set tracking</td></tr><tr class="command-row" data-search="create pr gh pr create --title &quot;short summary&quot; --body &quot;details&quot; create pull request from current branch"><td><div class="task-text">Create PR</div></td><td><button class="value-block value-block--shell" data-copy="gh pr create --title &quot;short summary&quot; --body &quot;details&quot;" title="Copy value"><code class="value-text">gh pr create --title "short summary" --body "details"</code></button></td><td class="desc-text">Create pull request from current branch</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="troubleshoot"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">🔧 Troubleshooting</span><span class="section-count">7</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="port already in use port=3001 pnpm start start on different port if 3000 is occupied"><td><div class="task-text">Port already in use</div></td><td><button class="value-block value-block--shell" data-copy="PORT=3001 pnpm start" title="Copy value"><code class="value-text">PORT=3001 pnpm start</code></button></td><td class="desc-text">Start on different port if 3000 is occupied</td></tr><tr class="command-row" data-search="database locked lsof +d ./data/ | grep ondina find processes using the database (kill other servers)"><td><div class="task-text">Database locked</div></td><td><button class="value-block value-block--shell" data-copy="lsof +D ./data/ | grep ondina" title="Copy value"><code class="value-text">lsof +D ./data/ | grep ondina</code></button></td><td class="desc-text">Find processes using the database (kill other servers)</td></tr><tr class="command-row" data-search="typescript errors pnpm type-check run type check to see detailed ts errors"><td><div class="task-text">TypeScript errors</div></td><td><button class="value-block value-block--shell" data-copy="pnpm type-check" title="Copy value"><code class="value-text">pnpm type-check</code></button></td><td class="desc-text">Run type check to see detailed TS errors</td></tr><tr class="command-row" data-search="clean reinstall rm -rf node_modules dist &amp;&amp; pnpm install &amp;&amp; pnpm build full clean and rebuild (fixes corrupt dependencies)"><td><div class="task-text">Clean reinstall</div></td><td><button class="value-block value-block--shell" data-copy="rm -rf node_modules dist &amp;&amp; pnpm install &amp;&amp; pnpm build" title="Copy value"><code class="value-text">rm -rf node_modules dist &amp;&amp; pnpm install &amp;&amp; pnpm build</code></button></td><td class="desc-text">Full clean and rebuild (fixes corrupt dependencies)</td></tr><tr class="command-row" data-search="reset database rm ./data/ondina.db* &amp;&amp; storage_backend=sqlite pnpm start delete database and start fresh (migrations run automatically)"><td><div class="task-text">Reset database</div></td><td><button class="value-block value-block--shell" data-copy="rm ./data/ondina.db* &amp;&amp; STORAGE_BACKEND=sqlite pnpm start" title="Copy value"><code class="value-text">rm ./data/ondina.db* &amp;&amp; STORAGE_BACKEND=sqlite pnpm start</code></button></td><td class="desc-text">Delete database and start fresh (migrations run automatically)</td></tr><tr class="command-row" data-search="check node version node --version must be v22.x or higher"><td><div class="task-text">Check Node version</div></td><td><button class="value-block value-block--shell" data-copy="node --version" title="Copy value"><code class="value-text">node --version</code></button></td><td class="desc-text">Must be v22.x or higher</td></tr><tr class="command-row" data-search="view server logs pnpm start 2&gt;&amp;1 | tee server.log start server and capture logs to file"><td><div class="task-text">View server logs</div></td><td><button class="value-block value-block--shell" data-copy="pnpm start 2&gt;&amp;1 | tee server.log" title="Copy value"><code class="value-text">pnpm start 2&gt;&amp;1 | tee server.log</code></button></td><td class="desc-text">Start server and capture logs to file</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="ios"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">📱 iOS Development</span><span class="section-count">5</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="open xcode project open ios/ondina/ondina.xcodeproj open ios project in xcode"><td><div class="task-text">Open Xcode project</div></td><td><button class="value-block value-block--shell" data-copy="open ios/Ondina/Ondina.xcodeproj" title="Copy value"><code class="value-text">open ios/Ondina/Ondina.xcodeproj</code></button></td><td class="desc-text">Open iOS project in Xcode</td></tr><tr class="command-row" data-search="build ios (simulator) cd ios/ondina &amp;&amp; xcodebuild -scheme ondina -destination &#x27;platform=ios simulator,name=iphone 16&#x27; build ios app for iphone 16 simulator"><td><div class="task-text">Build iOS (Simulator)</div></td><td><button class="value-block value-block--shell" data-copy="cd ios/Ondina &amp;&amp; xcodebuild -scheme Ondina -destination &#x27;platform=iOS Simulator,name=iPhone 16&#x27;" title="Copy value"><code class="value-text">cd ios/Ondina &amp;&amp; xcodebuild -scheme Ondina -destination 'platform=iOS Simulator,name=iPhone 16'</code></button></td><td class="desc-text">Build iOS app for iPhone 16 Simulator</td></tr><tr class="command-row" data-search="run ios tests cd ios/ondina &amp;&amp; xcodebuild test -scheme ondina -destination &#x27;platform=ios simulator,name=iphone 16&#x27; run ios unit tests on simulator"><td><div class="task-text">Run iOS tests</div></td><td><button class="value-block value-block--shell" data-copy="cd ios/Ondina &amp;&amp; xcodebuild test -scheme Ondina -destination &#x27;platform=iOS Simulator,name=iPhone 16&#x27;" title="Copy value"><code class="value-text">cd ios/Ondina &amp;&amp; xcodebuild test -scheme Ondina -destination 'platform=iOS Simulator,name=iPhone 16'</code></button></td><td class="desc-text">Run iOS unit tests on Simulator</td></tr><tr class="command-row" data-search="clean build folder cd ios/ondina &amp;&amp; xcodebuild clean -scheme ondina clean xcode build folder"><td><div class="task-text">Clean build folder</div></td><td><button class="value-block value-block--shell" data-copy="cd ios/Ondina &amp;&amp; xcodebuild clean -scheme Ondina" title="Copy value"><code class="value-text">cd ios/Ondina &amp;&amp; xcodebuild clean -scheme Ondina</code></button></td><td class="desc-text">Clean Xcode build folder</td></tr><tr class="command-row" data-search="list simulators xcrun simctl list devices available list available ios simulators"><td><div class="task-text">List simulators</div></td><td><button class="value-block value-block--shell" data-copy="xcrun simctl list devices available" title="Copy value"><code class="value-text">xcrun simctl list devices available</code></button></td><td class="desc-text">List available iOS simulators</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="docs"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">📚 Documentation</span><span class="section-count">5</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="list ond docs ls -1 docs/ond/ | grep -e &#x27;^ond[0-9]{3,4}\s+&#x27; | sort list all ond documentation files"><td><div class="task-text">List OND docs</div></td><td><button class="value-block value-block--shell" data-copy="ls -1 docs/ond/ | grep -E &#x27;^OND[0-9]{3,4}\s+&#x27; | sort" title="Copy value"><code class="value-text">ls -1 docs/ond/ | grep -E '^OND[0-9]{3,4}\s+' | sort</code></button></td><td class="desc-text">List all OND documentation files</td></tr><tr class="command-row" data-search="next doc number last=$(ls -1 docs/ond/ | grep -e &#x27;^ond[0-9]+&#x27; | sed -e &#x27;s/ond([0-9]+).*/\1/&#x27; | sort -n | tail -1); echo &quot;ond$((last + 1))&quot; find next sequential ond document number"><td><div class="task-text">Next doc number</div></td><td><button class="value-block value-block--shell" data-copy="last=$(ls -1 docs/ond/ | grep -E &#x27;^OND[0-9]+&#x27; | sed -E &#x27;s/OND([0-9]+).*/\1/&#x27; | sort -n | tail -1); echo &quot;OND$((last + 1))&quot;" title="Copy value"><code class="value-text">last=$(ls -1 docs/ond/ | grep -E '^OND[0-9]+' | sed -E 's/OND([0-9]+).*/\1/' | sort -n | tail -1); echo "OND$((last + 1))"</code></button></td><td class="desc-text">Find next sequential OND document number</td></tr><tr class="command-row" data-search="view claude.md cat claude.md | less read repo configuration and conventions"><td><div class="task-text">View CLAUDE.md</div></td><td><button class="value-block value-block--shell" data-copy="cat CLAUDE.md | less" title="Copy value"><code class="value-text">cat CLAUDE.md | less</code></button></td><td class="desc-text">Read repo configuration and conventions</td></tr><tr class="command-row" data-search="view recent docs ls -lt docs/ond/ond*.md | head -10 show 10 most recently modified docs"><td><div class="task-text">View recent docs</div></td><td><button class="value-block value-block--shell" data-copy="ls -lt docs/ond/OND*.md | head -10" title="Copy value"><code class="value-text">ls -lt docs/ond/OND*.md | head -10</code></button></td><td class="desc-text">Show 10 most recently modified docs</td></tr><tr class="command-row" data-search="view legacy kym docs ls -1 docs/kym/kym*.md | sort list deprecated kymata-era documentation"><td><div class="task-text">View legacy KYM docs</div></td><td><button class="value-block value-block--shell" data-copy="ls -1 docs/kym/KYM*.md | sort" title="Copy value"><code class="value-text">ls -1 docs/kym/KYM*.md | sort</code></button></td><td class="desc-text">List deprecated Kymata-era documentation</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="wireframes"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">🗺️ Wireframes &amp; Architecture Diagrams</span><span class="section-count">6</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="list wireframe versions ls -1 wireframes/ show available wireframe versions (e.g., v1)"><td><div class="task-text">List wireframe versions</div></td><td><button class="value-block value-block--shell" data-copy="ls -1 wireframes/" title="Copy value"><code class="value-text">ls -1 wireframes/</code></button></td><td class="desc-text">Show available wireframe versions (e.g., v1)</td></tr><tr class="command-row" data-search="view architecture diagram cat wireframes/v1/architecture-overview.mermaid.md view system architecture (paste into mermaid.live)"><td><div class="task-text">View architecture diagram</div></td><td><button class="value-block value-block--shell" data-copy="cat wireframes/v1/architecture-overview.mermaid.md" title="Copy value"><code class="value-text">cat wireframes/v1/architecture-overview.mermaid.md</code></button></td><td class="desc-text">View system architecture (paste into mermaid.live)</td></tr><tr class="command-row" data-search="view database schema cat wireframes/v1/database-schema.mermaid.md view erd of all database tables"><td><div class="task-text">View database schema</div></td><td><button class="value-block value-block--shell" data-copy="cat wireframes/v1/database-schema.mermaid.md" title="Copy value"><code class="value-text">cat wireframes/v1/database-schema.mermaid.md</code></button></td><td class="desc-text">View ERD of all database tables</td></tr><tr class="command-row" data-search="view auth flow cat wireframes/v1/authentication-authorization.mermaid.md view webauthn/jwt authentication sequences"><td><div class="task-text">View auth flow</div></td><td><button class="value-block value-block--shell" data-copy="cat wireframes/v1/authentication-authorization.mermaid.md" title="Copy value"><code class="value-text">cat wireframes/v1/authentication-authorization.mermaid.md</code></button></td><td class="desc-text">View WebAuthn/JWT authentication sequences</td></tr><tr class="command-row" data-search="list all diagrams ls -1 wireframes/v1/*.mermaid.md list all mermaid diagram files"><td><div class="task-text">List all diagrams</div></td><td><button class="value-block value-block--shell" data-copy="ls -1 wireframes/v1/*.mermaid.md" title="Copy value"><code class="value-text">ls -1 wireframes/v1/*.mermaid.md</code></button></td><td class="desc-text">List all Mermaid diagram files</td></tr><tr class="command-row" data-search="list all notes ls -1 wireframes/v1/*.notes.md list all accompanying notes files"><td><div class="task-text">List all notes</div></td><td><button class="value-block value-block--shell" data-copy="ls -1 wireframes/v1/*.notes.md" title="Copy value"><code class="value-text">ls -1 wireframes/v1/*.notes.md</code></button></td><td class="desc-text">List all accompanying notes files</td></tr></tbody></table></div></section>
-  <section class="callout-grid"><article class="surface-card callout callout--info"><h2>📦 Environment &amp; Stack</h2><p>Runtime: Node.js 22+ | Package Manager: pnpm | Framework: Hono | Database: SQLite (better-sqlite3) | Validation: Zod</p></article><article class="surface-card callout callout--warning"><h2>⚠️ Storage Backend Selection</h2><p>Use STORAGE_BACKEND=sqlite for production. File-based storage is default for development. Memory storage is for testing only.</p></article></section>
+  <div class="search-wrap"><span class="search-icon">&#x2315;</span><input class="search-input" type="text" placeholder="Search commands, snippets, or notes&#x2026;" id="search" autocomplete="off" spellcheck="false"><span class="search-count" id="search-count"></span><button class="search-clear" id="search-clear" title="Clear search">&times;</button></div>
+  <section class="surface-card section-card" data-section="setup"><button class="section-header" type="button" aria-expanded="true"><span class="section-arrow">&#x25BC;</span><span class="section-title">Setup</span><span class="section-count">2</span></button><div class="section-body"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="install dependencies pnpm install install dependencies"><td><div class="task-text">Install dependencies</div></td><td><button class="value-block value-block--shell" data-copy="pnpm install" title="Copy value"><code class="value-text">pnpm install</code></button></td><td class="desc-text">Install dependencies</td></tr><tr class="command-row" data-search="clean pnpm clean remove dist and coverage"><td><div class="task-text">Clean</div></td><td><button class="value-block value-block--shell" data-copy="pnpm clean" title="Copy value"><code class="value-text">pnpm clean</code></button></td><td class="desc-text">Remove dist and coverage</td></tr></tbody></table></div></section>
+  <section class="surface-card section-card" data-section="development"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">&#x25BC;</span><span class="section-title">Development</span><span class="section-count">4</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="check typescript types pnpm type-check check typescript types"><td><div class="task-text">Check TypeScript types</div></td><td><button class="value-block value-block--shell" data-copy="pnpm type-check" title="Copy value"><code class="value-text">pnpm type-check</code></button></td><td class="desc-text">Check TypeScript types</td></tr><tr class="command-row" data-search="lint pnpm lint check code style with biome"><td><div class="task-text">Lint</div></td><td><button class="value-block value-block--shell" data-copy="pnpm lint" title="Copy value"><code class="value-text">pnpm lint</code></button></td><td class="desc-text">Check code style with Biome</td></tr><tr class="command-row" data-search="lint fix pnpm lint:fix fix code style issues"><td><div class="task-text">Lint fix</div></td><td><button class="value-block value-block--shell" data-copy="pnpm lint:fix" title="Copy value"><code class="value-text">pnpm lint:fix</code></button></td><td class="desc-text">Fix code style issues</td></tr><tr class="command-row" data-search="format pnpm format format code with biome"><td><div class="task-text">Format</div></td><td><button class="value-block value-block--shell" data-copy="pnpm format" title="Copy value"><code class="value-text">pnpm format</code></button></td><td class="desc-text">Format code with Biome</td></tr></tbody></table></div></section>
+  <section class="surface-card section-card" data-section="building"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">&#x25BC;</span><span class="section-title">Building</span><span class="section-count">1</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="build pnpm build compile typescript to dist/"><td><div class="task-text">Build</div></td><td><button class="value-block value-block--shell" data-copy="pnpm build" title="Copy value"><code class="value-text">pnpm build</code></button></td><td class="desc-text">Compile TypeScript to dist/</td></tr></tbody></table></div></section>
+  <section class="surface-card section-card" data-section="testing"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">&#x25BC;</span><span class="section-title">Testing</span><span class="section-count">3</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="run tests pnpm test run full test suite with vitest"><td><div class="task-text">Run tests</div></td><td><button class="value-block value-block--shell" data-copy="pnpm test" title="Copy value"><code class="value-text">pnpm test</code></button></td><td class="desc-text">Run full test suite with Vitest</td></tr><tr class="command-row" data-search="watch mode pnpm test:watch watch mode"><td><div class="task-text">Watch mode</div></td><td><button class="value-block value-block--shell" data-copy="pnpm test:watch" title="Copy value"><code class="value-text">pnpm test:watch</code></button></td><td class="desc-text">Watch mode</td></tr><tr class="command-row" data-search="coverage pnpm test:coverage generate coverage report"><td><div class="task-text">Coverage</div></td><td><button class="value-block value-block--shell" data-copy="pnpm test:coverage" title="Copy value"><code class="value-text">pnpm test:coverage</code></button></td><td class="desc-text">Generate coverage report</td></tr></tbody></table></div></section>
+  <section class="surface-card section-card" data-section="docs"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">&#x25BC;</span><span class="section-title">Documentation</span><span class="section-count">2</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="show highest 6 docs ls -1 docs/ond/ond*.md | sort -v | tail -6 show highest 6 docs"><td><div class="task-text">Show highest 6 docs</div></td><td><button class="value-block value-block--shell" data-copy="ls -1 docs/ond/OND*.md | sort -V | tail -6" title="Copy value"><code class="value-text">ls -1 docs/ond/OND*.md | sort -V | tail -6</code></button></td><td class="desc-text">Show highest 6 docs</td></tr><tr class="command-row" data-search="search docs by topic grep -l 'keyword' docs/ond/*.md search docs by topic"><td><div class="task-text">Search docs by topic</div></td><td><button class="value-block value-block--shell" data-copy="grep -l 'keyword' docs/ond/*.md" title="Copy value"><code class="value-text">grep -l 'keyword' docs/ond/*.md</code></button></td><td class="desc-text">Search docs by topic</td></tr></tbody></table></div></section>
 </main>
 
 <footer>
   <div class="inner">
-    <span>Local command sheet generated from source content in <code>to-fix/</code>.</span>
-    <span>ondina_docs_repo-commands.html</span>
+    <span>ondina | PREFIX: OND | pnpm</span>
+    <span>ondina_repo-commands.html</span>
   </div>
-  <div class="footer-notes"><p>Quick Links: CLAUDE.md (repo config) | docs/ond/ (documentation) | docs/ond/INDEX.md (doc index) | wireframes/ (architecture diagrams)</p></div>
 </footer>
 
 <script>
@@ -1074,7 +918,7 @@ function exportToMarkdown() {
     return;
   }
 
-  let md = `# Ondina - Command Reference\n\n`;
+  let md = `# ondina - Command Reference\n\n`;
   sections.forEach((card) => {
     md += `## ${card.title}\n\n`;
     md += "| Task | Command / Snippet | Description |\n";
@@ -1085,7 +929,7 @@ function exportToMarkdown() {
     md += "\n";
   });
   copyMarkdown(md).then((success) => {
-    flashExportButton(success ? "✓ Copied Markdown" : "Copy failed", success ? "is-confirmed" : "is-error");
+    flashExportButton(success ? "\u2713 Copied Markdown" : "Copy failed", success ? "is-confirmed" : "is-error");
   });
 }
 

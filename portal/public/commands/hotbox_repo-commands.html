@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hotbox - Command Reference</title>
+<title>hotbox - Command Reference</title>
 <style>
 @font-face {
   font-family: "Geist Pixel Square";
@@ -284,15 +284,9 @@ main {
 }
 
 @keyframes export-confirm {
-  0% {
-    transform: translateY(0) scale(1);
-  }
-  40% {
-    transform: translateY(-1px) scale(1.03);
-  }
-  100% {
-    transform: translateY(0) scale(1);
-  }
+  0% { transform: translateY(0) scale(1); }
+  40% { transform: translateY(-1px) scale(1.03); }
+  100% { transform: translateY(0) scale(1); }
 }
 
 .surface-card {
@@ -339,9 +333,7 @@ main {
   overflow-wrap: anywhere;
 }
 
-.search-wrap {
-  position: relative;
-}
+.search-wrap { position: relative; }
 
 .search-input {
   width: 100%;
@@ -398,10 +390,7 @@ main {
   color: var(--text);
 }
 
-.callout-grid {
-  display: grid;
-  gap: 12px;
-}
+.callout-grid { display: grid; gap: 12px; }
 
 .callout {
   padding: 16px 18px;
@@ -422,17 +411,9 @@ main {
   white-space: pre-wrap;
 }
 
-.callout--info {
-  box-shadow: var(--callout-info-ring);
-}
-
-.callout--warning {
-  box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.16);
-}
-
-.callout--success {
-  box-shadow: inset 0 0 0 1px rgba(52, 211, 153, 0.16);
-}
+.callout--info { box-shadow: var(--callout-info-ring); }
+.callout--warning { box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.16); }
+.callout--success { box-shadow: inset 0 0 0 1px rgba(52, 211, 153, 0.16); }
 
 .section-card {
   overflow: hidden;
@@ -444,9 +425,7 @@ main {
   box-shadow: var(--section-card-focus-shadow);
 }
 
-.section-card.is-hidden {
-  display: none;
-}
+.section-card.is-hidden { display: none; }
 
 .section-header {
   width: 100%;
@@ -464,9 +443,7 @@ main {
   transition: background var(--transition), border-radius var(--transition), box-shadow var(--transition);
 }
 
-.section-header:hover {
-  background: var(--bg-panel-hover);
-}
+.section-header:hover { background: var(--bg-panel-hover); }
 
 .section-header:focus,
 .section-header:focus-visible {
@@ -486,14 +463,10 @@ main {
   transition: transform var(--transition);
 }
 
-.section-header.collapsed .section-arrow {
-  transform: rotate(-90deg);
-}
+.section-header.collapsed .section-arrow { transform: rotate(-90deg); }
 
 .section-header:focus .section-arrow,
-.section-header:focus-visible .section-arrow {
-  color: var(--accent);
-}
+.section-header:focus-visible .section-arrow { color: var(--accent); }
 
 .section-title {
   flex: 1;
@@ -526,18 +499,10 @@ main {
   color: var(--text);
 }
 
-.section-body {
-  display: block;
-}
+.section-body { display: block; }
+.section-body.collapsed { display: none; }
 
-.section-body.collapsed {
-  display: none;
-}
-
-.command-table {
-  width: 100%;
-  border-collapse: collapse;
-}
+.command-table { width: 100%; border-collapse: collapse; }
 
 .command-table th {
   padding: 8px 12px;
@@ -554,17 +519,9 @@ main {
 .command-table th:nth-child(2) { width: 38%; }
 .command-table th:nth-child(3) { width: 38%; }
 
-.command-row {
-  border-bottom: 1px solid var(--row-divider);
-}
-
-.command-row:last-child {
-  border-bottom: none;
-}
-
-.command-row.hidden {
-  display: none;
-}
+.command-row { border-bottom: 1px solid var(--row-divider); }
+.command-row:last-child { border-bottom: none; }
+.command-row.hidden { display: none; }
 
 .command-row td {
   padding: 10px 12px;
@@ -572,34 +529,13 @@ main {
   font-size: 11px;
 }
 
-.command-row td:first-child {
-  padding-left: 40px;
-}
+.command-row td:first-child { padding-left: 40px; }
 
 .task-text {
   color: var(--text);
   display: flex;
   align-items: center;
   min-height: 44px;
-}
-
-.row-badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 7px;
-}
-
-.row-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 7px;
-  border-radius: 999px;
-  border: 1px solid var(--accent-border);
-  background: var(--accent-soft);
-  color: var(--accent);
-  font-size: 10px;
-  line-height: 1.2;
 }
 
 .value-block {
@@ -634,44 +570,6 @@ main {
   color: var(--accent);
   white-space: pre-wrap;
   word-break: break-word;
-}
-
-.value-block--keys .value-text {
-  color: var(--text);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.value-block--osc .value-text {
-  color: var(--osc-text);
-}
-
-.inline-key {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 22px;
-  padding: 2px 7px;
-  border-radius: 6px;
-  border: 1px solid var(--accent-border);
-  background: var(--accent-soft);
-  color: var(--text);
-  font-family: var(--font-body);
-  font-size: 11px;
-}
-
-.key-combo {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.key-join,
-.key-note {
-  color: var(--text-muted);
-  font-size: 11px;
 }
 
 .desc-text {
@@ -724,9 +622,7 @@ footer .inner {
 }
 
 @media (max-width: 900px) {
-  .hero-row {
-    flex-direction: column;
-  }
+  .hero-row { flex-direction: column; }
 
   .site-header__inner {
     flex-direction: column;
@@ -753,56 +649,25 @@ footer .inner {
     width: 100%;
   }
 
-  .command-table thead {
-    display: none;
-  }
+  .command-table thead { display: none; }
 
-  .command-row td {
-    padding-top: 8px;
-    padding-bottom: 8px;
-  }
+  .command-row td { padding-top: 8px; padding-bottom: 8px; }
+  .command-row td:first-child { padding-left: 12px; }
+  .command-row td:first-child { padding-bottom: 0; }
+  .command-row td:nth-child(2) { padding-top: 8px; padding-bottom: 0; }
 
-  .command-row td:first-child {
-    padding-left: 12px;
-  }
-
-  .command-row td:first-child {
-    padding-bottom: 0;
-  }
-
-  .command-row td:nth-child(2) {
-    padding-top: 8px;
-    padding-bottom: 0;
-  }
-
-  footer .inner {
-    flex-direction: column;
-  }
+  footer .inner { flex-direction: column; }
 
   main,
   .site-header__inner,
   .footer-notes,
-  footer .inner {
-    width: 96vw;
-  }
+  footer .inner { width: 96vw; }
 
-  .hero-meta {
-    display: none;
-  }
+  .hero-meta { display: none; }
 
-  .value-block {
-    max-width: 100%;
-    overflow-x: auto;
-  }
-
-  .value-text {
-    word-break: break-all;
-  }
-
-  .desc-text {
-    display: block;
-    padding: 4px 12px 8px;
-  }
+  .value-block { max-width: 100%; overflow-x: auto; }
+  .value-text { word-break: break-all; }
+  .desc-text { display: block; padding: 4px 12px 8px; }
 }
 </style>
 </head>
@@ -820,22 +685,20 @@ footer .inner {
   <div class="hero-row">
     <div class="hero">
       <span class="hero-eyebrow">COMMAND REFERENCE</span>
-      <h1>Hotbox</h1>
-      <p>Narrative compiler for citation-first LLM chat and beat-driven authoring</p>
+      <h1>hotbox</h1>
+      <p>Citation-grounded narrative compiler — Node.js + Cloudflare Workers</p>
     </div>
-    <div class="hero-meta"><div class="meta-chip"><span class="meta-chip__label">UPDATED</span><span class="meta-chip__value">Last updated: 2026-01-18</span></div><div class="meta-chip"><span class="meta-chip__label">REPO</span><span class="meta-chip__value">~/dev/hotbox</span></div></div>
+    <div class="hero-meta"><div class="meta-chip"><span class="meta-chip__label">UPDATED</span><span class="meta-chip__value">2026-03-29</span></div><div class="meta-chip"><span class="meta-chip__label">REPO</span><span class="meta-chip__value">~/dev/hotbox</span></div></div>
   </div>
-  <div class="search-wrap"><span class="search-icon">⌕</span><input class="search-input" type="text" placeholder="Search commands, snippets, or notes…" id="search" autocomplete="off" spellcheck="false"><span class="search-count" id="search-count"></span><button class="search-clear" id="search-clear" title="Clear search">×</button></div>
-  <section class="surface-card section-card" data-section="setup"><button class="section-header" type="button" aria-expanded="true"><span class="section-arrow">▼</span><span class="section-title">Setup &amp; Installation</span><span class="section-count">1</span></button><div class="section-body"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="install dependencies npm install install all package dependencies"><td><div class="task-text">Install dependencies</div></td><td><button class="value-block value-block--shell" data-copy="npm install" title="Copy value"><code class="value-text">npm install</code></button></td><td class="desc-text">Install all package dependencies</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="beatpacks"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Beat Pack Development</span><span class="section-count">4</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="build beat packs npm run build:beatpacks generate beat pack json bundles from beats.yaml and claims.csv"><td><div class="task-text">Build beat packs</div></td><td><button class="value-block value-block--shell" data-copy="npm run build:beatpacks" title="Copy value"><code class="value-text">npm run build:beatpacks</code></button></td><td class="desc-text">Generate beat pack JSON bundles from beats.yaml and claims.csv</td></tr><tr class="command-row" data-search="compose drafts npm run compose llm-generated drafts from beat packs (auto/manual mode)"><td><div class="task-text">Compose drafts</div></td><td><button class="value-block value-block--shell" data-copy="npm run compose" title="Copy value"><code class="value-text">npm run compose</code></button></td><td class="desc-text">LLM-generated drafts from beat packs (auto/manual mode)</td></tr><tr class="command-row" data-search="stitch chapter npm run stitch merge beat drafts into cohesive chapter"><td><div class="task-text">Stitch chapter</div></td><td><button class="value-block value-block--shell" data-copy="npm run stitch" title="Copy value"><code class="value-text">npm run stitch</code></button></td><td class="desc-text">Merge beat drafts into cohesive chapter</td></tr><tr class="command-row" data-search="validate chapters npm run validate:chapters check a-claim usage, citation coverage ≥85%"><td><div class="task-text">Validate chapters</div></td><td><button class="value-block value-block--shell" data-copy="npm run validate:chapters" title="Copy value"><code class="value-text">npm run validate:chapters</code></button></td><td class="desc-text">Check A-claim usage, citation coverage ≥85%</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="ingest"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Content Ingestion &amp; Retrieval</span><span class="section-count">3</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="ingest passages npm run ingest embed passages for retrieval (vectorize)"><td><div class="task-text">Ingest passages</div></td><td><button class="value-block value-block--shell" data-copy="npm run ingest" title="Copy value"><code class="value-text">npm run ingest</code></button></td><td class="desc-text">Embed passages for retrieval (Vectorize)</td></tr><tr class="command-row" data-search="ingest beat packs npm run ingest:beatpacks embed beat packs for composition retrieval"><td><div class="task-text">Ingest beat packs</div></td><td><button class="value-block value-block--shell" data-copy="npm run ingest:beatpacks" title="Copy value"><code class="value-text">npm run ingest:beatpacks</code></button></td><td class="desc-text">Embed beat packs for composition retrieval</td></tr><tr class="command-row" data-search="full ingest pipeline npm run ingest &amp;&amp; npm run ingest:beatpacks run both passage and beat pack ingestion"><td><div class="task-text">Full ingest pipeline</div></td><td><button class="value-block value-block--shell" data-copy="npm run ingest &amp;&amp; npm run ingest:beatpacks" title="Copy value"><code class="value-text">npm run ingest &amp;&amp; npm run ingest:beatpacks</code></button></td><td class="desc-text">Run both passage and beat pack ingestion</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="dev"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Development</span><span class="section-count">4</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="start dev server npm run dev start cloudflare worker + web app (wrangler dev)"><td><div class="task-text">Start dev server</div></td><td><button class="value-block value-block--shell" data-copy="npm run dev" title="Copy value"><code class="value-text">npm run dev</code></button></td><td class="desc-text">Start Cloudflare Worker + web app (Wrangler dev)</td></tr><tr class="command-row" data-search="start http pipeline npm run http start local ollama pipeline server (port 3001)"><td><div class="task-text">Start HTTP pipeline</div></td><td><button class="value-block value-block--shell" data-copy="npm run http" title="Copy value"><code class="value-text">npm run http</code></button></td><td class="desc-text">Start local Ollama pipeline server (port 3001)</td></tr><tr class="command-row" data-search="test chat endpoint curl -x post http://localhost:8787/api/chat/stream?container_id=test -d&#10;&#x27;{&quot;query&quot;:&quot;test&quot;}&#x27; test streaming chat endpoint"><td><div class="task-text">Test chat endpoint</div></td><td><button class="value-block value-block--snippet" data-copy="curl -X POST http://localhost:8787/api/chat/stream?container_id=TEST -d&#10;&#x27;{&quot;query&quot;:&quot;test&quot;}&#x27;" title="Copy value"><code class="value-text">curl -X POST http://localhost:8787/api/chat/stream?container_id=TEST -d<br>'{"query":"test"}'</code></button></td><td class="desc-text">Test streaming chat endpoint</td></tr><tr class="command-row" data-search="debug coverage curl http://localhost:8787/api/debug/nodal-01 debug endpoint (requires hotbox_debug_mode=local)"><td><div class="task-text">Debug coverage</div></td><td><button class="value-block value-block--shell" data-copy="curl http://localhost:8787/api/debug/nodal-01" title="Copy value"><code class="value-text">curl http://localhost:8787/api/debug/nodal-01</code></button></td><td class="desc-text">Debug endpoint (requires HOTBOX_DEBUG_MODE=local)</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="testing"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Testing &amp; Quality</span><span class="section-count">6</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="test worker npm run test:worker run cloudflare worker tests"><td><div class="task-text">Test worker</div></td><td><button class="value-block value-block--shell" data-copy="npm run test:worker" title="Copy value"><code class="value-text">npm run test:worker</code></button></td><td class="desc-text">Run Cloudflare Worker tests</td></tr><tr class="command-row" data-search="test web app npm run test:web run web application tests"><td><div class="task-text">Test web app</div></td><td><button class="value-block value-block--shell" data-copy="npm run test:web" title="Copy value"><code class="value-text">npm run test:web</code></button></td><td class="desc-text">Run web application tests</td></tr><tr class="command-row" data-search="eval search npm run eval:search evaluate search quality and coverage"><td><div class="task-text">Eval search</div></td><td><button class="value-block value-block--shell" data-copy="npm run eval:search" title="Copy value"><code class="value-text">npm run eval:search</code></button></td><td class="desc-text">Evaluate search quality and coverage</td></tr><tr class="command-row" data-search="type check npm run typecheck run typescript type checking"><td><div class="task-text">Type check</div></td><td><button class="value-block value-block--shell" data-copy="npm run typecheck" title="Copy value"><code class="value-text">npm run typecheck</code></button></td><td class="desc-text">Run TypeScript type checking</td></tr><tr class="command-row" data-search="lint code npm run lint run eslint on codebase"><td><div class="task-text">Lint code</div></td><td><button class="value-block value-block--shell" data-copy="npm run lint" title="Copy value"><code class="value-text">npm run lint</code></button></td><td class="desc-text">Run ESLint on codebase</td></tr><tr class="command-row" data-search="format code npm run fmt format code with prettier"><td><div class="task-text">Format code</div></td><td><button class="value-block value-block--shell" data-copy="npm run fmt" title="Copy value"><code class="value-text">npm run fmt</code></button></td><td class="desc-text">Format code with Prettier</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="ollama"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Ollama (Free Local LLM)</span><span class="section-count">4</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="install ollama curl -fssl https://ollama.com/install.sh | sh install ollama on macos/linux"><td><div class="task-text">Install Ollama</div></td><td><button class="value-block value-block--shell" data-copy="curl -fsSL https://ollama.com/install.sh | sh" title="Copy value"><code class="value-text">curl -fsSL https://ollama.com/install.sh | sh</code></button></td><td class="desc-text">Install Ollama on macOS/Linux</td></tr><tr class="command-row" data-search="pull model ollama pull llama3.2 download llama 3.2 model"><td><div class="task-text">Pull model</div></td><td><button class="value-block value-block--shell" data-copy="ollama pull llama3.2" title="Copy value"><code class="value-text">ollama pull llama3.2</code></button></td><td class="desc-text">Download Llama 3.2 model</td></tr><tr class="command-row" data-search="configure pipeline export llm_provider=ollama &amp;&amp; export ollama_model=llama3.2 set environment variables for ollama"><td><div class="task-text">Configure pipeline</div></td><td><button class="value-block value-block--shell" data-copy="export LLM_PROVIDER=ollama &amp;&amp; export OLLAMA_MODEL=llama3.2" title="Copy value"><code class="value-text">export LLM_PROVIDER=ollama &amp;&amp; export OLLAMA_MODEL=llama3.2</code></button></td><td class="desc-text">Set environment variables for Ollama</td></tr><tr class="command-row" data-search="configure worker echo &quot;author_pipeline_base=http://localhost:3001&quot; &gt;&gt; app/worker/.dev.vars point worker to local ollama pipeline"><td><div class="task-text">Configure worker</div></td><td><button class="value-block value-block--shell" data-copy="echo &quot;AUTHOR_PIPELINE_BASE=http://localhost:3001&quot; &gt;&gt; app/worker/.dev.vars" title="Copy value"><code class="value-text">echo "AUTHOR_PIPELINE_BASE=http://localhost:3001" &gt;&gt; app/worker/.dev.vars</code></button></td><td class="desc-text">Point worker to local Ollama pipeline</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="git"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Git Operations</span><span class="section-count">4</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="check status git status view current branch and changed files"><td><div class="task-text">Check status</div></td><td><button class="value-block value-block--shell" data-copy="git status" title="Copy value"><code class="value-text">git status</code></button></td><td class="desc-text">View current branch and changed files</td></tr><tr class="command-row" data-search="view diff git diff see unstaged changes"><td><div class="task-text">View diff</div></td><td><button class="value-block value-block--shell" data-copy="git diff" title="Copy value"><code class="value-text">git diff</code></button></td><td class="desc-text">See unstaged changes</td></tr><tr class="command-row" data-search="view recent commits git log --oneline -10 show last 10 commits"><td><div class="task-text">View recent commits</div></td><td><button class="value-block value-block--shell" data-copy="git log --oneline -10" title="Copy value"><code class="value-text">git log --oneline -10</code></button></td><td class="desc-text">Show last 10 commits</td></tr><tr class="command-row" data-search="pull latest git pull origin main fetch and merge latest changes"><td><div class="task-text">Pull latest</div></td><td><button class="value-block value-block--shell" data-copy="git pull origin main" title="Copy value"><code class="value-text">git pull origin main</code></button></td><td class="desc-text">Fetch and merge latest changes</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="cloudflare"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Cloudflare &amp; Vectorize</span><span class="section-count">5</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="export api token export cloudflare_api_token=&quot;$(grep cloudflare_api_token app/worker/.dev.vars | cut&#10;-d= -f2)&quot; export token for wrangler cli (required before wrangler commands)"><td><div class="task-text">Export API token</div></td><td><button class="value-block value-block--snippet" data-copy="export CLOUDFLARE_API_TOKEN=&quot;$(grep CLOUDFLARE_API_TOKEN app/worker/.dev.vars | cut&#10;-d= -f2)&quot;" title="Copy value"><code class="value-text">export CLOUDFLARE_API_TOKEN="$(grep CLOUDFLARE_API_TOKEN app/worker/.dev.vars | cut<br>-d= -f2)"</code></button></td><td class="desc-text">Export token for wrangler CLI (required before wrangler commands)</td></tr><tr class="command-row" data-search="verify auth wrangler whoami check cloudflare authentication status"><td><div class="task-text">Verify auth</div></td><td><button class="value-block value-block--shell" data-copy="wrangler whoami" title="Copy value"><code class="value-text">wrangler whoami</code></button></td><td class="desc-text">Check Cloudflare authentication status</td></tr><tr class="command-row" data-search="upload vectors wrangler vectorize insert hotbox-index --file&#10;content/chapters/tnc001/.build/beatpack_vectors/vectors.jsonl upload vectors to cloudflare vectorize index"><td><div class="task-text">Upload vectors</div></td><td><button class="value-block value-block--snippet" data-copy="wrangler vectorize insert hotbox-index --file&#10;content/chapters/TNC001/.build/beatpack_vectors/vectors.jsonl" title="Copy value"><code class="value-text">wrangler vectorize insert hotbox-index --file<br>content/chapters/TNC001/.build/beatpack_vectors/vectors.jsonl</code></button></td><td class="desc-text">Upload vectors to Cloudflare Vectorize index</td></tr><tr class="command-row" data-search="check env bindings npm run diag:env verify cloudflare kv, do, r2, vectorize bindings"><td><div class="task-text">Check env bindings</div></td><td><button class="value-block value-block--shell" data-copy="npm run diag:env" title="Copy value"><code class="value-text">npm run diag:env</code></button></td><td class="desc-text">Verify Cloudflare KV, DO, R2, Vectorize bindings</td></tr><tr class="command-row" data-search="check worker health npm run diag:bindings probe /api/health endpoint (requires npm run dev)"><td><div class="task-text">Check worker health</div></td><td><button class="value-block value-block--shell" data-copy="npm run diag:bindings" title="Copy value"><code class="value-text">npm run diag:bindings</code></button></td><td class="desc-text">Probe /api/health endpoint (requires npm run dev)</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="embeddings"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Embeddings Providers</span><span class="section-count">5</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="use local embeddings embeddings_provider=local npm run ingest deterministic hash-based embeddings (256 dims, no api cost, for ci/testing)"><td><div class="task-text">Use local embeddings</div></td><td><button class="value-block value-block--shell" data-copy="EMBEDDINGS_PROVIDER=local npm run ingest" title="Copy value"><code class="value-text">EMBEDDINGS_PROVIDER=local npm run ingest</code></button></td><td class="desc-text">Deterministic hash-based embeddings (256 dims, no API cost, for CI/testing)</td></tr><tr class="command-row" data-search="use openai embeddings embeddings_provider=openai npm run ingest semantic embeddings via openai (1536 dims, requires openai_api_key)"><td><div class="task-text">Use OpenAI embeddings</div></td><td><button class="value-block value-block--shell" data-copy="EMBEDDINGS_PROVIDER=openai npm run ingest" title="Copy value"><code class="value-text">EMBEDDINGS_PROVIDER=openai npm run ingest</code></button></td><td class="desc-text">Semantic embeddings via OpenAI (1536 dims, requires OPENAI_API_KEY)</td></tr><tr class="command-row" data-search="use ollama embeddings embeddings_provider=ollama npm run ingest free semantic embeddings via local ollama (nomic-embed-text default, olmo 3.1 planned)"><td><div class="task-text">Use Ollama embeddings</div></td><td><button class="value-block value-block--shell" data-copy="EMBEDDINGS_PROVIDER=ollama npm run ingest" title="Copy value"><code class="value-text">EMBEDDINGS_PROVIDER=ollama npm run ingest</code></button></td><td class="desc-text">Free semantic embeddings via local Ollama (nomic-embed-text default, OLMo 3.1 planned)</td></tr><tr class="command-row" data-search="ollama with custom model embeddings_provider=ollama ollama_embed_model=mxbai-embed-large npm run&#10;ingest use specific ollama embedding model"><td><div class="task-text">Ollama with custom model</div></td><td><button class="value-block value-block--snippet" data-copy="EMBEDDINGS_PROVIDER=ollama OLLAMA_EMBED_MODEL=mxbai-embed-large npm run&#10;ingest" title="Copy value"><code class="value-text">EMBEDDINGS_PROVIDER=ollama OLLAMA_EMBED_MODEL=mxbai-embed-large npm run<br>ingest</code></button></td><td class="desc-text">Use specific Ollama embedding model</td></tr><tr class="command-row" data-search="full local pipeline embeddings_provider=local npm run ingest &amp;&amp; embeddings_provider=local npm run&#10;ingest:beatpacks ingest passages + beat packs with local embeddings"><td><div class="task-text">Full local pipeline</div></td><td><button class="value-block value-block--snippet" data-copy="EMBEDDINGS_PROVIDER=local npm run ingest &amp;&amp; EMBEDDINGS_PROVIDER=local npm run&#10;ingest:beatpacks" title="Copy value"><code class="value-text">EMBEDDINGS_PROVIDER=local npm run ingest &amp;&amp; EMBEDDINGS_PROVIDER=local npm run<br>ingest:beatpacks</code></button></td><td class="desc-text">Ingest passages + beat packs with local embeddings</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="diagnostics"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Diagnostics</span><span class="section-count">3</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="check node version node --version verify node.js version (require 20.x)"><td><div class="task-text">Check Node version</div></td><td><button class="value-block value-block--shell" data-copy="node --version" title="Copy value"><code class="value-text">node --version</code></button></td><td class="desc-text">Verify Node.js version (require 20.x)</td></tr><tr class="command-row" data-search="check npm version npm --version verify npm version"><td><div class="task-text">Check npm version</div></td><td><button class="value-block value-block--shell" data-copy="npm --version" title="Copy value"><code class="value-text">npm --version</code></button></td><td class="desc-text">Verify npm version</td></tr><tr class="command-row" data-search="list workspaces npm run workspaces list show all workspace packages"><td><div class="task-text">List workspaces</div></td><td><button class="value-block value-block--shell" data-copy="npm run workspaces list" title="Copy value"><code class="value-text">npm run workspaces list</code></button></td><td class="desc-text">Show all workspace packages</td></tr></tbody></table></div></section>
-  
+  <div class="search-wrap"><span class="search-icon">&#x2315;</span><input class="search-input" type="text" placeholder="Search commands, snippets, or notes…" id="search" autocomplete="off" spellcheck="false"><span class="search-count" id="search-count"></span><button class="search-clear" id="search-clear" title="Clear search">&#xd7;</button></div>
+  <section class="surface-card section-card" data-section="dev"><button class="section-header" type="button" aria-expanded="true"><span class="section-arrow">&#x25BC;</span><span class="section-title">Development</span><span class="section-count">4</span></button><div class="section-body"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="dev server npm run dev wrangler + web dev in parallel"><td><div class="task-text">Dev server</div></td><td><button class="value-block value-block--shell" data-copy="npm run dev" title="Copy value"><code class="value-text">npm run dev</code></button></td><td class="desc-text">Wrangler + web dev in parallel</td></tr><tr class="command-row" data-search="vite dev server npm run dev:web vite dev server (port 5173)"><td><div class="task-text">Vite dev server</div></td><td><button class="value-block value-block--shell" data-copy="npm run dev:web" title="Copy value"><code class="value-text">npm run dev:web</code></button></td><td class="desc-text">Vite dev server (port 5173)</td></tr><tr class="command-row" data-search="build npm run build chain web + worker builds"><td><div class="task-text">Build</div></td><td><button class="value-block value-block--shell" data-copy="npm run build" title="Copy value"><code class="value-text">npm run build</code></button></td><td class="desc-text">Chain web + worker builds</td></tr><tr class="command-row" data-search="typecheck npm run typecheck validate typescript"><td><div class="task-text">Typecheck</div></td><td><button class="value-block value-block--shell" data-copy="npm run typecheck" title="Copy value"><code class="value-text">npm run typecheck</code></button></td><td class="desc-text">Validate TypeScript</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="pipelines"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">&#x25BC;</span><span class="section-title">Composition Pipelines</span><span class="section-count">6</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="build beatpacks npm run build:beatpacks generate json bundles from chapter graph"><td><div class="task-text">Build beatpacks</div></td><td><button class="value-block value-block--shell" data-copy="npm run build:beatpacks" title="Copy value"><code class="value-text">npm run build:beatpacks</code></button></td><td class="desc-text">Generate JSON bundles from Chapter Graph</td></tr><tr class="command-row" data-search="compose npm run compose llm drafts from beat packs (ollama/openai)"><td><div class="task-text">Compose</div></td><td><button class="value-block value-block--shell" data-copy="npm run compose" title="Copy value"><code class="value-text">npm run compose</code></button></td><td class="desc-text">LLM drafts from beat packs (Ollama/OpenAI)</td></tr><tr class="command-row" data-search="stitch npm run stitch merge beat drafts into chapters"><td><div class="task-text">Stitch</div></td><td><button class="value-block value-block--shell" data-copy="npm run stitch" title="Copy value"><code class="value-text">npm run stitch</code></button></td><td class="desc-text">Merge beat drafts into chapters</td></tr><tr class="command-row" data-search="validate chapters npm run validate:chapters check coverage thresholds"><td><div class="task-text">Validate chapters</div></td><td><button class="value-block value-block--shell" data-copy="npm run validate:chapters" title="Copy value"><code class="value-text">npm run validate:chapters</code></button></td><td class="desc-text">Check coverage thresholds</td></tr><tr class="command-row" data-search="ingest npm run ingest generate embeddings + bm25 indexes"><td><div class="task-text">Ingest</div></td><td><button class="value-block value-block--shell" data-copy="npm run ingest" title="Copy value"><code class="value-text">npm run ingest</code></button></td><td class="desc-text">Generate embeddings + BM25 indexes</td></tr><tr class="command-row" data-search="ingest beatpacks npm run ingest:beatpacks index beat pack embeddings"><td><div class="task-text">Ingest beatpacks</div></td><td><button class="value-block value-block--shell" data-copy="npm run ingest:beatpacks" title="Copy value"><code class="value-text">npm run ingest:beatpacks</code></button></td><td class="desc-text">Index beat pack embeddings</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="testing"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">&#x25BC;</span><span class="section-title">Testing</span><span class="section-count">4</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="run all tests npm run test:all execute test:core + test:worker + test:pipelines"><td><div class="task-text">Run all tests</div></td><td><button class="value-block value-block--shell" data-copy="npm run test:all" title="Copy value"><code class="value-text">npm run test:all</code></button></td><td class="desc-text">Execute test:core + test:worker + test:pipelines</td></tr><tr class="command-row" data-search="worker tests npm run test:worker node.js worker tests"><td><div class="task-text">Worker tests</div></td><td><button class="value-block value-block--shell" data-copy="npm run test:worker" title="Copy value"><code class="value-text">npm run test:worker</code></button></td><td class="desc-text">Node.js worker tests</td></tr><tr class="command-row" data-search="pipeline tests npm run test:pipelines beat pack + stitching tests"><td><div class="task-text">Pipeline tests</div></td><td><button class="value-block value-block--shell" data-copy="npm run test:pipelines" title="Copy value"><code class="value-text">npm run test:pipelines</code></button></td><td class="desc-text">Beat pack + stitching tests</td></tr><tr class="command-row" data-search="search evaluation npm run eval:search search evaluation harness (ndcg/recall)"><td><div class="task-text">Search evaluation</div></td><td><button class="value-block value-block--shell" data-copy="npm run eval:search" title="Copy value"><code class="value-text">npm run eval:search</code></button></td><td class="desc-text">Search evaluation harness (NDCG/recall)</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="deployment"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">&#x25BC;</span><span class="section-title">Deployment</span><span class="section-count">2</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="deploy wrangler deploy publish worker to cloudflare"><td><div class="task-text">Deploy</div></td><td><button class="value-block value-block--shell" data-copy="wrangler deploy" title="Copy value"><code class="value-text">wrangler deploy</code></button></td><td class="desc-text">Publish Worker to Cloudflare</td></tr><tr class="command-row" data-search="pre-deploy validation npm run validate:chapters pre-deploy validation gate"><td><div class="task-text">Pre-deploy validation</div></td><td><button class="value-block value-block--shell" data-copy="npm run validate:chapters" title="Copy value"><code class="value-text">npm run validate:chapters</code></button></td><td class="desc-text">Pre-deploy validation gate</td></tr></tbody></table></div></section>
 </main>
 
 <footer>
   <div class="inner">
-    <span>Local command sheet generated from source content in <code>to-fix/</code>.</span>
-    <span>hotbox_docs_repo-commands.html</span>
+    <span>hotbox | PREFIX: HBX | npm</span>
+    <span>hotbox_repo-commands.html</span>
   </div>
-  
 </footer>
 
 <script>
@@ -1074,7 +937,7 @@ function exportToMarkdown() {
     return;
   }
 
-  let md = `# Hotbox - Command Reference\n\n`;
+  let md = `# hotbox - Command Reference\n\n`;
   sections.forEach((card) => {
     md += `## ${card.title}\n\n`;
     md += "| Task | Command / Snippet | Description |\n";
@@ -1085,7 +948,7 @@ function exportToMarkdown() {
     md += "\n";
   });
   copyMarkdown(md).then((success) => {
-    flashExportButton(success ? "✓ Copied Markdown" : "Copy failed", success ? "is-confirmed" : "is-error");
+    flashExportButton(success ? "\u2713 Copied Markdown" : "Copy failed", success ? "is-confirmed" : "is-error");
   });
 }
 

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CBC Schedule Sync - Command Reference</title>
+<title>cbc-schedule-sync - Command Reference</title>
 <style>
 @font-face {
   font-family: "Geist Pixel Square";
@@ -284,15 +284,9 @@ main {
 }
 
 @keyframes export-confirm {
-  0% {
-    transform: translateY(0) scale(1);
-  }
-  40% {
-    transform: translateY(-1px) scale(1.03);
-  }
-  100% {
-    transform: translateY(0) scale(1);
-  }
+  0% { transform: translateY(0) scale(1); }
+  40% { transform: translateY(-1px) scale(1.03); }
+  100% { transform: translateY(0) scale(1); }
 }
 
 .surface-card {
@@ -339,9 +333,7 @@ main {
   overflow-wrap: anywhere;
 }
 
-.search-wrap {
-  position: relative;
-}
+.search-wrap { position: relative; }
 
 .search-input {
   width: 100%;
@@ -392,61 +384,17 @@ main {
 }
 
 .search-clear.visible { display: flex; }
+.search-clear:hover { background: var(--accent-soft); color: var(--text); }
 
-.search-clear:hover {
-  background: var(--accent-soft);
-  color: var(--text);
-}
+.callout-grid { display: grid; gap: 12px; }
+.callout { padding: 16px 18px; display: grid; gap: 8px; }
+.callout h2 { font-family: var(--font-display); font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; }
+.callout p { color: var(--text-dim); font-size: 11px; white-space: pre-wrap; }
+.callout--info { box-shadow: var(--callout-info-ring); }
 
-.callout-grid {
-  display: grid;
-  gap: 12px;
-}
-
-.callout {
-  padding: 16px 18px;
-  display: grid;
-  gap: 8px;
-}
-
-.callout h2 {
-  font-family: var(--font-display);
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-}
-
-.callout p {
-  color: var(--text-dim);
-  font-size: 11px;
-  white-space: pre-wrap;
-}
-
-.callout--info {
-  box-shadow: var(--callout-info-ring);
-}
-
-.callout--warning {
-  box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.16);
-}
-
-.callout--success {
-  box-shadow: inset 0 0 0 1px rgba(52, 211, 153, 0.16);
-}
-
-.section-card {
-  overflow: hidden;
-  transition: border-color var(--transition), box-shadow var(--transition);
-}
-
-.section-card.is-focused {
-  border-color: var(--accent-border);
-  box-shadow: var(--section-card-focus-shadow);
-}
-
-.section-card.is-hidden {
-  display: none;
-}
+.section-card { overflow: hidden; transition: border-color var(--transition), box-shadow var(--transition); }
+.section-card.is-focused { border-color: var(--accent-border); box-shadow: var(--section-card-focus-shadow); }
+.section-card.is-hidden { display: none; }
 
 .section-header {
   width: 100%;
@@ -464,143 +412,36 @@ main {
   transition: background var(--transition), border-radius var(--transition), box-shadow var(--transition);
 }
 
-.section-header:hover {
-  background: var(--bg-panel-hover);
-}
+.section-header:hover { background: var(--bg-panel-hover); }
+.section-header:focus, .section-header:focus-visible { outline: none; background: var(--section-header-focus-bg); box-shadow: var(--section-header-focus-shadow); }
+.section-header.collapsed { border-radius: calc(var(--radius) - 1px); border-bottom-color: transparent; }
 
-.section-header:focus,
-.section-header:focus-visible {
-  outline: none;
-  background: var(--section-header-focus-bg);
-  box-shadow: var(--section-header-focus-shadow);
-}
+.section-arrow { font-size: 9px; color: var(--text-muted); transition: transform var(--transition); }
+.section-header.collapsed .section-arrow { transform: rotate(-90deg); }
+.section-header:focus .section-arrow, .section-header:focus-visible .section-arrow { color: var(--accent); }
 
-.section-header.collapsed {
-  border-radius: calc(var(--radius) - 1px);
-  border-bottom-color: transparent;
-}
+.section-title { flex: 1; font-family: var(--font-display); font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); }
+.section-header:focus .section-title, .section-header:focus-visible .section-title { color: var(--text); text-shadow: var(--section-title-focus-shadow); }
 
-.section-arrow {
-  font-size: 9px;
-  color: var(--text-muted);
-  transition: transform var(--transition);
-}
+.section-count { padding: 1px 8px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg-deep); color: var(--text-muted); font-size: 10px; }
+.section-header:focus .section-count, .section-header:focus-visible .section-count { border-color: var(--accent-border); background: var(--section-count-focus-bg); color: var(--text); }
 
-.section-header.collapsed .section-arrow {
-  transform: rotate(-90deg);
-}
+.section-body { display: block; }
+.section-body.collapsed { display: none; }
 
-.section-header:focus .section-arrow,
-.section-header:focus-visible .section-arrow {
-  color: var(--accent);
-}
-
-.section-title {
-  flex: 1;
-  font-family: var(--font-display);
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--accent);
-}
-
-.section-header:focus .section-title,
-.section-header:focus-visible .section-title {
-  color: var(--text);
-  text-shadow: var(--section-title-focus-shadow);
-}
-
-.section-count {
-  padding: 1px 8px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: var(--bg-deep);
-  color: var(--text-muted);
-  font-size: 10px;
-}
-
-.section-header:focus .section-count,
-.section-header:focus-visible .section-count {
-  border-color: var(--accent-border);
-  background: var(--section-count-focus-bg);
-  color: var(--text);
-}
-
-.section-body {
-  display: block;
-}
-
-.section-body.collapsed {
-  display: none;
-}
-
-.command-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.command-table th {
-  padding: 8px 12px;
-  text-align: left;
-  font-size: 10px;
-  font-weight: 200;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-bottom: 1px solid var(--border);
-}
-
+.command-table { width: 100%; border-collapse: collapse; }
+.command-table th { padding: 8px 12px; text-align: left; font-size: 10px; font-weight: 200; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); }
 .command-table th:nth-child(1) { width: 24%; }
 .command-table th:nth-child(2) { width: 38%; }
 .command-table th:nth-child(3) { width: 38%; }
 
-.command-row {
-  border-bottom: 1px solid var(--row-divider);
-}
+.command-row { border-bottom: 1px solid var(--row-divider); }
+.command-row:last-child { border-bottom: none; }
+.command-row.hidden { display: none; }
+.command-row td { padding: 10px 12px; vertical-align: middle; font-size: 11px; }
+.command-row td:first-child { padding-left: 40px; }
 
-.command-row:last-child {
-  border-bottom: none;
-}
-
-.command-row.hidden {
-  display: none;
-}
-
-.command-row td {
-  padding: 10px 12px;
-  vertical-align: middle;
-  font-size: 11px;
-}
-
-.command-row td:first-child {
-  padding-left: 40px;
-}
-
-.task-text {
-  color: var(--text);
-  display: flex;
-  align-items: center;
-  min-height: 44px;
-}
-
-.row-badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 7px;
-}
-
-.row-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 7px;
-  border-radius: 999px;
-  border: 1px solid var(--accent-border);
-  background: var(--accent-soft);
-  color: var(--accent);
-  font-size: 10px;
-  line-height: 1.2;
-}
+.task-text { color: var(--text); display: flex; align-items: center; min-height: 44px; }
 
 .value-block {
   width: 100%;
@@ -617,87 +458,16 @@ main {
   transition: border-color var(--transition), background var(--transition), transform var(--transition);
 }
 
-.value-block:hover {
-  border-color: var(--accent-border);
-  background: var(--accent-soft);
-}
+.value-block:hover { border-color: var(--accent-border); background: var(--accent-soft); }
+.value-block.copied { border-color: rgba(52, 211, 153, 0.4); background: rgba(52, 211, 153, 0.12); }
 
-.value-block.copied {
-  border-color: rgba(52, 211, 153, 0.4);
-  background: rgba(52, 211, 153, 0.12);
-}
+.value-text { font-family: var(--font-body); font-size: 11px; line-height: 1.45; color: var(--accent); white-space: pre-wrap; word-break: break-word; }
 
-.value-text {
-  font-family: var(--font-body);
-  font-size: 11px;
-  line-height: 1.45;
-  color: var(--accent);
-  white-space: pre-wrap;
-  word-break: break-word;
-}
+.desc-text { color: var(--text-dim); line-height: 1.5; white-space: pre-wrap; }
 
-.value-block--keys .value-text {
-  color: var(--text);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.value-block--osc .value-text {
-  color: var(--osc-text);
-}
-
-.inline-key {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 22px;
-  padding: 2px 7px;
-  border-radius: 6px;
-  border: 1px solid var(--accent-border);
-  background: var(--accent-soft);
-  color: var(--text);
-  font-family: var(--font-body);
-  font-size: 11px;
-}
-
-.key-combo {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.key-join,
-.key-note {
-  color: var(--text-muted);
-  font-size: 11px;
-}
-
-.desc-text {
-  color: var(--text-dim);
-  line-height: 1.5;
-  white-space: pre-wrap;
-}
-
-.empty-state {
-  padding: 22px 20px;
-  display: grid;
-  gap: 8px;
-}
-
-.empty-state h2 {
-  font-family: var(--font-display);
-  font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--accent);
-}
-
-.empty-state p {
-  color: var(--text-dim);
-  max-width: 70ch;
-}
+.empty-state { padding: 22px 20px; display: grid; gap: 8px; }
+.empty-state h2 { font-family: var(--font-display); font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); }
+.empty-state p { color: var(--text-dim); max-width: 70ch; }
 
 footer {
   border-top: 1px solid var(--border-strong);
@@ -706,103 +476,27 @@ footer {
   padding: 12px 0 14px;
 }
 
-footer .inner {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  color: var(--text-muted);
-  font-size: 11px;
-}
+footer .inner { display: flex; justify-content: space-between; gap: 16px; color: var(--text-muted); font-size: 11px; }
 
-.footer-notes {
-  width: var(--shell-width);
-  margin: 10px auto 0;
-  display: grid;
-  gap: 6px;
-  color: var(--text-dim);
-  font-size: 11px;
-}
+.footer-notes { width: var(--shell-width); margin: 10px auto 0; display: grid; gap: 6px; color: var(--text-dim); font-size: 11px; }
 
 @media (max-width: 900px) {
-  .hero-row {
-    flex-direction: column;
-  }
-
-  .site-header__inner {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .header-actions {
-    justify-content: flex-start;
-    align-items: flex-start;
-  }
-
-  .hero-meta {
-    width: 100%;
-    justify-items: start;
-  }
-
-  .command-table,
-  .command-table thead,
-  .command-table tbody,
-  .command-table tr,
-  .command-table th,
-  .command-table td {
-    display: block;
-    width: 100%;
-  }
-
-  .command-table thead {
-    display: none;
-  }
-
-  .command-row td {
-    padding-top: 8px;
-    padding-bottom: 8px;
-  }
-
-  .command-row td:first-child {
-    padding-left: 12px;
-  }
-
-  .command-row td:first-child {
-    padding-bottom: 0;
-  }
-
-  .command-row td:nth-child(2) {
-    padding-top: 8px;
-    padding-bottom: 0;
-  }
-
-  footer .inner {
-    flex-direction: column;
-  }
-
-  main,
-  .site-header__inner,
-  .footer-notes,
-  footer .inner {
-    width: 96vw;
-  }
-
-  .hero-meta {
-    display: none;
-  }
-
-  .value-block {
-    max-width: 100%;
-    overflow-x: auto;
-  }
-
-  .value-text {
-    word-break: break-all;
-  }
-
-  .desc-text {
-    display: block;
-    padding: 4px 12px 8px;
-  }
+  .hero-row { flex-direction: column; }
+  .site-header__inner { flex-direction: column; align-items: stretch; }
+  .header-actions { justify-content: flex-start; align-items: flex-start; }
+  .hero-meta { width: 100%; justify-items: start; }
+  .command-table, .command-table thead, .command-table tbody, .command-table tr, .command-table th, .command-table td { display: block; width: 100%; }
+  .command-table thead { display: none; }
+  .command-row td { padding-top: 8px; padding-bottom: 8px; }
+  .command-row td:first-child { padding-left: 12px; }
+  .command-row td:first-child { padding-bottom: 0; }
+  .command-row td:nth-child(2) { padding-top: 8px; padding-bottom: 0; }
+  footer .inner { flex-direction: column; }
+  main, .site-header__inner, .footer-notes, footer .inner { width: 96vw; }
+  .hero-meta { display: none; }
+  .value-block { max-width: 100%; overflow-x: auto; }
+  .value-text { word-break: break-all; }
+  .desc-text { display: block; padding: 4px 12px 8px; }
 }
 </style>
 </head>
@@ -820,22 +514,20 @@ footer .inner {
   <div class="hero-row">
     <div class="hero">
       <span class="hero-eyebrow">COMMAND REFERENCE</span>
-      <h1>CBC Schedule Sync</h1>
-      <p>Parse CBC Scheduall PDF schedules and sync to Google Calendar</p>
+      <h1>cbc-schedule-sync</h1>
+      <p>Parse CBC ScheduAll PDFs &rarr; Google Calendar sync</p>
     </div>
-    <div class="hero-meta"><div class="meta-chip"><span class="meta-chip__label">UPDATED</span><span class="meta-chip__value">Last updated: 2025-11-16</span></div><div class="meta-chip"><span class="meta-chip__label">REPO</span><span class="meta-chip__value">~/dev/cbc-schedule-sync</span></div></div>
+    <div class="hero-meta"><div class="meta-chip"><span class="meta-chip__label">UPDATED</span><span class="meta-chip__value">2026-03-29</span></div><div class="meta-chip"><span class="meta-chip__label">REPO</span><span class="meta-chip__value">~/dev/cbc-schedule-sync</span></div></div>
   </div>
-  <div class="search-wrap"><span class="search-icon">⌕</span><input class="search-input" type="text" placeholder="Search commands, snippets, or notes…" id="search" autocomplete="off" spellcheck="false"><span class="search-count" id="search-count"></span><button class="search-clear" id="search-clear" title="Clear search">×</button></div>
-  <section class="surface-card section-card" data-section="setup"><button class="section-header" type="button" aria-expanded="true"><span class="section-arrow">▼</span><span class="section-title">Setup &amp; Installation</span><span class="section-count">4</span></button><div class="section-body"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="install dependencies pip3 install -r requirements.txt install all python dependencies (pymupdf, flask, google api)"><td><div class="task-text">Install dependencies</div></td><td><button class="value-block value-block--shell" data-copy="pip3 install -r requirements.txt" title="Copy value"><code class="value-text">pip3 install -r requirements.txt</code></button></td><td class="desc-text">Install all Python dependencies (PyMuPDF, Flask, Google API)</td></tr><tr class="command-row" data-search="create virtual env python3 -m venv .venv &amp;&amp; source .venv/bin/activate create and activate python virtual environment"><td><div class="task-text">Create virtual env</div></td><td><button class="value-block value-block--shell" data-copy="python3 -m venv .venv &amp;&amp; source .venv/bin/activate" title="Copy value"><code class="value-text">python3 -m venv .venv &amp;&amp; source .venv/bin/activate</code></button></td><td class="desc-text">Create and activate Python virtual environment</td></tr><tr class="command-row" data-search="copy config template cp .env.example .env create environment variables file for standard notes"><td><div class="task-text">Copy config template</div></td><td><button class="value-block value-block--shell" data-copy="cp .env.example .env" title="Copy value"><code class="value-text">cp .env.example .env</code></button></td><td class="desc-text">Create environment variables file for Standard Notes</td></tr><tr class="command-row" data-search="run setup script bash setup.sh automated setup (dependencies + config check)"><td><div class="task-text">Run setup script</div></td><td><button class="value-block value-block--shell" data-copy="bash setup.sh" title="Copy value"><code class="value-text">bash setup.sh</code></button></td><td class="desc-text">Automated setup (dependencies + config check)</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="web"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Web Interface</span><span class="section-count">3</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="start web server python3 src/web_server.py launch flask web interface on http://localhost:5000"><td><div class="task-text">Start web server</div></td><td><button class="value-block value-block--shell" data-copy="python3 src/web_server.py" title="Copy value"><code class="value-text">python3 src/web_server.py</code></button></td><td class="desc-text">Launch Flask web interface on http://localhost:5000</td></tr><tr class="command-row" data-search="start on custom port port=8080 python3 src/web_server.py run web server on port 8080 instead of default 5000"><td><div class="task-text">Start on custom port</div></td><td><button class="value-block value-block--shell" data-copy="PORT=8080 python3 src/web_server.py" title="Copy value"><code class="value-text">PORT=8080 python3 src/web_server.py</code></button></td><td class="desc-text">Run web server on port 8080 instead of default 5000</td></tr><tr class="command-row" data-search="check if port in use lsof -i :5000 see what process is using port 5000"><td><div class="task-text">Check if port in use</div></td><td><button class="value-block value-block--shell" data-copy="lsof -i :5000" title="Copy value"><code class="value-text">lsof -i :5000</code></button></td><td class="desc-text">See what process is using port 5000</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="cli"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Command Line Usage</span><span class="section-count">3</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="run full sync python3 scripts/prototype/sync_cbc_sched.py parse latest pdf and sync to google calendar + standard notes"><td><div class="task-text">Run full sync</div></td><td><button class="value-block value-block--shell" data-copy="python3 scripts/prototype/sync_cbc_sched.py" title="Copy value"><code class="value-text">python3 scripts/prototype/sync_cbc_sched.py</code></button></td><td class="desc-text">Parse latest PDF and sync to Google Calendar + Standard Notes</td></tr><tr class="command-row" data-search="google calendar only python3 scripts/prototype/sync_cbc_to_google_calendar.py sync to google calendar only (no standard notes)"><td><div class="task-text">Google Calendar only</div></td><td><button class="value-block value-block--shell" data-copy="python3 scripts/prototype/sync_cbc_to_google_calendar.py" title="Copy value"><code class="value-text">python3 scripts/prototype/sync_cbc_to_google_calendar.py</code></button></td><td class="desc-text">Sync to Google Calendar only (no Standard Notes)</td></tr><tr class="command-row" data-search="analyze pdf structure python3 scripts/prototype/pdf_to_markdown.py convert pdf to markdown for debugging parse issues"><td><div class="task-text">Analyze PDF structure</div></td><td><button class="value-block value-block--shell" data-copy="python3 scripts/prototype/pdf_to_markdown.py" title="Copy value"><code class="value-text">python3 scripts/prototype/pdf_to_markdown.py</code></button></td><td class="desc-text">Convert PDF to markdown for debugging parse issues</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="pdf"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">PDF Analysis &amp; Debugging</span><span class="section-count">3</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="list available pdfs ls -lh ~/documents/cbc/schedules/*.pdf show all pdf files in schedules directory"><td><div class="task-text">List available PDFs</div></td><td><button class="value-block value-block--shell" data-copy="ls -lh ~/Documents/CBC/Schedules/*.pdf" title="Copy value"><code class="value-text">ls -lh ~/Documents/CBC/Schedules/*.pdf</code></button></td><td class="desc-text">Show all PDF files in schedules directory</td></tr><tr class="command-row" data-search="find latest pdf ls -t ~/documents/cbc/schedules/*.pdf | head -1 get most recently modified pdf file"><td><div class="task-text">Find latest PDF</div></td><td><button class="value-block value-block--shell" data-copy="ls -t ~/Documents/CBC/Schedules/*.pdf | head -1" title="Copy value"><code class="value-text">ls -t ~/Documents/CBC/Schedules/*.pdf | head -1</code></button></td><td class="desc-text">Get most recently modified PDF file</td></tr><tr class="command-row" data-search="check pdf metadata python3 -c &quot;import fitz; doc=fitz.open(&#x27;file.pdf&#x27;); print(doc.metadata)&quot; extract pdf metadata using pymupdf"><td><div class="task-text">Check PDF metadata</div></td><td><button class="value-block value-block--shell" data-copy="python3 -c &quot;import fitz; doc=fitz.open(&#x27;file.pdf&#x27;); print(doc.metadata)&quot;" title="Copy value"><code class="value-text">python3 -c "import fitz; doc=fitz.open('file.pdf'); print(doc.metadata)"</code></button></td><td class="desc-text">Extract PDF metadata using PyMuPDF</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="config"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Configuration Management</span><span class="section-count">4</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="view config cat config.yaml display current configuration settings"><td><div class="task-text">View config</div></td><td><button class="value-block value-block--shell" data-copy="cat config.yaml" title="Copy value"><code class="value-text">cat config.yaml</code></button></td><td class="desc-text">Display current configuration settings</td></tr><tr class="command-row" data-search="edit config vim config.yaml edit configuration file (paths, settings)"><td><div class="task-text">Edit config</div></td><td><button class="value-block value-block--shell" data-copy="vim config.yaml" title="Copy value"><code class="value-text">vim config.yaml</code></button></td><td class="desc-text">Edit configuration file (paths, settings)</td></tr><tr class="command-row" data-search="check schedules path ls -la ~/documents/cbc/schedules/ verify schedules directory exists and has pdfs"><td><div class="task-text">Check schedules path</div></td><td><button class="value-block value-block--shell" data-copy="ls -la ~/Documents/CBC/Schedules/" title="Copy value"><code class="value-text">ls -la ~/Documents/CBC/Schedules/</code></button></td><td class="desc-text">Verify schedules directory exists and has PDFs</td></tr><tr class="command-row" data-search="validate config hierarchy ~/dev/scripts/validate-config-hierarchy.sh check claude.md inheritance chain"><td><div class="task-text">Validate config hierarchy</div></td><td><button class="value-block value-block--shell" data-copy="~/dev/scripts/validate-config-hierarchy.sh" title="Copy value"><code class="value-text">~/dev/scripts/validate-config-hierarchy.sh</code></button></td><td class="desc-text">Check CLAUDE.md inheritance chain</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="oauth"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Google Calendar OAuth</span><span class="section-count">4</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="check credentials ls -lh ~/documents/cbc/schedules/credentials.json verify oauth credentials file exists"><td><div class="task-text">Check credentials</div></td><td><button class="value-block value-block--shell" data-copy="ls -lh ~/Documents/CBC/Schedules/credentials.json" title="Copy value"><code class="value-text">ls -lh ~/Documents/CBC/Schedules/credentials.json</code></button></td><td class="desc-text">Verify OAuth credentials file exists</td></tr><tr class="command-row" data-search="check token cache ls -lh ~/documents/cbc/schedules/token.pickle check if authentication token is cached"><td><div class="task-text">Check token cache</div></td><td><button class="value-block value-block--shell" data-copy="ls -lh ~/Documents/CBC/Schedules/token.pickle" title="Copy value"><code class="value-text">ls -lh ~/Documents/CBC/Schedules/token.pickle</code></button></td><td class="desc-text">Check if authentication token is cached</td></tr><tr class="command-row" data-search="clear auth token rm ~/documents/cbc/schedules/token.pickle force re-authentication by removing cached token"><td><div class="task-text">Clear auth token</div></td><td><button class="value-block value-block--shell" data-copy="rm ~/Documents/CBC/Schedules/token.pickle" title="Copy value"><code class="value-text">rm ~/Documents/CBC/Schedules/token.pickle</code></button></td><td class="desc-text">Force re-authentication by removing cached token</td></tr><tr class="command-row" data-search="open google console open https://console.cloud.google.com/ open google cloud console for oauth setup"><td><div class="task-text">Open Google Console</div></td><td><button class="value-block value-block--shell" data-copy="open https://console.cloud.google.com/" title="Copy value"><code class="value-text">open https://console.cloud.google.com/</code></button></td><td class="desc-text">Open Google Cloud Console for OAuth setup</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="sn"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Standard Notes Integration</span><span class="section-count">2</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="check sn token grep sn_api_token .env verify standard notes api token is configured"><td><div class="task-text">Check SN token</div></td><td><button class="value-block value-block--shell" data-copy="grep SN_API_TOKEN .env" title="Copy value"><code class="value-text">grep SN_API_TOKEN .env</code></button></td><td class="desc-text">Verify Standard Notes API token is configured</td></tr><tr class="command-row" data-search="set sn token echo &quot;sn_api_token=your_token_here&quot; &gt;&gt; .env add standard notes api token to .env file"><td><div class="task-text">Set SN token</div></td><td><button class="value-block value-block--shell" data-copy="echo &quot;SN_API_TOKEN=your_token_here&quot; &gt;&gt; .env" title="Copy value"><code class="value-text">echo "SN_API_TOKEN=your_token_here" &gt;&gt; .env</code></button></td><td class="desc-text">Add Standard Notes API token to .env file</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="gemini"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">🔒 Gemini CLI Sandboxing (AI Agent Security)</span><span class="section-count">5</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="install gemini cli npm install -g @google/gemini-cli install official google gemini cli (requires node.js v18+)"><td><div class="task-text">Install Gemini CLI</div></td><td><button class="value-block value-block--shell" data-copy="npm install -g @google/gemini-cli" title="Copy value"><code class="value-text">npm install -g @google/gemini-cli</code></button></td><td class="desc-text">Install official Google Gemini CLI (requires Node.js v18+)</td></tr><tr class="command-row" data-search="run with sandbox gemini --sandbox -p &quot;analyze the code in this directory.&quot; run gemini cli with sandboxing enabled (-s or --sandbox)"><td><div class="task-text">Run with sandbox</div></td><td><button class="value-block value-block--shell" data-copy="gemini --sandbox -p &quot;Analyze the code in this directory.&quot;" title="Copy value"><code class="value-text">gemini --sandbox -p "Analyze the code in this directory."</code></button></td><td class="desc-text">Run Gemini CLI with sandboxing enabled (-s or --sandbox)</td></tr><tr class="command-row" data-search="enable sandbox env export gemini_sandbox=true enable sandboxing via environment variable (persistent in session)"><td><div class="task-text">Enable sandbox env</div></td><td><button class="value-block value-block--shell" data-copy="export GEMINI_SANDBOX=true" title="Copy value"><code class="value-text">export GEMINI_SANDBOX=true</code></button></td><td class="desc-text">Enable sandboxing via environment variable (persistent in session)</td></tr><tr class="command-row" data-search="sandbox with docker export gemini_sandbox=docker &amp;&amp; gemini use docker containers for robust isolation (linux/macos/windows)"><td><div class="task-text">Sandbox with Docker</div></td><td><button class="value-block value-block--shell" data-copy="export GEMINI_SANDBOX=docker &amp;&amp; gemini" title="Copy value"><code class="value-text">export GEMINI_SANDBOX=docker &amp;&amp; gemini</code></button></td><td class="desc-text">Use Docker containers for robust isolation (Linux/macOS/Windows)</td></tr><tr class="command-row" data-search="sandbox with macos export gemini_sandbox=seatbelt &amp;&amp; gemini use macos seatbelt (lightweight built-in sandboxing)"><td><div class="task-text">Sandbox with macOS</div></td><td><button class="value-block value-block--shell" data-copy="export GEMINI_SANDBOX=seatbelt &amp;&amp; gemini" title="Copy value"><code class="value-text">export GEMINI_SANDBOX=seatbelt &amp;&amp; gemini</code></button></td><td class="desc-text">Use macOS Seatbelt (lightweight built-in sandboxing)</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="testing"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Testing &amp; Validation</span><span class="section-count">3</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="test pdf parsing python3 -c &quot;from src.web_server import parse_pdf; print(parse_pdf(&#x27;pdf/sample.pdf&#x27;))&quot; quick test of pdf parsing function"><td><div class="task-text">Test PDF parsing</div></td><td><button class="value-block value-block--shell" data-copy="python3 -c &quot;from src.web_server import parse_pdf; print(parse_pdf(&#x27;pdf/sample.pdf&#x27;))&quot;" title="Copy value"><code class="value-text">python3 -c "from src.web_server import parse_pdf; print(parse_pdf('pdf/sample.pdf'))"</code></button></td><td class="desc-text">Quick test of PDF parsing function</td></tr><tr class="command-row" data-search="validate schedule data python3 -m pytest tests/ run test suite (if tests exist)"><td><div class="task-text">Validate schedule data</div></td><td><button class="value-block value-block--shell" data-copy="python3 -m pytest tests/" title="Copy value"><code class="value-text">python3 -m pytest tests/</code></button></td><td class="desc-text">Run test suite (if tests exist)</td></tr><tr class="command-row" data-search="check python syntax python3 -m py_compile src/web_server.py verify python syntax is valid"><td><div class="task-text">Check Python syntax</div></td><td><button class="value-block value-block--shell" data-copy="python3 -m py_compile src/web_server.py" title="Copy value"><code class="value-text">python3 -m py_compile src/web_server.py</code></button></td><td class="desc-text">Verify Python syntax is valid</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="dev"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Development Tools</span><span class="section-count">4</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="archive old docs ~/dev/scripts/archive-old-docs.sh cbc-schedule-sync syn move docs older than 63 days to archive/"><td><div class="task-text">Archive old docs</div></td><td><button class="value-block value-block--shell" data-copy="~/dev/scripts/archive-old-docs.sh cbc-schedule-sync SYN" title="Copy value"><code class="value-text">~/dev/scripts/archive-old-docs.sh cbc-schedule-sync SYN</code></button></td><td class="desc-text">Move docs older than 63 days to archive/</td></tr><tr class="command-row" data-search="check prefix collisions ~/dev/scripts/check-prefix-collisions.sh --verbose detect duplicate syn### numbers"><td><div class="task-text">Check PREFIX collisions</div></td><td><button class="value-block value-block--shell" data-copy="~/dev/scripts/check-prefix-collisions.sh --verbose" title="Copy value"><code class="value-text">~/dev/scripts/check-prefix-collisions.sh --verbose</code></button></td><td class="desc-text">Detect duplicate SYN### numbers</td></tr><tr class="command-row" data-search="find next syn number ls -1 docs/syn/ | grep -e &#x27;^syn[0-9]{3}&#x27; | sed -e &#x27;s/syn([0-9]+).*/\1/&#x27; | sort -n | tail -1 get highest syn### number for next doc"><td><div class="task-text">Find next SYN number</div></td><td><button class="value-block value-block--shell" data-copy="ls -1 docs/syn/ | grep -E &#x27;^SYN[0-9]{3}&#x27; | sed -E &#x27;s/SYN([0-9]+).*/\1/&#x27; | sort -n | tail -1" title="Copy value"><code class="value-text">ls -1 docs/syn/ | grep -E '^SYN[0-9]{3}' | sed -E 's/SYN([0-9]+).*/\1/' | sort -n | tail -1</code></button></td><td class="desc-text">Get highest SYN### number for next doc</td></tr><tr class="command-row" data-search="list syn docs ls -1 docs/syn/ | grep -e &#x27;^syn[0-9]{3,4}\s+&#x27; | sort show all syn### documentation files"><td><div class="task-text">List SYN docs</div></td><td><button class="value-block value-block--shell" data-copy="ls -1 docs/syn/ | grep -E &#x27;^SYN[0-9]{3,4}\s+&#x27; | sort" title="Copy value"><code class="value-text">ls -1 docs/syn/ | grep -E '^SYN[0-9]{3,4}\s+' | sort</code></button></td><td class="desc-text">Show all SYN### documentation files</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="git"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Git Operations</span><span class="section-count">5</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="check status git status view current branch and changed files"><td><div class="task-text">Check status</div></td><td><button class="value-block value-block--shell" data-copy="git status" title="Copy value"><code class="value-text">git status</code></button></td><td class="desc-text">View current branch and changed files</td></tr><tr class="command-row" data-search="view diff git diff see unstaged changes"><td><div class="task-text">View diff</div></td><td><button class="value-block value-block--shell" data-copy="git diff" title="Copy value"><code class="value-text">git diff</code></button></td><td class="desc-text">See unstaged changes</td></tr><tr class="command-row" data-search="view recent commits git log --oneline -10 show last 10 commits"><td><div class="task-text">View recent commits</div></td><td><button class="value-block value-block--shell" data-copy="git log --oneline -10" title="Copy value"><code class="value-text">git log --oneline -10</code></button></td><td class="desc-text">Show last 10 commits</td></tr><tr class="command-row" data-search="pull latest git pull origin main fetch and merge latest changes"><td><div class="task-text">Pull latest</div></td><td><button class="value-block value-block--shell" data-copy="git pull origin main" title="Copy value"><code class="value-text">git pull origin main</code></button></td><td class="desc-text">Fetch and merge latest changes</td></tr><tr class="command-row" data-search="create feature branch git checkout -b feature/new-feature create and switch to new feature branch"><td><div class="task-text">Create feature branch</div></td><td><button class="value-block value-block--shell" data-copy="git checkout -b feature/new-feature" title="Copy value"><code class="value-text">git checkout -b feature/new-feature</code></button></td><td class="desc-text">Create and switch to new feature branch</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="diagnostics"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">▼</span><span class="section-title">Diagnostics</span><span class="section-count">6</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="check python version python3 --version verify python version (require 3.9+)"><td><div class="task-text">Check Python version</div></td><td><button class="value-block value-block--shell" data-copy="python3 --version" title="Copy value"><code class="value-text">python3 --version</code></button></td><td class="desc-text">Verify Python version (require 3.9+)</td></tr><tr class="command-row" data-search="check pip version pip3 --version verify pip version"><td><div class="task-text">Check pip version</div></td><td><button class="value-block value-block--shell" data-copy="pip3 --version" title="Copy value"><code class="value-text">pip3 --version</code></button></td><td class="desc-text">Verify pip version</td></tr><tr class="command-row" data-search="list installed packages pip3 list show all installed python packages"><td><div class="task-text">List installed packages</div></td><td><button class="value-block value-block--shell" data-copy="pip3 list" title="Copy value"><code class="value-text">pip3 list</code></button></td><td class="desc-text">Show all installed Python packages</td></tr><tr class="command-row" data-search="check flask installed python3 -c &quot;import flask; print(flask.__version__)&quot; verify flask is installed and check version"><td><div class="task-text">Check Flask installed</div></td><td><button class="value-block value-block--shell" data-copy="python3 -c &quot;import flask; print(flask.__version__)&quot;" title="Copy value"><code class="value-text">python3 -c "import flask; print(flask.__version__)"</code></button></td><td class="desc-text">Verify Flask is installed and check version</td></tr><tr class="command-row" data-search="check pymupdf installed python3 -c &quot;import fitz; print(fitz.__version__)&quot; verify pymupdf (fitz) is installed"><td><div class="task-text">Check PyMuPDF installed</div></td><td><button class="value-block value-block--shell" data-copy="python3 -c &quot;import fitz; print(fitz.__version__)&quot;" title="Copy value"><code class="value-text">python3 -c "import fitz; print(fitz.__version__)"</code></button></td><td class="desc-text">Verify PyMuPDF (fitz) is installed</td></tr><tr class="command-row" data-search="check disk space df -h ~/documents/cbc/schedules/ show disk space for schedules directory"><td><div class="task-text">Check disk space</div></td><td><button class="value-block value-block--shell" data-copy="df -h ~/Documents/CBC/Schedules/" title="Copy value"><code class="value-text">df -h ~/Documents/CBC/Schedules/</code></button></td><td class="desc-text">Show disk space for schedules directory</td></tr></tbody></table></div></section>
-  <section class="callout-grid"><article class="surface-card callout callout--info"><h2>🔐 Gemini CLI Sandboxing Explained</h2><p>The Gemini CLI is an open-source AI agent from Google/Gemini with built-in sandboxing</p><p>to limit file system access and shell command execution. This prevents the AI from accessing your entire</p><p>system.</p><p>Key Features:</p><p>Isolation: Limits file system access to project directory only</p><p>Multiple methods: macOS Seatbelt (lightweight), Docker/Podman (robust)</p><p>Easy activation: Use --sandbox flag or GEMINI_SANDBOX=true environment variable</p><p>Recommended Usage:</p><p># Navigate to project directory</p><p>cd ~/dev/cbc-schedule-sync</p><p># Run with sandboxing enabled</p><p>gemini --sandbox -p "Analyze the Python code in src/"</p><p># Or enable for entire session</p><p>export GEMINI_SANDBOX=true</p><p>gemini</p><p>When sandboxing is enabled, the AI's operations are isolated to the current directory,</p><p>preventing unintended access to your host system. This is especially useful when analyzing</p><p>code or processing schedules in cbc-schedule-sync.</p></article></section>
+  <div class="search-wrap"><span class="search-icon">&#x2315;</span><input class="search-input" type="text" placeholder="Search commands, snippets, or notes…" id="search" autocomplete="off" spellcheck="false"><span class="search-count" id="search-count"></span><button class="search-clear" id="search-clear" title="Clear search">&times;</button></div>
+  <section class="surface-card section-card" data-section="setup"><button class="section-header" type="button" aria-expanded="true"><span class="section-arrow">&#x25BC;</span><span class="section-title">Setup</span><span class="section-count">2</span></button><div class="section-body"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="create virtual environment python -m venv .venv && source .venv/bin/activate"><td><div class="task-text">Create virtual environment</div></td><td><button class="value-block value-block--shell" data-copy="python -m venv .venv && source .venv/bin/activate" title="Copy value"><code class="value-text">python -m venv .venv &amp;&amp; source .venv/bin/activate</code></button></td><td class="desc-text">Create virtual environment</td></tr><tr class="command-row" data-search="install pymupdf, google api client, flask pip install -r requirements.txt"><td><div class="task-text">Install PyMuPDF, Google API client, Flask</div></td><td><button class="value-block value-block--shell" data-copy="pip install -r requirements.txt" title="Copy value"><code class="value-text">pip install -r requirements.txt</code></button></td><td class="desc-text">Install PyMuPDF, Google API client, Flask</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="sync"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">&#x25BC;</span><span class="section-title">PDF &rarr; Calendar Sync</span><span class="section-count">3</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="dry run (json output) python scripts/batch_sync.py --pdf-dir pdf --from 2025-01-13 --to 2025-01-19 --json"><td><div class="task-text">Dry run (JSON output)</div></td><td><button class="value-block value-block--shell" data-copy="python scripts/batch_sync.py --pdf-dir pdf --from 2025-01-13 --to 2025-01-19 --json" title="Copy value"><code class="value-text">python scripts/batch_sync.py --pdf-dir pdf --from 2025-01-13 --to 2025-01-19 --json</code></button></td><td class="desc-text">Dry run (JSON output)</td></tr><tr class="command-row" data-search="sync one week to google calendar python scripts/batch_sync.py --pdf-dir pdf --from 2025-01-13 --to 2025-01-19"><td><div class="task-text">Sync one week to Google Calendar</div></td><td><button class="value-block value-block--shell" data-copy="python scripts/batch_sync.py --pdf-dir pdf --from 2025-01-13 --to 2025-01-19" title="Copy value"><code class="value-text">python scripts/batch_sync.py --pdf-dir pdf --from 2025-01-13 --to 2025-01-19</code></button></td><td class="desc-text">Sync one week to Google Calendar</td></tr><tr class="command-row" data-search="sync full month python scripts/batch_sync.py --pdf-dir pdf --from 2025-01-01 --to 2025-01-31"><td><div class="task-text">Sync full month</div></td><td><button class="value-block value-block--shell" data-copy="python scripts/batch_sync.py --pdf-dir pdf --from 2025-01-01 --to 2025-01-31" title="Copy value"><code class="value-text">python scripts/batch_sync.py --pdf-dir pdf --from 2025-01-01 --to 2025-01-31</code></button></td><td class="desc-text">Sync full month</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="fetch"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">&#x25BC;</span><span class="section-title">Calendar &rarr; Local Archive</span><span class="section-count">3</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="fetch current year cbc events python scripts/fetch_calendar.py"><td><div class="task-text">Fetch current year CBC events</div></td><td><button class="value-block value-block--shell" data-copy="python scripts/fetch_calendar.py" title="Copy value"><code class="value-text">python scripts/fetch_calendar.py</code></button></td><td class="desc-text">Fetch current year CBC events</td></tr><tr class="command-row" data-search="fetch custom date range python scripts/fetch_calendar.py --from 2025-01-01 --to 2025-06-30"><td><div class="task-text">Fetch custom date range</div></td><td><button class="value-block value-block--shell" data-copy="python scripts/fetch_calendar.py --from 2025-01-01 --to 2025-06-30" title="Copy value"><code class="value-text">python scripts/fetch_calendar.py --from 2025-01-01 --to 2025-06-30</code></button></td><td class="desc-text">Fetch custom date range</td></tr><tr class="command-row" data-search="fetch all events python scripts/fetch_calendar.py --all"><td><div class="task-text">Fetch all events</div></td><td><button class="value-block value-block--shell" data-copy="python scripts/fetch_calendar.py --all" title="Copy value"><code class="value-text">python scripts/fetch_calendar.py --all</code></button></td><td class="desc-text">Fetch all events</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="analytics"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">&#x25BC;</span><span class="section-title">Work Analytics</span><span class="section-count">3</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="generate summary (hours, assignments, budgets) python scripts/analyze_calendar.py"><td><div class="task-text">Generate summary (hours, assignments, budgets)</div></td><td><button class="value-block value-block--shell" data-copy="python scripts/analyze_calendar.py" title="Copy value"><code class="value-text">python scripts/analyze_calendar.py</code></button></td><td class="desc-text">Generate summary (hours, assignments, budgets)</td></tr><tr class="command-row" data-search="filter to date range python scripts/analyze_calendar.py --from 2025-01-01 --to 2025-03-31"><td><div class="task-text">Filter to date range</div></td><td><button class="value-block value-block--shell" data-copy="python scripts/analyze_calendar.py --from 2025-01-01 --to 2025-03-31" title="Copy value"><code class="value-text">python scripts/analyze_calendar.py --from 2025-01-01 --to 2025-03-31</code></button></td><td class="desc-text">Filter to date range</td></tr><tr class="command-row" data-search="json output python scripts/analyze_calendar.py --format json"><td><div class="task-text">JSON output</div></td><td><button class="value-block value-block--shell" data-copy="python scripts/analyze_calendar.py --format json" title="Copy value"><code class="value-text">python scripts/analyze_calendar.py --format json</code></button></td><td class="desc-text">JSON output</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="testing"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">&#x25BC;</span><span class="section-title">Testing</span><span class="section-count">2</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="run 25 tests (quiet) python -m pytest tests/ -q"><td><div class="task-text">Run 25 tests (quiet)</div></td><td><button class="value-block value-block--shell" data-copy="python -m pytest tests/ -q" title="Copy value"><code class="value-text">python -m pytest tests/ -q</code></button></td><td class="desc-text">Run 25 tests (quiet)</td></tr><tr class="command-row" data-search="verbose output python -m pytest tests/ -v"><td><div class="task-text">Verbose output</div></td><td><button class="value-block value-block--shell" data-copy="python -m pytest tests/ -v" title="Copy value"><code class="value-text">python -m pytest tests/ -v</code></button></td><td class="desc-text">Verbose output</td></tr></tbody></table></div></section>
 </main>
 
 <footer>
   <div class="inner">
-    <span>Local command sheet generated from source content in <code>to-fix/</code>.</span>
-    <span>cbc-schedule-sync_docs_repo-commands.html</span>
+    <span>cbc-schedule-sync | Python 3.9+ | PyMuPDF + Google Calendar API</span>
+    <span>cbc-schedule-sync_repo-commands.html</span>
   </div>
-  
 </footer>
 
 <script>
@@ -1074,7 +766,7 @@ function exportToMarkdown() {
     return;
   }
 
-  let md = `# CBC Schedule Sync - Command Reference\n\n`;
+  let md = `# cbc-schedule-sync - Command Reference\n\n`;
   sections.forEach((card) => {
     md += `## ${card.title}\n\n`;
     md += "| Task | Command / Snippet | Description |\n";
@@ -1085,7 +777,7 @@ function exportToMarkdown() {
     md += "\n";
   });
   copyMarkdown(md).then((success) => {
-    flashExportButton(success ? "✓ Copied Markdown" : "Copy failed", success ? "is-confirmed" : "is-error");
+    flashExportButton(success ? "Copied Markdown" : "Copy failed", success ? "is-confirmed" : "is-error");
   });
 }
 

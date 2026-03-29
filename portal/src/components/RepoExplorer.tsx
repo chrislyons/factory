@@ -42,7 +42,7 @@ const HAS_COMMANDS = new Set([
   "2110-audio-io","aes70","autoresearch","carbon-acx","cbc-schedule-sync",
   "chainly","chrislyons-website","freqfinder","git-av","hotbox",
   "listmaker","max4live-mcp","memex-mcp","nmos","ondina",
-  "orpheus-sdk","osd-v2","strudel","undone","vmotes",
+  "orpheus-sdk","osd-v2","strudel","vmotes",
 ]);
 
 function galleryHref(repoName: string): string {
