@@ -705,28 +705,26 @@ pub async fn send_to_agent(
 // Identity / system prompt construction
 // ============================================================================
 
-/// Build the system prompt from identity files (soul + principles + agents).
+/// Build the system prompt for --append-system-prompt injection.
 ///
-/// When a loop is active for the agent, callers should append the output of
-/// [`build_loop_context`] to the returned string before passing it to
-/// `--append-system-prompt`. This injects loop constraints (frozen/mutable
-/// surfaces, budget, metric state) into the agent's context.
+/// Identity is now delivered via the CLAUDE.md hierarchy (agents/CLAUDE.md for
+/// shared infrastructure, agents/{name}/CLAUDE.md for agent-specific identity).
+/// Claude Code auto-loads these when started with --cwd pointing at the agent
+/// directory. This function returns an empty string so no identity blob is
+/// injected via --append-system-prompt.
+///
+/// When loop support is wired up, callers should pass the output of
+/// [`build_loop_context`] instead — that remains the only planned use of
+/// --append-system-prompt.
 pub fn build_system_prompt(
     _agent_name: &str,
-    config: &AgentConfig,
-    base_dir: &std::path::Path,
+    _config: &AgentConfig,
+    _base_dir: &std::path::Path,
 ) -> String {
-    if let Some(ref files) = config.identity_files {
-        let soul = crate::config::read_identity(base_dir, &files.soul).unwrap_or_default();
-        let principles =
-            crate::config::read_identity(base_dir, &files.principles).unwrap_or_default();
-        let agents = crate::config::read_identity(base_dir, &files.agents).unwrap_or_default();
-        format!("{}\n\n{}\n\n{}", soul, principles, agents)
-    } else if let Some(ref prompt) = config.system_prompt {
-        prompt.clone()
-    } else {
-        String::new()
-    }
+    // Identity files (soul.md, principles.md, agents.md) are retained as
+    // versioned source-of-truth but no longer concatenated and injected here.
+    // The CLAUDE.md hierarchy handles identity delivery.
+    String::new()
 }
 
 /// Build the loop constraint block for --append-system-prompt injection.
