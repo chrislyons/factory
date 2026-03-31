@@ -10,7 +10,7 @@
     "dry-run": "tsx cross-sign.ts sign --dry-run"
   },
   "dependencies": {
-    "matrix-js-sdk": "35.1.0",
+    "matrix-js-sdk": "38.2.0",
     "@matrix-org/matrix-sdk-crypto-wasm": "15.3.0",
     "fake-indexeddb": "6.2.5"
   },

@@ -9,23 +9,23 @@ importers:
   .:
     dependencies:
       '@matrix-org/matrix-sdk-crypto-wasm':
-        specifier: ^15.0.0
+        specifier: 15.3.0
         version: 15.3.0
       fake-indexeddb:
-        specifier: ^6.0.0
+        specifier: 6.2.5
         version: 6.2.5
       matrix-js-sdk:
-        specifier: ^35.1.0
-        version: 35.1.0
+        specifier: 38.2.0
+        version: 38.2.0
     devDependencies:
       '@types/node':
-        specifier: ^20.0.0
+        specifier: 20.19.33
         version: 20.19.33
       tsx:
-        specifier: ^4.0.0
+        specifier: 4.21.0
         version: 4.21.0
       typescript:
-        specifier: ^5.5.0
+        specifier: 5.9.3
         version: 5.9.3
 
 packages:
@@ -190,16 +190,9 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@matrix-org/matrix-sdk-crypto-wasm@11.1.0':
-    resolution: {integrity: sha512-JPuO9RCVDklDjbFzMvZfQb7PuiFkLY72bniRSu81lRzkkrcbZtmKqBFMm9H4f2FSz+tHVkDnmsvn12I4sdJJ5A==}
-    engines: {node: '>= 10'}
-
   '@matrix-org/matrix-sdk-crypto-wasm@15.3.0':
     resolution: {integrity: sha512-QyxHvncvkl7nf+tnn92PjQ54gMNV8hMSpiukiDgNrqF6IYwgySTlcSdkPYdw8QjZJ0NR6fnVrNzMec0OohM3wA==}
     engines: {node: '>= 18'}
-
-  '@matrix-org/olm@3.2.15':
-    resolution: {integrity: sha512-S7lOrndAK9/8qOtaTq/WhttJC/o4GAzdfK0MUPpo8ApzsJEC0QjtwrkC3KBXdFP1cD1MXi/mlKR7aaoVMKgs6Q==}
 
   '@types/events@3.0.3':
     resolution: {integrity: sha512-trOc4AAUThEz9hapPtSd7wf5tiQKvTtu5b371UxXdTuqzIh0ArcRspRP0i0Viu+LXstIQ1z96t1nsPxT9ol01g==}
@@ -255,9 +248,9 @@ packages:
   matrix-events-sdk@0.0.1:
     resolution: {integrity: sha512-1QEOsXO+bhyCroIe2/A5OwaxHvBm7EsSQ46DEDn8RBIfQwN5HWBpFvyWWR4QY0KHPPnnJdI99wgRiAl7Ad5qaA==}
 
-  matrix-js-sdk@35.1.0:
-    resolution: {integrity: sha512-uADi0Uj3uASPe20DuAKEc17/3fywCkla6cHqq4vTd+FgxDWo8nngozl8ykINIU+Y3VimcrxeciGvUjTyHcA9pg==}
-    engines: {node: '>=20.0.0'}
+  matrix-js-sdk@38.2.0:
+    resolution: {integrity: sha512-R3jzK8rDGi/3OXOax8jFFyxblCG9KTT5yuXAbvnZCGcpTm8lZ4mHQAn5UydVD8qiyUMNMpaaMd6/k7N+5I/yaQ==}
+    engines: {node: '>=22.0.0'}
 
   matrix-widget-api@1.17.0:
     resolution: {integrity: sha512-5FHoo3iEP3Bdlv5jsYPWOqj+pGdFQNLWnJLiB0V7Ygne7bb+Gsj3ibyFyHWC6BVw+Z+tSW4ljHpO17I9TwStwQ==}
@@ -383,11 +376,7 @@ snapshots:
   '@esbuild/win32-x64@0.27.3':
     optional: true
 
-  '@matrix-org/matrix-sdk-crypto-wasm@11.1.0': {}
-
   '@matrix-org/matrix-sdk-crypto-wasm@15.3.0': {}
-
-  '@matrix-org/olm@3.2.15': {}
 
   '@types/events@3.0.3': {}
 
@@ -453,11 +442,10 @@ snapshots:
 
   matrix-events-sdk@0.0.1: {}
 
-  matrix-js-sdk@35.1.0:
+  matrix-js-sdk@38.2.0:
     dependencies:
       '@babel/runtime': 7.28.6
-      '@matrix-org/matrix-sdk-crypto-wasm': 11.1.0
-      '@matrix-org/olm': 3.2.15
+      '@matrix-org/matrix-sdk-crypto-wasm': 15.3.0
       another-json: 0.2.0
       bs58: 6.0.0
       content-type: 1.0.5
