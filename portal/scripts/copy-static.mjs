@@ -14,6 +14,7 @@ const copyPairs = [
   ["pages/local-inference-guide.html", "pages/local-inference-guide.html"],
   ["pages/repo-commands.html", "pages/repo-commands.html"],
   ["pages/login.html", "pages/login.html"],
+  ["pages/login.js",   "pages/login.js"],
   ["shared/explainers-docs.css", "shared/explainers-docs.css"],
   ["shared/explainers-docs.js", "shared/explainers-docs.js"]
 ];

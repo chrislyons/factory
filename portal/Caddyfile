@@ -57,18 +57,12 @@ http://100.88.222.111:41910, http://whitebox.taila25a34.ts.net:41910 {
 	handle {
 		root * /Users/nesbitt/dev/factory/portal/dist-production
 
-		@html {
-			path *.html
-		}
+		@html { path *.html }
 		header @html Cache-Control "no-cache"
 
-		@json {
-			path /index.json
-		}
+		@json { path /index.json }
 		header @json Cache-Control "no-store"
 
-		file_server {
-			index portal.html
-		}
+		file_server { index portal.html }
 	}
 }
