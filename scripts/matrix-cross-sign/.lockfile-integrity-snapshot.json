@@ -1,0 +1,277 @@
+[
+  {
+    "package": "@babel/runtime",
+    "version": "7.28.6",
+    "integrity": "sha512-05WQkdpL9COIMz4LjTxGpPNCdlpyimKppYNoJ5Di5EUObifl8t4tuLuUBBZEpoLYOmfvIWrsp9fCl0HoPRVTdA=="
+  },
+  {
+    "package": "@esbuild/aix-ppc64",
+    "version": "0.27.3",
+    "integrity": "sha512-9fJMTNFTWZMh5qwrBItuziu834eOCUcEqymSH7pY+zoMVEZg3gcPuBNxH1EvfVYe9h0x/Ptw8KBzv7qxb7l8dg=="
+  },
+  {
+    "package": "@esbuild/android-arm",
+    "version": "0.27.3",
+    "integrity": "sha512-i5D1hPY7GIQmXlXhs2w8AWHhenb00+GxjxRncS2ZM7YNVGNfaMxgzSGuO8o8SJzRc/oZwU2bcScvVERk03QhzA=="
+  },
+  {
+    "package": "@esbuild/android-arm64",
+    "version": "0.27.3",
+    "integrity": "sha512-YdghPYUmj/FX2SYKJ0OZxf+iaKgMsKHVPF1MAq/P8WirnSpCStzKJFjOjzsW0QQ7oIAiccHdcqjbHmJxRb/dmg=="
+  },
+  {
+    "package": "@esbuild/android-x64",
+    "version": "0.27.3",
+    "integrity": "sha512-IN/0BNTkHtk8lkOM8JWAYFg4ORxBkZQf9zXiEOfERX/CzxW3Vg1ewAhU7QSWQpVIzTW+b8Xy+lGzdYXV6UZObQ=="
+  },
+  {
+    "package": "@esbuild/darwin-arm64",
+    "version": "0.27.3",
+    "integrity": "sha512-Re491k7ByTVRy0t3EKWajdLIr0gz2kKKfzafkth4Q8A5n1xTHrkqZgLLjFEHVD+AXdUGgQMq+Godfq45mGpCKg=="
+  },
+  {
+    "package": "@esbuild/darwin-x64",
+    "version": "0.27.3",
+    "integrity": "sha512-vHk/hA7/1AckjGzRqi6wbo+jaShzRowYip6rt6q7VYEDX4LEy1pZfDpdxCBnGtl+A5zq8iXDcyuxwtv3hNtHFg=="
+  },
+  {
+    "package": "@esbuild/freebsd-arm64",
+    "version": "0.27.3",
+    "integrity": "sha512-ipTYM2fjt3kQAYOvo6vcxJx3nBYAzPjgTCk7QEgZG8AUO3ydUhvelmhrbOheMnGOlaSFUoHXB6un+A7q4ygY9w=="
+  },
+  {
+    "package": "@esbuild/freebsd-x64",
+    "version": "0.27.3",
+    "integrity": "sha512-dDk0X87T7mI6U3K9VjWtHOXqwAMJBNN2r7bejDsc+j03SEjtD9HrOl8gVFByeM0aJksoUuUVU9TBaZa2rgj0oA=="
+  },
+  {
+    "package": "@esbuild/linux-arm",
+    "version": "0.27.3",
+    "integrity": "sha512-s6nPv2QkSupJwLYyfS+gwdirm0ukyTFNl3KTgZEAiJDd+iHZcbTPPcWCcRYH+WlNbwChgH2QkE9NSlNrMT8Gfw=="
+  },
+  {
+    "package": "@esbuild/linux-arm64",
+    "version": "0.27.3",
+    "integrity": "sha512-sZOuFz/xWnZ4KH3YfFrKCf1WyPZHakVzTiqji3WDc0BCl2kBwiJLCXpzLzUBLgmp4veFZdvN5ChW4Eq/8Fc2Fg=="
+  },
+  {
+    "package": "@esbuild/linux-ia32",
+    "version": "0.27.3",
+    "integrity": "sha512-yGlQYjdxtLdh0a3jHjuwOrxQjOZYD/C9PfdbgJJF3TIZWnm/tMd/RcNiLngiu4iwcBAOezdnSLAwQDPqTmtTYg=="
+  },
+  {
+    "package": "@esbuild/linux-loong64",
+    "version": "0.27.3",
+    "integrity": "sha512-WO60Sn8ly3gtzhyjATDgieJNet/KqsDlX5nRC5Y3oTFcS1l0KWba+SEa9Ja1GfDqSF1z6hif/SkpQJbL63cgOA=="
+  },
+  {
+    "package": "@esbuild/linux-mips64el",
+    "version": "0.27.3",
+    "integrity": "sha512-APsymYA6sGcZ4pD6k+UxbDjOFSvPWyZhjaiPyl/f79xKxwTnrn5QUnXR5prvetuaSMsb4jgeHewIDCIWljrSxw=="
+  },
+  {
+    "package": "@esbuild/linux-ppc64",
+    "version": "0.27.3",
+    "integrity": "sha512-eizBnTeBefojtDb9nSh4vvVQ3V9Qf9Df01PfawPcRzJH4gFSgrObw+LveUyDoKU3kxi5+9RJTCWlj4FjYXVPEA=="
+  },
+  {
+    "package": "@esbuild/linux-riscv64",
+    "version": "0.27.3",
+    "integrity": "sha512-3Emwh0r5wmfm3ssTWRQSyVhbOHvqegUDRd0WhmXKX2mkHJe1SFCMJhagUleMq+Uci34wLSipf8Lagt4LlpRFWQ=="
+  },
+  {
+    "package": "@esbuild/linux-s390x",
+    "version": "0.27.3",
+    "integrity": "sha512-pBHUx9LzXWBc7MFIEEL0yD/ZVtNgLytvx60gES28GcWMqil8ElCYR4kvbV2BDqsHOvVDRrOxGySBM9Fcv744hw=="
+  },
+  {
+    "package": "@esbuild/linux-x64",
+    "version": "0.27.3",
+    "integrity": "sha512-Czi8yzXUWIQYAtL/2y6vogER8pvcsOsk5cpwL4Gk5nJqH5UZiVByIY8Eorm5R13gq+DQKYg0+JyQoytLQas4dA=="
+  },
+  {
+    "package": "@esbuild/netbsd-arm64",
+    "version": "0.27.3",
+    "integrity": "sha512-sDpk0RgmTCR/5HguIZa9n9u+HVKf40fbEUt+iTzSnCaGvY9kFP0YKBWZtJaraonFnqef5SlJ8/TiPAxzyS+UoA=="
+  },
+  {
+    "package": "@esbuild/netbsd-x64",
+    "version": "0.27.3",
+    "integrity": "sha512-P14lFKJl/DdaE00LItAukUdZO5iqNH7+PjoBm+fLQjtxfcfFE20Xf5CrLsmZdq5LFFZzb5JMZ9grUwvtVYzjiA=="
+  },
+  {
+    "package": "@esbuild/openbsd-arm64",
+    "version": "0.27.3",
+    "integrity": "sha512-AIcMP77AvirGbRl/UZFTq5hjXK+2wC7qFRGoHSDrZ5v5b8DK/GYpXW3CPRL53NkvDqb9D+alBiC/dV0Fb7eJcw=="
+  },
+  {
+    "package": "@esbuild/openbsd-x64",
+    "version": "0.27.3",
+    "integrity": "sha512-DnW2sRrBzA+YnE70LKqnM3P+z8vehfJWHXECbwBmH/CU51z6FiqTQTHFenPlHmo3a8UgpLyH3PT+87OViOh1AQ=="
+  },
+  {
+    "package": "@esbuild/openharmony-arm64",
+    "version": "0.27.3",
+    "integrity": "sha512-NinAEgr/etERPTsZJ7aEZQvvg/A6IsZG/LgZy+81wON2huV7SrK3e63dU0XhyZP4RKGyTm7aOgmQk0bGp0fy2g=="
+  },
+  {
+    "package": "@esbuild/sunos-x64",
+    "version": "0.27.3",
+    "integrity": "sha512-PanZ+nEz+eWoBJ8/f8HKxTTD172SKwdXebZ0ndd953gt1HRBbhMsaNqjTyYLGLPdoWHy4zLU7bDVJztF5f3BHA=="
+  },
+  {
+    "package": "@esbuild/win32-arm64",
+    "version": "0.27.3",
+    "integrity": "sha512-B2t59lWWYrbRDw/tjiWOuzSsFh1Y/E95ofKz7rIVYSQkUYBjfSgf6oeYPNWHToFRr2zx52JKApIcAS/D5TUBnA=="
+  },
+  {
+    "package": "@esbuild/win32-ia32",
+    "version": "0.27.3",
+    "integrity": "sha512-QLKSFeXNS8+tHW7tZpMtjlNb7HKau0QDpwm49u0vUp9y1WOF+PEzkU84y9GqYaAVW8aH8f3GcBck26jh54cX4Q=="
+  },
+  {
+    "package": "@esbuild/win32-x64",
+    "version": "0.27.3",
+    "integrity": "sha512-4uJGhsxuptu3OcpVAzli+/gWusVGwZZHTlS63hh++ehExkVT8SgiEf7/uC/PclrPPkLhZqGgCTjd0VWLo6xMqA=="
+  },
+  {
+    "package": "@matrix-org/matrix-sdk-crypto-wasm",
+    "version": "15.3.0",
+    "integrity": "sha512-QyxHvncvkl7nf+tnn92PjQ54gMNV8hMSpiukiDgNrqF6IYwgySTlcSdkPYdw8QjZJ0NR6fnVrNzMec0OohM3wA=="
+  },
+  {
+    "package": "@types/events",
+    "version": "3.0.3",
+    "integrity": "sha512-trOc4AAUThEz9hapPtSd7wf5tiQKvTtu5b371UxXdTuqzIh0ArcRspRP0i0Viu+LXstIQ1z96t1nsPxT9ol01g=="
+  },
+  {
+    "package": "@types/node",
+    "version": "20.19.33",
+    "integrity": "sha512-Rs1bVAIdBs5gbTIKza/tgpMuG1k3U/UMJLWecIMxNdJFDMzcM5LOiLVRYh3PilWEYDIeUDv7bpiHPLPsbydGcw=="
+  },
+  {
+    "package": "@types/retry",
+    "version": "0.12.0",
+    "integrity": "sha512-wWKOClTTiizcZhXnPY4wikVAwmdYHp8q6DmC+EJUzAMsycb7HB32Kh9RN4+0gExjmPmZSAQjgURXIGATPegAvA=="
+  },
+  {
+    "package": "another-json",
+    "version": "0.2.0",
+    "integrity": "sha512-/Ndrl68UQLhnCdsAzEXLMFuOR546o2qbYRqCglaNHbjXrwG1ayTcdwr3zkSGOGtGXDyR5X9nCFfnyG2AFJIsqg=="
+  },
+  {
+    "package": "base-x",
+    "version": "5.0.1",
+    "integrity": "sha512-M7uio8Zt++eg3jPj+rHMfCC+IuygQHHCOU+IYsVtik6FWjuYpVt/+MRKcgsAMHh8mMFAwnB+Bs+mTrFiXjMzKg=="
+  },
+  {
+    "package": "bs58",
+    "version": "6.0.0",
+    "integrity": "sha512-PD0wEnEYg6ijszw/u8s+iI3H17cTymlrwkKhDhPZq+Sokl3AU4htyBFTjAeNAlCCmg0f53g6ih3jATyCKftTfw=="
+  },
+  {
+    "package": "content-type",
+    "version": "1.0.5",
+    "integrity": "sha512-nTjqfcBFEipKdXCv4YDQWCfmcLZKm81ldF0pAopTvyrFGVbcR6P/VAAd5G7N+0tTr8QqiU0tFadD6FK4NtJwOA=="
+  },
+  {
+    "package": "esbuild",
+    "version": "0.27.3",
+    "integrity": "sha512-8VwMnyGCONIs6cWue2IdpHxHnAjzxnw2Zr7MkVxB2vjmQ2ivqGFb4LEG3SMnv0Gb2F/G/2yA8zUaiL1gywDCCg=="
+  },
+  {
+    "package": "events",
+    "version": "3.3.0",
+    "integrity": "sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q=="
+  },
+  {
+    "package": "fake-indexeddb",
+    "version": "6.2.5",
+    "integrity": "sha512-CGnyrvbhPlWYMngksqrSSUT1BAVP49dZocrHuK0SvtR0D5TMs5wP0o3j7jexDJW01KSadjBp1M/71o/KR3nD1w=="
+  },
+  {
+    "package": "fsevents",
+    "version": "2.3.3",
+    "integrity": "sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw=="
+  },
+  {
+    "package": "get-tsconfig",
+    "version": "4.13.6",
+    "integrity": "sha512-shZT/QMiSHc/YBLxxOkMtgSid5HFoauqCE3/exfsEcwg1WkeqjG+V40yBbBrsD+jW2HDXcs28xOfcbm2jI8Ddw=="
+  },
+  {
+    "package": "jwt-decode",
+    "version": "4.0.0",
+    "integrity": "sha512-+KJGIyHgkGuIq3IEBNftfhW/LfWhXUIY6OmyVWjliu5KH1y0fw7VQ8YndE2O4qZdMSd9SqbnC8GOcZEy0Om7sA=="
+  },
+  {
+    "package": "loglevel",
+    "version": "1.9.2",
+    "integrity": "sha512-HgMmCqIJSAKqo68l0rS2AanEWfkxaZ5wNiEFb5ggm08lDs9Xl2KxBlX3PTcaD2chBM1gXAYf491/M2Rv8Jwayg=="
+  },
+  {
+    "package": "matrix-events-sdk",
+    "version": "0.0.1",
+    "integrity": "sha512-1QEOsXO+bhyCroIe2/A5OwaxHvBm7EsSQ46DEDn8RBIfQwN5HWBpFvyWWR4QY0KHPPnnJdI99wgRiAl7Ad5qaA=="
+  },
+  {
+    "package": "matrix-js-sdk",
+    "version": "38.2.0",
+    "integrity": "sha512-R3jzK8rDGi/3OXOax8jFFyxblCG9KTT5yuXAbvnZCGcpTm8lZ4mHQAn5UydVD8qiyUMNMpaaMd6/k7N+5I/yaQ=="
+  },
+  {
+    "package": "matrix-widget-api",
+    "version": "1.17.0",
+    "integrity": "sha512-5FHoo3iEP3Bdlv5jsYPWOqj+pGdFQNLWnJLiB0V7Ygne7bb+Gsj3ibyFyHWC6BVw+Z+tSW4ljHpO17I9TwStwQ=="
+  },
+  {
+    "package": "oidc-client-ts",
+    "version": "3.4.1",
+    "integrity": "sha512-jNdst/U28Iasukx/L5MP6b274Vr7ftQs6qAhPBCvz6Wt5rPCA+Q/tUmCzfCHHWweWw5szeMy2Gfrm1rITwUKrw=="
+  },
+  {
+    "package": "p-retry",
+    "version": "4.6.2",
+    "integrity": "sha512-312Id396EbJdvRONlngUx0NydfrIQ5lsYu0znKVUzVvArzEIt08V1qhtyESbGVd1FGX7UKtiFp5uwKZdM8wIuQ=="
+  },
+  {
+    "package": "resolve-pkg-maps",
+    "version": "1.0.0",
+    "integrity": "sha512-seS2Tj26TBVOC2NIc2rOe2y2ZO7efxITtLZcGSOnHHNOQ7CkiUBfw0Iw2ck6xkIhPwLhKNLS8BO+hEpngQlqzw=="
+  },
+  {
+    "package": "retry",
+    "version": "0.13.1",
+    "integrity": "sha512-XQBQ3I8W1Cge0Seh+6gjj03LbmRFWuoszgK9ooCpwYIrhhoO80pfq4cUkU5DkknwfOfFteRwlZ56PYOGYyFWdg=="
+  },
+  {
+    "package": "sdp-transform",
+    "version": "2.15.0",
+    "integrity": "sha512-KrOH82c/W+GYQ0LHqtr3caRpM3ITglq3ljGUIb8LTki7ByacJZ9z+piSGiwZDsRyhQbYBOBJgr2k6X4BZXi3Kw=="
+  },
+  {
+    "package": "tsx",
+    "version": "4.21.0",
+    "integrity": "sha512-5C1sg4USs1lfG0GFb2RLXsdpXqBSEhAaA/0kPL01wxzpMqLILNxIxIOKiILz+cdg/pLnOUxFYOR5yhHU666wbw=="
+  },
+  {
+    "package": "typescript",
+    "version": "5.9.3",
+    "integrity": "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="
+  },
+  {
+    "package": "undici-types",
+    "version": "6.21.0",
+    "integrity": "sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ=="
+  },
+  {
+    "package": "unhomoglyph",
+    "version": "1.0.6",
+    "integrity": "sha512-7uvcWI3hWshSADBu4JpnyYbTVc7YlhF5GDW/oPD5AxIxl34k4wXR3WDkPnzLxkN32LiTCTKMQLtKVZiwki3zGg=="
+  },
+  {
+    "package": "uuid",
+    "version": "11.1.0",
+    "integrity": "sha512-0/A9rDy9P7cJ+8w1c9WD9V//9Wj15Ce2MPz8Ri6032usz+NfePxx5AcN3bN+r6ZL6jEo066/yNYB3tn4pQEx+A=="
+  }
+]
