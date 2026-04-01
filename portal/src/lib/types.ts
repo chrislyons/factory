@@ -1,4 +1,4 @@
-export type AgentId = "boot" | "ig88" | "kelk" | "nan";
+export type AgentId = "coord" | "boot" | "kelk" | "nan" | "xamm" | "ig88";
 
 export type ApprovalGateType =
   | "tool_call"

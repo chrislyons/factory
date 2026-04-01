@@ -1,5 +1,7 @@
 # FCT041 Power Outage Post-Mortem and Resilience Hardening
 
+> **Note (2026-03-31):** Port assignments referenced in this document (MLX-LM instances on 41960–41963, plist labels mlx-lm-41960 through mlx-lm-41963) are superseded by the 2026-03-31 re-plumb sprint. The RunAtLoad fix described here applies to the new port assignments as well. Current assignments: Boot→41961, Kelk→41962, Nan→41963, IG-88→41988, Reasoning→41966, Coordinator reserved→41960. See FCT002 section 2.3 for the authoritative port table.
+
 **Date:** 2026-03-24
 **Commit:** 91a4ffe
 **Status:** Closed — all immediate fixes applied, deferred items tracked

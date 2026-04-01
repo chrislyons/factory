@@ -51,8 +51,8 @@ check_service() {
 
 # --- checks ---
 
-# MLX-LM servers (:41960-41963)
-for port in 41960 41961 41962 41963; do
+# MLX-LM servers (5 agent slots — see FCT002 §2.3)
+for port in 41961 41962 41963 41966 41988; do
   code=$(curl -sf -o /dev/null -w '%{http_code}' --max-time 5 \
     "http://$WHITEBOX:$port/v1/models" 2>/dev/null || echo "000")
   [[ "$code" == "200" ]] && ok=1 || ok=0

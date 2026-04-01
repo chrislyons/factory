@@ -1,5 +1,7 @@
 # FCT036 Phase C Sprint Report — Whitebox Migration Execution
 
+> **Note (2026-03-31):** Port assignments documented in this report (41960–41963 for Nanbeige/Qwen4B/LFM/Qwen9B) are superseded by the 2026-03-31 re-plumb sprint. Current assignments: Boot→41961, Kelk→41962, Nan→41963, IG-88→41988, Reasoning→41966, Coordinator reserved→41960. See FCT002 section 2.3 for the authoritative port table.
+
 **Session:** FCT033 Session 3 of 4
 **Date:** 2026-03-23
 **Duration:** ~3 hours

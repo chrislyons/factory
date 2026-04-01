@@ -3,7 +3,7 @@
 **Prefix:** FCT
 **Repo:** `~/dev/factory/`
 **Date:** 2026-03-16
-**Revised:** 2026-03-16 (post architecture review + model inventory pass)
+**Revised:** 2026-03-16 (post architecture review + model inventory pass); 2026-03-31 (port re-plumb — all MLX-LM ports updated)
 **Status:** Living document — open questions explicitly marked
 **Related:** FCT001, BKX074, BKX078, BKX079, BKX080, ATR001, ATR002
 
@@ -44,7 +44,7 @@ LLM inference is memory-bandwidth-bound, not compute-bound [1]. At 400 GB/s unif
 
 **Primary: MLX-LM** — Apple's native inference framework, direct Metal GPU utilization. Confirmed compatible with Qwen3.5, LFM2.5, and Nanbeige4.1 series. Optimal for Apple Silicon. All agent models use MLX format.
 
-**Model serving: Ollama** — manages model lifecycle (lazy loading/eviction, warm-start, OpenAI-compatible endpoints per model). Multiple agent sessions can share one loaded model instance without loading separate weights. This is the key mechanism enabling the Nanbeige weight-sharing pattern (section 3).
+**Model serving: MLX-LM** — per-agent dedicated server instances on reserved ports (see section 2.3). Multiple agent sessions can share one loaded model instance without loading separate weights. This is the key mechanism enabling the Nanbeige weight-sharing pattern (section 3).
 
 **Embeddings: nomic-embed-text via Ollama** — retained for Qdrant semantic retrieval.
 
@@ -56,23 +56,37 @@ LLM inference is memory-bandwidth-bound, not compute-bound [1]. At 400 GB/s unif
 
 **Always-on permanent stack:**
 
-| Component | Model | Quant | Size | Notes |
-|---|---|---|---|---|
-| Boot | Nanbeige4.1-3B Deep Sea | 8bit MLX | ~4.2GB | Dedicated instance — fine-tuning will diverge from IG-88 |
-| IG-88 | Nanbeige4.1-3B Deep Sea | 8bit MLX | ~4.2GB | Dedicated instance — fine-tuning target, trading domain |
-| Kelk | Qwen3.5-4B | Q6 MLX | ~3.4GB | Always-on; factual recall via Qdrant RAG |
-| Nan | LFM2.5-1.2B Thinking | 6bit MLX | ~1.0GB | Always-on observer; `<think>` traces visible |
-| Expert pool | Qwen3.5-4B | Q6 MLX | ~3.4GB | One instance, six expert identities injected per-task |
-| LFM2.5-VL-1.6B | Shared vision module | 6bit MLX | ~1.4GB | Charts (IG-88), documents (Boot) |
-| LFM2.5-Audio-1.5B | Shared audio module | 6bit MLX | ~1.3GB | Voice (Kelk), alerts (IG-88) |
-| nomic-embed-text | Embeddings | — | ~0.1GB | Qdrant retrieval |
-| **Always-on total** | | | **~19.0GB** | |
+| Component | Port | Model | Quant | Size | Notes |
+|---|---|---|---|---|---|
+| Boot | 41961 | Nanbeige4.1-3B Deep Sea | 8bit MLX | ~4.2GB | Dedicated instance — fine-tuning will diverge from IG-88 |
+| IG-88 | 41988 | Nanbeige4.1-3B Deep Sea | 8bit MLX | ~4.2GB | Dedicated instance — fine-tuning target, trading domain |
+| Kelk | 41962 | Qwen3.5-4B | Q6 MLX | ~3.4GB | Always-on; factual recall via Qdrant RAG |
+| Nan | 41963 | LFM2.5-1.2B Thinking | 6bit MLX | ~1.0GB | Always-on observer; `<think>` traces visible |
+| Expert pool | 41962 | Qwen3.5-4B | Q6 MLX | ~3.4GB | Shares Kelk's instance; identities injected per-task |
+| LFM2.5-VL-1.6B | — | Shared vision module | 6bit MLX | ~1.4GB | Charts (IG-88), documents (Boot) |
+| LFM2.5-Audio-1.5B | — | Shared audio module | 6bit MLX | ~1.3GB | Voice (Kelk), alerts (IG-88) |
+| nomic-embed-text | 11434 | Embeddings | — | ~0.1GB | Qdrant retrieval (Ollama) |
+| **Always-on total** | | | | **~19.0GB** | |
+
+**Port block reference (2026-03-31 re-plumb):**
+
+| Port | Agent | Model | Status |
+|------|-------|-------|--------|
+| 41960 | Coordinator | (reserved, no model) | Reserved |
+| 41961 | Boot | Nanbeige4.1-3B-8bit | ACTIVE |
+| 41962 | Kelk + Expert pool | Qwen3.5-4B-MLX-8bit | ACTIVE |
+| 41963 | Nan | LFM2.5-1.2B-Thinking-MLX-6bit | ACTIVE |
+| 41964 | Xamm | (reserved) | Reserved |
+| 41910–41919 | Coding agents block | (reserved) | Reserved |
+| 41966 | On-demand reasoning | Qwen3.5-9B-MLX-6bit | ACTIVE |
+| 41977 | Research | (reserved) | Reserved |
+| 41988 | IG-88 | Nanbeige4.1-3B-8bit | ACTIVE |
 
 **On-demand reasoning tier (evicts expert pool when loading):**
 
-| Component | Model | Quant | Size | Trigger |
-|---|---|---|---|---|
-| Reasoning | Qwen3.5-9B-Opus-Distilled | 6bit MLX | ~7.2GB | Routed by Nan/Boot when task exceeds 4B capability |
+| Component | Port | Model | Quant | Size | Trigger |
+|---|---|---|---|---|---|
+| Reasoning | 41966 | Qwen3.5-9B-MLX-6bit | 6bit MLX | ~7.2GB | Routed by Nan/Boot when task exceeds 4B capability |
 
 With expert pool evicted (~3.4GB freed): 19.0 − 3.4 + 7.2 = **~22.8GB peak** — within the 24GB cap with ~1.2GB KV cache headroom. Tight but viable; monitor in practice.
 

@@ -10,11 +10,17 @@ port,service,host,bind,status,launchd_label,notes
 8448,Matrix MCP Boot,whitebox,0.0.0.0,live,com.bootindustries.matrix-mcp-boot,@boot.industries:matrix.org via Pan
 41910,Portal Caddy,whitebox,0.0.0.0,live,com.bootindustries.portal-caddy,Static site + reverse proxy
 41911,GSD sidecar,whitebox,127.0.0.1,live,com.bootindustries.gsd-sidecar,jobs.json + status API
+41912-41913,Coding agents block,whitebox,,reserved,,Coding agent slots (reserved)
 41914,Auth sidecar,whitebox,127.0.0.1,live,com.bootindustries.factory-auth,Cookie auth (bcrypt + HMAC)
+41915-41919,Coding agents block,whitebox,,reserved,,Coding agent slots (reserved)
 41920-41939,Preview slots,whitebox,,reserved,,A/B deploys and version comparison
 41940-41949,Development,whitebox,,reserved,,Local dev servers
 41950-41959,Coordinator HTTP API,whitebox,,planned,,coordinator-rs REST endpoints
-41960,MLX-LM Nanbeige 3B,whitebox,0.0.0.0,live,com.bootindustries.mlx-lm-41960,Boot + IG-88 fallback
-41961,MLX-LM Qwen 4B,whitebox,0.0.0.0,live,com.bootindustries.mlx-lm-41961,Kelk + expert queries
-41962,MLX-LM LFM Thinking,whitebox,0.0.0.0,live,com.bootindustries.mlx-lm-41962,Nan lightweight
-41963,MLX-LM Qwen 9B,whitebox,0.0.0.0,live,com.bootindustries.mlx-lm-41963,On-demand reasoning (heavy)
+41960,Coordinator,whitebox,0.0.0.0,reserved,com.bootindustries.mlx-lm-41960,Reserved — no model assigned
+41961,Boot (Nanbeige4.1-3B-8bit),whitebox,0.0.0.0,live,com.bootindustries.mlx-lm-41961,Boot agent inference
+41962,Kelk (Qwen3.5-4B-MLX-8bit),whitebox,0.0.0.0,live,com.bootindustries.mlx-lm-41962,Kelk agent inference
+41963,Nan (LFM2.5-1.2B-Thinking-MLX-6bit),whitebox,0.0.0.0,live,com.bootindustries.mlx-lm-41963,Nan observer inference
+41964,Xamm,whitebox,0.0.0.0,reserved,com.bootindustries.mlx-lm-41964,Reserved — no model assigned
+41966,On-demand reasoning (Qwen3.5-9B-MLX-6bit),whitebox,0.0.0.0,live,com.bootindustries.mlx-lm-41966,Heavy reasoning tier
+41977,Research,whitebox,0.0.0.0,reserved,,Reserved — research agent slot
+41988,IG-88 (Nanbeige4.1-3B-8bit),whitebox,0.0.0.0,live,com.bootindustries.mlx-lm-41988,IG-88 dedicated inference slot

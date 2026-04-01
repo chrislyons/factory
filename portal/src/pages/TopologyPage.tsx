@@ -97,10 +97,12 @@ function EditableCell({ value, onSave }: { value: string; onSave: (v: string) =>
 }
 
 const AGENT_CSS_COLORS: Record<string, string> = {
+  coord: "var(--agent-coord)",
   boot: "var(--agent-boot)",
-  ig88: "var(--agent-ig88)",
   kelk: "var(--agent-kelk)",
   nan: "var(--agent-nan)",
+  xamm: "var(--agent-xamm)",
+  ig88: "var(--agent-ig88)",
 };
 
 export function TopologyPage() {
@@ -177,7 +179,7 @@ export function TopologyPage() {
           </div>
           <div className="topology-mini-node">
             <div className="topology-mini-node__label">Hardware</div>
-            <div className="topology-mini-node__meta">Blackbox RP5 / Cloudkicker M2</div>
+            <div className="topology-mini-node__meta">Whitebox M1 Max / Cloudkicker M2</div>
           </div>
         </div>
       </SurfaceCard>
@@ -207,10 +209,10 @@ export function TopologyPage() {
         <div className="topology-tier-list">
           {[
             { tier: 0, label: "coordinator-rs — deterministic, no LLM", color: "#22c55e", trigger: "all routing" },
-            { tier: 1, label: "Permanent Agents", color: "var(--text)", model: "Nanbeige 3B / Qwen3.5-4B / LFM2.5-1.2B", trigger: "routine tasks" },
-            { tier: 2, label: "On-Demand Reasoning", color: "var(--yellow)", model: "Qwen3.5-9B-Opus-Distilled", trigger: "Nan escalation" },
+            { tier: 1, label: "Permanent Agents", color: "var(--text)", model: "Nanbeige4.1-3B-8bit / Qwen3.5-4B-MLX-8bit / LFM2.5-1.2B-Thinking-MLX-6bit", trigger: "routine tasks" },
+            { tier: 2, label: "On-Demand Reasoning", color: "var(--yellow)", model: "Qwen3.5-9B-MLX-6bit (port 41966)", trigger: "Nan escalation" },
             { tier: 3, label: "Anthropic API", color: "var(--purple)", model: "Claude Sonnet 4.6 / Opus 4.6", trigger: "Tier 2 insufficient" },
-            { tier: 4, label: "Solo Intensive", color: "var(--red)", model: "Qwen3.5-27B-Opus-Distilled", trigger: "explicit user request" },
+            { tier: 4, label: "Solo Intensive", color: "var(--red)", model: "Qwen3.5-35B-A3B (external volume)", trigger: "explicit user request" },
           ].map((row) => (
             <div key={row.tier} className="topology-tier-row">
               <div

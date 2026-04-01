@@ -28,7 +28,7 @@ All Factory services use the `:419xx` range. Ranges are grouped by function with
 | :41920-41939 | Preview / version comparison slots | 20 ports |
 | :41940-41949 | Development (hot-reload, experiments) | 10 ports |
 | :41950-41959 | Coordinator (HTTP API, metrics, debug) | 10 ports |
-| :41960-41969 | Reserved (future services) | 10 ports |
+| :41960-41988 | MLX-LM inference (agent slots — see FCT002 §2.3) | Variable |
 
 ### Production (:41910-41919)
 

@@ -1,5 +1,7 @@
 # FCT040 Red-Team Security Audit — Auth, Coordinator, and Infrastructure
 
+> **Note (2026-03-31):** Port assignments referenced in this document (MLX-LM on 41960–41963, F-18 finding) are superseded by the 2026-03-31 re-plumb sprint. Current assignments: Boot→41961, Kelk→41962, Nan→41963, IG-88→41988, Reasoning→41966, Coordinator reserved→41960. The F-18 finding (services bound to 0.0.0.0) remains open — the specific port list has changed. See FCT002 section 2.3 for the authoritative port table.
+
 **Session:** Red-Team Audit — Three Independent Agents
 **Date:** 2026-03-24
 **Scope:** Full-stack security review of the factory multi-agent system (auth layer, coordinator-rs internals, and infrastructure/supply chain)

@@ -78,7 +78,7 @@ factory/
 | :41920-41939 | Preview slots |
 | :41940-41949 | Development |
 | :41950-41959 | Coordinator HTTP API (planned) |
-| :41960-41963 | MLX-LM inference (4 model slots) |
+| :41961-41963, :41966, :41988 | MLX-LM inference (5 agent slots — see FCT002 §2.3) |
 
 > **Blackbox retired 2026-03-23.** RP5 serves as dumb watchdog only (cron health checks → Matrix alerts).
 
