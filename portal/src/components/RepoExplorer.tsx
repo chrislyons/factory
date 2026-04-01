@@ -35,11 +35,11 @@ const HAS_GALLERY = new Set([
   "2110-audio-io","aes70","autoresearch","chainly","claudezilla",
   "claudezilla-docs","factory","git-av","grafana","hotbox","listmaker",
   "max4live-mcp","memex-mcp","narwhal","nmos","ondina",
-  "orpheus-sdk","osd-v2","research-vault","strudel","tooltime","vmotes",
+  "orpheus-sdk","osd-v2","research-vault","strudel","tooltime","vmotes","whitebox",
 ]);
 
 const HAS_COMMANDS = new Set([
-  "2110-audio-io","aes70","autoresearch","carbon-acx","cbc-schedule-sync",
+  "2110-audio-io","aes70","autoresearch","carbon-acx",
   "chainly","chrislyons-website","freqfinder","git-av","hotbox",
   "listmaker","max4live-mcp","memex-mcp","nmos","ondina",
   "orpheus-sdk","osd-v2","strudel","vmotes",
