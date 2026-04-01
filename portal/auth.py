@@ -1,16 +1,20 @@
 #!/usr/bin/env python3
 """Cookie-based auth sidecar for Factory Portal.
 
-Runs on :41912. Caddy forward_auth sends every request here.
-- Valid cookie → 200 (allow)
-- Missing/invalid cookie → 401 with redirect to /login
-- POST /auth/login → validate u/pw, set signed cookie, redirect
+Runs on :41914. Validates session cookies and proxies data API calls to GSD (:41911).
+- GET /auth/check       → 200 if valid cookie, 401 otherwise
+- GET /auth/validate    → 200 if valid cookie, 401 otherwise (forward_auth compat)
+- POST /auth/login      → JSON response with Set-Cookie (no redirect)
+- GET/PUT /jobs.json    → validate cookie, proxy to GSD :41911
+- GET /tasks.json       → validate cookie, proxy to GSD :41911
+- GET /status/*         → validate cookie, proxy to GSD :41911
 
-Cookie: HMAC-SHA256 signed, 30-day expiry, HttpOnly + SameSite=Lax.
+Cookie: HMAC-SHA256 signed, 30-day expiry, HttpOnly + SameSite=Strict.
 """
 
 import hashlib
 import hmac
+import http.client
 import http.server
 import json
 import os
@@ -22,6 +26,7 @@ import bcrypt
 
 # ── Config ────────────────────────────────────────────────────────────
 PORT = 41914
+GSD_PORT = 41911
 COOKIE_NAME = "factory_session"
 COOKIE_MAX_AGE = 30 * 24 * 3600  # 30 days
 BCRYPT_HASH = os.environ.get("AUTH_BCRYPT_HASH", "")
@@ -36,6 +41,8 @@ if not SECRET_KEY:
     print("FATAL: AUTH_SECRET environment variable is required. Generate with: python3 -c \"import secrets; print(secrets.token_hex(32))\"", file=sys.stderr)
     sys.exit(1)
 
+DATA_PATHS = ("/jobs.json", "/tasks.json")
+
 
 def sign_cookie(payload: str) -> str:
     import base64
@@ -49,7 +56,6 @@ def verify_cookie(cookie_val: str) -> bool:
     if "." not in cookie_val:
         return False
     encoded, sig = cookie_val.rsplit(".", 1)
-    # Decode base64 payload for HMAC verification
     try:
         payload = base64.urlsafe_b64decode(encoded.encode()).decode()
     except Exception:
@@ -85,7 +91,7 @@ def make_session_cookie() -> str:
         f"Path=/; "
         f"Max-Age={COOKIE_MAX_AGE}; "
         f"HttpOnly; "
-        f"SameSite=Lax"
+        f"SameSite=Strict"
     )
 
 
@@ -94,13 +100,7 @@ def get_cookie(headers, name):
     for part in cookie_header.split(";"):
         part = part.strip()
         if part.startswith(f"{name}="):
-            return part[len(name) + 1 :]
-    # Also check X-Forwarded-* headers from Caddy forward_auth
-    cookie_fwd = headers.get("X-Forwarded-Cookie", "")
-    for part in cookie_fwd.split(";"):
-        part = part.strip()
-        if part.startswith(f"{name}="):
-            return part[len(name) + 1 :]
+            return part[len(name) + 1:]
     return None
 
 
@@ -108,52 +108,123 @@ class AuthHandler(http.server.BaseHTTPRequestHandler):
     def log_message(self, fmt, *args):
         pass  # silent
 
-    def do_GET(self):
-        # Caddy forward_auth sends subrequests here
-        cookie = get_cookie(self.headers, COOKIE_NAME)
-        if cookie and verify_cookie(cookie):
-            fwd_method = self.headers.get("X-Forwarded-Method", "GET")
-            if fwd_method in ("POST", "PUT", "DELETE"):
-                csrf_cookie = get_cookie(self.headers, "factory_csrf")
-                csrf_header = self.headers.get("X-CSRF-Token", "")
-                if not csrf_cookie or not csrf_header or not hmac.compare_digest(csrf_cookie, csrf_header):
-                    self.send_response(403)
-                    self.end_headers()
-                    return
-            self.send_response(200)
-            self.end_headers()
-        else:
-            self.send_response(401)
-            self.end_headers()
+    def proxy_to_gsd(self, path):
+        """Forward a validated request to GSD sidecar and stream response back."""
+        length = int(self.headers.get("Content-Length", 0))
+        body = self.rfile.read(length) if length > 0 else None
+        forward_headers = {
+            k: v for k, v in self.headers.items()
+            if k.lower() not in ("host", "connection", "transfer-encoding")
+        }
+        conn = http.client.HTTPConnection("127.0.0.1", GSD_PORT, timeout=10)
+        conn.request(self.command, path, body=body, headers=forward_headers)
+        r = conn.getresponse()
+        resp_body = r.read()
+        self.send_response(r.status)
+        for h, v in r.getheaders():
+            if h.lower() not in ("transfer-encoding", "connection"):
+                self.send_header(h, v)
+        self.end_headers()
+        self.wfile.write(resp_body)
 
-    def do_POST(self):
-        if self.path != "/auth/login":
-            self.send_response(404)
-            self.end_headers()
+    def _cookie_valid(self):
+        cookie = get_cookie(self.headers, COOKIE_NAME)
+        return cookie and verify_cookie(cookie)
+
+    def _check_csrf(self):
+        csrf_cookie = get_cookie(self.headers, "factory_csrf")
+        csrf_header = self.headers.get("X-CSRF-Token", "")
+        return csrf_cookie and csrf_header and hmac.compare_digest(csrf_cookie, csrf_header)
+
+    def do_GET(self):
+        # Auth check endpoint (client-side session verification)
+        if self.path in ("/auth/check", "/auth/validate"):
+            if self._cookie_valid():
+                self.send_response(200)
+                self.end_headers()
+            else:
+                self.send_response(401)
+                self.end_headers()
             return
 
-        length = int(self.headers.get("Content-Length", 0))
-        body = self.rfile.read(length).decode()
-        params = urllib.parse.parse_qs(body)
-        user = params.get("username", [""])[0]
-        pw = params.get("password", [""])[0]
+        # Data proxy paths — validate cookie then forward to GSD
+        if self.path.startswith(DATA_PATHS) or self.path.startswith("/status/"):
+            if self._cookie_valid():
+                self.proxy_to_gsd(self.path)
+            else:
+                self.send_response(401)
+                self.end_headers()
+            return
 
-        redirect = params.get("redirect", ["/"])[0]
-        # Sanitize redirect — only allow relative paths
-        if not redirect.startswith("/") or redirect.startswith("//"):
-            redirect = "/"
+        self.send_response(404)
+        self.end_headers()
 
-        if user == AUTH_USER and bcrypt.checkpw(pw.encode(), BCRYPT_HASH.encode()):
-            csrf_token = generate_csrf_token()
-            self.send_response(303)
-            self.send_header("Set-Cookie", make_session_cookie())
-            self.send_header("Set-Cookie", make_csrf_cookie(csrf_token))
-            self.send_header("Location", redirect)
-            self.end_headers()
-        else:
-            self.send_response(303)
-            self.send_header("Location", f"/login?error=1&redirect={urllib.parse.quote(redirect)}")
-            self.end_headers()
+    def do_PUT(self):
+        if self.path.startswith(DATA_PATHS) or self.path.startswith("/status/"):
+            if self._cookie_valid() and self._check_csrf():
+                self.proxy_to_gsd(self.path)
+            elif not self._cookie_valid():
+                self.send_response(401)
+                self.end_headers()
+            else:
+                self.send_response(403)
+                self.end_headers()
+            return
+        self.send_response(404)
+        self.end_headers()
+
+    def do_POST(self):
+        if self.path == "/auth/login":
+            length = int(self.headers.get("Content-Length", 0))
+            body = self.rfile.read(length)
+            content_type = self.headers.get("Content-Type", "")
+            if "application/json" in content_type:
+                d = json.loads(body.decode())
+                user = d.get("username", "")
+                pw = d.get("password", "")
+                redirect = d.get("redirect", "/")
+            else:
+                params = urllib.parse.parse_qs(body.decode())
+                user = params.get("username", [""])[0]
+                pw = params.get("password", [""])[0]
+                redirect = params.get("redirect", ["/"])[0]
+
+            if not redirect.startswith("/") or redirect.startswith("//"):
+                redirect = "/"
+
+            if user == AUTH_USER and bcrypt.checkpw(pw.encode(), BCRYPT_HASH.encode()):
+                csrf_token = generate_csrf_token()
+                resp = json.dumps({"ok": True, "redirect": redirect}).encode()
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(resp)))
+                self.send_header("Set-Cookie", make_session_cookie())
+                self.send_header("Set-Cookie", make_csrf_cookie(csrf_token))
+                self.end_headers()
+                self.wfile.write(resp)
+            else:
+                resp = json.dumps({"ok": False, "error": "invalid_credentials"}).encode()
+                self.send_response(401)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(resp)))
+                self.end_headers()
+                self.wfile.write(resp)
+            return
+
+        # Data proxy POST paths
+        if self.path.startswith(DATA_PATHS) or self.path.startswith("/status/"):
+            if self._cookie_valid() and self._check_csrf():
+                self.proxy_to_gsd(self.path)
+            elif not self._cookie_valid():
+                self.send_response(401)
+                self.end_headers()
+            else:
+                self.send_response(403)
+                self.end_headers()
+            return
+
+        self.send_response(404)
+        self.end_headers()
 
 
 if __name__ == "__main__":

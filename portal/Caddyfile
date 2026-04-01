@@ -2,7 +2,7 @@
 	admin off
 }
 
-http://100.88.222.111:41910 {
+http://100.88.222.111:41910, http://whitebox.taila25a34.ts.net:41910 {
 	encode gzip
 
 	header {
@@ -12,15 +12,10 @@ http://100.88.222.111:41910 {
 		Referrer-Policy "strict-origin-when-cross-origin"
 	}
 
-	# ── Public routes (no auth) ──────────────────────────────────────
+	# ── Public routes ─────────────────────────────────────────────────
 	handle /login {
 		root * /Users/nesbitt/dev/factory/portal/dist-production/pages
 		rewrite * /login.html
-		file_server
-	}
-
-	handle /login.js {
-		root * /Users/nesbitt/dev/factory/portal/dist-production/pages
 		file_server
 	}
 
@@ -35,74 +30,31 @@ http://100.88.222.111:41910 {
 		file_server
 	}
 
-	# ── Protected routes (HMAC cookie validated via auth sidecar) ────
-	route /jobs.json {
-		forward_auth 127.0.0.1:41914 {
-			uri /auth/validate
-			@error status 4xx
-			handle_response @error {
-				redir * /login?redirect={http.request.uri} 302
-			}
-		}
-		reverse_proxy 127.0.0.1:41911
+	# ── Data routes — auth.py validates cookie and proxies to GSD ─────
+	handle /jobs.json {
+		reverse_proxy 127.0.0.1:41914
 	}
 
-	route /tasks.json {
-		forward_auth 127.0.0.1:41914 {
-			uri /auth/validate
-			@error status 4xx
-			handle_response @error {
-				redir * /login?redirect={http.request.uri} 302
-			}
-		}
-		reverse_proxy 127.0.0.1:41911
+	handle /tasks.json {
+		reverse_proxy 127.0.0.1:41914
 	}
 
-	route /status/* {
-		forward_auth 127.0.0.1:41914 {
-			uri /auth/validate
-			@error status 4xx
-			handle_response @error {
-				redir * /login?redirect={http.request.uri} 302
-			}
-		}
-		reverse_proxy 127.0.0.1:41911
+	handle /status/* {
+		reverse_proxy 127.0.0.1:41914
 	}
 
-	route /repos/* {
-		forward_auth 127.0.0.1:41914 {
-			uri /auth/validate
-			@error status 4xx
-			handle_response @error {
-				redir * /login?redirect={http.request.uri} 302
-			}
-		}
+	handle /repos/* {
 		root * /Users/nesbitt/dev/factory/portal
 		file_server
 	}
 
-	route /galleries/* {
-		forward_auth 127.0.0.1:41914 {
-			uri /auth/validate
-			@error status 4xx
-			handle_response @error {
-				redir * /login?redirect={http.request.uri} 302
-			}
-		}
+	handle /galleries/* {
 		header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; frame-ancestors 'none'; object-src 'none'"
 		root * /Users/nesbitt/dev/factory/portal/dist-production
 		file_server
 	}
 
-	route {
-		forward_auth 127.0.0.1:41914 {
-			uri /auth/validate
-			@error status 4xx
-			handle_response @error {
-				redir * /login?redirect={http.request.uri} 302
-			}
-		}
-
+	handle {
 		root * /Users/nesbitt/dev/factory/portal/dist-production
 
 		@html {
