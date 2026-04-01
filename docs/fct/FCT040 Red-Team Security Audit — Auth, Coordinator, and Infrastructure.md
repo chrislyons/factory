@@ -1,6 +1,6 @@
 # FCT040 Red-Team Security Audit — Auth, Coordinator, and Infrastructure
 
-> **Note (2026-03-31):** Port assignments referenced in this document (MLX-LM on 41960–41963, F-18 finding) are superseded by the 2026-03-31 re-plumb sprint. Current assignments: Boot→41961, Kelk→41962, Nan→41963, IG-88→41988, Reasoning→41966, Coordinator reserved→41960. The F-18 finding (services bound to 0.0.0.0) remains open — the specific port list has changed. See FCT002 section 2.3 for the authoritative port table.
+> **Note (2026-03-31):** Port assignments referenced in this document (MLX-LM on 41960–41963, F-18 finding) are superseded by the 2026-03-31 MLX re-plumb sprint and the subsequent infrastructure re-plumb. Current MLX assignments: Boot→41961, Kelk→41962, Nan→41963, IG-88→41988, Reasoning→41966, Coordinator reserved→41960. Current infra ports: Pantalaimon→41200, FalkorDB→41430, Graphiti MCP→41440, Qdrant HTTP→41450, Qdrant gRPC→41455, Qdrant MCP→41460, Research MCP→41470, Matrix MCP Coord→41400, Matrix MCP Boot→41401. The F-18 finding (services bound to 0.0.0.0) remains open — the specific port list has changed. See FCT002 section 2.3 and infra/ports.csv for the authoritative port tables.
 
 **Session:** Red-Team Audit — Three Independent Agents
 **Date:** 2026-03-24
@@ -283,9 +283,9 @@ Both SSH commands pass `-o StrictHostKeyChecking=no`. A compromised Tailscale ho
 **Files:** `infra/ports.csv`, `plists/com.bootindustries.mlx-lm-*.plist`
 **Agent:** rt-infra
 
-Services bound to all interfaces: Qdrant (6333/6334), Matrix MCP Coord (8440), Qdrant MCP (8442), Research MCP (8443), Graphiti MCP (8444), Matrix MCP Boot (8448), Portal Caddy (41910), MLX-LM x4 (41960–41963). The four MLX-LM inference servers pass `--host 0.0.0.0` and carry no authentication. If Whitebox is on any shared or misconfigured network segment, all 11 services are reachable without credentials.
+Services bound to all interfaces (post-re-plumb ports): Qdrant HTTP (41450), Qdrant gRPC (41455), Matrix MCP Coord (41400), Qdrant MCP (41460), Research MCP (41470), Graphiti MCP (41440), Matrix MCP Boot (41401), Portal Caddy (41910), MLX-LM x5 (41961–41963, 41966, 41988). The MLX-LM inference servers pass `--host 0.0.0.0` and carry no authentication. If Whitebox is on any shared or misconfigured network segment, all services are reachable without credentials.
 
-Correctly bound to 127.0.0.1: GSD sidecar (41911), auth sidecar (41914), Pantalaimon (8009), FalkorDB (6379).
+Correctly bound to 127.0.0.1: GSD sidecar (41911), auth sidecar (41914), Pantalaimon (41200), FalkorDB (41430).
 
 **Remediation:** Bind all non-portal services to the Tailscale interface IP rather than 0.0.0.0. For MLX-LM, add a reverse proxy with token auth or bind to 127.0.0.1 and access via SSH tunnel or Tailscale-only routing.
 
@@ -470,7 +470,7 @@ This plan covers all feasible in-scope fixes. Breaking/architectural changes are
 | `routing_hop_counts` unbounded map | Rust change + rebuild | Add `retain` eviction keyed on event age. |
 | `glob_match` single-star only | Rust change + rebuild | Replace with `glob` crate or implement multi-star split. |
 | `--permission-mode auto` invisible to coordinator | Requires Claude Code internals investigation | Architectural concern for FCT038. |
-| 0.0.0.0 binding (MLX-LM, MCP servers) | Live Whitebox plist edits + service restarts; must be done on Whitebox directly | Bind to `100.88.222.111` (Tailscale IP) in each plist. Do in next Whitebox maintenance window. |
+| 0.0.0.0 binding (MLX-LM, MCP servers) | Live Whitebox plist edits + service restarts; must be done on Whitebox directly | Bind to `100.88.222.111` (Tailscale IP) in each plist. See infra/ports.csv for current port list. Do in next Whitebox maintenance window. |
 | Budget enforcement (soft limit) | Rust change + rebuild | Add `return Err` or session pause on `BudgetCheckResult::Paused`. |
 | Delegate symlink traversal | Rust change + rebuild | Use `canonicalize()` before the `..` check. |
 | Frozen harness substring bypass | Rust change + rebuild | Replace substring match with proper path canonicalization. |
@@ -652,7 +652,7 @@ The root-cause auth issue (**Caddy cookie presence ≠ validity**) requires a de
 - Replace Caddy with nginx + `auth_request` module
 - Implement a Caddy `handle_errors` approach that redirects non-200 from auth.py
 
-Until resolved, the portal relies on Tailscale network isolation as its primary access control. All 11 services bound to `0.0.0.0` should also be moved to `100.88.222.111` in the same Whitebox maintenance window.
+Until resolved, the portal relies on Tailscale network isolation as its primary access control. All services bound to `0.0.0.0` should also be moved to `100.88.222.111` in the same Whitebox maintenance window. See infra/ports.csv for the current port list.
 
 ---
 

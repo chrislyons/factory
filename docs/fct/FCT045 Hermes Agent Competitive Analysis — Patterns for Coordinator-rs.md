@@ -1,6 +1,6 @@
 # FCT045 Hermes Agent Competitive Analysis — Patterns for Coordinator-rs
 
-> **Note (2026-03-31):** Port assignments referenced in the example YAML in section 4.1 (e.g., `endpoint: http://localhost:41960` for ig88) reflect the pre-re-plumb scheme and are illustrative only. Current assignments: Boot→41961, Kelk→41962, Nan→41963, IG-88→41988, Reasoning→41966, Coordinator reserved→41960. See FCT002 section 2.3 for the authoritative port table.
+> **Note (2026-03-31):** The example YAML in section 4.1 has been updated to reflect current port assignments. MLX assignments: Boot→41961, Kelk→41962, Nan→41963, IG-88→41988, Reasoning→41966, Coordinator reserved→41960. Infra service ports have also been re-plumbed (Pantalaimon→41200, FalkorDB→41430, Graphiti MCP→41440, Qdrant→41450/41455, etc.). See FCT002 section 2.3 and infra/ports.csv for authoritative tables.
 
 **Prefix:** FCT | **Repo:** ~/dev/factory/ | **Date:** 2026-03-31 | **Status:** Complete
 **Related:** FCT005, FCT007, FCT038, FCT039
@@ -69,8 +69,8 @@ agents:
   ig88:
     providers:
       - name: mlx-local
-        endpoint: http://localhost:41960
-        model: /Users/nesbitt/models/Qwen3.5-4B-MLX-8bit
+        endpoint: http://localhost:41988
+        model: /Users/nesbitt/models/Nanbeige4.1-3B-8bit
         timeout_ms: 10000
       - name: anthropic
         model: claude-sonnet-4-20250514
@@ -169,7 +169,7 @@ Hermes's long-term vision includes self-owning weights — agents that fine-tune
 
 Ollama 0.19 (previewed March 2026) introduces an MLX backend for Apple Silicon, enabling local model serving through Ollama's unified API on macOS [4]. If Ollama's MLX support matures to cover training workloads (not just inference), the convergence point is significant: agents running on Apple Silicon could train their own models locally without cloud GPU access.
 
-Whitebox (M1 Max, 32GB unified memory) is positioned for this convergence. Current MLX-LM inference already runs four model slots on ports 41960--41963. If Ollama subsumes MLX-LM's serving role and adds training support, the path from "agent uses local model" to "agent improves local model" shortens considerably.
+Whitebox (M1 Max, 32GB unified memory) is positioned for this convergence. Current MLX-LM inference already runs five agent slots on ports 41961–41963, 41966, 41988. If Ollama subsumes MLX-LM's serving role and adds training support, the path from "agent uses local model" to "agent improves local model" shortens considerably.
 
 **Timeline estimate:** 6--12 months before Ollama MLX supports enough model architectures for practical agent self-improvement. Monitor but do not invest engineering effort yet.
 

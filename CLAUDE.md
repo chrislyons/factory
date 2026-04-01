@@ -65,13 +65,16 @@ factory/
 
 | Port | Service |
 |------|---------|
-| :6333-6334 | Qdrant (HTTP + gRPC) |
-| :8009 | Pantalaimon (E2EE proxy) |
-| :8440 | Matrix MCP Coord |
-| :8442 | Qdrant MCP (projects-vault) |
-| :8443 | Research MCP (research-vault) |
-| :8444 | Graphiti MCP |
-| :8448 | Matrix MCP Boot |
+| :41200 | Pantalaimon (E2EE proxy) |
+| :41400 | Matrix MCP Coord |
+| :41401 | Matrix MCP Boot |
+| :41430 | FalkorDB (graph DB) |
+| :41440 | Graphiti MCP (SSE) |
+| :41450 | Qdrant HTTP |
+| :41455 | Qdrant gRPC |
+| :41460 | Qdrant MCP (projects-vault) |
+| :41470 | Research MCP (research-vault) |
+| :41010 | LiteLLM proxy (planned) |
 | :41910 | Portal Caddy (live) |
 | :41911 | GSD sidecar (jobs.json + status) |
 | :41914 | Auth sidecar (cookie auth) |

@@ -7,7 +7,7 @@ Rust orchestration binary for the factory multi-agent system. Runs on Whitebox a
 ```
 Matrix rooms (matrix.org)
     ↕ E2EE
-Pantalaimon (:8009)
+Pantalaimon (:41200)
     ↕ HTTP
 coordinator-rs
     ↕ stdin/stdout JSON
@@ -66,9 +66,9 @@ All services must be running for full functionality:
 
 | Service | Port | Required for |
 |---------|------|-------------|
-| Pantalaimon | :8009 | All Matrix operations |
-| Graphiti MCP | :8444 | Agent memory |
-| Qdrant MCP | :8442/:8443 | Project/research vault |
+| Pantalaimon | :41200 | All Matrix operations |
+| Graphiti MCP | :41440 | Agent memory |
+| Qdrant MCP | :41460/:41470 | Project/research vault |
 
 On cold reboot, `KeepAlive` retries until dependencies are available. No `WaitForDependencies` configured — coordinator will log sync errors until Pantalaimon is ready (typically <30s).
 

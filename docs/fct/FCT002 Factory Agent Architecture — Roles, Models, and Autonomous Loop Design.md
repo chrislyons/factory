@@ -300,9 +300,9 @@ The Anthropic API is not a fallback — it is a deliberate high-capability tier 
 
 ### 7.1 Current Stack
 
-- **Qdrant** (port 6333): Semantic retrieval over large corpus (PREFIX docs, research vault). Embedding model: nomic-embed-text.
-- **Graphiti** (port 8444): Temporal facts, entity relationships, conversation memory with context evolution. Entity extraction: Haiku 4.5. Note: Haiku extraction errors compound over time — monitor entity quality, especially for IG-88 signal facts where precision matters.
-- **FalkorDB** (port 6379): Graph database backend for Graphiti.
+- **Qdrant** (port 41450): Semantic retrieval over large corpus (PREFIX docs, research vault). Embedding model: nomic-embed-text.
+- **Graphiti** (port 41440): Temporal facts, entity relationships, conversation memory with context evolution. Entity extraction: Haiku 4.5. Note: Haiku extraction errors compound over time — monitor entity quality, especially for IG-88 signal facts where precision matters.
+- **FalkorDB** (port 41430): Graph database backend for Graphiti.
 
 ### 7.2 Hybrid Retrieval Upgrade
 

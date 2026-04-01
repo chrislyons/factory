@@ -404,10 +404,10 @@ const NODE_DATA = {
         { text: 'Embedding: nomic-embed-text via Ollama, ~0.1GB', mono: true },
         { text: 'Upgrade pending: hybrid BM25 + vector (+26% accuracy, 91% faster) — schedule for Whitebox migration' },
       ]},
-      { heading: 'Graphiti (port 8444)', rows: [
+      { heading: 'Graphiti (port 41440)', rows: [
         { text: 'Temporal facts, entity relationships, conversation memory' },
         { text: 'Entity extraction: Haiku 4.5 — errors compound over time, monitor especially for IG-88 signal facts' },
-        { text: 'FalkorDB (port 6379) graph backend' },
+        { text: 'FalkorDB (port 41430) graph backend' },
       ]},
       { heading: 'Working memory', rows: [
         { text: 'Per-session state: structured markdown files (74.0% vs 68.5% specialized tools on LoCoMo)' },
@@ -632,8 +632,8 @@ function App() {
             onClick={() => select('memory')}
           >
             <div style={{ marginTop: 10 }}>
-              <MemRow name="Qdrant :6333" color="#818cf8" detail="Semantic search · PREFIX docs · research vault" />
-              <MemRow name="Graphiti :8444" color="#a78bfa" detail="Temporal facts · entity relations · conv. memory" />
+              <MemRow name="Qdrant :41450" color="#818cf8" detail="Semantic search · PREFIX docs · research vault" />
+              <MemRow name="Graphiti :41440" color="#a78bfa" detail="Temporal facts · entity relations · conv. memory" />
               <MemRow name="nomic-embed" color="#60a5fa" detail="Embeddings via Ollama · 0.1GB" />
             </div>
           </Node>

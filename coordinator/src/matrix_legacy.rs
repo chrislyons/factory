@@ -1,6 +1,6 @@
 /// Pantalaimon HTTP client — Matrix Client-Server API over local proxy.
 ///
-/// The coordinator speaks plain HTTP to Pantalaimon at http://127.0.0.1:8009.
+/// The coordinator speaks plain HTTP to Pantalaimon at http://127.0.0.1:41200.
 /// Pantalaimon handles Olm/Megolm E2EE transparently. From this module's perspective
 /// all messages are plaintext. See BKX084 for the architectural rationale.
 use anyhow::{bail, Context, Result};
@@ -36,7 +36,7 @@ pub struct Mentions {
 // Constants
 // ============================================================================
 
-const DEFAULT_PANTALAIMON_URL: &str = "http://127.0.0.1:8009";
+const DEFAULT_PANTALAIMON_URL: &str = "http://127.0.0.1:41200";
 const SYNC_TIMEOUT_SECS: u64 = 30;
 const REQUEST_TIMEOUT_SECS: u64 = 30;
 const MAX_RESPONSE_LENGTH: usize = 30_000;

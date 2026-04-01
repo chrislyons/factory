@@ -442,12 +442,12 @@
                 </tr>
                 <tr class="section-row hidden" data-section="vault">
                     <td class="job">Qdrant health</td>
-                    <td><code class="command">curl -s http://100.87.53.109:6333/collections/vault | python3 -m json.tool | head -10</code></td>
+                    <td><code class="command">curl -s http://100.88.222.111:41450/collections/vault | python3 -m json.tool | head -10</code></td>
                     <td class="description">Check Qdrant vault collection status</td>
                 </tr>
                 <tr class="section-row hidden" data-section="vault">
                     <td class="job">Backrooms history</td>
-                    <td><code class="command">ssh blackbox "TKN=\$(mcp-env.sh get KELK_MATRIX) && curl -s 'http://127.0.0.1:8009/_matrix/client/r0/rooms/%21TlibpvdxVpGNAgjlir%3Amatrix.org/messages?dir=b&amp;limit=20' -H 'Authorization: Bearer '\"\$TKN\""</code></td>
+                    <td><code class="command">ssh whitebox "TKN=\$(~/.config/ig88/mcp-env.sh MATRIX_TOKEN_KELK_PAN -- printenv MATRIX_TOKEN_KELK_PAN) && curl -s 'http://127.0.0.1:41200/_matrix/client/r0/rooms/%21TlibpvdxVpGNAgjlir%3Amatrix.org/messages?dir=b&amp;limit=20' -H 'Authorization: Bearer '\"\$TKN\""</code></td>
                     <td class="description">Fetch recent Backrooms Matrix messages via Pantalaimon</td>
                 </tr>
 
@@ -482,8 +482,8 @@
                 </tr>
                 <tr class="section-row hidden" data-section="bot-trust">
                     <td class="job">Pantalaimon restart fix</td>
-                    <td><code class="command">ssh blackbox 'sudo kill $(sudo ss -tlnp sport = 8009 | grep -oP "pid=\K[0-9]+") 2>/dev/null; sudo systemctl restart pantalaimon && sudo systemctl restart matrix-coordinator'</code></td>
-                    <td class="description">Kill stale pan process holding port 8009, restart pan + coordinator. Run sign-all-devices after if new red flags appear.</td>
+                    <td><code class="command">ssh whitebox 'launchctl unload ~/Library/LaunchAgents/com.pantalaimon.plist; sleep 1; launchctl load ~/Library/LaunchAgents/com.pantalaimon.plist'</code></td>
+                    <td class="description">Restart Pantalaimon on Whitebox (port 41200). Run sign-all-devices after if new red flags appear.</td>
                 </tr>
 
                 <!-- Documentation -->

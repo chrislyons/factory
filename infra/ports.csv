@@ -1,13 +1,14 @@
 port,service,host,bind,status,launchd_label,notes
-6333,Qdrant HTTP,whitebox,0.0.0.0,live,,Vector DB (SSH tunnel from Lima VM)
-6334,Qdrant gRPC,whitebox,0.0.0.0,live,,Vector DB gRPC (SSH tunnel from Lima VM)
-6379,FalkorDB,whitebox,127.0.0.1,live,,Graph DB for Graphiti (Lima VM)
-8009,Pantalaimon,whitebox,127.0.0.1,live,,Matrix E2EE proxy
-8440,Matrix MCP Coord,whitebox,0.0.0.0,live,com.bootindustries.matrix-mcp-coord,@coord:matrix.org via Pan
-8442,Qdrant MCP (projects-vault),whitebox,0.0.0.0,live,com.bootindustries.qdrant-mcp,SSE MCP daemon
-8443,Research MCP (research-vault),whitebox,0.0.0.0,live,com.bootindustries.research-mcp,SSE MCP daemon
-8444,Graphiti MCP,whitebox,0.0.0.0,live,,Knowledge graph MCP (SSH tunnel from Lima VM)
-8448,Matrix MCP Boot,whitebox,0.0.0.0,live,com.bootindustries.matrix-mcp-boot,@boot.industries:matrix.org via Pan
+41010,LiteLLM proxy,whitebox,127.0.0.1,planned,,Unified LLM API (Phase 2)
+41200,Pantalaimon,whitebox,127.0.0.1,live,,Matrix E2EE proxy
+41400,Matrix MCP Coord,whitebox,0.0.0.0,live,com.bootindustries.matrix-mcp-coord,@coord:matrix.org via Pan
+41401,Matrix MCP Boot,whitebox,0.0.0.0,live,com.bootindustries.matrix-mcp-boot,@boot.industries:matrix.org via Pan
+41430,FalkorDB,whitebox,127.0.0.1,live,,Graph DB for Graphiti
+41440,Graphiti MCP,whitebox,0.0.0.0,live,,Knowledge graph MCP (SSE)
+41450,Qdrant HTTP,whitebox,0.0.0.0,live,,Vector DB HTTP
+41455,Qdrant gRPC,whitebox,0.0.0.0,live,,Vector DB gRPC
+41460,Qdrant MCP (projects-vault),whitebox,0.0.0.0,live,com.bootindustries.qdrant-mcp,SSE MCP daemon
+41470,Research MCP (research-vault),whitebox,0.0.0.0,live,com.bootindustries.research-mcp,SSE MCP daemon
 41910,Portal Caddy,whitebox,0.0.0.0,live,com.bootindustries.portal-caddy,Static site + reverse proxy
 41911,GSD sidecar,whitebox,127.0.0.1,live,com.bootindustries.gsd-sidecar,jobs.json + status API
 41912-41913,Coding agents block,whitebox,,reserved,,Coding agent slots (reserved)

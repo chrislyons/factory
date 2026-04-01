@@ -59,21 +59,21 @@ for port in 41961 41962 41963 41966 41988; do
   check_service "mlx-$port" "$ok" "$code"
 done
 
-# Qdrant (:6333)
+# Qdrant (:41450)
 code=$(curl -sf -o /dev/null -w '%{http_code}' --max-time 5 \
-  "http://$WHITEBOX:6333/collections" 2>/dev/null || echo "000")
+  "http://$WHITEBOX:41450/collections" 2>/dev/null || echo "000")
 [[ "$code" == "200" ]] && ok=1 || ok=0
 check_service "qdrant" "$ok" "$code"
 
-# Graphiti SSE (:8444) — connection opened (exit 28) = healthy
+# Graphiti SSE (:41440) — connection opened (exit 28) = healthy
 ec=0
-curl -sf -o /dev/null --max-time 3 "http://$WHITEBOX:8444/sse" 2>/dev/null || ec=$?
+curl -sf -o /dev/null --max-time 3 "http://$WHITEBOX:41440/sse" 2>/dev/null || ec=$?
 # exit 0 (response completed) or 28 (timeout = stream open) both mean healthy
 [[ "$ec" == "0" || "$ec" == "28" ]] && ok=1 || ok=0
 check_service "graphiti" "$ok" "exit-$ec"
 
-# Pantalaimon TCP (:8009) — Pan binds to loopback on Whitebox, check via SSH
-if ssh -o ConnectTimeout=5 -o BatchMode=yes -o StrictHostKeyChecking=accept-new whitebox '(echo >/dev/tcp/127.0.0.1/8009) 2>/dev/null' 2>/dev/null; then
+# Pantalaimon TCP (:41200) — Pan binds to loopback on Whitebox, check via SSH
+if ssh -o ConnectTimeout=5 -o BatchMode=yes -o StrictHostKeyChecking=accept-new whitebox '(echo >/dev/tcp/127.0.0.1/41200) 2>/dev/null' 2>/dev/null; then
   ok=1
 else
   ok=0
