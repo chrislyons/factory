@@ -4,6 +4,7 @@ Project documentation index for factory.
 
 ## Recent Documents
 
+- [[FCT046 Provider Failover Chain and Hermes Integration Architecture]]
 - [[FCT045 Hermes Agent Competitive Analysis — Patterns for Coordinator-rs]]
 - [[FCT044 Portal Static Page Modularization — Shared Asset Extraction]]
 - [[FCT043 Matrix Mechanisms Research — Spaces, Threads, Replies, and Notifications]]
@@ -61,6 +62,7 @@ Project documentation index for factory.
 - [[FCT043 Matrix Mechanisms Research — Spaces, Threads, Replies, and Notifications]]
 - [[FCT044 Portal Static Page Modularization — Shared Asset Extraction]]
 - [[FCT045 Hermes Agent Competitive Analysis — Patterns for Coordinator-rs]]
+- [[FCT046 Provider Failover Chain and Hermes Integration Architecture]]
 
 ## Navigation
 
@@ -74,4 +76,4 @@ Project documentation index for factory.
 
 ---
 
-**Last Generated:** 2026-03-29
+**Last Generated:** 2026-04-02
