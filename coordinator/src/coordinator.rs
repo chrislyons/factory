@@ -231,10 +231,8 @@ struct CoordinatorState {
     last_identity_check: Instant,
     /// Last timer check timestamp
     last_timer_check: Instant,
-    /// Active LLM provider index
-    active_provider_index: usize,
-    /// LLM provider consecutive failure count
-    llm_consecutive_failures: u32,
+    /// Provider failover chain (ordered failover with health tracking)
+    provider_chain: crate::provider_chain::ProviderChain,
     /// Last LLM health check timestamp
     last_llm_health_check: Instant,
     /// Inter-agent routing hop counts (keyed by original event_id)
@@ -295,6 +293,29 @@ impl CoordinatorState {
 
         let infra_checker = InfraChecker::new(&config.settings);
 
+        // Build provider chain before moving config into Self
+        let provider_chain = {
+            let providers = config.settings.llm_providers.clone();
+            if providers.is_empty() {
+                crate::provider_chain::ProviderChain::new(vec![
+                    crate::config::LLMProviderConfig {
+                        name: "anthropic".to_string(),
+                        cli: "claude".to_string(),
+                        model: "claude-haiku-4-5-20251001".to_string(),
+                        fallback_model: "claude-sonnet-4-6".to_string(),
+                        health_url: "https://api.anthropic.com/v1/messages".to_string(),
+                        env: HashMap::new(),
+                        timeout_ms: None,
+                        retry_count: 1,
+                        backoff_ms: 1000,
+                        provider_type: crate::config::ProviderType::Cloud,
+                    },
+                ])
+            } else {
+                crate::provider_chain::ProviderChain::new(providers)
+            }
+        };
+
         Ok(Self {
             config,
             sessions: HashMap::new(),
@@ -326,8 +347,7 @@ impl CoordinatorState {
             identity_hashes: HashMap::new(),
             last_identity_check: Instant::now(),
             last_timer_check: Instant::now(),
-            active_provider_index: 0,
-            llm_consecutive_failures: 0,
+            provider_chain,
             last_llm_health_check: Instant::now(),
             routing_hop_counts: HashMap::new(),
             memory_rate_limiter: memory::MemoryRateLimiter::new(),
@@ -667,25 +687,8 @@ async fn init_agent_sessions(state: &mut CoordinatorState) -> Result<()> {
             }
         };
 
-        // Get provider
-        let provider = state
-            .config
-            .settings
-            .llm_providers
-            .first()
-            .cloned()
-            .unwrap_or_else(|| crate::config::LLMProviderConfig {
-                name: "anthropic".to_string(),
-                cli: "claude".to_string(),
-                model: "claude-haiku-4-5-20251001".to_string(),
-                fallback_model: "claude-sonnet-4-6".to_string(),
-                health_url: "https://api.anthropic.com/v1/messages".to_string(),
-                env: HashMap::new(),
-                timeout_ms: None,
-                retry_count: 1,
-                backoff_ms: 1000,
-                provider_type: crate::config::ProviderType::Cloud,
-            });
+        // Get provider from failover chain (respects current active index)
+        let provider = state.provider_chain.current().clone();
 
         // Build system prompt
         let system_prompt = build_system_prompt(agent_name, &agent_config, &agent_base);
@@ -2830,11 +2833,20 @@ async fn update_status_hud(state: &mut CoordinatorState) {
         lines.push(format!("Pending approvals: {}", pending_count));
     }
 
-    // LLM provider
-    if !state.config.settings.llm_providers.is_empty() {
-        let provider = &state.config.settings.llm_providers
-            [state.active_provider_index.min(state.config.settings.llm_providers.len() - 1)];
-        lines.push(format!("LLM: {} ({})", provider.name, provider.model));
+    // LLM provider (from failover chain)
+    {
+        let provider = state.provider_chain.current();
+        let metrics = state.provider_chain.get_metrics();
+        let failures: u32 = metrics.iter().map(|m| m.consecutive_failures).sum();
+        let active_idx = state.provider_chain.active_index();
+        if active_idx > 0 || failures > 0 {
+            lines.push(format!(
+                "LLM: {} ({}) [failover idx={}, failures={}]",
+                provider.name, provider.model, active_idx, failures
+            ));
+        } else {
+            lines.push(format!("LLM: {} ({})", provider.name, provider.model));
+        }
     }
 
     // Timestamp
@@ -3150,15 +3162,8 @@ fn check_inter_agent_routing(
 // ============================================================================
 
 async fn check_llm_health(state: &mut CoordinatorState) {
-    if state.config.settings.llm_providers.is_empty() {
-        return;
-    }
-
-    let provider_index = state
-        .active_provider_index
-        .min(state.config.settings.llm_providers.len() - 1);
-    let provider = &state.config.settings.llm_providers[provider_index];
-    let health_url = &provider.health_url;
+    let provider_name = state.provider_chain.current().name.clone();
+    let health_url = state.provider_chain.current().health_url.clone();
 
     let timeout_ms = state
         .config
@@ -3171,42 +3176,54 @@ async fn check_llm_health(state: &mut CoordinatorState) {
         .build();
 
     let healthy = match client {
-        Ok(c) => match c.get(health_url).send().await {
+        Ok(c) => match c.get(&health_url).send().await {
             Ok(resp) => resp.status().is_success(),
             Err(e) => {
-                debug!("LLM health check failed for {}: {}", provider.name, e);
+                debug!("LLM health check failed for {}: {}", provider_name, e);
                 false
             }
         },
         Err(_) => false,
     };
 
-    if healthy {
-        if state.llm_consecutive_failures > 0 {
-            info!("LLM provider {} recovered", provider.name);
-            state.llm_consecutive_failures = 0;
-        }
-    } else {
-        state.llm_consecutive_failures += 1;
-        warn!(
-            "LLM provider {} unhealthy (consecutive failures: {})",
-            provider.name, state.llm_consecutive_failures
-        );
+    let event = state
+        .provider_chain
+        .record_health_check(&provider_name, healthy);
 
-        // Failover after 2 consecutive failures
-        if state.llm_consecutive_failures >= 2 {
-            let next_index = (provider_index + 1) % state.config.settings.llm_providers.len();
-            if next_index != provider_index {
-                let next_provider = &state.config.settings.llm_providers[next_index];
-                warn!(
-                    "LLM failover: {} -> {}",
-                    provider.name, next_provider.name
+    match event {
+        Some(crate::provider_chain::ProviderEvent::Failover {
+            ref from,
+            ref to,
+            ref reason,
+        }) => {
+            warn!("LLM failover: {} -> {} ({})", from, to, reason);
+
+            // Alert to STATUS_ROOM_ID
+            if let Some(ref token) = state.coord_token {
+                let client = MatrixClient::new(
+                    state.config.settings.pantalaimon_url.as_deref(),
+                    token.clone(),
+                    "@coord:matrix.org".to_string(),
                 );
+                if let Ok(c) = client {
+                    let alert = format!(
+                        "**LLM Failover**\n`{}` -> `{}` ({})",
+                        from, to, reason
+                    );
+                    let _ = c.send_message(STATUS_ROOM_ID, &alert, None, None).await;
+                }
+            }
+        }
+        Some(crate::provider_chain::ProviderEvent::Recovered { ref provider }) => {
+            info!("LLM primary provider {} recovered — resetting to primary", provider);
 
-                state.active_provider_index = next_index;
-                state.llm_consecutive_failures = 0;
-
-                // Alert to STATUS_ROOM_ID
+            // Reset to primary and alert
+            if let Some(crate::provider_chain::ProviderEvent::Failover {
+                ref from,
+                ref to,
+                ..
+            }) = state.provider_chain.reset_to_primary()
+            {
                 if let Some(ref token) = state.coord_token {
                     let client = MatrixClient::new(
                         state.config.settings.pantalaimon_url.as_deref(),
@@ -3215,13 +3232,34 @@ async fn check_llm_health(state: &mut CoordinatorState) {
                     );
                     if let Ok(c) = client {
                         let alert = format!(
-                            "**⚠️ LLM Failover**\n`{}` → `{}` (primary unhealthy)",
-                            provider.name, next_provider.name
+                            "**LLM Recovered**\n`{}` -> `{}` (primary healthy again)",
+                            from, to
                         );
                         let _ = c.send_message(STATUS_ROOM_ID, &alert, None, None).await;
                     }
                 }
             }
+        }
+        Some(crate::provider_chain::ProviderEvent::Exhausted { ref tried }) => {
+            warn!("All LLM providers exhausted: {:?}", tried);
+
+            if let Some(ref token) = state.coord_token {
+                let client = MatrixClient::new(
+                    state.config.settings.pantalaimon_url.as_deref(),
+                    token.clone(),
+                    "@coord:matrix.org".to_string(),
+                );
+                if let Ok(c) = client {
+                    let alert = format!(
+                        "**All LLM Providers Exhausted**\nTried: {}",
+                        tried.join(", ")
+                    );
+                    let _ = c.send_message(STATUS_ROOM_ID, &alert, None, None).await;
+                }
+            }
+        }
+        None => {
+            // No state change — normal health check pass/fail within retry threshold
         }
     }
 }
