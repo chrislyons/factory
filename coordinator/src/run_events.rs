@@ -28,6 +28,9 @@ pub enum RunEventType {
     LoopComplete,
     LoopAborted,
     FrozenHarnessViolation,
+    ProviderFailover,
+    ProviderExhausted,
+    ProviderRecovered,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

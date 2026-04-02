@@ -681,6 +681,10 @@ async fn init_agent_sessions(state: &mut CoordinatorState) -> Result<()> {
                 fallback_model: "claude-sonnet-4-6".to_string(),
                 health_url: "https://api.anthropic.com/v1/messages".to_string(),
                 env: HashMap::new(),
+                timeout_ms: None,
+                retry_count: 1,
+                backoff_ms: 1000,
+                provider_type: crate::config::ProviderType::Cloud,
             });
 
         // Build system prompt

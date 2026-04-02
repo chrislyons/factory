@@ -15,6 +15,7 @@ mod runtime_state;
 mod task_lease;
 mod timer;
 mod loop_engine;
+mod provider_chain;
 #[cfg(feature = "native-e2ee")]
 mod identity_store;
 #[cfg(feature = "native-e2ee")]

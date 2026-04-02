@@ -79,6 +79,8 @@ pub struct Settings {
     pub llm_providers: Vec<LLMProviderConfig>,
     pub llm_health_check_interval_ms: Option<u64>,
     pub llm_health_check_timeout_ms: Option<u64>,
+    #[serde(default)]
+    pub failover_strategy: Option<String>,
 
     // Agent lifecycle (BKX042)
     pub health_score_window_ms: Option<u64>,
@@ -155,6 +157,20 @@ pub enum CredentialSource {
     Env,
 }
 
+#[derive(Debug, Clone, Deserialize, PartialEq)]
+#[serde(rename_all = "lowercase")]
+pub enum ProviderType {
+    Local,
+    Cloud,
+    Fallback,
+}
+
+impl Default for ProviderType {
+    fn default() -> Self {
+        ProviderType::Cloud
+    }
+}
+
 // ============================================================================
 // LLM Providers
 // ============================================================================
@@ -169,7 +185,18 @@ pub struct LLMProviderConfig {
     pub health_url: String,
     #[serde(default)]
     pub env: HashMap<String, String>,
+    #[serde(default)]
+    pub timeout_ms: Option<u64>,
+    #[serde(default = "default_retry_count")]
+    pub retry_count: u32,
+    #[serde(default = "default_backoff_ms")]
+    pub backoff_ms: u64,
+    #[serde(default)]
+    pub provider_type: ProviderType,
 }
+
+fn default_retry_count() -> u32 { 1 }
+fn default_backoff_ms() -> u64 { 1000 }
 
 // ============================================================================
 // Devices

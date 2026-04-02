@@ -12,6 +12,15 @@ use tracing::{debug, info, warn};
 // Types
 // ============================================================================
 
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub struct ProviderStats {
+    pub total_requests: u64,
+    pub total_failures: u64,
+    pub total_tokens: u64,
+    pub total_cost_cents: f64,
+    pub avg_latency_ms: f64,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AgentRuntimeState {
     pub agent_id: String,
@@ -22,6 +31,8 @@ pub struct AgentRuntimeState {
     pub last_run_status: String,
     pub last_error: Option<String>,
     pub updated_at: String, // ISO 8601
+    #[serde(default)]
+    pub provider_stats: HashMap<String, ProviderStats>,
 }
 
 // ============================================================================
@@ -88,6 +99,7 @@ impl RuntimeStateManager {
                 last_run_status: String::new(),
                 last_error: None,
                 updated_at: String::new(),
+                provider_stats: HashMap::new(),
             });
 
         state.session_id = session_id.map(|s| s.to_string());
@@ -104,6 +116,59 @@ impl RuntimeStateManager {
             "runtime_state: {} — {}+{} tokens, status={}",
             agent_id, input_tokens, output_tokens, status
         );
+    }
+
+    /// Update per-provider stats for an agent. Accumulates requests, tokens, cost,
+    /// and maintains a running average latency. Persists state after update.
+    pub async fn update_provider_stats(
+        &self,
+        agent_id: &str,
+        provider_name: &str,
+        tokens: u64,
+        cost_cents: f64,
+        latency_ms: f64,
+        failed: bool,
+    ) -> Result<()> {
+        let mut states = self.states.lock().await;
+        let state = states
+            .entry(agent_id.to_string())
+            .or_insert_with(|| AgentRuntimeState {
+                agent_id: agent_id.to_string(),
+                session_id: None,
+                total_input_tokens: 0,
+                total_output_tokens: 0,
+                total_cost_cents: 0.0,
+                last_run_status: String::new(),
+                last_error: None,
+                updated_at: String::new(),
+                provider_stats: HashMap::new(),
+            });
+
+        let ps = state
+            .provider_stats
+            .entry(provider_name.to_string())
+            .or_default();
+
+        let prev_total = ps.total_requests;
+        ps.total_requests += 1;
+        if failed {
+            ps.total_failures += 1;
+        }
+        ps.total_tokens += tokens;
+        ps.total_cost_cents += cost_cents;
+        // Running average: avg = (avg * n + new) / (n + 1)
+        ps.avg_latency_ms =
+            (ps.avg_latency_ms * prev_total as f64 + latency_ms) / ps.total_requests as f64;
+
+        state.updated_at = Utc::now().to_rfc3339();
+
+        debug!(
+            "runtime_state: {} provider {} — req={}, fail={}, tokens={}, latency={:.1}ms",
+            agent_id, provider_name, ps.total_requests, ps.total_failures, ps.total_tokens, ps.avg_latency_ms
+        );
+
+        drop(states);
+        self.persist().await
     }
 
     /// Get state for a single agent.
