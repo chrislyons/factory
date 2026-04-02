@@ -175,6 +175,21 @@ fn is_suppressed_error(text: &str) -> bool {
         || (lower.contains("401") && lower.contains("unauthorized"))
 }
 
+/// Check if an inference error is retriable (provider-level, not agent-level).
+/// These errors indicate the LLM provider is down or rate-limited, not that
+/// the agent's request was malformed.
+fn is_retriable_inference_error(text: &str) -> bool {
+    let lower = text.to_lowercase();
+    lower.contains("timed out")
+        || lower.contains("rate limit")
+        || lower.contains("overloaded")
+        || lower.contains("503 service")
+        || lower.contains("529")
+        || lower.contains("capacity")
+        || lower.contains("model_not_available")
+        || lower.contains("server error")
+}
+
 /// Agent output hash entry for relay loop output dedup.
 #[derive(Debug, Clone)]
 struct OutputHashEntry {
@@ -1267,6 +1282,24 @@ async fn dispatch_to_agent(
 
     match result {
         Ok(res) => {
+            // Record provider success/failure for failover chain
+            let provider_name = state.provider_chain.current().name.clone();
+            if res.subtype == "error" && is_retriable_inference_error(&res.result) {
+                if let Some(event) = state.provider_chain.record_failure(&provider_name, &res.result) {
+                    match &event {
+                        crate::provider_chain::ProviderEvent::Failover { from, to, reason } => {
+                            warn!("[{}] Provider failover triggered by inference error: {} -> {} ({})", agent_name, from, to, reason);
+                        }
+                        crate::provider_chain::ProviderEvent::Exhausted { tried } => {
+                            warn!("[{}] All providers exhausted after inference error: {:?}", agent_name, tried);
+                        }
+                        _ => {}
+                    }
+                }
+            } else if res.subtype != "error" {
+                state.provider_chain.record_success(&provider_name, 0);
+            }
+
             // If Claude returned subtype="error", route through the context-aware error relay
             // rather than broadcasting raw error text as a normal agent response.
             if res.subtype == "error" {
@@ -1395,8 +1428,25 @@ async fn dispatch_to_agent(
         Err(e) => {
             error!("[{}] Agent returned error: {}", agent_name, e);
 
+            // Record retriable errors in provider chain for failover tracking
+            let err_text = e.to_string();
+            if is_retriable_inference_error(&err_text) {
+                let provider_name = state.provider_chain.current().name.clone();
+                if let Some(event) = state.provider_chain.record_failure(&provider_name, &err_text) {
+                    match &event {
+                        crate::provider_chain::ProviderEvent::Failover { from, to, reason } => {
+                            warn!("[{}] Provider failover triggered by dispatch error: {} -> {} ({})", agent_name, from, to, reason);
+                        }
+                        crate::provider_chain::ProviderEvent::Exhausted { tried } => {
+                            warn!("[{}] All providers exhausted after dispatch error: {:?}", agent_name, tried);
+                        }
+                        _ => {}
+                    }
+                }
+            }
+
             // Record failure for circuit breaker
-            let is_timeout = e.to_string().contains("timed out");
+            let is_timeout = err_text.contains("timed out");
             let incident = if is_timeout {
                 IncidentType::Timeout
             } else {
@@ -1406,23 +1456,22 @@ async fn dispatch_to_agent(
 
             if let Some(session) = state.sessions.get(agent_name) {
                 let mut proc = session.process.lock().await;
-                proc.health.record_incident(incident, Some(&e.to_string()), None);
+                proc.health.record_incident(incident, Some(&err_text), None);
             }
 
             // Always suppress CLI auth/init errors — these are never useful to relay
-            let err_str = e.to_string();
-            if is_suppressed_error(&err_str) {
-                warn!("[{}] Suppressed CLI error in Err branch: {}", agent_name, err_str);
+            if is_suppressed_error(&err_text) {
+                warn!("[{}] Suppressed CLI error in Err branch: {}", agent_name, err_text);
                 return;
             }
 
             // Context-aware error relay for remaining errors:
             // During a network outage, auth-adjacent errors are suppressed and summarized on recovery.
-            let is_auth_error = err_str.contains("authentication")
-                || err_str.contains("401")
-                || err_str.contains("403")
-                || err_str.contains("Unauthorized")
-                || err_str.contains("Permission denied");
+            let is_auth_error = err_text.contains("authentication")
+                || err_text.contains("401")
+                || err_text.contains("403")
+                || err_text.contains("Unauthorized")
+                || err_text.contains("Permission denied");
             let network_degraded = state.sync_consecutive_failures > 0
                 || state.last_sync_success.elapsed().as_secs() > 30;
 
@@ -1432,7 +1481,7 @@ async fn dispatch_to_agent(
                     .entry(agent_name.to_string())
                     .or_insert(0);
                 *count += 1;
-                warn!("[{}] Suppressing auth error during network degradation (suppressed: {}): {}", agent_name, count, err_str);
+                warn!("[{}] Suppressing auth error during network degradation (suppressed: {}): {}", agent_name, count, err_text);
             } else {
                 // Network healthy or non-auth error — relay immediately
                 // Flush any suppressed count for this agent first
@@ -1443,7 +1492,7 @@ async fn dispatch_to_agent(
                     );
                     let _ = matrix_client.send_message(room_id, &summary, None, None).await;
                 }
-                let msg = format!("_(Error: {})_", e);
+                let msg = format!("_(Error: {})_", err_text);
                 let _ = matrix_client.send_message(room_id, &msg, None, None).await;
             }
         }
@@ -3445,5 +3494,20 @@ mod tests {
         assert!(!is_suppressed_error("Error: file not found"));
         // 401 alone without "unauthorized" should pass through
         assert!(!is_suppressed_error("status code 401"));
+    }
+
+    #[test]
+    fn retriable_inference_error_detection() {
+        assert!(is_retriable_inference_error("Request timed out after 30s"));
+        assert!(is_retriable_inference_error("Rate limit exceeded"));
+        assert!(is_retriable_inference_error("API overloaded, try again"));
+        assert!(is_retriable_inference_error("503 Service Unavailable"));
+        assert!(is_retriable_inference_error("529 overloaded"));
+        assert!(is_retriable_inference_error("model_not_available"));
+        assert!(is_retriable_inference_error("Internal server error"));
+        // Not retriable
+        assert!(!is_retriable_inference_error("Invalid JSON in response"));
+        assert!(!is_retriable_inference_error("file not found"));
+        assert!(!is_retriable_inference_error("Hello, how can I help?"));
     }
 }
