@@ -17,6 +17,7 @@ mod timer;
 mod loop_engine;
 mod provider_chain;
 mod profile_export;
+mod hermes_adapter;
 #[cfg(feature = "native-e2ee")]
 mod identity_store;
 #[cfg(feature = "native-e2ee")]

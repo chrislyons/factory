@@ -14,7 +14,7 @@ use tokio::time::Duration;
 use tracing::{debug, error, info, warn};
 
 use crate::config::{
-    AgentConfig, ClaudeResponse, Config, LLMProviderConfig,
+    AgentConfig, ClaudeResponse, Config, LLMProviderConfig, RuntimeType,
 };
 use crate::health::HealthScorer;
 
@@ -215,6 +215,10 @@ pub async fn start_agent_session(
     let cwd = working_dir.to_string();
     let proc_clone = process.clone();
 
+    let runtime = agent_config.runtime.clone();
+    let hermes_profile = agent_config.hermes_profile.clone();
+    let scoped_env = agent_config.scoped_env.clone();
+
     tokio::spawn(agent_task(
         name.clone(),
         prov,
@@ -228,6 +232,9 @@ pub async fn start_agent_session(
         health_window_ms,
         shutdown_rx,
         resume_id,
+        runtime,
+        hermes_profile,
+        scoped_env,
     ));
 
     let rooms = HashSet::new();
@@ -277,7 +284,77 @@ async fn agent_task(
     _health_window_ms: u64,
     mut shutdown_rx: tokio::sync::broadcast::Receiver<()>,
     resume_id: Option<String>,
+    runtime: RuntimeType,
+    hermes_profile: Option<String>,
+    scoped_env: std::collections::HashMap<String, String>,
 ) {
+    // Hermes runtime uses a separate spawn/session path
+    if runtime == RuntimeType::Hermes {
+        let profile = hermes_profile.as_deref().unwrap_or("default");
+        info!("[{}] Using Hermes runtime (profile: {})", agent_name, profile);
+
+        loop {
+            match spawn_hermes(&agent_name, profile, &working_dir, &scoped_env).await {
+                Ok((mut child, stdin, stdout)) => {
+                    {
+                        let mut p = process.lock().await;
+                        p.is_ready = true;
+                    }
+                    info!("[{}] Hermes session started (profile: {})", agent_name, profile);
+
+                    let result = run_hermes_session(
+                        &agent_name,
+                        &mut child,
+                        stdin,
+                        stdout,
+                        &mut message_rx,
+                        &activity_tx,
+                        &process,
+                        &mut shutdown_rx,
+                    )
+                    .await;
+
+                    {
+                        let mut p = process.lock().await;
+                        p.is_ready = false;
+                        p.session_id = None;
+                        p.child = None;
+                        p.stdin = None;
+                        p.init_received = false;
+                    }
+
+                    match result {
+                        SessionEnd::Shutdown => {
+                            info!("[{}] Hermes agent task shutting down", agent_name);
+                            return;
+                        }
+                        SessionEnd::ProcessExited(code) => {
+                            if code == Some(0) {
+                                info!("[{}] Hermes exited cleanly, restarting", agent_name);
+                            } else {
+                                warn!(
+                                    "[{}] Hermes exited unexpectedly (code {:?}), restarting in {}ms",
+                                    agent_name, code, CLAUDE_RESTART_DELAY_MS
+                                );
+                            }
+                            tokio::time::sleep(Duration::from_millis(CLAUDE_RESTART_DELAY_MS)).await;
+                        }
+                        SessionEnd::Error(e) => {
+                            error!("[{}] Hermes session error: {}", agent_name, e);
+                            tokio::time::sleep(Duration::from_millis(CLAUDE_RESTART_DELAY_MS)).await;
+                        }
+                    }
+                }
+                Err(e) => {
+                    error!("[{}] Failed to spawn Hermes: {:#}", agent_name, e);
+                    tokio::time::sleep(Duration::from_millis(CLAUDE_RESTART_DELAY_MS * 2)).await;
+                }
+            }
+        }
+    }
+
+    // --- Claude CLI runtime (default) ---
+
     // Track resume state across respawns — cleared on bad resume to avoid retry loops.
     let mut current_resume: Option<String> = resume_id;
 
@@ -665,6 +742,166 @@ async fn spawn_claude(
     }
 
     Ok((child, stdin, stdout))
+}
+
+// ============================================================================
+// Spawn Hermes subprocess (Phase 3: non-interactive CLI mode)
+// ============================================================================
+
+async fn spawn_hermes(
+    agent_name: &str,
+    profile: &str,
+    working_dir: &str,
+    scoped_env: &std::collections::HashMap<String, String>,
+) -> Result<(Child, ChildStdin, ChildStdout)> {
+    let args = vec![
+        "--profile".to_string(),
+        profile.to_string(),
+        "chat".to_string(),
+        "--non-interactive".to_string(),
+    ];
+
+    let mut cmd = Command::new("hermes");
+    cmd.args(&args)
+        .current_dir(working_dir)
+        .stdin(std::process::Stdio::piped())
+        .stdout(std::process::Stdio::piped())
+        .stderr(std::process::Stdio::piped())
+        .kill_on_drop(true);
+
+    // Inject ONLY this agent's scoped credentials
+    for (k, v) in scoped_env {
+        cmd.env(k, v);
+    }
+
+    let mut child = cmd.spawn().context(format!(
+        "Failed to spawn Hermes for agent {}", agent_name
+    ))?;
+
+    let stdin = child.stdin.take().context("No stdin")?;
+    let stdout = child.stdout.take().context("No stdout")?;
+
+    // Spawn stderr logger (same pattern as spawn_claude)
+    if let Some(stderr) = child.stderr.take() {
+        let name = agent_name.to_string();
+        tokio::spawn(async move {
+            let mut lines = BufReader::new(stderr).lines();
+            while let Ok(Some(line)) = lines.next_line().await {
+                if !line.trim().is_empty() {
+                    debug!("[{}] Hermes stderr: {}", name, &line[..line.len().min(200)]);
+                }
+            }
+        });
+    }
+
+    Ok((child, stdin, stdout))
+}
+
+// ============================================================================
+// Hermes session I/O (Phase 3: subprocess text mode)
+// ============================================================================
+
+/// Simplified session loop for Hermes subprocess mode.
+/// Unlike run_session() which handles stream-json, this reads/writes plain text.
+/// Tool approvals are not supported — Hermes tools are disabled in Phase 3.
+async fn run_hermes_session(
+    agent_name: &str,
+    child: &mut Child,
+    mut stdin: ChildStdin,
+    stdout: ChildStdout,
+    message_rx: &mut mpsc::Receiver<(UserMessage, oneshot::Sender<Result<SessionResult>>)>,
+    activity_tx: &mpsc::UnboundedSender<AgentActivity>,
+    process: &Arc<Mutex<AgentProcess>>,
+    shutdown_rx: &mut tokio::sync::broadcast::Receiver<()>,
+) -> SessionEnd {
+    use crate::hermes_adapter::parse_hermes_output;
+
+    let mut lines = BufReader::new(stdout).lines();
+    let mut current_result_tx: Option<oneshot::Sender<Result<SessionResult>>> = None;
+
+    // Mark init as received immediately — Hermes has no init handshake
+    {
+        let mut p = process.lock().await;
+        p.init_received = true;
+    }
+
+    loop {
+        tokio::select! {
+            // Shutdown signal
+            _ = shutdown_rx.recv() => {
+                let _ = child.kill().await;
+                return SessionEnd::Shutdown;
+            }
+
+            // Incoming message from coordinator
+            msg = message_rx.recv() => {
+                match msg {
+                    Some((user_msg, result_tx)) => {
+                        // Write message as plain text to Hermes stdin
+                        let input = format!("{}\n", user_msg.content);
+                        if let Err(e) = stdin.write_all(input.as_bytes()).await {
+                            error!("[{}] Failed to write to Hermes stdin: {}", agent_name, e);
+                            let _ = result_tx.send(Err(anyhow::anyhow!("Hermes stdin write failed: {}", e)));
+                            continue;
+                        }
+                        if let Err(e) = stdin.flush().await {
+                            error!("[{}] Failed to flush Hermes stdin: {}", agent_name, e);
+                        }
+
+                        // Store the result channel — response comes from stdout
+                        current_result_tx = Some(result_tx);
+
+                        // Report activity
+                        let _ = activity_tx.send(AgentActivity {
+                            agent_name: agent_name.to_string(),
+                            room_id: user_msg.room_id.clone(),
+                            thread_root_event_id: user_msg.event_id.clone(),
+                            tool_names: vec![],
+                            text_blocks: vec!["Processing via Hermes runtime".to_string()],
+                        });
+                    }
+                    None => {
+                        info!("[{}] Message channel closed, ending Hermes session", agent_name);
+                        let _ = child.kill().await;
+                        return SessionEnd::Shutdown;
+                    }
+                }
+            }
+
+            // Read Hermes stdout line by line
+            line = lines.next_line() => {
+                match line {
+                    Ok(Some(text)) => {
+                        // Accumulate output — for now, each line is treated as a complete response
+                        // since Hermes non-interactive mode outputs then exits.
+                        // In practice, we collect all output until EOF.
+                        if let Some(tx) = current_result_tx.take() {
+                            let result = parse_hermes_output(&text);
+                            let _ = tx.send(Ok(result));
+                        }
+                    }
+                    Ok(None) => {
+                        // EOF — Hermes process exited
+                        // If there's a pending result, send empty response
+                        if let Some(tx) = current_result_tx.take() {
+                            let result = parse_hermes_output("");
+                            let _ = tx.send(Ok(result));
+                        }
+                        let status = child.wait().await.ok().and_then(|s| s.code());
+                        return SessionEnd::ProcessExited(status);
+                    }
+                    Err(e) => {
+                        error!("[{}] Hermes stdout read error: {}", agent_name, e);
+                        if let Some(tx) = current_result_tx.take() {
+                            let _ = tx.send(Err(anyhow::anyhow!("Hermes stdout error: {}", e)));
+                        }
+                        let status = child.wait().await.ok().and_then(|s| s.code());
+                        return SessionEnd::ProcessExited(status);
+                    }
+                }
+            }
+        }
+    }
 }
 
 // ============================================================================

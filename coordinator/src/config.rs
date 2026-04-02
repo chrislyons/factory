@@ -240,6 +240,14 @@ impl Default for ContextMode {
     }
 }
 
+#[derive(Debug, Clone, Deserialize, PartialEq, Default)]
+#[serde(rename_all = "kebab-case")]
+pub enum RuntimeType {
+    #[default]
+    ClaudeCli,
+    Hermes,
+}
+
 #[allow(dead_code)]
 #[derive(Debug, Clone, Deserialize)]
 pub struct AgentConfig {
@@ -262,6 +270,14 @@ pub struct AgentConfig {
     pub context_mode: ContextMode,
     pub password_env: Option<String>,
     pub recovery_key_env: Option<String>,
+    #[serde(default)]
+    pub runtime: RuntimeType,
+    #[serde(default)]
+    pub hermes_profile: Option<String>,
+    #[serde(default)]
+    pub hermes_port: Option<u16>,
+    #[serde(default)]
+    pub scoped_env: HashMap<String, String>,
 }
 
 #[derive(Debug, Clone, Deserialize, PartialEq)]

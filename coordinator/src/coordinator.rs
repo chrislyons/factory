@@ -728,6 +728,14 @@ async fn init_agent_sessions(state: &mut CoordinatorState) -> Result<()> {
             info!("[{}] Attempting session resume", agent_name);
         }
 
+        // Log runtime selection
+        if agent_config.runtime == crate::config::RuntimeType::Hermes {
+            info!(
+                "[{}] Runtime: Hermes (profile: {:?}, port: {:?})",
+                agent_name, agent_config.hermes_profile, agent_config.hermes_port
+            );
+        }
+
         let shutdown_rx = state.shutdown_tx.subscribe();
         let session = agent::start_agent_session(
             agent_name,

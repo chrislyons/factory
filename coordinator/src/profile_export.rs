@@ -246,6 +246,10 @@ mod tests {
                 context_mode: ContextMode::Fat,
                 password_env: None,
                 recovery_key_env: None,
+                runtime: Default::default(),
+                hermes_profile: None,
+                hermes_port: None,
+                scoped_env: HashMap::new(),
             },
         );
 

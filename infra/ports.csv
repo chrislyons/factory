@@ -23,5 +23,8 @@ port,service,host,bind,status,launchd_label,notes
 41963,Nan (LFM2.5-1.2B-Thinking-MLX-6bit),whitebox,0.0.0.0,live,com.bootindustries.mlx-lm-41963,Nan observer inference
 41964,Xamm,whitebox,0.0.0.0,reserved,com.bootindustries.mlx-lm-41964,Reserved — no model assigned
 41966,On-demand reasoning (Qwen3.5-9B-MLX-6bit),whitebox,0.0.0.0,live,com.bootindustries.mlx-lm-41966,Heavy reasoning tier
+41970,Hermes Boot API,whitebox,127.0.0.1,planned,,Hermes serve endpoint for Boot (Phase 4)
+41971,Hermes IG-88 API,whitebox,127.0.0.1,planned,,Hermes serve endpoint for IG-88 (Phase 4)
+41972,Hermes Kelk API,whitebox,127.0.0.1,planned,,Hermes serve endpoint for Kelk (Phase 4)
 41977,Research,whitebox,0.0.0.0,reserved,,Reserved — research agent slot
 41988,IG-88 (Nanbeige4.1-3B-8bit),whitebox,0.0.0.0,live,com.bootindustries.mlx-lm-41988,IG-88 dedicated inference slot
