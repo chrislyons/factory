@@ -40,9 +40,9 @@ const HAS_GALLERY = new Set([
 
 const HAS_COMMANDS = new Set([
   "2110-audio-io","aes70","autoresearch","carbon-acx",
-  "chainly","chrislyons-website","freqfinder","git-av","hotbox",
+  "chainly","chrislyons-website","factory","freqfinder","git-av","hotbox",
   "listmaker","max4live-mcp","memex-mcp","nmos","ondina",
-  "orpheus-sdk","osd-v2","strudel","vmotes",
+  "orpheus-sdk","osd-v2","strudel","vmotes","whitebox",
 ]);
 
 function galleryHref(repoName: string): string {
