@@ -176,6 +176,10 @@ pub struct AgentSession {
 
     /// Session ID from the last successful Claude turn (persisted across restarts for resume).
     pub last_session_id: Option<String>,
+
+    /// tmux session name when agent_console_enabled is true (e.g. "agent-boot").
+    /// Coordinator can later write activity into this session for human observers.
+    pub tmux_session_name: Option<String>,
 }
 
 // ============================================================================
@@ -184,6 +188,12 @@ pub struct AgentSession {
 
 /// Start an agent session. Returns the AgentSession handle.
 /// Spawns a background tokio task that owns the Claude subprocess.
+///
+/// When `console_enabled` is true, a named tmux session (`agent-<name>`) is
+/// created so humans can attach and observe agent activity. The coordinator
+/// writes activity into this session separately — `spawn_claude()` is unchanged.
+// TODO(FCT048): callers in coordinator.rs must pass console_enabled + tmux_socket_dir
+//               from Settings.agent_console_enabled / Settings.agent_tmux_socket_dir.
 pub async fn start_agent_session(
     agent_name: &str,
     agent_config: AgentConfig,
@@ -195,6 +205,8 @@ pub async fn start_agent_session(
     health_window_ms: u64,
     shutdown_rx: tokio::sync::broadcast::Receiver<()>,
     resume_id: Option<String>,
+    console_enabled: bool,
+    tmux_socket_dir: Option<String>,
 ) -> Result<AgentSession> {
     // message_tx -> message_rx: coordinator sends messages, task receives
     let (message_tx, message_rx) =
@@ -214,6 +226,28 @@ pub async fn start_agent_session(
     let prompt = system_prompt.map(|s| s.to_string());
     let cwd = working_dir.to_string();
     let proc_clone = process.clone();
+
+    // Ensure tmux console session exists when enabled (FCT048)
+    let tmux_session_name = if console_enabled {
+        let session_name = format!("agent-{}", agent_name);
+        let socket_dir = tmux_socket_dir
+            .as_deref()
+            .unwrap_or("/tmp/factory-tmux");
+        match ensure_tmux_session(&session_name, socket_dir).await {
+            Ok(()) => {
+                info!("[{}] tmux console session '{}' ready (socket dir: {})",
+                    agent_name, session_name, socket_dir);
+                Some(session_name)
+            }
+            Err(e) => {
+                warn!("[{}] Failed to create tmux console session: {:#} — continuing without console",
+                    agent_name, e);
+                None
+            }
+        }
+    } else {
+        None
+    };
 
     let runtime = agent_config.runtime.clone();
     let hermes_profile = agent_config.hermes_profile.clone();
@@ -264,6 +298,7 @@ pub async fn start_agent_session(
         relay_delivered: false,
         last_response_text: None,
         last_session_id: None,
+        tmux_session_name,
     })
 }
 
@@ -735,6 +770,86 @@ async fn spawn_claude(
     }
 
     Ok((child, stdin, stdout))
+}
+
+// ============================================================================
+// tmux console session for human observation (FCT048)
+// ============================================================================
+
+/// Ensure a named tmux session exists for human observers to attach to.
+///
+/// The session is created via a dedicated tmux socket (`-L <session_name>`)
+/// so it doesn't collide with the user's default tmux server. Configuration:
+///   - history-limit 250000 (large scrollback for long agent runs)
+///   - mouse on (scroll/select with trackpad)
+///   - status off (clean display — coordinator owns the content)
+///
+/// If the session already exists, this is a no-op.
+async fn ensure_tmux_session(session_name: &str, socket_dir: &str) -> Result<()> {
+    // Ensure socket directory exists
+    tokio::fs::create_dir_all(socket_dir)
+        .await
+        .context(format!("Failed to create tmux socket dir: {}", socket_dir))?;
+
+    // Check if session already exists
+    let check = Command::new("tmux")
+        .args(["-L", session_name, "has-session", "-t", session_name])
+        .stdout(std::process::Stdio::null())
+        .stderr(std::process::Stdio::null())
+        .env("TMUX_TMPDIR", socket_dir)
+        .status()
+        .await;
+
+    match check {
+        Ok(status) if status.success() => {
+            debug!("tmux session '{}' already exists", session_name);
+            return Ok(());
+        }
+        _ => {
+            // Session doesn't exist (or tmux not reachable) — create it
+        }
+    }
+
+    // Create new detached session
+    let create = Command::new("tmux")
+        .args([
+            "-L", session_name,
+            "new-session",
+            "-d",
+            "-s", session_name,
+            "-x", "200",
+            "-y", "50",
+        ])
+        .env("TMUX_TMPDIR", socket_dir)
+        .stdout(std::process::Stdio::null())
+        .stderr(std::process::Stdio::piped())
+        .status()
+        .await
+        .context("Failed to run tmux new-session")?;
+
+    if !create.success() {
+        bail!(
+            "tmux new-session exited with code {:?}",
+            create.code()
+        );
+    }
+
+    // Configure the session: large scrollback, mouse on, status off
+    for opt in &[
+        ("set-option", "history-limit", "250000"),
+        ("set-option", "mouse", "on"),
+        ("set-option", "status", "off"),
+    ] {
+        let _ = Command::new("tmux")
+            .args(["-L", session_name, opt.0, "-t", session_name, opt.1, opt.2])
+            .env("TMUX_TMPDIR", socket_dir)
+            .stdout(std::process::Stdio::null())
+            .stderr(std::process::Stdio::null())
+            .status()
+            .await;
+    }
+
+    Ok(())
 }
 
 // ============================================================================
