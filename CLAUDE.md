@@ -12,8 +12,9 @@ factory/
 ├── coordinator/      # Rust orchestration binary (coordinator-rs)
 ├── agents/           # Agent planning repos (boot, ig88, kelk — submodules)
 ├── jobs/             # Job YAML files + registry.yaml
-├── scripts/          # Build tooling (build-jobs-json.py)
-├── docs/fct/         # PREFIX docs (FCT001–FCT017+)
+├── scripts/          # Build tooling + agent-console.sh (tmux manager)
+├── plists/           # launchd plists (gitignored, deployed manually)
+├── docs/fct/         # PREFIX docs (FCT001–FCT048+)
 └── CLAUDE.md         # This file
 ```
 
@@ -84,6 +85,15 @@ factory/
 | :41961-41963, :41966, :41988 | MLX-LM inference (5 agent slots — see FCT002 §2.3) |
 
 > **Blackbox retired 2026-03-23.** RP5 serves as dumb watchdog only (cron health checks → Matrix alerts).
+
+## Agent Console (FCT048)
+
+- **Feature:** Shared tmux sessions for observing/interacting with agents from any Tailnet SSH client
+- **Config:** `agent_console_enabled: bool` + `agent_tmux_socket_dir` in Settings (default: off)
+- **Script:** `scripts/agent-console.sh <agent> [--attach|--watch|--list]`
+- **Sessions:** `agent-<name>` tmux sessions with 250k scrollback, named sockets in `/tmp/tmux-nesbitt/`
+- **Rendering:** Coordinator writes `[HH:MM] matrix/sender message` (input) and `[HH:MM] agent -> tool_call/response` (output) to pty
+- **Plist:** `plists/com.bootindustries.agent-console-boot.plist` (RunAtLoad + KeepAlive)
 
 ## Security Notes (FCT040)
 

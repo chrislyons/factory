@@ -192,8 +192,6 @@ pub struct AgentSession {
 /// When `console_enabled` is true, a named tmux session (`agent-<name>`) is
 /// created so humans can attach and observe agent activity. The coordinator
 /// writes activity into this session separately — `spawn_claude()` is unchanged.
-// TODO(FCT048): callers in coordinator.rs must pass console_enabled + tmux_socket_dir
-//               from Settings.agent_console_enabled / Settings.agent_tmux_socket_dir.
 pub async fn start_agent_session(
     agent_name: &str,
     agent_config: AgentConfig,
