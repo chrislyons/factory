@@ -2,7 +2,7 @@
 
 WHITEBOX    := whitebox
 REMOTE      := /Users/nesbitt/dev/factory/portal
-REMOTE_DIST := $(REMOTE)/dist-production
+REMOTE_DIST := $(REMOTE)/dist
 LOCAL_DEV   := /Users/chrislyons/dev
 DIST        := dist
 PNPM        := pnpm
@@ -30,15 +30,12 @@ sync-dist:  ## Rsync dist/ to Whitebox (preserves server-generated index.json an
 	rsync -avz --delete --exclude='index.json' --exclude='jobs.json' $(DIST)/ $(WHITEBOX):$(REMOTE_DIST)/
 
 .PHONY: sync-runtime
-sync-runtime:  ## Sync local runtime helpers needed by serve.sh and the index generator
-	ssh $(WHITEBOX) 'mkdir -p $(REMOTE)/src'
-	rsync -avz Makefile serve.sh server.py $(WHITEBOX):$(REMOTE)/
-	rsync -avz src/generate_index.py src/normalize_fonts.py $(WHITEBOX):$(REMOTE)/src/
-	ssh $(WHITEBOX) 'chmod +x $(REMOTE)/serve.sh $(REMOTE)/server.py'
+sync-runtime:  ## Push source files to Whitebox via git
+	git push whitebox main
 
 .PHONY: sync-gsd
 sync-gsd:  ## Seed live jobs.json + status/ into the task/status sidecar data root
-	rsync -avz $(LOCAL_DEV)/factory/jobs/jobs.json $(WHITEBOX):$(REMOTE)/dist-production/jobs.json
+	rsync -avz $(LOCAL_DEV)/factory/jobs/jobs.json $(WHITEBOX):$(REMOTE)/jobs.json
 	-rsync -avz $(LOCAL_DEV)/get-shit-done/status/ $(WHITEBOX):$(REMOTE)/status/
 
 .PHONY: sync-repos
@@ -62,11 +59,11 @@ ssh-normalize:  ## Normalize repo-corpus font paths on Whitebox
 	ssh $(WHITEBOX) 'cd $(REMOTE) && python3 src/normalize_fonts.py --repos-dir repos/ --verbose'
 
 .PHONY: ssh-generate-index
-ssh-generate-index:  ## Rebuild index.json from the synced repo corpus into dist-production
+ssh-generate-index:  ## Rebuild index.json from the synced repo corpus into dist/
 	ssh $(WHITEBOX) 'cd $(REMOTE) && python3 src/generate_index.py --repos-dir repos/ --output $(REMOTE_DIST)/index.json'
 
 .PHONY: install
-install: sync-runtime  ## Install or refresh the Whitebox launchd services
+install:  ## Install or refresh the Whitebox launchd services
 	ssh $(WHITEBOX) 'cd $(REMOTE) && ./serve.sh --systemd'
 
 # ---------------------------------------------------------------------------
@@ -75,24 +72,24 @@ install: sync-runtime  ## Install or refresh the Whitebox launchd services
 
 .PHONY: logs
 logs:  ## Follow Caddy service logs on Whitebox
-	ssh $(WHITEBOX) 'tail -f ~/Library/Logs/factory/portal.log'
+	ssh $(WHITEBOX) 'tail -f ~/Library/Logs/factory/portal-caddy.log'
 
-.PHONY: logs-gsd
-logs-gsd:  ## Follow the task/status sidecar logs on Whitebox
-	ssh $(WHITEBOX) 'tail -f ~/Library/Logs/factory/gsd.log'
+.PHONY: logs-auth
+logs-auth:  ## Follow the auth sidecar logs on Whitebox
+	ssh $(WHITEBOX) 'tail -f ~/Library/Logs/factory/factory-auth.log'
 
 .PHONY: status
-status:  ## Show both launchd services on Whitebox
-	@ssh $(WHITEBOX) 'launchctl print system/com.factory.portal 2>&1 | head -5; echo "---"; launchctl print system/com.factory.gsd 2>&1 | head -5'
+status:  ## Show portal launchd services on Whitebox
+	@ssh $(WHITEBOX) 'launchctl list | grep -E "portal-caddy|factory-auth"'
 
 .PHONY: restart
-restart:  ## Restart the Whitebox Caddy and task/status sidecar services
-	ssh $(WHITEBOX) 'launchctl kickstart -k system/com.factory.gsd && launchctl kickstart -k system/com.factory.portal'
+restart:  ## Restart the Whitebox Caddy and auth services
+	ssh $(WHITEBOX) 'launchctl stop com.bootindustries.portal-caddy && launchctl start com.bootindustries.portal-caddy && launchctl stop com.bootindustries.factory-auth && launchctl start com.bootindustries.factory-auth'
 
 .PHONY: uninstall
-uninstall:  ## Stop, disable, and remove the Whitebox services
-	ssh $(WHITEBOX) 'launchctl bootout system/com.factory.portal; launchctl bootout system/com.factory.gsd'
-	@echo "ok Removed com.factory.portal + com.factory.gsd"
+uninstall:  ## Stop and remove the Whitebox portal services
+	ssh $(WHITEBOX) 'launchctl remove com.bootindustries.portal-caddy; launchctl remove com.bootindustries.factory-auth'
+	@echo "ok Removed portal-caddy + factory-auth"
 
 .PHONY: verify
 verify:  ## Smoke-test the live portal via Tailnet

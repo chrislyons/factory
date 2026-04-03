@@ -14,7 +14,7 @@ http://100.88.222.111:41910, http://whitebox.taila25a34.ts.net:41910 {
 
 	# ── Public routes ─────────────────────────────────────────────────
 	handle /login {
-		root * /Users/nesbitt/dev/factory/portal/dist-production/pages
+		root * /Users/nesbitt/dev/factory/portal/dist/pages
 		rewrite * /login.html
 		file_server
 	}
@@ -25,7 +25,7 @@ http://100.88.222.111:41910, http://whitebox.taila25a34.ts.net:41910 {
 
 	@fonts_public path /fonts/*
 	handle @fonts_public {
-		root * /Users/nesbitt/dev/factory/portal/dist-production
+		root * /Users/nesbitt/dev/factory/portal/dist
 		header Cache-Control "public, max-age=31536000, immutable"
 		file_server
 	}
@@ -50,12 +50,12 @@ http://100.88.222.111:41910, http://whitebox.taila25a34.ts.net:41910 {
 
 	handle /galleries/* {
 		header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; frame-ancestors 'none'; object-src 'none'"
-		root * /Users/nesbitt/dev/factory/portal/dist-production
+		root * /Users/nesbitt/dev/factory/portal/dist
 		file_server
 	}
 
 	handle {
-		root * /Users/nesbitt/dev/factory/portal/dist-production
+		root * /Users/nesbitt/dev/factory/portal/dist
 
 		@html {
 			path *.html

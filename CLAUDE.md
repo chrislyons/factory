@@ -21,7 +21,7 @@ factory/
 
 - **Stack:** Vite + React + TypeScript, pnpm
 - **Fonts:** Geist Pixel Square (display), Geist Mono UltraLight (body/mono)
-- **Deploy:** `make sync` from `portal/` — rsyncs to Whitebox :41910
+- **Deploy:** `make sync` from `portal/` — builds, git-pushes source + rsyncs dist/ to Whitebox :41910
 - **Tests:** `pnpm test` (vitest, 17 tests across 9 files)
 - **Build:** `pnpm build` — outputs to `portal/dist/`
 - **Brand:** "dreamfactory" (hero header, 16px/10px)

@@ -4,16 +4,11 @@ Project documentation index for factory.
 
 ## Recent Documents
 
-- [[FCT046 Provider Failover Chain and Hermes Integration Architecture]]
-- [[FCT045 Hermes Agent Competitive Analysis — Patterns for Coordinator-rs]]
-- [[FCT044 Portal Static Page Modularization — Shared Asset Extraction]]
 - [[FCT043 Matrix Mechanisms Research — Spaces, Threads, Replies, and Notifications]]
-- [[FCT042 Error Filter Centralization and Thread Strategy Overhaul]]
-- [[FCT041 Power Outage Post-Mortem and Resilience Hardening]]
-- [[FCT040 Red-Team Security Audit — Auth, Coordinator, and Infrastructure]]
-- [[FCT039 Stream 2 Sprint Report — Agent Readiness, Paper Trading, and Infrastructure]]
-- [[FCT038 Conversational Room Behavior — Design Spec]]
-- [[FCT037 Phase D Sprint Report — Session 4 Stabilization and Blackbox Retirement]]
+- [[FCT044 Portal Static Page Modularization — Shared Asset Extraction]]
+- [[FCT045 Hermes Agent Competitive Analysis — Patterns for Coordinator-rs]]
+- [[FCT046 Provider Failover Chain and Hermes Integration Architecture]]
+- [[FCT047 Hermes Runtime Integration Phase 3 Implementation]]
 
 ## All Documents
 
@@ -46,7 +41,7 @@ Project documentation index for factory.
 - [[FCT027 Post-Deployment Recovery and Next Steps]]
 - [[FCT028 v0 Factory Jobs Audit Report]]
 - [[FCT029 Factory Consolidated Plan — Architecture, Recovery, and Roadmap]]
-- [[FCT030 FCT029 Sprint Completion — Port Allocation, GSD SQLite Design, and Git Housekeeping]]
+- [[FCT030 Sprint Completion — Port Allocation, GSD SQLite Design, and Git Housekeeping]]
 - [[FCT031 Next Steps Forward]]
 - [[FCT032 Strategy Vet Research Vault Findings vs Compiled Assessment]]
 - [[FCT033 Definitive Execution Plan — Agent Equipping, Blackbox Retirement, and Trading Validation]]
@@ -63,6 +58,7 @@ Project documentation index for factory.
 - [[FCT044 Portal Static Page Modularization — Shared Asset Extraction]]
 - [[FCT045 Hermes Agent Competitive Analysis — Patterns for Coordinator-rs]]
 - [[FCT046 Provider Failover Chain and Hermes Integration Architecture]]
+- [[FCT047 Hermes Runtime Integration Phase 3 Implementation]]
 
 ## Navigation
 
@@ -76,4 +72,4 @@ Project documentation index for factory.
 
 ---
 
-**Last Generated:** 2026-04-02
+**Last Generated:** 2026-04-03
