@@ -115,6 +115,12 @@ pub struct Settings {
     #[serde(default)]
     pub e2ee: Option<E2eeSettings>,
 
+    // Agent console — tmux pty bridge (FCT048)
+    #[serde(default)]
+    pub agent_console_enabled: bool,
+    #[serde(default)]
+    pub agent_tmux_socket_dir: Option<String>,
+
     // Infrastructure health check targets (platform-aware, FCT043)
     #[serde(default)]
     pub infra_docker_containers: Option<Vec<String>>,
