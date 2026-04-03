@@ -328,6 +328,8 @@ mod tests {
                 loop_state_file: None,
                 loop_max_concurrent: None,
                 e2ee: None,
+                agent_console_enabled: false,
+                agent_tmux_socket_dir: None,
                 infra_docker_containers: None,
                 infra_systemd_services: None,
                 infra_launchd_services: None,

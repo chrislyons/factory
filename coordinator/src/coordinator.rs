@@ -737,6 +737,8 @@ async fn init_agent_sessions(state: &mut CoordinatorState) -> Result<()> {
         }
 
         let shutdown_rx = state.shutdown_tx.subscribe();
+        let console_enabled = state.config.settings.agent_console_enabled;
+        let tmux_socket_dir = state.config.settings.agent_tmux_socket_dir.clone();
         let session = agent::start_agent_session(
             agent_name,
             agent_config,
@@ -748,6 +750,8 @@ async fn init_agent_sessions(state: &mut CoordinatorState) -> Result<()> {
             health_window_ms,
             shutdown_rx,
             resume_id,
+            console_enabled,
+            tmux_socket_dir,
         )
         .await
         .context(format!("Failed to start agent session for {}", agent_name))?;
@@ -1268,6 +1272,18 @@ async fn dispatch_to_agent(
                 session.current_thread_root_event_id = None;
             }
         }
+    }
+
+    // Agent console: render input attribution to tmux pty (FCT048)
+    if state.config.settings.agent_console_enabled {
+        let socket_dir = state.config.settings.agent_tmux_socket_dir
+            .as_deref()
+            .unwrap_or("/tmp/tmux-nesbitt");
+        let ts = console_timestamp();
+        let sender_short = event.sender.trim_start_matches('@').split(':').next().unwrap_or(&event.sender);
+        let preview = if body.len() > 120 { format!("{}...", &body[..120]) } else { body.to_string() };
+        let attribution = format!("[{}] matrix/{}  {}", ts, sender_short, preview);
+        write_to_agent_console(agent_name, &attribution, socket_dir);
     }
 
     let timeout_ms = state.config.settings.claude_timeout_ms;
@@ -1939,6 +1955,46 @@ async fn sweep_timed_out_approvals(state: &mut CoordinatorState) {
 }
 
 // ============================================================================
+// Agent console — tmux pty rendering (FCT048)
+// ============================================================================
+
+/// Write a line to the agent's tmux console session (if enabled).
+/// Non-blocking: spawns a background process, logs errors but never fails the caller.
+fn write_to_agent_console(
+    agent_name: &str,
+    line: &str,
+    _socket_dir: &str,
+) {
+    let socket_name = format!("agent-{}", agent_name);
+    let session_name = socket_name.clone();
+    // Escape single quotes for shell safety
+    let escaped = line.replace('\'', "'\\''");
+    // Use -L (named socket) which tmux stores in its default socket dir
+    let cmd = format!(
+        "tmux -L '{}' send-keys -t '{}' '{}' Enter 2>/dev/null",
+        socket_name, session_name, escaped
+    );
+    let _ = std::process::Command::new("sh")
+        .args(["-c", &cmd])
+        .stdin(std::process::Stdio::null())
+        .stdout(std::process::Stdio::null())
+        .stderr(std::process::Stdio::null())
+        .spawn();
+}
+
+/// Format a timestamp for console display (HH:MM).
+fn console_timestamp() -> String {
+    use std::time::SystemTime;
+    let now = SystemTime::now()
+        .duration_since(SystemTime::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_secs();
+    let hours = (now % 86400) / 3600;
+    let minutes = (now % 3600) / 60;
+    format!("{:02}:{:02}", hours, minutes)
+}
+
+// ============================================================================
 // Verbose tool activity — drain and post to Matrix threads
 // ============================================================================
 
@@ -2052,6 +2108,31 @@ async fn drain_agent_activity(state: &mut CoordinatorState) {
                 .await
             {
                 debug!("[{}] Failed to post tool activity: {}", activity.agent_name, e);
+            }
+        }
+
+        // Agent console: render output to tmux pty (FCT048)
+        if state.config.settings.agent_console_enabled {
+            let socket_dir = state.config.settings.agent_tmux_socket_dir
+                .as_deref()
+                .unwrap_or("/tmp/tmux-nesbitt");
+            let ts = console_timestamp();
+            // Render text blocks (agent reasoning/response)
+            for block in &activity.text_blocks {
+                if !is_suppressed_error(block) {
+                    let preview = if block.len() > 200 {
+                        format!("{}...", &block[..200])
+                    } else {
+                        block.clone()
+                    };
+                    let line = format!("[{}] {} -> response: {}", ts, activity.agent_name, preview);
+                    write_to_agent_console(&activity.agent_name, &line, socket_dir);
+                }
+            }
+            // Render tool calls
+            for tool in &activity.tool_names {
+                let line = format!("[{}] {} -> tool_call: {}", ts, activity.agent_name, tool);
+                write_to_agent_console(&activity.agent_name, &line, socket_dir);
             }
         }
     }
