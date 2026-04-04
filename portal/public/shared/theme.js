@@ -1,6 +1,7 @@
 /* theme.js — theme constants, apply/get/set/cycle, persistence, cssVar() helper */
 
 var THEME_KEY = "commandsheets-theme";
+var PORTAL_KEY = "factory-portal-theme";
 var THEME_ORDER = ["light", "dark", "ember"];
 
 function getDefaultTheme() {
@@ -8,7 +9,9 @@ function getDefaultTheme() {
 }
 
 function getSavedTheme() {
-  var saved = localStorage.getItem(THEME_KEY);
+  var saved = localStorage.getItem(PORTAL_KEY);
+  if (THEME_ORDER.includes(saved)) return saved;
+  saved = localStorage.getItem(THEME_KEY);
   return THEME_ORDER.includes(saved) ? saved : null;
 }
 
@@ -23,6 +26,7 @@ function applyTheme(theme, persist) {
   document.documentElement.setAttribute("data-theme", nextTheme);
   if (persist) {
     localStorage.setItem(THEME_KEY, nextTheme);
+    localStorage.setItem(PORTAL_KEY, nextTheme);
   }
 }
 
