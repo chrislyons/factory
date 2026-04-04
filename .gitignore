@@ -17,5 +17,8 @@ jobs.json
 jobs.json.bak-*
 scripts/matrix-cross-sign/node_modules/
 
+# Local command sheet (canonical version is portal/public/commands/)
+docs/repo-commands.html
+
 # Plists contain BWS secret UUIDs — never commit
 plists/
