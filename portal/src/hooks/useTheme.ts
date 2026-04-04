@@ -41,6 +41,18 @@ export function useTheme() {
     applyTheme(theme);
   }, [theme]);
 
+  // Re-sync from localStorage when restored from bfcache (back/forward nav)
+  useEffect(() => {
+    const onPageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) {
+        const fresh = getStoredTheme();
+        if (fresh && fresh !== theme) setTheme(fresh);
+      }
+    };
+    window.addEventListener("pageshow", onPageShow);
+    return () => window.removeEventListener("pageshow", onPageShow);
+  }, [theme, setTheme]);
+
   const setTheme = useCallback((next: Theme) => {
     setThemeState(next);
     try {

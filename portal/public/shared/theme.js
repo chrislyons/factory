@@ -37,3 +37,11 @@ function cssVar(name) {
 (function initTheme() {
   applyTheme(getSavedTheme() || getDefaultTheme(), false);
 })();
+
+/* Re-sync theme when restored from bfcache (back/forward nav) */
+window.addEventListener("pageshow", function(e) {
+  if (e.persisted) {
+    var fresh = getSavedTheme();
+    if (fresh) applyTheme(fresh, false);
+  }
+});
