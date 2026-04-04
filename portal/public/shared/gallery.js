@@ -430,6 +430,9 @@ function setAllDiagrams(collapsed) {
   diagramHeaders.forEach(function(header) { toggleDiagram(header, collapsed); });
 }
 
+/* Default all diagrams to collapsed on load */
+setAllDiagrams(true);
+
 function focusHeader(index) {
   if (!diagramHeaders.length) {
     return;

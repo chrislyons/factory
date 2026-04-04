@@ -34,6 +34,9 @@ function setAllSections(collapsed) {
   });
 }
 
+/* Default all sections to collapsed on load */
+setAllSections(true);
+
 function focusHeaderElement(header) {
   if (!header) return;
   currentHeaderIndex = headerArray.indexOf(header);
