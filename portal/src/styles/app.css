@@ -177,6 +177,8 @@
   --bg-gradient-bottom: #0e1520;
   --bg-radial-1: rgba(88, 166, 255, 0.04);
   --bg-radial-2: rgba(96, 165, 250, 0.03);
+  --dust-dot: rgba(148, 163, 184, 0.26);
+  --dust-accent-dot: rgba(99, 102, 241, 0.14);
   color-scheme: dark;
 }
 
@@ -215,6 +217,8 @@
   --bg-gradient-bottom: #f1f5f9;
   --bg-radial-1: rgba(0, 106, 220, 0.04);
   --bg-radial-2: rgba(59, 130, 246, 0.03);
+  --dust-dot: rgba(71, 85, 105, 0.2);
+  --dust-accent-dot: rgba(79, 70, 229, 0.12);
   color-scheme: light;
 }
 
@@ -239,8 +243,8 @@
   --border: rgba(210, 160, 105, 0.42);
   --border-strong: rgba(210, 160, 105, 0.7);
   --shadow: 0 16px 40px rgba(20, 10, 0, 0.38);
-  --dust-dot: rgba(232, 206, 171, 0.22);
-  --dust-dot-dim: rgba(255, 184, 0, 0.16);
+  --dust-dot: rgba(232, 206, 171, 0.24);
+  --dust-accent-dot: rgba(255, 184, 0, 0.22);
   --green: #6ee7a0;
   --red: #f87171;
   --yellow: #FFB800;
@@ -276,36 +280,7 @@ body {
     linear-gradient(180deg, var(--bg-gradient-top, var(--bg)), var(--bg-gradient-bottom, var(--bg)));
 }
 
-/* ── Background Texture — Dust Grid ──────────────────────────────── */
-
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background-image:
-    radial-gradient(circle, var(--dust-dot) 0.8px, transparent 0.8px),
-    radial-gradient(circle, var(--dust-dot-dim) 0.6px, transparent 0.6px);
-  background-size: 40px 40px, 29px 29px;
-  background-position: 0 0, 17px 19px;
-  animation: dust-drift 90s linear infinite;
-}
-
-:root {
-  --dust-dot: rgba(148, 163, 184, 0.22);
-  --dust-dot-dim: rgba(99, 102, 241, 0.12);
-}
-
-[data-theme="light"] {
-  --dust-dot: rgba(71, 85, 105, 0.16);
-  --dust-dot-dim: rgba(79, 70, 229, 0.08);
-}
-
-@keyframes dust-drift {
-  0% { background-position: 0 0, 11px 13px; }
-  100% { background-position: 24px 48px, 35px 61px; }
-}
+/* ── Background Texture — Dust Grid (canvas-based, see /shared/dust.js) ── */
 
 body > * {
   position: relative;

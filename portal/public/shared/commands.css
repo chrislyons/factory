@@ -143,7 +143,6 @@
 .section-header:focus-visible {
   outline: none;
   background: var(--section-header-focus-bg);
-  box-shadow: var(--section-header-focus-shadow);
 }
 
 .section-header.collapsed {

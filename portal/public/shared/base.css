@@ -16,14 +16,14 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg: #0a1016;
-  --bg-gradient-top: #070e15;
-  --bg-gradient-bottom: #0d1520;
-  --bg-deep: #060b10;
-  --bg-panel: #111824;
-  --bg-panel-strong: #172131;
-  --bg-panel-hover: #1d2840;
-  --surface-strong: rgba(18, 25, 37, 0.95);
+  --bg: #0f1720;
+  --bg-gradient-top: #0c141d;
+  --bg-gradient-bottom: #121c28;
+  --bg-deep: #0b1219;
+  --bg-panel: #16202e;
+  --bg-panel-strong: #1c2a3b;
+  --bg-panel-hover: #23314a;
+  --surface-strong: rgba(22, 32, 46, 0.95);
   --text: #e5edf6;
   --text-dim: #9bb0c8;
   --text-muted: #677a92;
@@ -54,12 +54,12 @@
   --mermaid-line-muted: rgba(127, 192, 255, 0.42);
   --mermaid-label-fill: #0f1721;
   --mermaid-label-text: #eef5fd;
-  --grid-size-primary: 37px 37px;
-  --grid-size-secondary: 29px 29px;
+  --grid-size-primary: 31px 31px;
+  --grid-size-secondary: 23px 23px;
   --grid-mask-top: rgba(0, 0, 0, 1);
   --grid-mask-bottom: rgba(0, 0, 0, 0.82);
-  --dust-dot: rgba(103,122,146,0.24);
-  --dust-accent-dot: rgba(88,166,255,0.16);
+  --dust-dot: rgba(103,122,146,0.26);
+  --dust-accent-dot: rgba(88,166,255,0.18);
   --search-focus-shadow: 0 0 12px rgba(88, 166, 255, 0.14), 0 0 4px rgba(88, 166, 255, 0.1);
   --callout-info-ring: inset 0 0 0 1px rgba(88, 166, 255, 0.12);
   --section-card-focus-shadow: 0 0 0 1px rgba(88, 166, 255, 0.16), 0 0 24px rgba(88, 166, 255, 0.12);
@@ -122,22 +122,22 @@
 }
 
 [data-theme="ember"] {
-  --bg: #352619;
-  --bg-gradient-top: #312217;
-  --bg-gradient-bottom: #38281c;
-  --bg-deep: rgba(48, 38, 29, 0.93);
-  --bg-panel: rgba(73, 56, 44, 0.95);
-  --bg-panel-strong: rgba(105, 83, 62, 0.95);
-  --bg-panel-hover: rgba(137, 110, 82, 0.95);
-  --surface-strong: rgba(73, 56, 44, 0.95);
+  --bg: #3e2e1e;
+  --bg-gradient-top: #3a2a1b;
+  --bg-gradient-bottom: #423222;
+  --bg-deep: rgba(56, 44, 32, 0.93);
+  --bg-panel: rgba(84, 64, 48, 0.95);
+  --bg-panel-strong: rgba(118, 92, 66, 0.95);
+  --bg-panel-hover: rgba(148, 118, 86, 0.95);
+  --surface-strong: rgba(84, 64, 48, 0.95);
   --text: #FFFDF9;
   --text-dim: #F8EDDE;
   --text-muted: #E0CAAA;
   --accent: #FFB800;
-  --accent-soft: rgba(255, 184, 0, 0.2);
-  --accent-border: rgba(210, 160, 105, 0.7);
-  --border: rgba(210, 160, 105, 0.42);
-  --border-strong: rgba(210, 160, 105, 0.7);
+  --accent-soft: rgba(255, 192, 32, 0.26);
+  --accent-border: rgba(224, 170, 80, 0.75);
+  --border: rgba(218, 168, 100, 0.46);
+  --border-strong: rgba(224, 170, 80, 0.75);
   --mermaid-neutral-fill: #5a4433;
   --mermaid-neutral-border: #d0a26c;
   --mermaid-neutral-text: #fff8ef;
@@ -160,15 +160,15 @@
   --mermaid-line-muted: rgba(255, 211, 107, 0.42);
   --mermaid-label-fill: #594434;
   --mermaid-label-text: #fffaf2;
-  --dust-dot: rgba(232, 206, 171, 0.22);
-  --dust-accent-dot: rgba(255, 184, 0, 0.16);
-  --search-focus-shadow: 0 0 12px rgba(255, 184, 0, 0.18), 0 0 4px rgba(255, 107, 53, 0.18);
-  --callout-info-ring: inset 0 0 0 1px rgba(210, 160, 105, 0.28);
-  --section-card-focus-shadow: 0 0 0 1px rgba(210, 160, 105, 0.34), 0 0 24px rgba(255, 107, 53, 0.14);
-  --section-header-focus-bg: linear-gradient(180deg, rgba(255, 184, 0, 0.16), rgba(255, 107, 53, 0.12));
-  --section-header-focus-shadow: inset 0 0 0 1px var(--accent-border), inset 0 0 18px rgba(255, 107, 53, 0.14);
-  --section-title-focus-shadow: 0 0 12px rgba(255, 107, 53, 0.18);
-  --section-count-focus-bg: rgba(255, 184, 0, 0.12);
+  --dust-dot: rgba(232, 206, 171, 0.24);
+  --dust-accent-dot: rgba(255, 184, 0, 0.22);
+  --search-focus-shadow: 0 0 12px rgba(255, 184, 0, 0.26), 0 0 4px rgba(255, 107, 53, 0.22);
+  --callout-info-ring: inset 0 0 0 1px rgba(224, 170, 80, 0.34);
+  --section-card-focus-shadow: 0 0 0 1px rgba(224, 170, 80, 0.42), 0 0 24px rgba(255, 107, 53, 0.18);
+  --section-header-focus-bg: linear-gradient(180deg, rgba(255, 184, 0, 0.20), rgba(255, 107, 53, 0.14));
+  --section-header-focus-shadow: inset 0 0 0 1px var(--accent-border), inset 0 0 18px rgba(255, 107, 53, 0.18);
+  --section-title-focus-shadow: 0 0 12px rgba(255, 107, 53, 0.24);
+  --section-count-focus-bg: rgba(255, 184, 0, 0.16);
   --row-divider: rgba(210, 160, 105, 0.18);
   --osc-text: #FF6B35;
   color-scheme: dark;
@@ -188,28 +188,9 @@ body {
   flex-direction: column;
 }
 
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background-image:
-    radial-gradient(circle, var(--dust-dot) 0.8px, transparent 0.8px),
-    radial-gradient(circle, var(--dust-accent-dot) 0.6px, transparent 0.6px);
-  background-size: var(--grid-size-primary), var(--grid-size-secondary);
-  background-position: 0 0, 17px 19px;
-  -webkit-mask-image: linear-gradient(180deg, var(--grid-mask-top), var(--grid-mask-bottom));
-  mask-image: linear-gradient(180deg, var(--grid-mask-top), var(--grid-mask-bottom));
-  animation: dust-drift 90s linear infinite;
-}
+/* Dust grid is now canvas-based — see /shared/dust.js */
 
 body > * { position: relative; z-index: 1; }
-
-@keyframes dust-drift {
-  0% { background-position: 0 0, 11px 13px; }
-  100% { background-position: 24px 48px, 35px 61px; }
-}
 
 .site-header {
   position: sticky;

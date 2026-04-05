@@ -146,35 +146,11 @@ body {
   flex-direction: column;
 }
 
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background-image:
-    radial-gradient(circle, var(--dust-dot) 0.8px, transparent 0.8px),
-    radial-gradient(circle, var(--dust-accent-dot) 0.6px, transparent 0.6px);
-  background-size: var(--grid-size-primary), var(--grid-size-secondary);
-  background-position: 0 0, 17px 19px;
-  -webkit-mask-image: linear-gradient(180deg, var(--grid-mask-top), var(--grid-mask-bottom));
-  mask-image: linear-gradient(180deg, var(--grid-mask-top), var(--grid-mask-bottom));
-  animation: dust-drift 90s linear infinite;
-}
+/* Dust grid is now canvas-based — see /shared/dust.js */
 
 body > * {
   position: relative;
   z-index: 1;
-}
-
-@keyframes dust-drift {
-  0% {
-    background-position: 0 0, 11px 13px;
-  }
-
-  100% {
-    background-position: 24px 48px, 35px 61px;
-  }
 }
 
 .sr-only {
