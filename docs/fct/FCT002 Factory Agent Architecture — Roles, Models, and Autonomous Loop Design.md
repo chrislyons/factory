@@ -58,11 +58,11 @@ LLM inference is memory-bandwidth-bound, not compute-bound [1]. At 400 GB/s unif
 
 | Component | Port | Model | Quant | Size | Notes |
 |---|---|---|---|---|---|
-| Boot | 41961 | Nanbeige4.1-3B Deep Sea | 8bit MLX | ~4.2GB | Dedicated instance — fine-tuning will diverge from IG-88 |
-| IG-88 | 41988 | Nanbeige4.1-3B Deep Sea | 8bit MLX | ~4.2GB | Dedicated instance — fine-tuning target, trading domain |
-| Kelk | 41962 | Qwen3.5-4B | Q6 MLX | ~3.4GB | Always-on; factual recall via Qdrant RAG |
-| Nan | 41963 | LFM2.5-1.2B Thinking | 6bit MLX | ~1.0GB | Always-on observer; `<think>` traces visible |
-| Expert pool | 41962 | Qwen3.5-4B | Q6 MLX | ~3.4GB | Shares Kelk's instance; identities injected per-task |
+| Boot | 41961 | Nanbeige4.1-3B Deep Sea | 8bit MLX | ~4.3GB | Dedicated instance |
+| IG-88 | 41988 | Qwen3.5-4B | 8bit MLX | ~4.6GB | Local filter only — cloud primary (IG88004). Scans, classification, triage. |
+| Kelk / Xamm | 41962 | Qwen3.5-4B | 8bit MLX | ~4.6GB | Always-on; Xamm shares slot (WHB025) |
+| Nan | 41963 | LFM2.5-1.2B Thinking | 8bit MLX | ~1.3GB | Always-on observer; `<think>` traces visible |
+| Expert pool | 41962 | Qwen3.5-4B | 8bit MLX | ~4.6GB | Shares Kelk/Xamm instance; identities injected per-task |
 | LFM2.5-VL-1.6B | — | Shared vision module | 6bit MLX | ~1.4GB | Charts (IG-88), documents (Boot) |
 | LFM2.5-Audio-1.5B | — | Shared audio module | 6bit MLX | ~1.3GB | Voice (Kelk), alerts (IG-88) |
 | nomic-embed-text | 11434 | Embeddings | — | ~0.1GB | Qdrant retrieval (Ollama) |
@@ -74,13 +74,12 @@ LLM inference is memory-bandwidth-bound, not compute-bound [1]. At 400 GB/s unif
 |------|-------|-------|--------|
 | 41960 | Coordinator | (reserved, no model) | Reserved |
 | 41961 | Boot | Nanbeige4.1-3B-8bit | ACTIVE |
-| 41962 | Kelk + Expert pool | Qwen3.5-4B-MLX-8bit | ACTIVE |
-| 41963 | Nan | LFM2.5-1.2B-Thinking-MLX-6bit | ACTIVE |
-| 41964 | Xamm | (reserved) | Reserved |
+| 41962 | Kelk / Xamm + Expert pool | Qwen3.5-4B-MLX-8bit | ACTIVE |
+| 41963 | Nan | LFM2.5-1.2B-Thinking-MLX-8bit | ACTIVE |
 | 41910–41919 | Coding agents block | (reserved) | Reserved |
 | 41966 | On-demand reasoning | Qwen3.5-9B-MLX-6bit | ACTIVE |
 | 41977 | Research | (reserved) | Reserved |
-| 41988 | IG-88 | Nanbeige4.1-3B-8bit | ACTIVE |
+| 41988 | IG-88 (local filter) | Qwen3.5-4B-MLX-8bit | ACTIVE |
 
 **On-demand reasoning tier (evicts expert pool when loading):**
 
