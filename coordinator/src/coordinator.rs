@@ -3339,12 +3339,29 @@ async fn check_llm_health(state: &mut CoordinatorState) {
         .timeout(Duration::from_millis(timeout_ms))
         .build();
 
+    // For cloud providers, inject API key header so the health endpoint doesn't 401.
+    // Anthropic /v1/models requires x-api-key; OpenRouter requires Authorization: Bearer.
+    let api_key_env = match state.provider_chain.current().provider_type {
+        crate::config::ProviderType::Cloud => std::env::var("ANTHROPIC_API_KEY").ok(),
+        crate::config::ProviderType::Fallback => std::env::var("OPENROUTER_API_KEY").ok(),
+        crate::config::ProviderType::Local => None,
+    };
+
     let healthy = match client {
-        Ok(c) => match c.get(&health_url).send().await {
-            Ok(resp) => resp.status().is_success(),
-            Err(e) => {
-                debug!("LLM health check failed for {}: {}", provider_name, e);
-                false
+        Ok(c) => {
+            let mut req = c.get(&health_url);
+            if let Some(ref key) = api_key_env {
+                req = req
+                    .header("x-api-key", key)
+                    .header("Authorization", format!("Bearer {}", key))
+                    .header("anthropic-version", "2023-06-01");
+            }
+            match req.send().await {
+                Ok(resp) => resp.status().is_success(),
+                Err(e) => {
+                    debug!("LLM health check failed for {}: {}", provider_name, e);
+                    false
+                }
             }
         },
         Err(_) => false,
