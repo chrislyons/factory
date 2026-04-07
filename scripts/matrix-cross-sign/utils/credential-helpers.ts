@@ -4,8 +4,8 @@
  * Provides interactive prompts for credential input.
  * No credentials are logged or written to disk.
  *
- * Bot tokens are now managed via BWS (Bitwarden Secrets Manager)
- * and injected as env vars by mcp-env.sh. Use MATRIX_TOKEN_PAN_<AGENT>
+ * Bot tokens are managed via Infisical (Factory project) and injected
+ * as env vars by infisical-env.sh. Use MATRIX_TOKEN_PAN_<AGENT>
  * env vars instead of the old file-based approach.
  */
 
@@ -37,6 +37,6 @@ export function getBotPanToken(agentName: string): string {
   if (token) return token;
   throw new Error(
     `No token found. Set ${envVar} env var.\n` +
-    `  Use mcp-env.sh to inject from BWS, or export manually.`
+    `  Run via infisical-env.sh factory, or export manually.`
   );
 }
