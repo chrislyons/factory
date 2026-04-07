@@ -76,6 +76,8 @@ pub struct ProviderChain {
     providers: Vec<LLMProviderConfig>,
     health: Vec<ProviderHealth>,
     active_index: usize,
+    /// Set after the first Exhausted event; suppresses repeat emissions until reset.
+    exhausted: bool,
 }
 
 impl ProviderChain {
@@ -87,7 +89,18 @@ impl ProviderChain {
             providers,
             health,
             active_index: 0,
+            exhausted: false,
         }
+    }
+
+    /// Returns true if all providers have been exhausted.
+    pub fn is_exhausted(&self) -> bool {
+        self.exhausted
+    }
+
+    /// Reset the exhausted flag (e.g. after a provider recovers or config reload).
+    pub fn reset_exhausted(&mut self) {
+        self.exhausted = false;
     }
 
     /// Get the currently active provider.
@@ -162,9 +175,10 @@ impl ProviderChain {
 
     /// Reset to the primary (first) provider. Used when primary recovers.
     pub fn reset_to_primary(&mut self) -> Option<ProviderEvent> {
-        if self.active_index == 0 {
+        if self.active_index == 0 && !self.exhausted {
             return None;
         }
+        self.exhausted = false;
         let from = self.providers[self.active_index].name.clone();
         let to = self.providers[0].name.clone();
         self.active_index = 0;
@@ -205,7 +219,11 @@ impl ProviderChain {
         let next_index = self.active_index + 1;
 
         if next_index >= self.providers.len() {
-            // All providers exhausted
+            // All providers exhausted — only emit the event once until reset
+            if self.exhausted {
+                return None;
+            }
+            self.exhausted = true;
             let tried: Vec<String> = self.providers.iter().map(|p| p.name.clone()).collect();
             Some(ProviderEvent::Exhausted { tried })
         } else {
@@ -350,6 +368,53 @@ mod tests {
         // Fail the secondary (not active)
         let event = chain.record_failure("secondary", "err");
         assert!(event.is_none());
+        assert_eq!(chain.current().name, "primary");
+    }
+
+    #[test]
+    fn exhausted_event_fires_only_once() {
+        let mut chain = ProviderChain::new(vec![make_provider("primary"), make_provider("secondary")]);
+        // Exhaust primary
+        chain.record_failure("primary", "timeout");
+        chain.record_failure("primary", "timeout");
+        // Exhaust secondary — first time should emit Exhausted
+        chain.record_failure("secondary", "timeout");
+        let first = chain.record_failure("secondary", "timeout");
+        assert!(matches!(first, Some(ProviderEvent::Exhausted { .. })));
+        assert!(chain.is_exhausted());
+        // Subsequent failures must not re-emit
+        let second = chain.record_failure("secondary", "timeout");
+        assert!(second.is_none(), "Exhausted must not re-emit on repeated failures");
+        let third = chain.record_failure("secondary", "timeout");
+        assert!(third.is_none());
+    }
+
+    #[test]
+    fn reset_exhausted_clears_flag() {
+        let mut chain = ProviderChain::new(vec![make_provider("only")]);
+        chain.record_failure("only", "err");
+        chain.record_failure("only", "err");
+        assert!(chain.is_exhausted());
+        chain.reset_exhausted();
+        assert!(!chain.is_exhausted());
+        // First failure after reset crosses threshold immediately (counter wasn't reset),
+        // so the very next record_failure should re-emit Exhausted.
+        let event = chain.record_failure("only", "err");
+        assert!(matches!(event, Some(ProviderEvent::Exhausted { .. })));
+        assert!(chain.is_exhausted());
+    }
+
+    #[test]
+    fn reset_to_primary_clears_exhausted_flag() {
+        let mut chain = ProviderChain::new(vec![make_provider("primary"), make_provider("secondary")]);
+        chain.record_failure("primary", "timeout");
+        chain.record_failure("primary", "timeout");
+        chain.record_failure("secondary", "timeout");
+        chain.record_failure("secondary", "timeout");
+        assert!(chain.is_exhausted());
+        let event = chain.reset_to_primary();
+        assert!(matches!(event, Some(ProviderEvent::Failover { .. })));
+        assert!(!chain.is_exhausted());
         assert_eq!(chain.current().name, "primary");
     }
 }

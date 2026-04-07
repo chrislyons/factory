@@ -320,7 +320,7 @@ impl CoordinatorState {
                         cli: "claude".to_string(),
                         model: "claude-haiku-4-5-20251001".to_string(),
                         fallback_model: "claude-sonnet-4-6".to_string(),
-                        health_url: "https://api.anthropic.com/v1/messages".to_string(),
+                        health_url: "https://api.anthropic.com/v1/models".to_string(),
                         env: HashMap::new(),
                         timeout_ms: None,
                         retry_count: 1,
@@ -3320,6 +3320,12 @@ fn check_inter_agent_routing(
 // ============================================================================
 
 async fn check_llm_health(state: &mut CoordinatorState) {
+    // All providers already exhausted — stop hammering health endpoints until
+    // the chain is reset (e.g. via manual intervention or a future recovery path).
+    if state.provider_chain.is_exhausted() {
+        return;
+    }
+
     let provider_name = state.provider_chain.current().name.clone();
     let health_url = state.provider_chain.current().health_url.clone();
 
