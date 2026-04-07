@@ -249,7 +249,19 @@ pub async fn start_agent_session(
 
     let runtime = agent_config.runtime.clone();
     let hermes_profile = agent_config.hermes_profile.clone();
-    let scoped_env = agent_config.scoped_env.clone();
+    // Expand ${VAR} references in scoped_env values using the coordinator's environment
+    let scoped_env: std::collections::HashMap<String, String> = agent_config.scoped_env
+        .iter()
+        .map(|(k, v)| {
+            let expanded = if v.starts_with("${") && v.ends_with('}') {
+                let var_name = &v[2..v.len()-1];
+                std::env::var(var_name).unwrap_or_else(|_| v.clone())
+            } else {
+                v.clone()
+            };
+            (k.clone(), expanded)
+        })
+        .collect();
 
     tokio::spawn(agent_task(
         name.clone(),
