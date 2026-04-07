@@ -1,0 +1,25 @@
+{
+  "mcpServers": {
+    "_lunarcrush": {
+      "command": "/Users/chrislyons/.config/mcp-env.sh",
+      "args": [
+        "LUNARCRUSH_API_KEY_IG88",
+        "--",
+        "bash", "-c",
+        "LUNARCRUSH_API_KEY=\"$LUNARCRUSH_API_KEY_IG88\" node /opt/homebrew/lib/node_modules/@lunarcrush/mcp-server/index.js"
+      ]
+    },
+    "jupiter": {
+      "command": "/Users/chrislyons/.config/mcp-env.sh",
+      "args": [
+        "JUPITER_API_KEY",
+        "--",
+        "node", "/Users/chrislyons/dev/ig88/mcp-servers/jupiter-mcp/dist/index.js"
+      ]
+    },
+    "dexscreener": {
+      "command": "node",
+      "args": ["/Users/chrislyons/dev/ig88/mcp-servers/dexscreener-mcp/dist/index.js"]
+    }
+  }
+}

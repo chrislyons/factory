@@ -1,0 +1,23 @@
+[Unit]
+Description=Pantalaimon Matrix E2EE Proxy
+Documentation=https://github.com/matrix-org/pantalaimon
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=nesbitt
+Group=nesbitt
+
+ExecStart=/home/nesbitt/.local/bin/pantalaimon -c /home/nesbitt/.config/pantalaimon/pantalaimon.conf
+Restart=always
+RestartSec=10
+
+# Data directory
+WorkingDirectory=/home/nesbitt/.local/share/pantalaimon
+
+# Health check (pantalaimon listens on 8009)
+ExecStartPost=/bin/bash -c 'for i in {1..30}; do curl -s http://localhost:8009/_matrix/client/versions && exit 0; sleep 1; done; exit 1'
+
+[Install]
+WantedBy=blackbox.target

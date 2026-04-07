@@ -1,0 +1,29 @@
+[Unit]
+Description=Qdrant Vector Database
+Documentation=https://qdrant.tech/documentation/
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=nesbitt
+Group=nesbitt
+
+# Qdrant binary location (adjust if using Docker)
+ExecStart=/home/nesbitt/.local/bin/qdrant --config-path /home/nesbitt/.config/qdrant/config.yaml
+Restart=always
+RestartSec=10
+
+# Environment
+Environment=QDRANT__SERVICE__HTTP_PORT=6333
+Environment=QDRANT__SERVICE__GRPC_PORT=6334
+
+# Resource limits
+MemoryMax=2G
+CPUQuota=200%
+
+# Health check via systemd
+ExecStartPost=/bin/bash -c 'for i in {1..30}; do curl -s http://localhost:6333/health && exit 0; sleep 1; done; exit 1'
+
+[Install]
+WantedBy=blackbox.target

@@ -22,3 +22,51 @@ docs/repo-commands.html
 
 # Plists contain BWS secret UUIDs — never commit
 plists/
+
+# Agent private files — never commit (factory/ is public-safe)
+# .env files and examples (may contain template tokens)
+agents/ig88/.env.example
+agents/ig88/.env
+
+# Legacy archive docs — written pre-secrets-hygiene, may contain embedded tokens/URLs
+agents/ig88/docs/archive/
+
+# Secrets management setup doc — contains example credential patterns
+agents/ig88/docs/ig88/IG88009 Infisical Secrets Management Setup.md
+
+# Docker compose references FALKORDB_PASSWORD env var
+agents/ig88/docker-compose.yml
+
+# Identity: personality, trading strategy, personal context
+agents/*/soul.md
+agents/*/principles.md
+agents/*/agents.md
+agents/*/environment.md
+agents/*/src/agents/
+agents/*/src/principles/
+agents/*/src/soul/
+
+# Runtime data: logs, memory, conversation history, transcripts
+agents/*/logs/
+agents/*/data/
+agents/*/memory/
+agents/ig88/evals/results/
+
+# Agent configs: scoped credentials, operational parameters
+agents/ig88/config/
+
+# Session context and implementation notes
+agents/*/.claude/
+agents/*/.agent/
+agents/*/.agents/
+agents/*/.cursor/
+agents/*/.venv/
+agents/*/nan/
+
+# Build artifacts in agent src and mcp-servers
+agents/*/src/dist/
+agents/*/src/node_modules/
+agents/*/src/.lockfile-integrity-snapshot.json
+agents/*/mcp-servers/**/node_modules/
+agents/*/mcp-servers/**/.lockfile-integrity-snapshot.json
+agents/*/mcp-servers/**/pnpm-lock.yaml

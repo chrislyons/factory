@@ -1,0 +1,64 @@
+# Claude Code scratch space
+.claude/scratch/
+
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+dist/
+build/
+out/
+.next/
+.turbo/
+target/
+*.o
+*.a
+*.so
+*.dylib
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+deploy/**/.env
+config/*.secret.yaml
+
+# Secrets and tokens (NEVER commit)
+**/secrets/
+*_token
+*_token.txt
+*.secret
+matrix_token*
+ig88bot_token*
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+poetry.lock
+
+# Editor directories
+.vscode/
+.idea/
+
+# Temporary files
+tmp/
+temp/
+*.tmp

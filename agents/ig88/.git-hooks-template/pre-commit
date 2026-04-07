@@ -1,0 +1,14 @@
+#!/bin/bash
+# Pre-commit hook for documentation validation
+# Install: cp .git-hooks-template/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+
+set -e
+
+# Check for misplaced docs in root
+if [[ -n "$(git diff --cached --name-only | grep '^[A-Z]\{3,4\}[0-9]\{3,4\}.*\.md$')" ]]; then
+  echo "Error: PREFIX-numbered docs must be in docs/PREFIX/ directory"
+  echo "Commit blocked. Please move files to correct location."
+  exit 1
+fi
+
+echo "✓ Documentation placement validated"
