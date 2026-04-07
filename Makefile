@@ -47,6 +47,33 @@ status:  ## Check coordinator launchd state and last 5 log lines
 	@ssh $(WHITEBOX) 'launchctl list | grep coordinator-rs; echo "---"; tail -5 ~/Library/Logs/factory/coordinator.log'
 
 # ---------------------------------------------------------------------------
+# Agent provisioning
+# ---------------------------------------------------------------------------
+
+.PHONY: agent-add
+agent-add:  ## Provision a new agent: NAME= PORT= MODEL= MATRIX_USER= required
+	@test -n "$(NAME)"        || (echo "ERROR: NAME required";        exit 1)
+	@test -n "$(PORT)"        || (echo "ERROR: PORT required";        exit 1)
+	@test -n "$(MODEL)"       || (echo "ERROR: MODEL required";       exit 1)
+	@test -n "$(MATRIX_USER)" || (echo "ERROR: MATRIX_USER required"; exit 1)
+	bash scripts/agent-add.sh \
+	    --name "$(NAME)" --port "$(PORT)" \
+	    --model "$(MODEL)" --matrix-user "$(MATRIX_USER)" \
+	    --prefix "$(PREFIX)" --description "$(DESCRIPTION)"
+
+.PHONY: agent-remove
+agent-remove:  ## Remove an agent — prints manual checklist
+	@test -n "$(NAME)" || (echo "ERROR: NAME required"; exit 1)
+	@echo "Manual removal checklist for $(NAME):"
+	@echo "  1. Remove '$(NAME):' block from agents/ig88/config/agent-config.yaml"
+	@echo "  2. make sync-config && make reload"
+	@echo "  3. ssh whitebox 'rm -rf ~/.hermes/profiles/$(NAME)'"
+	@echo "  4. Archive agents/$(NAME)/ — do not delete"
+	@echo "  5. infra/ports.csv — status back to reserved"
+	@echo "  6. Disable MLX-LM launchd plist on Whitebox"
+	@echo "  7. Remove from scripts/matrix-cross-sign/utils/constants.ts"
+
+# ---------------------------------------------------------------------------
 # Help
 # ---------------------------------------------------------------------------
 

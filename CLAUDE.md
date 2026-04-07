@@ -12,7 +12,7 @@ factory/
 ├── coordinator/      # Rust orchestration binary (coordinator-rs)
 ├── agents/           # Agent planning repos (boot, ig88, kelk — submodules)
 ├── jobs/             # Job YAML files + registry.yaml
-├── scripts/          # Build tooling + agent-console.sh (tmux manager)
+├── scripts/          # Build tooling + agent-add.sh (provisioning) + agent-console.sh (tmux)
 ├── plists/           # launchd plists (gitignored, deployed manually)
 ├── docs/fct/         # PREFIX docs (FCT001–FCT048+)
 └── CLAUDE.md         # This file

@@ -4,14 +4,12 @@ Project documentation index for factory.
 
 ## Recent Documents
 
-- [[FCT050 Coordinator-rs Deployment Status and Operational Runbook]]
-- [[FCT049 Agentic Orchestration Philosophy — Hermes Self-Extension vs Factory Frozen Harness]]
-- [[FCT048 Agent Console Tmux Bridge]]
-- [[FCT047 Hermes Runtime Integration Phase 3 Implementation]]
 - [[FCT046 Provider Failover Chain and Hermes Integration Architecture]]
-- [[FCT045 Hermes Agent Competitive Analysis — Patterns for Coordinator-rs]]
-- [[FCT044 Portal Static Page Modularization — Shared Asset Extraction]]
-- [[FCT043 Matrix Mechanisms Research — Spaces, Threads, Replies, and Notifications]]
+- [[FCT047 Hermes Runtime Integration Phase 3 Implementation]]
+- [[FCT048 Agent Console Tmux Bridge]]
+- [[FCT049 Agentic Orchestration Philosophy — Hermes Self-Extension vs Factory Frozen Harness]]
+- [[FCT050 Coordinator-rs Deployment Status and Operational Runbook]]
+- [[FCT051 Agent Provisioning System — agent-add Automation]]
 
 ## All Documents
 
@@ -65,9 +63,18 @@ Project documentation index for factory.
 - [[FCT048 Agent Console Tmux Bridge]]
 - [[FCT049 Agentic Orchestration Philosophy — Hermes Self-Extension vs Factory Frozen Harness]]
 - [[FCT050 Coordinator-rs Deployment Status and Operational Runbook]]
+- [[FCT051 Agent Provisioning System — agent-add Automation]]
 
 ## Navigation
 
 - **Vault:** [[../../vault|Return to Vault]]
 - **Repo:** factory
 - **Docs:** `docs/fct/`
+
+## Tags
+
+#project-index #fct
+
+---
+
+**Last Generated:** 2026-04-07
