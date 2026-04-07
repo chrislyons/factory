@@ -206,7 +206,7 @@ impl MatrixClient {
             .timeout(http_timeout)
             .send()
             .await
-            .context("sync request failed")?;
+            .with_context(|| format!("sync request failed for {}", &url[..url.len().min(120)]))?;
 
         let status = resp.status();
         if status == StatusCode::UNAUTHORIZED {

@@ -842,7 +842,7 @@ async fn sync_coord_approvals(state: &mut CoordinatorState) {
     // timeout=0: non-blocking poll — return immediately with pending events.
     // Avoids blocking the 3s poll loop for 30s when the approval room is quiet.
     match client.sync(since.as_deref(), None, Some(0)).await {
-        Err(e) => warn!("coord sync failed: {}", e),
+        Err(e) => warn!("coord sync failed: {:#}", e),
         Ok(resp) => {
             state.coord_sync_token = Some(resp.next_batch.clone());
 
