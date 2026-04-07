@@ -14,14 +14,41 @@ use crate::agent::SessionResult;
 /// Parse Hermes non-interactive stdout into a SessionResult.
 /// In subprocess mode, Hermes writes markdown text to stdout — no structured
 /// JSON protocol like Claude CLI's stream-json.
+///
+/// When Hermes `-Q` mode emits a trailing `session_id: <value>` line, we
+/// extract it for resume-chain dispatch and strip it from the response body.
 pub fn parse_hermes_output(raw: &str) -> SessionResult {
     let trimmed = raw.trim();
-    let subtype = if trimmed.is_empty() { "error" } else { "success" };
+
+    // Check for trailing `session_id: <value>` line
+    let (body, session_id) = if let Some(last_line) = trimmed.lines().last() {
+        let stripped = last_line.trim();
+        if let Some(sid) = stripped.strip_prefix("session_id: ") {
+            let sid = sid.trim();
+            if !sid.is_empty() {
+                // Strip the session_id line from the body
+                let body = trimmed
+                    .lines()
+                    .take(trimmed.lines().count().saturating_sub(1))
+                    .collect::<Vec<_>>()
+                    .join("\n");
+                (body.trim_end().to_string(), Some(sid.to_string()))
+            } else {
+                (trimmed.to_string(), None)
+            }
+        } else {
+            (trimmed.to_string(), None)
+        }
+    } else {
+        (trimmed.to_string(), None)
+    };
+
+    let subtype = if body.is_empty() { "error" } else { "success" };
     SessionResult {
-        result: trimmed.to_string(),
+        result: body,
         subtype: subtype.to_string(),
         cost_usd: None,
-        session_id: None,
+        session_id,
     }
 }
 
@@ -122,6 +149,25 @@ mod tests {
         assert_eq!(result.subtype, "success");
         assert_eq!(result.result, "Here is my response.\nWith multiple lines.");
         assert!(result.session_id.is_none());
+    }
+
+    #[test]
+    fn test_parse_hermes_output_with_session_id() {
+        let raw = "Here is my response.\nWith details.\nsession_id: abc-123-def";
+        let result = parse_hermes_output(raw);
+        assert_eq!(result.subtype, "success");
+        assert_eq!(result.result, "Here is my response.\nWith details.");
+        assert_eq!(result.session_id.as_deref(), Some("abc-123-def"));
+    }
+
+    #[test]
+    fn test_parse_hermes_output_session_id_only() {
+        // Edge case: output is just the session_id line
+        let raw = "session_id: xyz-789";
+        let result = parse_hermes_output(raw);
+        assert_eq!(result.subtype, "error"); // empty body
+        assert_eq!(result.result, "");
+        assert_eq!(result.session_id.as_deref(), Some("xyz-789"));
     }
 
     #[test]

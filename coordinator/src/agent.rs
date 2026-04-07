@@ -342,6 +342,10 @@ async fn agent_task(
         let profile = hermes_profile.as_deref().unwrap_or("default");
         info!("[{}] Using Hermes runtime (profile: {})", agent_name, profile);
 
+        // Track session ID for resume-chaining across messages.
+        // Seeded from persisted session_id on coordinator restart.
+        let mut last_hermes_session_id: Option<String> = resume_id;
+
         {
             let mut p = process.lock().await;
             p.is_ready = true;
@@ -367,13 +371,51 @@ async fn agent_task(
                                 text_blocks: vec!["Processing via Hermes runtime".to_string()],
                             });
 
-                            // Spawn single-shot Hermes process
-                            match run_hermes_query(
-                                &agent_name, profile, &working_dir, &scoped_env, &user_msg.content,
-                            ).await {
+                            // Spawn single-shot Hermes process with session resume
+                            let query_result = run_hermes_query(
+                                &agent_name, profile, &working_dir, &scoped_env,
+                                &user_msg.content, last_hermes_session_id.as_deref(),
+                            ).await;
+
+                            match query_result {
                                 Ok(output) => {
                                     let result = parse_hermes_output(&output);
+
+                                    // Update session tracking
+                                    if let Some(ref sid) = result.session_id {
+                                        last_hermes_session_id = Some(sid.clone());
+                                        let mut p = process.lock().await;
+                                        p.session_id = Some(sid.clone());
+                                    }
+
                                     let _ = result_tx.send(Ok(result));
+                                }
+                                Err(e) if last_hermes_session_id.is_some() => {
+                                    // Stale session fallback: retry once without --resume
+                                    warn!(
+                                        "[{}] Hermes query failed with resume, retrying fresh: {:#}",
+                                        agent_name, e
+                                    );
+                                    last_hermes_session_id = None;
+
+                                    match run_hermes_query(
+                                        &agent_name, profile, &working_dir, &scoped_env,
+                                        &user_msg.content, None,
+                                    ).await {
+                                        Ok(output) => {
+                                            let result = parse_hermes_output(&output);
+                                            if let Some(ref sid) = result.session_id {
+                                                last_hermes_session_id = Some(sid.clone());
+                                                let mut p = process.lock().await;
+                                                p.session_id = Some(sid.clone());
+                                            }
+                                            let _ = result_tx.send(Ok(result));
+                                        }
+                                        Err(e2) => {
+                                            error!("[{}] Hermes query failed (fresh): {:#}", agent_name, e2);
+                                            let _ = result_tx.send(Err(e2));
+                                        }
+                                    }
                                 }
                                 Err(e) => {
                                     error!("[{}] Hermes query failed: {:#}", agent_name, e);
@@ -874,15 +916,16 @@ async fn run_hermes_query(
     working_dir: &str,
     scoped_env: &std::collections::HashMap<String, String>,
     message: &str,
+    resume_session_id: Option<&str>,
 ) -> Result<String> {
     let mut cmd = Command::new("hermes");
-    cmd.args([
-        "--profile", profile,
-        "chat",
-        "-q", message,
-        "-Q",              // quiet: suppress banner/spinner/tool previews
-        "--source", "tool", // tag as programmatic integration
-    ])
+    let mut args = vec!["--profile", profile, "chat"];
+    if let Some(sid) = resume_session_id {
+        args.extend(["--resume", sid]);
+        info!("[{}] Hermes resuming session: {}", agent_name, sid);
+    }
+    args.extend(["-q", message, "-Q", "--source", "tool"]);
+    cmd.args(&args)
     .current_dir(working_dir)
     .stdin(std::process::Stdio::null())
     .stdout(std::process::Stdio::piped())
