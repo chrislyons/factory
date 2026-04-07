@@ -260,6 +260,8 @@ struct CoordinatorState {
     last_fs_approval_scan: Instant,
     /// Sync token for the coordinator's own Matrix account (for approval room reactions).
     coord_sync_token: Option<String>,
+    /// Sync filter ID for the coordinator's own Matrix account (limits initial sync payload).
+    coord_sync_filter_id: Option<String>,
     /// Loop engine manager (autoscope — FCT009)
     loop_manager: LoopManager,
     /// Per-agent budget tracking with soft/hard thresholds
@@ -369,6 +371,7 @@ impl CoordinatorState {
             approval_dir,
             last_fs_approval_scan: Instant::now(),
             coord_sync_token: None,
+            coord_sync_filter_id: None,
             loop_manager: LoopManager::new(),
             budget_tracker: BudgetTracker::new(PathBuf::from(format!("{}/budget.json", state_dir))),
             runtime_state: RuntimeStateManager::new(PathBuf::from(format!("{}/runtime-state.json", state_dir))),
@@ -838,10 +841,27 @@ async fn sync_coord_approvals(state: &mut CoordinatorState) {
         }
     };
 
+    // Create a sync filter on first call — without it, the initial sync pulls all
+    // room state for every room the coord account has joined, which times out via Pantalaimon.
+    if state.coord_sync_filter_id.is_none() {
+        match client.create_sync_filter().await {
+            Ok(fid) => {
+                info!("coord sync: created filter: {}", fid);
+                state.coord_sync_filter_id = Some(fid);
+            }
+            Err(e) => {
+                warn!("coord sync: failed to create filter: {:#}", e);
+                // Continue without filter — will likely time out on initial sync, but try anyway
+            }
+        }
+    }
+
     let since = state.coord_sync_token.clone();
+    let filter_id = state.coord_sync_filter_id.clone();
     // timeout=0: non-blocking poll — return immediately with pending events.
-    // Avoids blocking the 3s poll loop for 30s when the approval room is quiet.
-    match client.sync(since.as_deref(), None, Some(0)).await {
+    // Use 30s timeout for initial sync (no since token) to handle Pantalaimon's first response.
+    let timeout_ms = if since.is_none() { Some(30_000) } else { Some(0) };
+    match client.sync(since.as_deref(), filter_id.as_deref(), timeout_ms).await {
         Err(e) => warn!("coord sync failed: {:#}", e),
         Ok(resp) => {
             state.coord_sync_token = Some(resp.next_batch.clone());
