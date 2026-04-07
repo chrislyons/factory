@@ -4,6 +4,8 @@ Project documentation index for factory.
 
 ## Recent Documents
 
+- [[FCT050 Coordinator-rs Deployment Status and Operational Runbook]]
+- [[FCT049 Agentic Orchestration Philosophy — Hermes Self-Extension vs Factory Frozen Harness]]
 - [[FCT048 Agent Console Tmux Bridge]]
 - [[FCT047 Hermes Runtime Integration Phase 3 Implementation]]
 - [[FCT046 Provider Failover Chain and Hermes Integration Architecture]]
@@ -61,6 +63,8 @@ Project documentation index for factory.
 - [[FCT046 Provider Failover Chain and Hermes Integration Architecture]]
 - [[FCT047 Hermes Runtime Integration Phase 3 Implementation]]
 - [[FCT048 Agent Console Tmux Bridge]]
+- [[FCT049 Agentic Orchestration Philosophy — Hermes Self-Extension vs Factory Frozen Harness]]
+- [[FCT050 Coordinator-rs Deployment Status and Operational Runbook]]
 
 ## Navigation
 
