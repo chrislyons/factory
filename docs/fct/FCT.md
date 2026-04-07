@@ -9,7 +9,7 @@ Project documentation index for factory.
 - [[FCT049 Agentic Orchestration Philosophy — Hermes Self-Extension vs Factory Frozen Harness]]
 - [[FCT050 Coordinator-rs Deployment Status and Operational Runbook]]
 - [[FCT051 Agent Provisioning System — agent-add Automation]]
-- [[FCT052 BWS to Infisical Secrets Migration]]
+- BWS to Infisical Secrets Migration → moved to WHB027 (sensitive)
 
 ## All Documents
 
@@ -64,7 +64,7 @@ Project documentation index for factory.
 - [[FCT049 Agentic Orchestration Philosophy — Hermes Self-Extension vs Factory Frozen Harness]]
 - [[FCT050 Coordinator-rs Deployment Status and Operational Runbook]]
 - [[FCT051 Agent Provisioning System — agent-add Automation]]
-- [[FCT052 BWS to Infisical Secrets Migration]]
+- BWS to Infisical Secrets Migration → moved to WHB027 (sensitive)
 
 ## Navigation
 
