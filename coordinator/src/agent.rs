@@ -440,7 +440,7 @@ async fn agent_task(
 
     loop {
         // Spawn the Claude subprocess
-        match spawn_claude(&agent_name, &provider, system_prompt.as_deref(), &working_dir, current_resume.as_deref()).await {
+        match spawn_claude(&agent_name, &provider, system_prompt.as_deref(), &working_dir, current_resume.as_deref(), &scoped_env).await {
             Ok((mut child, stdin, stdout)) => {
                 let spawn_instant = std::time::Instant::now();
                 let was_resume = current_resume.is_some();
@@ -762,6 +762,7 @@ async fn spawn_claude(
     system_prompt: Option<&str>,
     working_dir: &str,
     resume_id: Option<&str>,
+    scoped_env: &std::collections::HashMap<String, String>,
 ) -> Result<(Child, ChildStdin, ChildStdout)> {
     let mut args = vec![
         "--input-format".to_string(),
@@ -797,6 +798,11 @@ async fn spawn_claude(
 
     // Provider-specific env overrides (e.g. ANTHROPIC_BASE_URL for greybox)
     for (k, v) in &provider.env {
+        cmd.env(k, v);
+    }
+
+    // Inject agent-scoped credentials (same pattern as Hermes runtime)
+    for (k, v) in scoped_env {
         cmd.env(k, v);
     }
 
