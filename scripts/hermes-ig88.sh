@@ -55,16 +55,32 @@ export HERMES_HOME="/Users/nesbitt/.hermes/profiles/ig88"
 # ---------------------------------------------------------------------------
 
 IG88_PROFILE_CFG="${HERMES_HOME}/config.yaml"
+IG88_PROFILE_TMPL="/Users/nesbitt/dev/factory/scripts/profiles/ig88-config.yaml.tmpl"
 HERMES_AGENT_PY="/Users/nesbitt/.local/share/uv/tools/hermes-agent/bin/python3"
 IG88_MODEL_CONFIG="/Users/nesbitt/models/gemma-4-e4b-it-6bit/config.json"
 MLX_VLM_HEALTH_URL="http://127.0.0.1:41988/health"
+
+# FCT060: render live profile config from the versioned template (same
+# pattern as Boot and Kelk). Only WEBHOOK_SECRET_IG88 is substituted; every
+# other ${...} in the template stays literal.
+if [[ ! -f "${IG88_PROFILE_TMPL}" ]]; then
+  echo "ERROR: IG-88 profile template not found at ${IG88_PROFILE_TMPL}" >&2
+  exit 3
+fi
+if [[ -z "${WEBHOOK_SECRET_IG88:-}" ]]; then
+  echo "ERROR: WEBHOOK_SECRET_IG88 not set — Infisical injection failed" >&2
+  exit 2
+fi
+mkdir -p "${HERMES_HOME}"
+envsubst '${WEBHOOK_SECRET_IG88}' < "${IG88_PROFILE_TMPL}" > "${IG88_PROFILE_CFG}"
+chmod 600 "${IG88_PROFILE_CFG}"
 
 # 1. Profile must exist AND pin provider: custom (top-level key). If the pin
 #    is removed, Hermes's runtime_provider.py will auto-detect OPENROUTER_API_KEY
 #    from env and silently cloud-route the local filesystem model path — the
 #    exact failure mode that bit us overnight 2026-04-07 (FCT055 RC-1).
 if [[ ! -f "${IG88_PROFILE_CFG}" ]]; then
-  echo "ERROR: IG-88 profile config not found at ${IG88_PROFILE_CFG}" >&2
+  echo "ERROR: IG-88 profile config not found at ${IG88_PROFILE_CFG} (render failed?)" >&2
   exit 3
 fi
 if ! grep -qE '^provider:[[:space:]]*custom([[:space:]]|$)' "${IG88_PROFILE_CFG}"; then
