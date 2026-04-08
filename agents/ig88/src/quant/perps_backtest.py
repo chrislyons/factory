@@ -33,7 +33,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 import numpy as np
@@ -550,7 +550,7 @@ class PerpsBacktester:
             # Open fee
             open_fee = notional * OPEN_FEE_PCT
 
-            entry_time = datetime.utcfromtimestamp(timestamps[entry_bar])
+            entry_time = datetime.fromtimestamp(timestamps[entry_bar], tz=timezone.utc)
 
             trade = Trade(
                 trade_id=self._next_trade_id(),
@@ -650,7 +650,7 @@ class PerpsBacktester:
 
             # Close fee
             close_fee = notional * CLOSE_FEE_PCT
-            exit_time = datetime.utcfromtimestamp(timestamps[min(exit_bar, n - 1)])
+            exit_time = datetime.fromtimestamp(timestamps[min(exit_bar, n - 1)], tz=timezone.utc)
 
             trade.close(
                 exit_price=exit_price,

@@ -4,7 +4,10 @@ version = "0.1.0"
 description = "Quantitative analysis toolkit for IG-88 crypto scalper"
 authors = ["Chris Lyons"]
 readme = "README.md"
-packages = [{include = "quant", from = "src"}]
+packages = [
+    {include = "quant", from = "src"},
+    {include = "trading", from = "src"},
+]
 
 [tool.poetry.dependencies]
 python = "^3.13"

@@ -400,7 +400,7 @@ class EventDrivenBacktester:
                 break
 
             entry_price = opens[entry_bar]
-            entry_time = datetime.fromtimestamp(timestamps[entry_bar])
+            entry_time = datetime.fromtimestamp(timestamps[entry_bar], tz=timezone.utc)
 
             # Position sizing
             pos_size = self._position_size()
@@ -486,7 +486,7 @@ class EventDrivenBacktester:
 
             # Exit fee
             exit_fee = pos_size * self._get_fee(use_limit=True)
-            exit_time = datetime.fromtimestamp(timestamps[min(exit_bar, n - 1)])
+            exit_time = datetime.fromtimestamp(timestamps[min(exit_bar, n - 1)], tz=timezone.utc)
 
             trade.close(
                 exit_price=exit_price,
@@ -703,7 +703,7 @@ class RegimeMomentumBacktester:
                 break
 
             entry_price = opens[entry_bar]
-            entry_time = datetime.fromtimestamp(timestamps[entry_bar])
+            entry_time = datetime.fromtimestamp(timestamps[entry_bar], tz=timezone.utc)
 
             pos_size = self._position_size()
             if pos_size < 1.0:
@@ -779,7 +779,7 @@ class RegimeMomentumBacktester:
                 exit_price = closes[bar]
 
             exit_fee = pos_size * MAKER_FEE_PCT
-            exit_time = datetime.fromtimestamp(timestamps[min(exit_bar, n - 1)])
+            exit_time = datetime.fromtimestamp(timestamps[min(exit_bar, n - 1)], tz=timezone.utc)
 
             trade.close(
                 exit_price=exit_price,
