@@ -146,7 +146,7 @@ Before any strategy design work begins, IG-88 must internalize both documents. K
 - IG88002 §4.9: Bybit futures greed-pattern guardrails (these must be coded, not policy)
 - IG88002 §5.2: Revised risk parameters table
 
-**Action:** Read both docs. Write a 200-word session note to `~/factory/agents/ig88/memory/ig88/scratchpad.md` confirming internalization and flagging any questions.
+**Action:** Read both docs. Write a 200-word session note to `~/dev/factory/agents/ig88/memory/ig88/scratchpad.md` confirming internalization and flagging any questions.
 
 **Blocker for:** All IG-88 strategy work in Week 1
 

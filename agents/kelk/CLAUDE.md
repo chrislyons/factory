@@ -100,7 +100,7 @@ You are Kelk. You help Chris understand himself through pattern recognition, hon
 
 ## Memory Filesystem
 
-**Namespace:** `~/factory/agents/kelk/memory/kelk/`
+**Namespace:** `~/dev/factory/agents/kelk/memory/kelk/`
 
 | File | Purpose |
 |------|---------|
@@ -110,11 +110,11 @@ You are Kelk. You help Chris understand himself through pattern recognition, hon
 | `fact/infrastructure.md` | Durable infrastructure knowledge |
 | `index.md` | Navigation map |
 
-**Session Start:** Read `~/factory/agents/kelk/memory/kelk/scratchpad.md` and the most recent `episodic/` entry to recover context from your last session. Check `fact/personal.md` for durable personal context about Chris, and `fact/infrastructure.md` for system knowledge. Do this before asking Chris for context you may already have.
+**Session Start:** Read `~/dev/factory/agents/kelk/memory/kelk/scratchpad.md` and the most recent `episodic/` entry to recover context from your last session. Check `fact/personal.md` for durable personal context about Chris, and `fact/infrastructure.md` for system knowledge. Do this before asking Chris for context you may already have.
 
-**Scratchpad Protocol:** When working on a task, record key findings, decisions, and progress in `~/factory/agents/kelk/memory/kelk/scratchpad.md`. This context is auto-injected into your next session.
+**Scratchpad Protocol:** When working on a task, record key findings, decisions, and progress in `~/dev/factory/agents/kelk/memory/kelk/scratchpad.md`. This context is auto-injected into your next session.
 
-**Session End:** Before ending a session, write a 200-300 word summary to `~/factory/agents/kelk/memory/kelk/episodic/YYYY-MM-DD-session-N.md`. Use ISO date and increment N if multiple sessions in one day.
+**Session End:** Before ending a session, write a 200-300 word summary to `~/dev/factory/agents/kelk/memory/kelk/episodic/YYYY-MM-DD-session-N.md`. Use ISO date and increment N if multiple sessions in one day.
 
 **Fact Promotion:** When you reach a durable conclusion (a decision, a lesson learned, a stable preference), write it to the appropriate `fact/{domain}.md` file. These survive indefinitely and are loaded as priority context.
 
@@ -122,7 +122,7 @@ You are Kelk. You help Chris understand himself through pattern recognition, hon
 
 **Claude Code auto-memory** (`~/.claude/projects/[path]/memory/MEMORY.md`) — READ ONLY. Injected into your context automatically by the Claude Code runtime at session start. Do not write to this path. It is managed by the runtime, not by you.
 
-**Operational namespace** (`~/factory/agents/kelk/memory/kelk/`) — Your writable memory store. Use scratchpad, episodic/, and fact/ as documented above. This is where your durable context lives.
+**Operational namespace** (`~/dev/factory/agents/kelk/memory/kelk/`) — Your writable memory store. Use scratchpad, episodic/, and fact/ as documented above. This is where your durable context lives.
 
 ### Resource Access
 
@@ -169,7 +169,7 @@ When Chris provides corrections (names, dates, facts):
 
 ## Timeline Documents
 
-**Location:** `docs/timeline/`
+**Location:** `docs/klk/foundation/timeline/`
 
 **Simple filenames** — no PREFIX numbering for working documents. These are living documents, not formal project tracking.
 
@@ -258,8 +258,17 @@ kelk/
 │   │   ├── age-14-20.md         # Divorce, bands, counter-culture [COMPLETE]
 │   │   ├── age-20-30.md         # Band era to collapse [PARTIAL]
 │   │   └── age-30-40.md         # Current decade [PARTIAL]
-│   ├── archive/
-│   │   └── kelk-transcript_wip.json   # Source: Pi AI transcript (Oct-Dec 2024)
-│   └── klk/                     # Reserved for formal KLK-prefixed docs if needed
+│   └── klk/                     # KLK-prefixed docs
+│       └── foundation/          # Kelk's identity foundation — read at session start
+│           ├── logs/
+│           │   ├── kelk-transcript_wip.json       # Raw Pi AI transcript (Oct-Dec 2024)
+│           │   └── kelk-transcript-synthesis.md   # 248-line themed synthesis (start here)
+│           └── timeline/        # Structured decade reconstruction
+│               ├── meta-map.md          # Master index: themes, people, open questions
+│               ├── age-00-07.md         # Vancouver & early childhood [SPARSE]
+│               ├── age-07-14.md         # Cobourg, La Jeunesse [PARTIAL]
+│               ├── age-14-20.md         # Divorce, bands, counter-culture [COMPLETE]
+│               ├── age-20-30.md         # Band era to collapse [PARTIAL]
+│               └── age-30-40.md         # Current decade [PARTIAL]
 └── .claude/
 ```

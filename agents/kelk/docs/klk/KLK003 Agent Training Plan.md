@@ -29,7 +29,7 @@ Kelk's challenge is fundamentally different from IG-88 or Boot. There's no codeb
 
 | Source | Content | Status |
 |--------|---------|--------|
-| Pi transcript | `docs/archive/kelk-transcript_wip.json` — Oct-Dec 2024 conversations with Pi AI | Ground truth, partially extracted |
+| Pi transcript | `docs/klk/foundation/logs/kelk-transcript_wip.json` — Oct-Dec 2024 conversations with Pi AI (synthesis at `docs/klk/foundation/logs/kelk-transcript-synthesis.md`) | Ground truth, partially extracted |
 | age-00-07 | Vancouver childhood | **Sparse** — almost nothing |
 | age-07-14 | La Jeunesse, Cobourg, 8-family community | **Partial** |
 | age-14-20 | Divorce night, bands, counter-culture, Peterborough | **Complete** |
@@ -75,7 +75,7 @@ Kelk's challenge is fundamentally different from IG-88 or Boot. There's no codeb
 **Objective:** Kelk reads the FULL Pi transcript — not just the timeline extractions that became decade files, but the conversational texture, tone shifts, and avoidances.
 
 **Tasks:**
-- Read `docs/archive/kelk-transcript_wip.json` end-to-end
+- Read `docs/klk/foundation/logs/kelk-transcript_wip.json` end-to-end (start with `docs/klk/foundation/logs/kelk-transcript-synthesis.md` for the themed summary)
 - Map what was said vs. what was captured in decade files
 - Identify emotional texture that didn't make it into structured data:
   - Moments where Chris's tone shifted (anger, deflection, tenderness)

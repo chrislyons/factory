@@ -65,8 +65,8 @@ If you have nothing useful to say about the content, say nothing.
 | IG-88 Training | !zRnHwXlrVdCfdNbNOx | ig88 | @boot | no | ~/dev/factory/agents/ig88 | Also Chris<>IG-88 DM; Boot is approval delegate |
 | System Status | !jPovIiHiRrKTQWCOrp | boot | — | no | — | HUD + infra alerts; require_mention: true |
 | General | !MDVmYJtAiHZoBfaQdK | boot | — | no | — | require_mention: true |
-| Chris<>Boot DM | !WBXxFNvnQlbsQywTta | boot | — | — | ~/factory/agents/boot | DM: no mention required |
-| Chris<>Kelk DM | !sLoMlfxPNQeYppNbbS | kelk | — | — | ~/factory/agents/kelk | DM: no mention required |
+| Chris<>Boot DM | !WBXxFNvnQlbsQywTta | boot | — | — | ~/dev/factory/agents/boot | DM: no mention required |
+| Chris<>Kelk DM | !sLoMlfxPNQeYppNbbS | kelk | — | — | ~/dev/factory/agents/kelk | DM: no mention required |
 | Chris<>Coord DM | !vTNmcZzRgfeFzMEzLc | coord | — | — | — | Approval requests only |
 | Orpheus SDK | !DdGujpFMkFtSImKhTr | boot | — | no | ~/dev/orpheus-sdk | PREFIX: ORP |
 | Carbon | !qkRpAfXWtMLWaqcFDP | boot | — | no | ~/dev/carbon-acx | PREFIX: ACX |
@@ -121,7 +121,7 @@ Set the job's status to "done" in its YAML file. If other jobs depend on this on
 
 ### Reporting Status
 
-Write your status to `/home/nesbitt/projects/gsd/status/{agent}.json` every time your state changes (starting a task, finishing, getting blocked, going idle). Schema:
+Write your status to `~/dev/factory/portal/status/{agent}.json` every time your state changes (starting a task, finishing, getting blocked, going idle). Schema:
 
 ```json
 {
