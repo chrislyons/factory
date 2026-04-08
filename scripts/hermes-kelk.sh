@@ -50,29 +50,13 @@ export HERMES_HOME="/Users/nesbitt/.hermes/profiles/kelk"
 # ---------------------------------------------------------------------------
 
 KELK_PROFILE_CFG="${HERMES_HOME}/config.yaml"
-KELK_PROFILE_TMPL="/Users/nesbitt/dev/factory/scripts/profiles/kelk-config.yaml.tmpl"
 HERMES_AGENT_PY="/Users/nesbitt/.local/share/uv/tools/hermes-agent/bin/python3"
 KELK_MODEL_CONFIG="/Users/nesbitt/models/gemma-4-e4b-it-6bit/config.json"
 MLX_VLM_HEALTH_URL="http://127.0.0.1:41961/health"
 
-# FCT060: render live profile config from the versioned template (same
-# pattern as Boot and IG-88). Only WEBHOOK_SECRET_KELK is substituted;
-# every other ${...} in the template stays literal.
-if [[ ! -f "${KELK_PROFILE_TMPL}" ]]; then
-  echo "ERROR: Kelk profile template not found at ${KELK_PROFILE_TMPL}" >&2
-  exit 3
-fi
-if [[ -z "${WEBHOOK_SECRET_KELK:-}" ]]; then
-  echo "ERROR: WEBHOOK_SECRET_KELK not set — Infisical injection failed" >&2
-  exit 2
-fi
-mkdir -p "${HERMES_HOME}"
-envsubst '${WEBHOOK_SECRET_KELK}' < "${KELK_PROFILE_TMPL}" > "${KELK_PROFILE_CFG}"
-chmod 600 "${KELK_PROFILE_CFG}"
-
 # 1. Profile must exist AND pin provider: custom. See FCT055 RC-1.
 if [[ ! -f "${KELK_PROFILE_CFG}" ]]; then
-  echo "ERROR: Kelk profile config not found at ${KELK_PROFILE_CFG} (render failed?)" >&2
+  echo "ERROR: Kelk profile config not found at ${KELK_PROFILE_CFG}" >&2
   exit 3
 fi
 if ! grep -qE '^provider:[[:space:]]*custom([[:space:]]|$)' "${KELK_PROFILE_CFG}"; then

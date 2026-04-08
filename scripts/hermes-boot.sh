@@ -51,33 +51,13 @@ export HERMES_HOME="/Users/nesbitt/.hermes/profiles/boot"
 # ---------------------------------------------------------------------------
 
 BOOT_PROFILE_CFG="${HERMES_HOME}/config.yaml"
-BOOT_PROFILE_TMPL="/Users/nesbitt/dev/factory/scripts/profiles/boot-config.yaml.tmpl"
 HERMES_AGENT_PY="/Users/nesbitt/.local/share/uv/tools/hermes-agent/bin/python3"
 BOOT_MODEL_CONFIG="/Users/nesbitt/models/gemma-4-e4b-it-6bit/config.json"
 MLX_VLM_HEALTH_URL="http://127.0.0.1:41961/health"
 
-# FCT060: render live profile config from the versioned template by
-# substituting only the WEBHOOK_SECRET_BOOT placeholder. envsubst with an
-# explicit variable allowlist does NOT touch any other ${...} occurrences in
-# the template (prompt bodies, comments, etc. remain literal). The rendered
-# file is chmod 600 immediately so the HMAC secret is not world-readable.
-# Without this step, Hermes would see ${WEBHOOK_SECRET_BOOT} as a literal
-# string and reject startup with "Route 'memo' has no HMAC secret".
-if [[ ! -f "${BOOT_PROFILE_TMPL}" ]]; then
-  echo "ERROR: Boot profile template not found at ${BOOT_PROFILE_TMPL}" >&2
-  exit 3
-fi
-if [[ -z "${WEBHOOK_SECRET_BOOT:-}" ]]; then
-  echo "ERROR: WEBHOOK_SECRET_BOOT not set — Infisical injection failed" >&2
-  exit 2
-fi
-mkdir -p "${HERMES_HOME}"
-envsubst '${WEBHOOK_SECRET_BOOT}' < "${BOOT_PROFILE_TMPL}" > "${BOOT_PROFILE_CFG}"
-chmod 600 "${BOOT_PROFILE_CFG}"
-
 # 1. Profile must exist AND pin provider: custom. See FCT055 RC-1 for why.
 if [[ ! -f "${BOOT_PROFILE_CFG}" ]]; then
-  echo "ERROR: Boot profile config not found at ${BOOT_PROFILE_CFG} (render failed?)" >&2
+  echo "ERROR: Boot profile config not found at ${BOOT_PROFILE_CFG}" >&2
   exit 3
 fi
 if ! grep -qE '^provider:[[:space:]]*custom([[:space:]]|$)' "${BOOT_PROFILE_CFG}"; then
