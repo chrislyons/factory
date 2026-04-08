@@ -32,8 +32,9 @@ export MATRIX_USER_ID="@sir.kelk:matrix.org"
 export MATRIX_ENCRYPTION="false"
 
 # User allowlist. Kelk responds to Chris plus other agents for cross-agent
-# coordination. Matches coordinator's room allowlist semantics.
-export GATEWAY_ALLOWED_USERS="@chrislyons:matrix.org,@boot.industries:matrix.org,@ig88bot:matrix.org"
+# coordination and the coordinator user for system messages/approvals.
+# Matches coordinator's room allowlist semantics.
+export GATEWAY_ALLOWED_USERS="@chrislyons:matrix.org,@coord:matrix.org,@boot.industries:matrix.org,@ig88bot:matrix.org"
 
 # Hermes profile directory (isolates state, sessions, matrix store, logs).
 export HERMES_HOME="/Users/nesbitt/.hermes/profiles/kelk"
