@@ -138,6 +138,29 @@ This made every `-q` invocation appear interactive to the approval system, trigg
 
 `d889ab0` feat(coordinator): add Phase 4 Hermes HTTP daemon mode for agent latency fix
 
+## Addendum (2026-04-08): Parallelized Coordinator Sync Loop
+
+After this doc was originally written, profiling revealed a second latency source the HTTP daemon could not address: the coordinator's `poll_once()` function iterated agents sequentially in a `for` loop, with each agent's Matrix `/sync` long-poll blocking up to 30 seconds. With three agents (ig88, boot, kelk) the worst-case delay between a new message arriving and the third agent observing it was ~90 seconds, regardless of how fast the HTTP daemon processed individual messages.
+
+The fix split `poll_once()` into three phases:
+
+1. **Sequential phase 1** — build per-agent `MatrixClient` + sync inputs (touches mutable session state, sync filter creation)
+2. **Concurrent phase 2** — `futures::future::join_all` over all agent sync calls; all clients long-poll in parallel
+3. **Sequential phase 3** — process results in original order to preserve event-dispatch ordering guarantees
+
+`MatrixClient` already derives `Clone` and owns an internal `reqwest::Client` with connection pooling, so parallel syncs share the HTTP pool cleanly. `futures = "0.3"` was already in `Cargo.toml`. The 30s sync timeout and 3s outer poll interval were left untouched. All 70 coordinator tests pass.
+
+**Result:** worst-case sync latency drops from ~90s (sequential, N agents) to ~30s (parallel, independent of N).
+
+This fix is what enabled the FCT054 model swap to actually surface as a user-perceptible latency improvement — without parallel sync, the coordinator's poll loop would still have been the dominant bottleneck for Boot/Kelk DM responsiveness.
+
+**Commit:** `34bbbd9` perf(coordinator): parallelize agent sync loop
+
+## Related
+
+- **FCT053** — Matrix dual-login architectural constraint (why IG-88 was eventually moved off the coordinator entirely to a standalone Hermes gateway)
+- **FCT054** — Local E4B model consolidation (the second-order fix that addressed Boot/Kelk's residual MLX inference latency, which the HTTP daemon could not touch)
+
 ---
 
 *FCT052 -- Factory Documentation*
