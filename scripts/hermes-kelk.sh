@@ -101,6 +101,19 @@ cd "${TERMINAL_CWD}"
 # FCT059: raise Hermes agent wall-clock from 600s default to 2h for autonomous workloads.
 export HERMES_AGENT_TIMEOUT=7200
 
+# FCT060: Factory Conductor Webhook Memo Protocol.
+# Bridge WEBHOOK_SECRET_KELK (from Infisical) into Hermes's generic
+# WEBHOOK_SECRET env var. See docs/fct/FCT060 for architecture.
+if [[ -z "${WEBHOOK_SECRET_KELK:-}" ]]; then
+  echo "ERROR: WEBHOOK_SECRET_KELK not set — Infisical injection failed" >&2
+  exit 2
+fi
+export WEBHOOK_ENABLED=true
+export WEBHOOK_PORT=41952
+# Unquoted intentional: see hermes-boot.sh for rationale.
+export WEBHOOK_SECRET=$WEBHOOK_SECRET_KELK
+unset WEBHOOK_SECRET_KELK
+
 exec /Users/nesbitt/.local/bin/hermes \
   --profile kelk \
   gateway run --replace

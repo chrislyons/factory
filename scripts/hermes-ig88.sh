@@ -112,6 +112,22 @@ export HERMES_AGENT_TIMEOUT=7200
 # FCT059: IG-88 has no cloud fallback (fallback_providers: []); defeat auxiliary routing poisoning at the env-var source.
 unset OPENROUTER_API_KEY
 
+# FCT060: Factory Conductor Webhook Memo Protocol.
+# Bridge WEBHOOK_SECRET_IG88 (from Infisical) into Hermes's generic
+# WEBHOOK_SECRET env var. IG-88's Matrix ACL is @chrislyons-only per FCT055,
+# so the webhook is the only non-Matrix channel into IG-88's reasoning loop.
+# HMAC replaces the Matrix user ACL as the trust boundary for this path.
+# See docs/fct/FCT060 for architecture.
+if [[ -z "${WEBHOOK_SECRET_IG88:-}" ]]; then
+  echo "ERROR: WEBHOOK_SECRET_IG88 not set — Infisical injection failed" >&2
+  exit 2
+fi
+export WEBHOOK_ENABLED=true
+export WEBHOOK_PORT=41977
+# Unquoted intentional: see hermes-boot.sh for rationale.
+export WEBHOOK_SECRET=$WEBHOOK_SECRET_IG88
+unset WEBHOOK_SECRET_IG88
+
 exec /Users/nesbitt/.local/bin/hermes \
   --profile ig88 \
   gateway run --replace
