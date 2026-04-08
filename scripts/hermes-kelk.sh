@@ -101,6 +101,12 @@ cd "${TERMINAL_CWD}"
 # FCT059: raise Hermes agent wall-clock from 600s default to 2h for autonomous workloads.
 export HERMES_AGENT_TIMEOUT=7200
 
+# FCT060 (drive-by fix): defeat auxiliary routing poisoning at the env-var
+# source, same as IG-88's wrapper. See hermes-boot.sh for rationale. Kelk's
+# errors.log at 17:26:13 shows the exact OpenRouter HTTP 400 signature this
+# unset prevents.
+unset OPENROUTER_API_KEY
+
 # FCT060: Factory Conductor Webhook Memo Protocol.
 # Bridge WEBHOOK_SECRET_KELK (from Infisical) into Hermes's generic
 # WEBHOOK_SECRET env var. See docs/fct/FCT060 for architecture.

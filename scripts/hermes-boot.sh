@@ -100,6 +100,19 @@ cd "${TERMINAL_CWD}"
 # FCT059: raise Hermes agent wall-clock from 600s default to 2h for autonomous workloads.
 export HERMES_AGENT_TIMEOUT=7200
 
+# FCT060 (drive-by fix): defeat auxiliary routing poisoning at the env-var
+# source, same as IG-88's wrapper. infisical-env.sh factory -- injects
+# OPENROUTER_API_KEY into this process environment because it exists in the
+# factory Infisical project. If any Hermes auxiliary slot is not explicitly
+# pinned to provider: custom (and new slots get added upstream faster than
+# we enumerate them), runtime_provider.py auto-detects OPENROUTER_API_KEY
+# and silently cloud-routes auxiliary calls — sending the local model's
+# filesystem path as the model ID and producing HTTP 400. The earlier
+# FCT059 A2 reasoning ("Boot/Kelk may need cloud fallback for face-consultant
+# MCP later") does not justify keeping the env var live at the gateway level;
+# any cloud-fallback code path can re-export it at its own point of use.
+unset OPENROUTER_API_KEY
+
 # FCT060: Factory Conductor Webhook Memo Protocol.
 # Bridge the agent-specific WEBHOOK_SECRET_BOOT (injected by infisical-env.sh
 # factory --) into Hermes's generic WEBHOOK_SECRET env var. Hermes's
