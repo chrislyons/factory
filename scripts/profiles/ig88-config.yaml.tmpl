@@ -58,32 +58,6 @@ platforms:
       encryption: false
       group_sessions_per_user: true
       unauthorized_dm_behavior: ignore
-  # FCT060: Factory Conductor Webhook Memo Protocol.
-  # Platform exposes POST /webhooks/memo on 127.0.0.1:41977. HMAC-SHA256 signed
-  # requests (X-Webhook-Signature header) only. Secret is injected at render
-  # time from the factory Infisical project (WEBHOOK_SECRET_IG88). Rate limit
-  # 30 POSTs/minute, max body 1 MiB. Prompt template instructs the agent to
-  # reply back through its normal Matrix DM path after processing the memo.
-  # Note: IG-88's Matrix ACL is @chrislyons-only per FCT055, so the webhook is
-  # the only path by which a non-Chris operator (e.g., a Factory Conductor
-  # Claude session) can reach IG-88's reasoning context. HMAC replaces the
-  # user-ACL as the trust boundary.
-  # See docs/fct/FCT060 for the full architecture and signing workflow.
-  webhook:
-    enabled: true
-    extra:
-      host: 127.0.0.1
-      port: 41977
-      secret: ${WEBHOOK_SECRET_IG88}
-      rate_limit: 30
-      max_body_bytes: 1048576
-      routes:
-        memo:
-          prompt: |
-            Factory Conductor memo from Chris (approved via HMAC signature): {message}
-
-            After completing this memo, post your reply as a regular Matrix message in the Chris<>IG-88 DM room (room_id: !zRnHwXlrVdCfdNbNOx:matrix.org). The reply should be the actual answer or work product the memo asked for, not a meta-acknowledgement.
-          deliver: log
 # Auxiliary slots: route ALL auxiliary subsystems to the dedicated mlx-vlm-ig88
 # on :41988 (IG-88 has its own instance, not the shared :41961). Without these,
 # auxiliaries default to provider=auto which falls through to OpenRouter with
