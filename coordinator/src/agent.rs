@@ -278,6 +278,7 @@ pub async fn start_agent_session(
         resume_id,
         runtime,
         hermes_profile,
+        agent_config.hermes_port,
         scoped_env,
     ));
 
@@ -331,6 +332,7 @@ async fn agent_task(
     resume_id: Option<String>,
     runtime: RuntimeType,
     hermes_profile: Option<String>,
+    hermes_port: Option<u16>,
     scoped_env: std::collections::HashMap<String, String>,
 ) {
     // Hermes runtime: single-shot per message (-q flag).
@@ -352,6 +354,23 @@ async fn agent_task(
             p.init_received = true; // No init handshake for Hermes
         }
 
+        // Phase 4: HTTP daemon mode (if hermes_port is configured)
+        let http_client = if let Some(port) = hermes_port {
+            let client = crate::hermes_adapter::HermesHttpClient::new(port);
+            match client.health_check().await {
+                Ok(()) => {
+                    info!("[{}] Hermes HTTP daemon healthy on port {}", agent_name, port);
+                    Some(client)
+                }
+                Err(e) => {
+                    warn!("[{}] Hermes HTTP daemon not available on port {}: {:#}. Falling back to subprocess.", agent_name, port, e);
+                    None
+                }
+            }
+        } else {
+            None
+        };
+
         loop {
             tokio::select! {
                 _ = shutdown_rx.recv() => {
@@ -362,6 +381,31 @@ async fn agent_task(
                 msg = message_rx.recv() => {
                     match msg {
                         Some((user_msg, result_tx)) => {
+                            // Try HTTP mode first if available
+                            if let Some(ref client) = http_client {
+                                let _ = activity_tx.send(AgentActivity {
+                                    agent_name: agent_name.to_string(),
+                                    room_id: user_msg.room_id.clone(),
+                                    thread_root_event_id: user_msg.event_id.clone(),
+                                    tool_names: vec![],
+                                    text_blocks: vec!["Processing via Hermes HTTP runtime".to_string()],
+                                });
+
+                                match run_hermes_http_query(
+                                    &agent_name, client, profile,
+                                    &user_msg.content, system_prompt.as_deref(),
+                                ).await {
+                                    Ok(result) => {
+                                        let _ = result_tx.send(Ok(result));
+                                        continue;  // skip subprocess path
+                                    }
+                                    Err(e) => {
+                                        warn!("[{}] Hermes HTTP query failed, falling back to subprocess: {:#}", agent_name, e);
+                                        // Fall through to existing subprocess dispatch below
+                                    }
+                                }
+                            }
+
                             // Report activity
                             let _ = activity_tx.send(AgentActivity {
                                 agent_name: agent_name.to_string(),
@@ -930,7 +974,7 @@ async fn run_hermes_query(
         args.extend(["--resume", sid]);
         info!("[{}] Hermes resuming session: {}", agent_name, sid);
     }
-    args.extend(["-q", message, "-Q", "--source", "tool"]);
+    args.extend(["-q", message, "-Q", "--source", "tool", "--yolo"]);
     cmd.args(&args)
     .current_dir(working_dir)
     .stdin(std::process::Stdio::null())
@@ -983,6 +1027,37 @@ async fn run_hermes_query(
 
     debug!("[{}] Hermes query completed ({} bytes)", agent_name, output.len());
     Ok(output)
+}
+
+// ============================================================================
+// Hermes HTTP query (Phase 4: persistent daemon, one POST per message)
+// ============================================================================
+
+/// Query the Hermes HTTP daemon (Phase 4).
+async fn run_hermes_http_query(
+    agent_name: &str,
+    client: &crate::hermes_adapter::HermesHttpClient,
+    model: &str,
+    message: &str,
+    system_prompt: Option<&str>,
+) -> Result<SessionResult> {
+    let start = std::time::Instant::now();
+    let (content, usage) = client.chat(message, model, system_prompt).await?;
+    let elapsed = start.elapsed();
+
+    let (input_tokens, output_tokens) = crate::hermes_adapter::convert_usage(&usage);
+    info!(
+        "[{}] Hermes HTTP query completed in {:.1}s ({} in / {} out tokens)",
+        agent_name, elapsed.as_secs_f64(), input_tokens, output_tokens
+    );
+
+    let subtype = if content.is_empty() { "error" } else { "success" };
+    Ok(SessionResult {
+        result: content,
+        subtype: subtype.to_string(),
+        cost_usd: None,
+        session_id: None,
+    })
 }
 
 // ============================================================================

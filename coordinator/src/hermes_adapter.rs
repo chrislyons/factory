@@ -57,7 +57,6 @@ pub fn parse_hermes_output(raw: &str) -> SessionResult {
 // ============================================================================
 
 /// Token usage from OpenAI-compatible `/v1/chat/completions` response.
-#[allow(dead_code)]
 #[derive(Debug, Deserialize)]
 pub struct OpenAIUsage {
     pub prompt_tokens: u64,
@@ -65,7 +64,6 @@ pub struct OpenAIUsage {
     pub total_tokens: u64,
 }
 
-#[allow(dead_code)]
 pub fn convert_usage(usage: &OpenAIUsage) -> (u64, u64) {
     (usage.prompt_tokens, usage.completion_tokens)
 }
@@ -76,13 +74,11 @@ pub fn convert_usage(usage: &OpenAIUsage) -> (u64, u64) {
 
 /// HTTP client for a Hermes instance running in `hermes serve --port N` mode.
 /// Phase 4 only — Phase 3 uses subprocess I/O via spawn_hermes().
-#[allow(dead_code)]
 pub struct HermesHttpClient {
     port: u16,
     client: reqwest::Client,
 }
 
-#[allow(dead_code)]
 impl HermesHttpClient {
     pub fn new(port: u16) -> Self {
         Self {
@@ -94,13 +90,33 @@ impl HermesHttpClient {
         }
     }
 
+    /// Check if the daemon is reachable. GET /health with 5s timeout.
+    pub async fn health_check(&self) -> Result<()> {
+        let url = format!("http://127.0.0.1:{}/health", self.port);
+        let client = reqwest::Client::builder()
+            .timeout(std::time::Duration::from_secs(5))
+            .build()?;
+        let resp = client.get(&url).send().await
+            .context("Hermes daemon health check failed")?;
+        if resp.status().is_success() {
+            Ok(())
+        } else {
+            anyhow::bail!("Hermes daemon returned HTTP {}", resp.status())
+        }
+    }
+
     /// Send a chat message to Hermes serve endpoint.
     /// Returns (response_text, usage).
-    pub async fn chat(&self, message: &str, model: &str) -> Result<(String, OpenAIUsage)> {
+    pub async fn chat(&self, message: &str, model: &str, system_prompt: Option<&str>) -> Result<(String, OpenAIUsage)> {
         let url = format!("http://127.0.0.1:{}/v1/chat/completions", self.port);
+        let mut messages = Vec::new();
+        if let Some(sp) = system_prompt {
+            messages.push(serde_json::json!({"role": "system", "content": sp}));
+        }
+        messages.push(serde_json::json!({"role": "user", "content": message}));
         let body = serde_json::json!({
             "model": model,
-            "messages": [{"role": "user", "content": message}],
+            "messages": messages,
         });
 
         let resp = self
