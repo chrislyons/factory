@@ -52,6 +52,12 @@ agents/*/data/
 agents/*/memory/
 agents/ig88/evals/results/
 
+# Kelk identity foundation: personal history, trauma content, family names, transcripts.
+# PRIVATE — never commit. Local-only. chmod 600/700 on disk.
+agents/kelk/docs/klk/foundation/
+agents/kelk/docs/klk/archive/
+agents/kelk/docs/timeline/
+
 # Agent configs: scoped credentials, operational parameters
 agents/ig88/config/
 
