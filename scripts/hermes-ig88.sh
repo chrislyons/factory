@@ -98,7 +98,13 @@ if ! curl -sf --max-time 3 "${MLX_VLM_HEALTH_URL}" >/dev/null 2>&1; then
   exit 6
 fi
 
-cd /Users/nesbitt/dev/factory/agents/ig88
+# Working directory for file/terminal toolsets. Hermes's file_tools reads
+# TERMINAL_CWD from env (tools/terminal_tool.py:492), NOT from the profile
+# config's terminal.cwd field — that field is only used by the terminal
+# toolset's shell context. Export explicitly so the file toolset lands in
+# the right place too. The `cd` below covers terminal-toolset shell state.
+export TERMINAL_CWD="/Users/nesbitt/dev/factory/agents/ig88"
+cd "${TERMINAL_CWD}"
 
 exec /Users/nesbitt/.local/bin/hermes \
   --profile ig88 \

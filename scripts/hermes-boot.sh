@@ -64,4 +64,11 @@ if ! curl -sf --max-time 3 "${MLX_VLM_HEALTH_URL}" >/dev/null 2>&1; then
   exit 6
 fi
 
+# Working directory for file/terminal toolsets. Hermes's file_tools reads
+# TERMINAL_CWD from env (tools/terminal_tool.py:492), NOT from the profile
+# config's terminal.cwd field. Export explicitly and `cd` so both the env
+# var path and the os.getcwd() fallback land in the right place.
+export TERMINAL_CWD="/Users/nesbitt/dev/factory/agents/boot"
+cd "${TERMINAL_CWD}"
+
 exec "${HERMES_AGENT_PY}" "${HERMES_SERVE_PY}" --profile boot --port "${HERMES_PORT}"
