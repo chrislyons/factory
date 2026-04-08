@@ -899,6 +899,10 @@ async fn poll_once(state: &mut CoordinatorState) {
     // Collect agent names to poll
     let agent_names: Vec<String> = state.sessions.keys().cloned().collect();
 
+    // Phase 1: build per-agent MatrixClient + sync inputs (sequential — touches state).
+    // Filter creation stays here because it mutates session state.
+    let mut sync_inputs: Vec<(String, MatrixClient, Option<String>, Option<String>)> =
+        Vec::with_capacity(agent_names.len());
     for agent_name in agent_names {
         let session = match state.sessions.get_mut(&agent_name) {
             Some(s) => s,
@@ -907,7 +911,6 @@ async fn poll_once(state: &mut CoordinatorState) {
 
         let token = session.matrix_token.clone();
         let since = session.sync_token.clone();
-        let filter_id = session.sync_filter_id.clone();
         let user_id = session.matrix_user_id.clone();
 
         let matrix_client = match MatrixClient::new(pantalaimon_url.as_deref(), token, user_id) {
@@ -931,8 +934,23 @@ async fn poll_once(state: &mut CoordinatorState) {
             }
         }
 
-        // Sync (long-poll, default 30s timeout)
-        let sync_result = matrix_client.sync(since.as_deref(), filter_id.as_deref(), None).await;
+        let filter_id = session.sync_filter_id.clone();
+        sync_inputs.push((agent_name, matrix_client, since, filter_id));
+    }
+
+    // Phase 2: run all agent syncs concurrently (long-poll, default 30s timeout).
+    let sync_futures = sync_inputs.into_iter().map(|(name, client, since, filter_id)| {
+        async move {
+            let result = client
+                .sync(since.as_deref(), filter_id.as_deref(), None)
+                .await;
+            (name, client, since, result)
+        }
+    });
+    let sync_results = futures::future::join_all(sync_futures).await;
+
+    // Phase 3: process results sequentially to preserve ordering guarantees.
+    for (agent_name, matrix_client, since, sync_result) in sync_results {
         match sync_result {
             Err(e) => {
                 state.sync_consecutive_failures += 1;
