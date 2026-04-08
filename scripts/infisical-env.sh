@@ -58,25 +58,34 @@ esac
 
 DOMAIN="${INFISICAL_API_URL:-https://eu.infisical.com/api}"
 
-# Fetch machine identity credentials from macOS Keychain
-CLIENT_ID=$(security find-generic-password -s "$KEYCHAIN_SERVICE" -a "client_id" -w 2>/dev/null) || {
-    echo "infisical-env.sh: failed to read client_id from Keychain service '$KEYCHAIN_SERVICE'" >&2
+# Fetch machine identity credentials — keychain first, launchd env vars as fallback
+# (launchd background services may not have keychain access)
+PROJECT_UPPER=$(echo "$PROJECT" | tr '[:lower:]' '[:upper:]')
+ENV_CLIENT_ID_VAR="INFISICAL_${PROJECT_UPPER}_CLIENT_ID"
+ENV_CLIENT_SECRET_VAR="INFISICAL_${PROJECT_UPPER}_CLIENT_SECRET"
+
+CLIENT_ID=$(security find-generic-password -s "$KEYCHAIN_SERVICE" -a "client_id" -w 2>/dev/null \
+    || echo "${!ENV_CLIENT_ID_VAR:-}")
+CLIENT_SECRET=$(security find-generic-password -s "$KEYCHAIN_SERVICE" -a "client_secret" -w 2>/dev/null \
+    || echo "${!ENV_CLIENT_SECRET_VAR:-}")
+
+if [[ -z "$CLIENT_ID" || -z "$CLIENT_SECRET" ]]; then
+    echo "infisical-env.sh: no credentials found for project '$PROJECT'" \
+         "(tried keychain '$KEYCHAIN_SERVICE' and env vars ${ENV_CLIENT_ID_VAR}/${ENV_CLIENT_SECRET_VAR})" >&2
     exit 1
-}
-CLIENT_SECRET=$(security find-generic-password -s "$KEYCHAIN_SERVICE" -a "client_secret" -w 2>/dev/null) || {
-    echo "infisical-env.sh: failed to read client_secret from Keychain service '$KEYCHAIN_SERVICE'" >&2
-    exit 1
-}
+fi
 
 # Authenticate and get access token
-TOKEN=$(infisical login --method=universal-auth \
+AUTH_ERR=$(/opt/homebrew/bin/infisical login --method=universal-auth \
     --client-id="$CLIENT_ID" \
     --client-secret="$CLIENT_SECRET" \
     --domain="$DOMAIN" \
-    --silent --plain 2>/dev/null) || {
-    echo "infisical-env.sh: authentication failed for project '$PROJECT'" >&2
+    --silent --plain 2>&1)
+TOKEN=$(echo "$AUTH_ERR" | grep -v '^\[' | head -1)
+if [[ -z "$TOKEN" ]]; then
+    echo "infisical-env.sh: authentication failed for project '$PROJECT' domain='$DOMAIN' client_id_len=${#CLIENT_ID} err=$AUTH_ERR" >&2
     exit 1
-}
+fi
 
 # Clear credentials from memory
 unset CLIENT_ID CLIENT_SECRET
@@ -97,7 +106,7 @@ if [[ ${#RENAMES[@]} -gt 0 ]]; then
         # Quote args to preserve spaces
         CMD_STR+=" \"$arg\""
     done
-    exec infisical run \
+    exec /opt/homebrew/bin/infisical run \
         --token="$TOKEN" \
         --projectId="$PROJECT_ID" \
         --env="$ENV" \
@@ -105,7 +114,7 @@ if [[ ${#RENAMES[@]} -gt 0 ]]; then
         --silent \
         --command "$CMD_STR"
 else
-    exec infisical run \
+    exec /opt/homebrew/bin/infisical run \
         --token="$TOKEN" \
         --projectId="$PROJECT_ID" \
         --env="$ENV" \
