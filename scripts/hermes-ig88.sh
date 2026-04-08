@@ -106,6 +106,9 @@ fi
 export TERMINAL_CWD="/Users/nesbitt/dev/factory/agents/ig88"
 cd "${TERMINAL_CWD}"
 
+# FCT059: raise Hermes agent wall-clock from 600s default to 2h for autonomous workloads.
+export HERMES_AGENT_TIMEOUT=7200
+
 exec /Users/nesbitt/.local/bin/hermes \
   --profile ig88 \
   gateway run --replace
