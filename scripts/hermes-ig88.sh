@@ -109,6 +109,9 @@ cd "${TERMINAL_CWD}"
 # FCT059: raise Hermes agent wall-clock from 600s default to 2h for autonomous workloads.
 export HERMES_AGENT_TIMEOUT=7200
 
+# FCT059: IG-88 has no cloud fallback (fallback_providers: []); defeat auxiliary routing poisoning at the env-var source.
+unset OPENROUTER_API_KEY
+
 exec /Users/nesbitt/.local/bin/hermes \
   --profile ig88 \
   gateway run --replace
