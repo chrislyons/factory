@@ -19,6 +19,8 @@
 | IG88010 | Post-Compaction Roadmap and Next Steps | active | Sequenced roadmap consolidating IG88003/IG88009: Infisical migration, MCP wiring, strategy work, paper trading validation |
 | IG88011 | Cloud Model Bake-Off Results | active | 10-model evaluation on 25 Polymarket markets: Gemma 4 E4B and Gemini Flash beat Brier < 0.15 target; tier assignments for T1/T2/T3 |
 | IG88012 | Backtesting and Paper Trading Systems | active | Backtest engine, regime detection, paper trader, venue-specific backtesters; architecture and config documentation |
+| IG88013 | Sprint Report — Backtesting and Paper Trading Build | active | Build sprint report: 10 files, ~6,600 lines, 3 commits; full inventory of what was built, tested, and deployed |
+| IG88014 | Manim Visualization Skill for Hermes Integration | exploratory | Hermes-native animated visualization for backtest results, Ichimoku charts, calibration curves; implementation plan and decision gate |
 
 ---
 
