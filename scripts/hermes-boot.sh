@@ -1,33 +1,58 @@
 #!/bin/bash
-# hermes-boot.sh — launch Boot Hermes HTTP daemon with preflight guards
+# hermes-boot.sh — launch Boot Hermes gateway with Matrix adapter
 #
-# Boot runs in coordinator-dispatched mode: the coordinator posts to this
-# daemon over HTTP (FCT052 Phase 4). The plist currently invokes
-# hermes-serve.py directly; this wrapper is a drop-in replacement that adds
-# the FCT055 Phase 4 structural defenses before exec'ing the same command.
+# FCT059: migrated from coordinator-dispatched HTTP mode (hermes-serve.py on
+# :41970) to standalone `hermes gateway run`, matching the IG-88 pattern.
+# Boot now owns its Matrix connection via matrix-nio -> Pantalaimon rather
+# than receiving dispatched prompts over HTTP from coordinator-rs.
 #
-# NOTE: The plist is not updated by this change. User decides deployment.
-# To adopt: replace the hermes-serve.py ProgramArguments in
-# com.bootindustries.hermes-boot.plist with a single invocation of this
-# script.
+# The coordinator remains the inter-agent conductor at the Matrix protocol
+# level (room routing, allowlists, approvals), but no longer speaks HTTP
+# to Boot. Removes the hermes-serve.py shutdown race and eliminates the
+# HTTP dispatch failure mode.
+#
+# Invoked by com.bootindustries.hermes-boot.plist via infisical-env.sh,
+# which already supplies MATRIX_TOKEN_PAN_BOOT in the environment.
 
 set -euo pipefail
 
+# Required: Infisical-provided Pantalaimon access token for @boot.industries.
+if [[ -z "${MATRIX_TOKEN_PAN_BOOT:-}" ]]; then
+  echo "ERROR: MATRIX_TOKEN_PAN_BOOT not set — Infisical injection failed" >&2
+  exit 2
+fi
+
+# Map the Infisical variable name into what matrix-nio expects.
+MATRIX_ACCESS_TOKEN=${MATRIX_TOKEN_PAN_BOOT}
+export MATRIX_ACCESS_TOKEN
+
+# Matrix homeserver (Pantalaimon local proxy — handles E2EE for us).
+export MATRIX_HOMESERVER="http://localhost:41200"
+export MATRIX_USER_ID="@boot.industries:matrix.org"
+export MATRIX_ENCRYPTION="false"
+
+# User allowlist. Boot responds to Chris plus other agents for cross-agent
+# coordination (teammate tagging, handoffs). Matches coordinator's room
+# allowlist semantics.
+export GATEWAY_ALLOWED_USERS="@chrislyons:matrix.org,@ig88bot:matrix.org,@sir.kelk:matrix.org"
+
+# Hermes profile directory (isolates state, sessions, matrix store, logs).
+export HERMES_HOME="/Users/nesbitt/.hermes/profiles/boot"
+
 # ---------------------------------------------------------------------------
-# Preflight guards (FCT055 Phase 4)
+# Preflight guards (FCT055 Phase 4 — structural defenses).
 #
+#   exit 2  — MATRIX_TOKEN_PAN_BOOT missing (above)
 #   exit 3  — profile missing or not pinned to `provider: custom`
-#   exit 4  — matrix-nio not importable in hermes-agent venv (cheap sanity)
+#   exit 4  — matrix-nio not importable in hermes-agent venv
 #   exit 5  — local model file missing
 #   exit 6  — mlx-vlm-factory not reachable on :41961
 # ---------------------------------------------------------------------------
 
-BOOT_PROFILE_CFG="/Users/nesbitt/.hermes/profiles/boot/config.yaml"
+BOOT_PROFILE_CFG="${HERMES_HOME}/config.yaml"
 HERMES_AGENT_PY="/Users/nesbitt/.local/share/uv/tools/hermes-agent/bin/python3"
-HERMES_SERVE_PY="/Users/nesbitt/dev/factory/scripts/hermes-serve.py"
 BOOT_MODEL_CONFIG="/Users/nesbitt/models/gemma-4-e4b-it-6bit/config.json"
 MLX_VLM_HEALTH_URL="http://127.0.0.1:41961/health"
-HERMES_PORT="41970"
 
 # 1. Profile must exist AND pin provider: custom. See FCT055 RC-1 for why.
 if [[ ! -f "${BOOT_PROFILE_CFG}" ]]; then
@@ -41,9 +66,9 @@ if ! grep -qE '^provider:[[:space:]]*custom([[:space:]]|$)' "${BOOT_PROFILE_CFG}
   exit 3
 fi
 
-# 2. matrix-nio must be importable. Boot does not use matrix-nio at runtime
-#    (coordinator dispatches), but the hermes-agent venv shares code paths
-#    that will crash-import on startup if it is missing. Cheap check.
+# 2. matrix-nio must be importable in the hermes-agent venv. Boot now uses
+#    matrix-nio directly at runtime (gateway mode), so missing dep is a hard
+#    startup failure — not a latent crash-import.
 "${HERMES_AGENT_PY}" -c 'import nio' 2>/dev/null || {
   echo "ERROR: matrix-nio not installed in hermes-agent venv (${HERMES_AGENT_PY})" >&2
   echo "       Install with: uv tool install --with matrix-nio hermes-agent" >&2
@@ -57,7 +82,7 @@ if [[ ! -f "${BOOT_MODEL_CONFIG}" ]]; then
   exit 5
 fi
 
-# 4. mlx-vlm-factory must be listening on :41961.
+# 4. mlx-vlm-factory must be listening on :41961. 3s max.
 if ! curl -sf --max-time 3 "${MLX_VLM_HEALTH_URL}" >/dev/null 2>&1; then
   echo "ERROR: mlx-vlm-factory not reachable at ${MLX_VLM_HEALTH_URL}" >&2
   echo "       Check: launchctl list | grep mlx-vlm-factory" >&2
@@ -74,4 +99,6 @@ cd "${TERMINAL_CWD}"
 # FCT059: raise Hermes agent wall-clock from 600s default to 2h for autonomous workloads.
 export HERMES_AGENT_TIMEOUT=7200
 
-exec "${HERMES_AGENT_PY}" "${HERMES_SERVE_PY}" --profile boot --port "${HERMES_PORT}"
+exec /Users/nesbitt/.local/bin/hermes \
+  --profile boot \
+  gateway run --replace
