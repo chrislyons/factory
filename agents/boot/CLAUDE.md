@@ -302,19 +302,35 @@ The coordinator intercepts this and manages the session lifecycle.
 - `BTI-001-Overview.md` (wrong separator format)
 - `001 Overview.md` (missing PREFIX)
 
-### Creating New Documents
+### Creating New Documents — MANDATORY Protocol
 
-1. **Check existing numbers:**
-   ```bash
-   ls -1 docs/bti/ | grep -E '^BTI[0-9]{3,4}\s+' | sort
-   ```
+**You MUST run the lookup before picking a number.** The PREFIX number space is shared across all sessions and other work may have created documents since you last read this directory. Picking a number without looking is a protocol violation that produces collisions.
 
-2. **Find next number:**
-   ```bash
-   last=$(ls -1 docs/bti/ | grep -E '^BTI[0-9]{3}' | sed -E 's/BTI([0-9]+).*/\1/' | sort -n | tail -1)
-   next=$((last + 1))
-   echo "Next: BTI${next} Your Title Here.md"
-   ```
+**Step 1 — find the next available number (REQUIRED before writing):**
+
+```bash
+last=$(ls -1 /Users/nesbitt/dev/factory/agents/boot/docs/bti/ | grep -E '^BTI[0-9]{3}' | sed -E 's/BTI([0-9]+).*/\1/' | sort -n | tail -1)
+next=$(printf "%03d" $((10#${last} + 1)))
+echo "Next available: BTI${next}"
+```
+
+Use absolute paths — never relative `docs/bti/` — because your shell working directory may not match the repository root.
+
+**Step 2 — verify the file does not already exist (REQUIRED before writing):**
+
+```bash
+ls -1 /Users/nesbitt/dev/factory/agents/boot/docs/bti/ | grep -qE "^BTI${next} " && echo "COLLISION: BTI${next} taken" || echo "OK to write BTI${next}"
+```
+
+If the verification prints `COLLISION`, recompute step 1 — something changed underneath you — and retry. Do not override an existing file under any circumstance.
+
+**Step 3 — write the file** at `/Users/nesbitt/dev/factory/agents/boot/docs/bti/BTI<NUM> <Verbose Title>.md` using the absolute path. Use the write_file tool with the full path.
+
+**Gaps in the number sequence are normal.** If `001-008` exists and then `010-014`, that means `009` was retired or skipped. You do NOT fill gaps — always take the number after the highest existing one. The sequence is "last + 1", not "first missing."
+
+**Handoff prompts that reference specific document numbers are informational, not authoritative.** If a prompt says "write this to BTI025" but your lookup shows BTI025 already exists, the lookup wins. Report the collision to Chris and request guidance. Never overwrite.
+
+**Cross-prefix note.** Boot works across many repos with different PREFIX letters (ORP, ACX, HBX, WBD, HLM, OND, CLZ, OSD, LMK, 21IO, OCC, KYM, UND, CLW, BKX, GYX, WHB, FCT). When working in another repo, swap BTI for that repo's PREFIX and swap the path for that repo's docs directory. The protocol is the same: look up the highest number first, verify no collision, write with absolute path.
 
 ### Citation Style
 

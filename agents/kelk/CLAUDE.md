@@ -169,7 +169,7 @@ When Chris provides corrections (names, dates, facts):
 
 ## Timeline Documents
 
-**Location:** `docs/klk/foundation/timeline/`
+**Location:** `/Users/nesbitt/dev/factory/agents/kelk/docs/klk/foundation/timeline/`
 
 **Simple filenames** — no PREFIX numbering for working documents. These are living documents, not formal project tracking.
 
@@ -186,6 +186,42 @@ When Chris provides corrections (names, dates, facts):
 - `inflection_points` — Critical moments that shifted trajectory
 - `gaps` — What's still unknown
 - `cross_references` — Connections to other decades
+
+---
+
+## Formal PREFIX-Numbered Documents (KLK###) — MANDATORY Protocol
+
+Timeline decade files and the meta-map use simple filenames. But for formal documents — session reports, decisions, architectural notes that transcend Chris's personal timeline — use the KLK### PREFIX convention.
+
+**Location:** `/Users/nesbitt/dev/factory/agents/kelk/docs/klk/`
+
+**Pattern:** `{KLK###} {Verbose Title}.md` (note: KLK, three letters, not KELK)
+
+**You MUST run the lookup before picking a number.** The PREFIX number space is shared across all sessions. Picking a number without looking is a protocol violation that produces collisions.
+
+**Step 1 — find the next available number (REQUIRED before writing):**
+
+```bash
+last=$(ls -1 /Users/nesbitt/dev/factory/agents/kelk/docs/klk/ /Users/nesbitt/dev/factory/agents/kelk/docs/klk/archive/ 2>/dev/null | grep -E '^KLK[0-9]{3}' | sed -E 's/KLK([0-9]+).*/\1/' | sort -n | tail -1)
+next=$(printf "%03d" $((10#${last} + 1)))
+echo "Next available: KLK${next}"
+```
+
+Use absolute paths. Include the `archive/` subdirectory in the lookup — retired docs still occupy numbers.
+
+**Step 2 — verify the file does not already exist (REQUIRED before writing):**
+
+```bash
+( ls -1 /Users/nesbitt/dev/factory/agents/kelk/docs/klk/; ls -1 /Users/nesbitt/dev/factory/agents/kelk/docs/klk/archive/ 2>/dev/null ) | grep -qE "^KLK${next} " && echo "COLLISION: KLK${next} taken" || echo "OK to write KLK${next}"
+```
+
+If the verification prints `COLLISION`, recompute step 1 and retry. Never overwrite.
+
+**Step 3 — write the file** at `/Users/nesbitt/dev/factory/agents/kelk/docs/klk/KLK<NUM> <Verbose Title>.md` using the absolute path and the write_file tool.
+
+**Gaps in the number sequence are normal.** Always take the number after the highest existing one, even if earlier numbers were retired.
+
+**Handoff prompts that reference specific KLK numbers are informational, not authoritative.** If a prompt names a KLK number that your lookup shows is already taken, the lookup wins. Report the collision and request guidance.
 
 ---
 
@@ -247,28 +283,28 @@ When Chris provides corrections (names, dates, facts):
 
 ## Project Structure
 
+**IMPORTANT — single source of truth for timeline and foundation material:**
+
+All of Kelk's identity foundation lives under `/Users/nesbitt/dev/factory/agents/kelk/docs/klk/foundation/`. There is NO `docs/timeline/` directory at the top level — an earlier split-brain existed where working files were mistakenly written to `docs/timeline/`; that directory was reconciled into `docs/klk/foundation/timeline/` on 2026-04-08. Do NOT recreate `docs/timeline/` or write any files there. All timeline work goes in `docs/klk/foundation/timeline/`.
+
 ```
 kelk/
 ├── CLAUDE.md                    # This file
 ├── docs/
-│   ├── timeline/                # Decade files (working documents)
-│   │   ├── meta-map.md          # Master index connecting all decades
-│   │   ├── age-00-07.md         # Vancouver & early childhood [SPARSE]
-│   │   ├── age-07-14.md         # Cobourg, La Jeunesse [PARTIAL]
-│   │   ├── age-14-20.md         # Divorce, bands, counter-culture [COMPLETE]
-│   │   ├── age-20-30.md         # Band era to collapse [PARTIAL]
-│   │   └── age-30-40.md         # Current decade [PARTIAL]
-│   └── klk/                     # KLK-prefixed docs
+│   └── klk/                     # KLK-prefixed docs and identity foundation
+│       ├── KLK003 Agent Training Plan.md
+│       ├── archive/             # Historical KELK/KLK analysis reports
 │       └── foundation/          # Kelk's identity foundation — read at session start
-│           ├── logs/
+│           ├── logs/            # Raw and synthesized source material
 │           │   ├── kelk-transcript_wip.json       # Raw Pi AI transcript (Oct-Dec 2024)
 │           │   └── kelk-transcript-synthesis.md   # 248-line themed synthesis (start here)
-│           └── timeline/        # Structured decade reconstruction
-│               ├── meta-map.md          # Master index: themes, people, open questions
-│               ├── age-00-07.md         # Vancouver & early childhood [SPARSE]
-│               ├── age-07-14.md         # Cobourg, La Jeunesse [PARTIAL]
-│               ├── age-14-20.md         # Divorce, bands, counter-culture [COMPLETE]
-│               ├── age-20-30.md         # Band era to collapse [PARTIAL]
-│               └── age-30-40.md         # Current decade [PARTIAL]
+│           └── timeline/        # Structured decade reconstruction — ALL timeline work goes here
+│               ├── meta-map.md                  # Master index: themes, people, open questions
+│               ├── age-00-07.md                 # Vancouver & early childhood [SPARSE]
+│               ├── age-07-14.md                 # Cobourg, La Jeunesse [PARTIAL]
+│               ├── age-14-20.md                 # Divorce, bands, counter-culture [COMPLETE]
+│               ├── age-20-30.md                 # Band era to collapse [PARTIAL]
+│               ├── age-30-40.md                 # Current decade [PARTIAL]
+│               └── personal_history_tracker.md  # Kelk's living tracker document
 └── .claude/
 ```
