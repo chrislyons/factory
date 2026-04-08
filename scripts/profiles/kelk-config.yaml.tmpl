@@ -37,6 +37,29 @@ memory:
 approvals:
   mode: "off"
 gateway: {}
+# FCT060: Factory Conductor Webhook Memo Protocol.
+# Platform exposes POST /webhooks/memo on 127.0.0.1:41952. HMAC-SHA256 signed
+# requests (X-Webhook-Signature header) only. Secret is injected at render
+# time from the factory Infisical project (WEBHOOK_SECRET_KELK). Rate limit
+# 30 POSTs/minute, max body 1 MiB. Prompt template instructs the agent to
+# reply back through its normal Matrix DM path after processing the memo.
+# See docs/fct/FCT060 for the full architecture and signing workflow.
+platforms:
+  webhook:
+    enabled: true
+    extra:
+      host: 127.0.0.1
+      port: 41952
+      secret: ${WEBHOOK_SECRET_KELK}
+      rate_limit: 30
+      max_body_bytes: 1048576
+      routes:
+        memo:
+          prompt: |
+            Factory Conductor memo from Chris (approved via HMAC signature): {message}
+
+            After completing this memo, post your reply as a regular Matrix message in the Chris<>Kelk DM room (room_id: !sLoMlfxPNQeYppNbbS:matrix.org). The reply should be the actual answer or work product the memo asked for, not a meta-acknowledgement.
+          deliver: log
 # Auxiliary slots: route ALL auxiliary subsystems (title generation, context
 # compression, session search, flush_memories, vision, web_extract, skills_hub,
 # approval, mcp) to the local mlx-vlm on :41961 using provider=custom.
