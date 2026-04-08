@@ -58,6 +58,10 @@ agents/kelk/docs/klk/foundation/
 agents/kelk/docs/klk/archive/
 agents/kelk/docs/timeline/
 
+# Recovery stash: safety copies of docs that agents may damage during tool calls.
+# Populated by /Users/nesbitt/dev/factory/.stash/ig88-recovery-20260408/ etc.
+.stash/
+
 # Agent configs: scoped credentials, operational parameters
 agents/ig88/config/
 

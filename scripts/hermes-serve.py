@@ -55,18 +55,32 @@ def _load_config() -> dict:
 
 def _create_agent(config: dict) -> AIAgent:
     api_key = os.environ.get("OPENROUTER_API_KEY") or os.environ.get("OPENAI_API_KEY") or "not-needed"
+    # max_tokens: profile top-level or agent.max_tokens override. None means
+    # hermes-agent library default, which for custom/mlx providers means the
+    # request omits max_tokens entirely and mlx-vlm falls back to DEFAULT_MAX_TOKENS=256.
+    # Set a generous value in the profile to avoid truncation. See FCT057.
+    max_tokens = config.get("max_tokens") or config.get("agent", {}).get("max_tokens")
+    # provider: MUST be passed explicitly from profile config. Without this,
+    # AIAgent's provider field defaults to "" and runtime_provider.py's routing
+    # gate at runtime_provider.py:345-349 fails to match the (requested=custom,
+    # cfg=custom) branch even when the profile pins provider: custom. The
+    # request then falls through to the OpenRouter path, which sends the local
+    # model filesystem path as a model ID and gets HTTP 400. See FCT055 RC-1.
+    provider = config.get("provider")
     agent = AIAgent(
         model=config["model"],
+        provider=provider,
         base_url=config.get("base_url", ""),
         api_key=api_key,
         enabled_toolsets=config.get("toolsets", []),
         quiet_mode=True,
         max_iterations=config.get("agent", {}).get("max_turns", 90),
+        max_tokens=max_tokens,
         ephemeral_system_prompt=None,
         session_id=f"daemon_{profile}_{int(time.time())}",
         platform="tool",
     )
-    log.info("AIAgent created — model=%s, toolsets=%s", config["model"], config.get("toolsets", []))
+    log.info("AIAgent created — model=%s, provider=%s, toolsets=%s, max_tokens=%s", config["model"], provider, config.get("toolsets", []), max_tokens)
     return agent
 
 

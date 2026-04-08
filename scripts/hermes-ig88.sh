@@ -98,7 +98,19 @@ if ! curl -sf --max-time 3 "${MLX_VLM_HEALTH_URL}" >/dev/null 2>&1; then
   exit 6
 fi
 
-cd /Users/nesbitt/dev/factory/agents/ig88
+# Working directory for file/terminal toolsets. Hermes's file_tools reads
+# TERMINAL_CWD from env (tools/terminal_tool.py:492), NOT from the profile
+# config's terminal.cwd field — that field is only used by the terminal
+# toolset's shell context. Export explicitly so the file toolset lands in
+# the right place too. The `cd` below covers terminal-toolset shell state.
+export TERMINAL_CWD="/Users/nesbitt/dev/factory/agents/ig88"
+cd "${TERMINAL_CWD}"
+
+# FCT059: raise Hermes agent wall-clock from 600s default to 2h for autonomous workloads.
+export HERMES_AGENT_TIMEOUT=7200
+
+# FCT059: IG-88 has no cloud fallback (fallback_providers: []); defeat auxiliary routing poisoning at the env-var source.
+unset OPENROUTER_API_KEY
 
 exec /Users/nesbitt/.local/bin/hermes \
   --profile ig88 \
