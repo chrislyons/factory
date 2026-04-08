@@ -1,4 +1,5 @@
 port,service,host,bind,status,launchd_label,notes
+# Updated per FCT055 to reflect FCT054 local-E4B consolidation (2026-04-08)
 41010,LiteLLM proxy,whitebox,127.0.0.1,planned,,Unified LLM API (Phase 2)
 41200,Pantalaimon,whitebox,127.0.0.1,live,,Matrix E2EE proxy
 41400,Matrix MCP Coord,whitebox,0.0.0.0,live,com.bootindustries.matrix-mcp-coord,@coord:matrix.org via Pan
@@ -17,14 +18,14 @@ port,service,host,bind,status,launchd_label,notes
 41920-41939,Preview slots,whitebox,,reserved,,A/B deploys and version comparison
 41940-41949,Development,whitebox,,reserved,,Local dev servers
 41950-41959,Coordinator HTTP API,whitebox,,planned,,coordinator-rs REST endpoints
-41960,Coordinator,whitebox,0.0.0.0,reserved,com.bootindustries.mlx-lm-41960,Reserved — no model assigned
-41961,Boot (Nanbeige4.1-3B-8bit),whitebox,0.0.0.0,live,com.bootindustries.mlx-lm-41961,Boot agent inference
-41962,Kelk (Qwen3.5-4B-MLX-8bit),whitebox,0.0.0.0,live,com.bootindustries.mlx-lm-41962,Kelk agent inference
-41963,Nan (LFM2.5-1.2B-Thinking-MLX-6bit),whitebox,0.0.0.0,live,com.bootindustries.mlx-lm-41963,Nan observer inference
-41964,Xamm,whitebox,0.0.0.0,reserved,com.bootindustries.mlx-lm-41964,Reserved — no model assigned
-41966,On-demand reasoning (Qwen3.5-9B-MLX-6bit),whitebox,0.0.0.0,live,com.bootindustries.mlx-lm-41966,Heavy reasoning tier
-41970,Hermes Boot API,whitebox,127.0.0.1,planned,,Hermes serve endpoint for Boot (Phase 4)
-41971,Hermes IG-88 API,whitebox,127.0.0.1,planned,,Hermes serve endpoint for IG-88 (Phase 4)
-41972,Hermes Kelk API,whitebox,127.0.0.1,planned,,Hermes serve endpoint for Kelk (Phase 4)
+41960,Reserved,whitebox,,reserved,,No binding
+41961,mlx-vlm-factory (gemma-4-e4b-it-6bit),whitebox,127.0.0.1,live,com.bootindustries.mlx-vlm-factory,Shared mlx_vlm server for Boot + Kelk; loads /Users/nesbitt/models/gemma-4-e4b-it-6bit
+41962,RETIRED,whitebox,,retired,,Was Kelk Qwen3.5-4B; consolidated into :41961 per FCT054
+41963,UNUSED,whitebox,,retired,,Was Nan LFM2.5-1.2B-Thinking; retired
+41964,Xamm,whitebox,0.0.0.0,reserved,,Reserved — no model assigned
+41966,UNUSED,whitebox,,retired,,Was heavy-reasoning tier (Qwen3.5-9B); retired
+41970,hermes-boot,whitebox,127.0.0.1,live,com.bootindustries.hermes-boot,Hermes HTTP daemon for Boot (hermes-serve.py --profile boot --port 41970); backed by mlx-vlm-factory on :41961
+41971,RETIRED,whitebox,,retired,,Was planned Hermes IG-88 API; IG-88 runs standalone gateway with no HTTP daemon per FCT054
+41972,hermes-kelk,whitebox,127.0.0.1,live,com.bootindustries.hermes-kelk,Hermes HTTP daemon for Kelk (hermes-serve.py --profile kelk --port 41972); backed by mlx-vlm-factory on :41961
 41977,Research,whitebox,0.0.0.0,reserved,,Reserved — research agent slot
-41988,IG-88 (Nanbeige4.1-3B-8bit),whitebox,0.0.0.0,live,com.bootindustries.mlx-lm-41988,IG-88 dedicated inference slot
+41988,mlx-vlm-ig88 (gemma-4-e4b-it-6bit),whitebox,127.0.0.1,live,com.bootindustries.mlx-vlm-ig88,Dedicated mlx_vlm server for IG-88; reached by IG-88 Hermes gateway via base_url http://127.0.0.1:41988/v1

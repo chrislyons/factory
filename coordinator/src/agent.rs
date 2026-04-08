@@ -356,7 +356,12 @@ async fn agent_task(
 
         // Phase 4: HTTP daemon mode (if hermes_port is configured)
         let http_client = if let Some(port) = hermes_port {
-            let client = crate::hermes_adapter::HermesHttpClient::new(port);
+            // Bug-C1 fix: resolve the actual model ID from the Hermes profile
+            // config rather than passing the profile name as the OpenAI
+            // `model` field. Falls back to profile-name on resolve failure
+            // (see HermesHttpClient::new).
+            let client = crate::hermes_adapter::HermesHttpClient::new(port, profile);
+            info!("[{}] Hermes HTTP client model resolved: {}", agent_name, client.model());
             match client.health_check().await {
                 Ok(()) => {
                     info!("[{}] Hermes HTTP daemon healthy on port {}", agent_name, port);
@@ -392,7 +397,7 @@ async fn agent_task(
                                 });
 
                                 match run_hermes_http_query(
-                                    &agent_name, client, profile,
+                                    &agent_name, client,
                                     &user_msg.content, system_prompt.as_deref(),
                                 ).await {
                                     Ok(result) => {
@@ -400,7 +405,13 @@ async fn agent_task(
                                         continue;  // skip subprocess path
                                     }
                                     Err(e) => {
-                                        warn!("[{}] Hermes HTTP query failed, falling back to subprocess: {:#}", agent_name, e);
+                                        // Bug-C3: surface the full error chain
+                                        // (including the Hermes HTTP response
+                                        // body logged at error! inside
+                                        // HermesHttpClient::chat) before
+                                        // falling through to subprocess.
+                                        error!("[{}] Hermes HTTP query failed with error body: {:#}", agent_name, e);
+                                        warn!("[{}] Hermes HTTP query failed, falling back to subprocess", agent_name);
                                         // Fall through to existing subprocess dispatch below
                                     }
                                 }
@@ -1034,15 +1045,22 @@ async fn run_hermes_query(
 // ============================================================================
 
 /// Query the Hermes HTTP daemon (Phase 4).
+///
+/// Bug-C1: the OpenAI `model` field is now sourced from the profile config
+/// inside `HermesHttpClient`, not passed by this caller.
+///
+/// Bug-C2: structured `tool_calls` returned in the response are logged at
+/// info! for diagnostics. Wiring them into the coordinator tool-approval
+/// pipeline is deferred to a future FCT — log-and-forward is sufficient
+/// for Phase 3 of FCT055 to stop silently dropping them.
 async fn run_hermes_http_query(
     agent_name: &str,
     client: &crate::hermes_adapter::HermesHttpClient,
-    model: &str,
     message: &str,
     system_prompt: Option<&str>,
 ) -> Result<SessionResult> {
     let start = std::time::Instant::now();
-    let (content, usage) = client.chat(message, model, system_prompt).await?;
+    let (content, tool_calls, usage) = client.chat(message, system_prompt).await?;
     let elapsed = start.elapsed();
 
     let (input_tokens, output_tokens) = crate::hermes_adapter::convert_usage(&usage);
@@ -1050,6 +1068,16 @@ async fn run_hermes_http_query(
         "[{}] Hermes HTTP query completed in {:.1}s ({} in / {} out tokens)",
         agent_name, elapsed.as_secs_f64(), input_tokens, output_tokens
     );
+
+    if !tool_calls.is_empty() {
+        let names: Vec<&str> = tool_calls.iter().map(|tc| tc.name.as_str()).collect();
+        info!(
+            "[{}] Hermes HTTP response included {} tool_call(s): {:?} (diagnostic log; not yet wired to approval pipeline)",
+            agent_name,
+            tool_calls.len(),
+            names
+        );
+    }
 
     let subtype = if content.is_empty() { "error" } else { "success" };
     Ok(SessionResult {

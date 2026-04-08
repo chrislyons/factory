@@ -42,6 +42,62 @@ export HERMES_HOME="/Users/nesbitt/.hermes/profiles/ig88"
 # OpenRouter cloud inference (already in Infisical env).
 # OPENROUTER_API_KEY is passed through by infisical-env.sh.
 
+# ---------------------------------------------------------------------------
+# Preflight guards (FCT055 Phase 4 — structural defenses against the overnight
+# failure class). All checks must complete in <5s total so launchd start is
+# not delayed. Distinct exit codes so errors are grep-able in launchd logs.
+#
+#   exit 2  — MATRIX_TOKEN_PAN_IG88 missing (existing)
+#   exit 3  — profile missing or not pinned to `provider: custom`
+#   exit 4  — matrix-nio not importable in hermes-agent venv
+#   exit 5  — local model file missing
+#   exit 6  — mlx-vlm-ig88 not reachable on :41988
+# ---------------------------------------------------------------------------
+
+IG88_PROFILE_CFG="${HERMES_HOME}/config.yaml"
+HERMES_AGENT_PY="/Users/nesbitt/.local/share/uv/tools/hermes-agent/bin/python3"
+IG88_MODEL_CONFIG="/Users/nesbitt/models/gemma-4-e4b-it-6bit/config.json"
+MLX_VLM_HEALTH_URL="http://127.0.0.1:41988/health"
+
+# 1. Profile must exist AND pin provider: custom (top-level key). If the pin
+#    is removed, Hermes's runtime_provider.py will auto-detect OPENROUTER_API_KEY
+#    from env and silently cloud-route the local filesystem model path — the
+#    exact failure mode that bit us overnight 2026-04-07 (FCT055 RC-1).
+if [[ ! -f "${IG88_PROFILE_CFG}" ]]; then
+  echo "ERROR: IG-88 profile config not found at ${IG88_PROFILE_CFG}" >&2
+  exit 3
+fi
+if ! grep -qE '^provider:[[:space:]]*custom([[:space:]]|$)' "${IG88_PROFILE_CFG}"; then
+  echo "ERROR: ${IG88_PROFILE_CFG} is missing top-level 'provider: custom'." >&2
+  echo "       Without this pin, OPENROUTER_API_KEY in env will cause Hermes" >&2
+  echo "       to silently cloud-route local inference. See FCT055 RC-1." >&2
+  exit 3
+fi
+
+# 2. matrix-nio must be importable in the hermes-agent venv. Missing dep was
+#    the cause of the 00:32 KeepAlive respawn loop during FCT054 cutover.
+"${HERMES_AGENT_PY}" -c 'import nio' 2>/dev/null || {
+  echo "ERROR: matrix-nio not installed in hermes-agent venv (${HERMES_AGENT_PY})" >&2
+  echo "       Install with: uv tool install --with matrix-nio hermes-agent" >&2
+  exit 4
+}
+
+# 3. Local model weights must be present on disk. Cheap stat only — no load.
+if [[ ! -f "${IG88_MODEL_CONFIG}" ]]; then
+  echo "ERROR: local model config missing at ${IG88_MODEL_CONFIG}" >&2
+  echo "       IG-88 runs gemma-4-e4b-it-6bit (FCT054). Re-download model." >&2
+  exit 5
+fi
+
+# 4. mlx-vlm-ig88 must be listening on :41988. 3s max so launchd start is
+#    not delayed. If the inference server is down there is no point bringing
+#    the gateway up — it will just 000-retry on every Matrix message.
+if ! curl -sf --max-time 3 "${MLX_VLM_HEALTH_URL}" >/dev/null 2>&1; then
+  echo "ERROR: mlx-vlm-ig88 not reachable at ${MLX_VLM_HEALTH_URL}" >&2
+  echo "       Check: launchctl list | grep mlx-vlm-ig88" >&2
+  exit 6
+fi
+
 cd /Users/nesbitt/dev/factory/agents/ig88
 
 exec /Users/nesbitt/.local/bin/hermes \
