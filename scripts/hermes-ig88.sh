@@ -1,9 +1,9 @@
 #!/bin/bash
-# hermes-gateway-ig88.sh — launch IG-88 Hermes gateway with Matrix adapter
+# hermes-ig88.sh — launch IG-88 Hermes gateway with Matrix adapter
 #
 # IG-88 was migrated from coordinator-managed mode to a standalone Hermes
 # gateway running matrix-nio directly. This wrapper is invoked by
-# com.bootindustries.hermes-ig88-gateway.plist via Infisical, which already
+# com.bootindustries.hermes-ig88.plist via Infisical, which already
 # supplies MATRIX_TOKEN_PAN_IG88 in the environment.
 #
 # Room isolation: IG-88 has no room allowlist in the Hermes Matrix adapter.
