@@ -72,4 +72,7 @@ fi
 export TERMINAL_CWD="/Users/nesbitt/dev/factory/agents/kelk"
 cd "${TERMINAL_CWD}"
 
+# FCT059: raise Hermes agent wall-clock from 600s default to 2h for autonomous workloads.
+export HERMES_AGENT_TIMEOUT=7200
+
 exec "${HERMES_AGENT_PY}" "${HERMES_SERVE_PY}" --profile kelk --port "${HERMES_PORT}"
