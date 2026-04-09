@@ -82,7 +82,10 @@ factory/
 | :41920-41939 | Preview slots |
 | :41940-41949 | Development |
 | :41950-41959 | Coordinator HTTP API (planned) |
-| :41961-41963, :41966, :41988 | MLX-LM inference (5 agent slots — see FCT002 §2.3) |
+| :41961 | MLX inference — factory shared (Boot+Kelk per FCT054; idle 2026-04-09 during Boot OpenRouter divergence) |
+| :41962 | MLX inference — Kelk dedicated slot (un-retired 2026-04-09, switchable via `scripts/factory-mlx-switch.sh`) |
+| :41963, :41966 | MLX inference — reserved agent slots (see FCT002 §2.3) |
+| :41988 | MLX inference — IG-88 dedicated (per FCT054; idle 2026-04-09 during IG-88 OpenRouter divergence) |
 
 > **Blackbox retired 2026-03-23.** RP5 serves as dumb watchdog only (cron health checks → Matrix alerts).
 
