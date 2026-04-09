@@ -80,3 +80,12 @@ agents/*/src/.lockfile-integrity-snapshot.json
 agents/*/mcp-servers/**/node_modules/
 agents/*/mcp-servers/**/.lockfile-integrity-snapshot.json
 agents/*/mcp-servers/**/pnpm-lock.yaml
+
+# Build artifacts and noise
+__pycache__/
+*.bak-*
+*.bak
+portal/public/**/*.draft
+portal/docs/*.html
+agents/ig88/docs/ig88/plots/
+agents/ig88/timers/
