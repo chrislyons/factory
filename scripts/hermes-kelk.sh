@@ -107,6 +107,15 @@ export HERMES_AGENT_TIMEOUT=7200
 # unset prevents.
 unset OPENROUTER_API_KEY
 
+# FCT061: harden against Hermes issue #5358 (provider routing bypass).
+# Force HERMES_INFERENCE_PROVIDER so runtime_provider.py uses the explicit
+# 'requested' arg at both gateway/run.py::_resolve_runtime_agent_kwargs() and
+# runtime_provider.py::_resolve_openrouter_runtime(). Also unset OPENAI_API_KEY
+# which auth.py:872 treats identically to OPENROUTER_API_KEY for provider
+# auto-detection (presence-only check, not value validation).
+export HERMES_INFERENCE_PROVIDER=custom
+unset OPENAI_API_KEY
+
 # FCT060: Factory Conductor Webhook Memo Protocol.
 # Bridge WEBHOOK_SECRET_KELK (from Infisical) into Hermes's generic
 # WEBHOOK_SECRET env var. See docs/fct/FCT060 for architecture.

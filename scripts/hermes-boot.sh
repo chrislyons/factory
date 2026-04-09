@@ -113,6 +113,17 @@ export HERMES_AGENT_TIMEOUT=7200
 # any cloud-fallback code path can re-export it at its own point of use.
 unset OPENROUTER_API_KEY
 
+# FCT061: harden against Hermes issue #5358 (provider routing bypass).
+# Force HERMES_INFERENCE_PROVIDER so runtime_provider.py uses the explicit
+# 'requested' arg at both gateway/run.py::_resolve_runtime_agent_kwargs() and
+# runtime_provider.py::_resolve_openrouter_runtime(). Also unset OPENAI_API_KEY
+# which auth.py:872 treats identically to OPENROUTER_API_KEY for provider
+# auto-detection (presence-only check, not value validation). Boot's profile
+# .env contains OPENAI_API_KEY=not-needed as a placeholder which would
+# otherwise trigger the same auto-detect path.
+export HERMES_INFERENCE_PROVIDER=custom
+unset OPENAI_API_KEY
+
 # FCT060: Factory Conductor Webhook Memo Protocol.
 # Bridge the agent-specific WEBHOOK_SECRET_BOOT (injected by infisical-env.sh
 # factory --) into Hermes's generic WEBHOOK_SECRET env var. Hermes's
