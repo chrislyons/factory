@@ -10,6 +10,7 @@ Project documentation index for factory.
 - [[FCT050 Coordinator-rs Deployment Status and Operational Runbook]]
 - [[FCT051 Agent Provisioning System — agent-add Automation]]
 - [[FCT052 Hermes Agent Latency Fix — Phase 4 HTTP Daemon]]
+- [[FCT057 Kelk Local MLX Bootstrap — mlx-vlm Port Split and Model Path Fix]]
 - BWS to Infisical Secrets Migration → moved to WHB027 (sensitive)
 
 ## All Documents
@@ -66,6 +67,11 @@ Project documentation index for factory.
 - [[FCT050 Coordinator-rs Deployment Status and Operational Runbook]]
 - [[FCT051 Agent Provisioning System — agent-add Automation]]
 - [[FCT052 Hermes Agent Latency Fix — Phase 4 HTTP Daemon]]
+- [[FCT053 Matrix Dual-Login Architectural Constraint]]
+- [[FCT054 Local E4B Model Consolidation — All Agents on Gemma 4 E4B 6-bit]]
+- [[FCT055 IG-88 Overnight Failure Post-Mortem and Hermes Routing Hardening]]
+- [[FCT056 Ensemble Agents and Face-Based Cognition — Architecture Proposal]]
+- [[FCT057 Kelk Local MLX Bootstrap — mlx-vlm Port Split and Model Path Fix]]
 - BWS to Infisical Secrets Migration → moved to WHB027 (sensitive)
 
 ## Navigation
