@@ -337,7 +337,7 @@ Invocation: Nan detects research-warranted signal → triggers `@boot research: 
 
 ### 8.2 Phase 1 — IG-88 Narrative Data Loop (no coordinator-rs changes required)
 
-Self-scheduling via timer files in `~/factory/coordinator/timers/`. `timer.rs` fires the loop.
+Self-scheduling via timer files in `~/dev/factory/coordinator/timers/`. `timer.rs` fires the loop.
 
 **Metric:** `narrative_accuracy_rate` — see operationalization note in section 4.3. Loop Spec is blocked until metric is operationalized.
 **Approval gate:** None

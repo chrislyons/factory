@@ -24,7 +24,7 @@ IG88_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(IG88_ROOT))
 
 from src.trading.config import load_config
-from src.quant.regime import assess_regime, regime_allows_venue, RegimeState
+from src.quant.regime import assess_regime, regime_allows_venue, RegimeState, MarketDataCollector
 
 
 def run_scan_cycle() -> dict:
@@ -54,9 +54,11 @@ def run_scan_cycle() -> dict:
         "volatility_regime": "GARCH vol percentile (from internal model)",
     }
 
-    # Default regime with no live data = RISK_OFF (safe)
+    # Live regime assessment
+    collector = MarketDataCollector()
+    live_inputs = collector.get_regime_inputs()
     regime = assess_regime(
-        inputs={},
+        inputs=live_inputs,
         weights=cfg.regime.weights,
         risk_off_max=cfg.regime.risk_off_max,
         neutral_max=cfg.regime.neutral_max,

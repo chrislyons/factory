@@ -72,7 +72,7 @@ sudo systemctl restart matrix-coordinator.service
 
 ```bash
 # Check all 3 agents show sync activity
-tail -f ~/factory/coordinator/logs/coordinator.log | grep -E "\[boot\]|\[ig88\]|\[kelk\]"
+tail -f ~/dev/factory/coordinator/logs/coordinator.log | grep -E "\[boot\]|\[ig88\]|\[kelk\]"
 ```
 
 Message each agent in Element — all three should respond.

@@ -231,6 +231,46 @@ The plan is staged by blast radius: smallest-safest-first. Items marked **[IG-88
 - [7] IG-88 error log: `~/.hermes/profiles/ig88/logs/errors.log`
 - [8] Request dumps (non-retryable 400s): `~/.hermes/profiles/ig88/sessions/request_dump_20260408_*.json`
 
+## 11. Post-Session Log Review — Corrections to Phase 4 Claims (2026-04-08)
+
+Log review against `~/.hermes/profiles/*/logs/errors.log` after the session closed reveals that several Phase 4 remediations documented as complete did not fully take effect at runtime. Original Phase 4 text is preserved unchanged in §10. Corrections are recorded here.
+
+### 11.1 Streaming-off workaround (RC-2) — may be insufficient
+
+**Original claim (§10.3):** "Direct curl probe to `:41988` post-fix returned a clean response with parsed `tool_calls` and no `<|tool_call>` text leakage."
+
+**Log reality:** IG-88 hit `Agent execution timed out after 600s` at **13:13** and **13:39** — both hours after the streaming-off workaround was applied at ~10:48. The dead-loop resumed or never fully stopped.
+
+**Likely cause:** PR #964 ("Set finish_reason to 'tool_calls'") documents that `finish_reason="stop"` is hardcoded in **both** `server.py:1182` (streaming `ChatStreamChoice`) and `server.py:1264` (non-streaming `ChatChoice`). The streaming-off workaround moves requests to the non-streaming path, but that path has the same `finish_reason` bug. Hermes sees `finish_reason=stop` even on the non-streaming path and treats tool responses as plain stops.
+
+**Status:** RC-2 is **not resolved**. The streaming-off workaround is a partial mitigation only. Cherry-pick of upstream PR #964 is required to fix `finish_reason` on the non-streaming path, which is now the active path.
+
+### 11.2 Auxiliary routing fix (FCT058 §3.11) — daemon restart not confirmed
+
+**Original claim (FCT058 §3.11):** "Kelk's HTTP 400 errors stopped after the auxiliary fix landed."
+
+**Log reality:** Kelk's `errors.log` shows gemma-path HTTP 400s at 12:35, 12:47, 13:07, and 13:19 — all after the auxiliary routing fix at ~13:00. The fix was written to disk but the daemon was not confirmed to have restarted and picked up the new config. The error at 13:00:27 was a restart of IG-88's daemon (to pick up the auxiliary fix), not Kelk's. Kelk's daemon may have been running the old config throughout.
+
+**Status:** Auxiliary routing fix config is correct on disk (verified by direct read of `~/.hermes/profiles/kelk/config.yaml`). **The Kelk hermes-serve daemon needs an explicit restart to apply it.** Verification: restart daemon, confirm new PID, send a test message, check `errors.log` for absence of model-ID 400s.
+
+### 11.3 Boot daemon stale config at cutover
+
+**Log reality:** `~/.hermes/profiles/boot/logs/errors.log:21` shows Boot referencing `model=/Users/nesbitt/models/Nanbeige4.1-3B-8bit` at **01:00 on 2026-04-08** — after FCT054 was supposed to have replaced Nanbeige with gemma. Boot's daemon was running the old config at that time.
+
+**Pattern:** The same stale-daemon pattern applies across all three agents. Writing a new config.yaml does not restart or reload the daemon. Each profile change requires an explicit `launchctl kickstart -k com.bootindustries.hermes-<agent>` followed by PID verification.
+
+**Recommended addition to Phase 1 checklist:** After any profile edit, record the daemon PID before restart, restart, confirm the new PID differs, and probe `/health` to verify the new config is active.
+
+### 11.4 `@coord:matrix.org` rejection — confirmed intentional, not a bug
+
+**Subagent finding:** Flagged `@coord:matrix.org` being rejected 8+ times as potentially a misconfiguration. **This is intentional** per `hermes-ig88.sh`: `GATEWAY_ALLOWED_USERS=@chrislyons:matrix.org`. The coordinator account is not and should not be in the IG-88 allowlist — IG-88 is a standalone gateway that only responds to Chris. The coordinator's repeated attempts to contact IG-88 are the coordinator's issue (it should not be DMing IG-88 via Matrix at all), not IG-88's.
+
+**However:** The volume of coordinator DM attempts (8+ in 13 hours, clustering around the same times as the 600s timeouts) is worth investigating. It may be that coordinator message events are landing in IG-88's DM room and being silently rejected, but the queue of unprocessed events is contributing to the event-loop pressure that produces the dead-loops. Inconclusive without deeper gateway log analysis.
+
+### 11.5 Matrix sync validation errors — likely Pantalaimon token issue
+
+Three consecutive `'next_batch' is a required property` failures at 10:43 with `Unable to introspect the access token — retrying in 5s` are consistent with Pantalaimon token staleness or the E2EE proxy returning a non-standard response during a reconnect window. The self-retry logic recovered within 30 seconds. Not a structural failure, but indicates the Pantalaimon↔matrix-nio bridge has marginal robustness on reconnect.
+
 ## 10. Phase 4 Execution Notes (2026-04-08)
 
 Phase 4 = systemic hardening. Tasks 4a–4d executed below.

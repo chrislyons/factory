@@ -253,6 +253,25 @@ class BacktestStats:
         return "\n".join(lines)
 
 
+
+@dataclass
+class FrictionModel:
+    """Models real-world execution friction: slippage and latency."""
+    venue: str
+    avg_slippage_bps: float = 5.0  # 5 basis points = 0.05%
+    latency_seconds: int = 2       # Simulate 2s lag
+
+    def apply_entry_friction(self, price: float, side: str) -> float:
+        # Longs pay more (slippage up), Shorts receive less (slippage down)
+        adjustment = price * (self.avg_slippage_bps / 10000)
+        return price + adjustment if side in ("long", "buy_yes") else price - adjustment
+
+    def apply_exit_friction(self, price: float, side: str) -> float:
+        # Longs sell lower, Shorts cover higher
+        adjustment = price * (self.avg_slippage_bps / 10000)
+        return price - adjustment if side in ("long", "buy_yes") else price + adjustment
+
+
 class BacktestEngine:
     """Multi-venue backtesting engine with statistical analysis."""
 
