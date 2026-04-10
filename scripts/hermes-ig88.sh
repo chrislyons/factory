@@ -67,8 +67,8 @@ if [[ ! -f "${IG88_PROFILE_CFG}" ]]; then
   echo "ERROR: IG-88 profile config not found at ${IG88_PROFILE_CFG}" >&2
   exit 3
 fi
-if ! grep -qE '^provider:[[:space:]]*custom([[:space:]]|$)' "${IG88_PROFILE_CFG}"; then
-  echo "ERROR: ${IG88_PROFILE_CFG} is missing top-level 'provider: custom'." >&2
+if ! grep -qE '^[[:space:]]*provider:[[:space:]]*custom([[:space:]]|$)' "${IG88_PROFILE_CFG}"; then
+  echo "ERROR: ${IG88_PROFILE_CFG} is missing 'provider: custom'." >&2
   echo "       Without this pin, OPENROUTER_API_KEY in env will cause Hermes" >&2
   echo "       to silently cloud-route local inference. See FCT055 RC-1." >&2
   exit 3
