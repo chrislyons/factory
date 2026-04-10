@@ -102,6 +102,12 @@ cd "${TERMINAL_CWD}"
 # FCT059: raise Hermes agent wall-clock from 600s default to 2h for autonomous workloads.
 export HERMES_AGENT_TIMEOUT=7200
 
+# FCT064: raise stream read timeout from 60s default to 10 min. Local mlx-vlm
+# prefills take 60-120s for large contexts — the default 60s triggers spurious
+# "Connection to provider dropped (ReadTimeout)" retries on every turn.
+export HERMES_STREAM_READ_TIMEOUT=600
+export HERMES_STREAM_STALE_TIMEOUT=600
+
 # FCT060 (drive-by fix): defeat auxiliary routing poisoning at the env-var
 # source, same as IG-88's wrapper. See hermes-boot.sh for rationale. Kelk's
 # errors.log at 17:26:13 shows the exact OpenRouter HTTP 400 signature this

@@ -109,6 +109,15 @@ cd "${TERMINAL_CWD}"
 # FCT059: raise Hermes agent wall-clock from 600s default to 2h for autonomous workloads.
 export HERMES_AGENT_TIMEOUT=7200
 
+# FCT064: raise stream read timeout from 60s default to 5 min. Local mlx-vlm
+# prefills take 60-120s for large contexts — the default 60s triggers spurious
+# "Connection to provider dropped (ReadTimeout)" retries on every turn.
+export HERMES_STREAM_READ_TIMEOUT=600
+# FCT064: stale stream detector — kills connection if no tokens arrive within
+# this window. Default 180s is too short for large prefills (37k = ~2 min of
+# silence before first token). Set to match HERMES_STREAM_READ_TIMEOUT.
+export HERMES_STREAM_STALE_TIMEOUT=600
+
 # FCT059: IG-88 has no cloud fallback (fallback_providers: []); defeat auxiliary routing poisoning at the env-var source.
 unset OPENROUTER_API_KEY
 
