@@ -47,13 +47,13 @@ export HERMES_HOME="/Users/nesbitt/.hermes/profiles/boot"
 #   exit 3  — profile missing or not pinned to `provider: custom`
 #   exit 4  — matrix-nio not importable in hermes-agent venv
 #   exit 5  — local model file missing
-#   exit 6  — mlx-vlm-factory not reachable on :41966
+#   exit 6  — mlx-vlm-factory not reachable on :41961
 # ---------------------------------------------------------------------------
 
 BOOT_PROFILE_CFG="${HERMES_HOME}/config.yaml"
 HERMES_AGENT_PY="/Users/nesbitt/.local/share/uv/tools/hermes-agent/bin/python3"
 BOOT_MODEL_CONFIG="/Users/nesbitt/models/gemma-4-e4b-it-6bit/config.json"
-MLX_VLM_HEALTH_URL="http://127.0.0.1:41966/health"
+MLX_VLM_HEALTH_URL="http://127.0.0.1:41961/health"
 
 # 1. Profile must exist AND pin provider: custom. See FCT055 RC-1 for why.
 # FCT064: provider: custom may be top-level (legacy) or indented under model:
@@ -79,13 +79,13 @@ fi
 }
 
 # 3. Local model weights must be present on disk (FCT054: Boot shares
-#    gemma-4-e4b-it-6bit via mlx-vlm-factory on :41966).
+#    gemma-4-e4b-it-6bit via mlx-vlm-factory on :41961).
 if [[ ! -f "${BOOT_MODEL_CONFIG}" ]]; then
   echo "ERROR: local model config missing at ${BOOT_MODEL_CONFIG}" >&2
   exit 5
 fi
 
-# 4. mlx-vlm-factory must be listening on :41966. 3s max.
+# 4. mlx-vlm-factory must be listening on :41961. 3s max.
 if ! curl -sf --max-time 3 "${MLX_VLM_HEALTH_URL}" >/dev/null 2>&1; then
   echo "ERROR: mlx-vlm-factory not reachable at ${MLX_VLM_HEALTH_URL}" >&2
   echo "       Check: launchctl list | grep mlx-vlm-factory" >&2
