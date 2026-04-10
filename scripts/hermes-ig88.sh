@@ -59,18 +59,16 @@ HERMES_AGENT_PY="/Users/nesbitt/.local/share/uv/tools/hermes-agent/bin/python3"
 IG88_MODEL_CONFIG="/Users/nesbitt/models/gemma-4-e4b-it-6bit/config.json"
 MLX_VLM_HEALTH_URL="http://127.0.0.1:41988/health"
 
-# 1. Profile must exist AND pin provider: custom (top-level key). If the pin
-#    is removed, Hermes's runtime_provider.py will auto-detect OPENROUTER_API_KEY
-#    from env and silently cloud-route the local filesystem model path — the
-#    exact failure mode that bit us overnight 2026-04-07 (FCT055 RC-1).
+# 1. Profile must exist AND declare an explicit provider (not missing/auto).
+#    FCT066: accepts openrouter (31B main) or custom (local fallback).
+#    Without an explicit provider, Hermes auto-detect can silently mis-route.
 if [[ ! -f "${IG88_PROFILE_CFG}" ]]; then
   echo "ERROR: IG-88 profile config not found at ${IG88_PROFILE_CFG}" >&2
   exit 3
 fi
-if ! grep -qE '^[[:space:]]*provider:[[:space:]]*custom([[:space:]]|$)' "${IG88_PROFILE_CFG}"; then
-  echo "ERROR: ${IG88_PROFILE_CFG} is missing 'provider: custom'." >&2
-  echo "       Without this pin, OPENROUTER_API_KEY in env will cause Hermes" >&2
-  echo "       to silently cloud-route local inference. See FCT055 RC-1." >&2
+if ! grep -qE '^[[:space:]]*provider:[[:space:]]*(custom|openrouter)([[:space:]]|$)' "${IG88_PROFILE_CFG}"; then
+  echo "ERROR: ${IG88_PROFILE_CFG} is missing explicit provider (custom or openrouter)." >&2
+  echo "       Without this, Hermes auto-detect may mis-route inference. See FCT055/FCT066." >&2
   exit 3
 fi
 
@@ -89,13 +87,12 @@ if [[ ! -f "${IG88_MODEL_CONFIG}" ]]; then
   exit 5
 fi
 
-# 4. mlx-vlm-ig88 must be listening on :41988. 3s max so launchd start is
-#    not delayed. If the inference server is down there is no point bringing
-#    the gateway up — it will just 000-retry on every Matrix message.
+# 4. mlx-vlm-ig88 on :41988 is now the AUX model (FCT066 — main is OpenRouter).
+#    Downgraded from hard exit to warning: a crashed aux server should not
+#    prevent the gateway from starting. Main inference will still work.
 if ! curl -sf --max-time 3 "${MLX_VLM_HEALTH_URL}" >/dev/null 2>&1; then
-  echo "ERROR: mlx-vlm-ig88 not reachable at ${MLX_VLM_HEALTH_URL}" >&2
-  echo "       Check: launchctl list | grep mlx-vlm-ig88" >&2
-  exit 6
+  echo "WARN: mlx-vlm-ig88 not reachable at ${MLX_VLM_HEALTH_URL} — aux tasks will fail" >&2
+  echo "      Check: launchctl list | grep mlx-vlm-ig88" >&2
 fi
 
 # Working directory for file/terminal toolsets. Hermes's file_tools reads
@@ -118,16 +115,10 @@ export HERMES_STREAM_READ_TIMEOUT=600
 # silence before first token). Set to match HERMES_STREAM_READ_TIMEOUT.
 export HERMES_STREAM_STALE_TIMEOUT=600
 
-# FCT059: IG-88 has no cloud fallback (fallback_providers: []); defeat auxiliary routing poisoning at the env-var source.
-unset OPENROUTER_API_KEY
-
-# FCT061: harden against Hermes issue #5358 (provider routing bypass).
-# Force HERMES_INFERENCE_PROVIDER so runtime_provider.py uses the explicit
-# 'requested' arg at both gateway/run.py::_resolve_runtime_agent_kwargs() and
-# runtime_provider.py::_resolve_openrouter_runtime(). Also unset OPENAI_API_KEY
-# which auth.py:872 treats identically to OPENROUTER_API_KEY for provider
-# auto-detection (presence-only check, not value validation).
-export HERMES_INFERENCE_PROVIDER=custom
+# FCT066: OpenRouter recovered. OPENROUTER_API_KEY flows through from Infisical
+# to authenticate the Gemma-4-31B main model. HERMES_INFERENCE_PROVIDER=custom
+# removed — profile now specifies provider: openrouter explicitly.
+# OPENAI_API_KEY still scrubbed to prevent aux auto-detect from escaping.
 unset OPENAI_API_KEY
 
 # FCT064 (2026-04-09): close remaining cloud-escape paths. See hermes-boot.sh
