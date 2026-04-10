@@ -682,6 +682,111 @@ On or after 2026-05-01, when the Anthropic budget unlocks:
 
 ---
 
+## Addendum — 2026-04-10 Morning Session
+
+### RC6 — Preflight guard regression in `hermes-ig88.sh`
+
+The `hermes-ig88.sh` wrapper carried a preflight guard at line 70 that
+validated the profile's `provider:` field before launching the gateway.
+The grep pattern was `^provider:` — anchored to the start of line. After
+FCT064 Phase 1 converted IG-88's config from flat top-level keys to the
+dict form (`provider:` indented under `model:`), the grep no longer
+matched, causing the preflight check to fail with exit code 3. Launchd's
+KeepAlive respawned the wrapper every 15 seconds.
+
+**Impact window:** 2026-04-09 03:51 UTC through 2026-04-10 10:18 UTC
+(approximately 6.5 hours). IG-88 was completely offline for the entire
+overnight period — no Matrix presence, no webhook processing, no
+inference.
+
+**Root cause:** Boot and Kelk wrappers had already been updated to the
+flexible pattern `^[[:space:]]*provider:` (matching with optional leading
+whitespace) during an earlier fix pass, but IG-88's wrapper was missed.
+This is a classic "fix two of three" regression — the same pattern that
+produced RC2 in the main doc.
+
+**Fix:** `hermes-ig88.sh` line 70 grep updated from `^provider:` to
+`^[[:space:]]*provider:`. IG-88 gateway restarted successfully at 10:18
+UTC. Committed as `45835b5`.
+
+### Context/compression resolution discovery
+
+Investigation of the overnight MLX server logs revealed that the
+auxiliary compression client resolves `context_length` **independently**
+from the main agent loop, using a different code path:
+
+1. The main agent loop reads `model.context_length` from
+   `config.yaml` and correctly applies the declared value (now 22000
+   after the profile update).
+2. The auxiliary compression client probes the MLX server's
+   `/v1/models` endpoint at runtime. `mlx_vlm.server` does not report
+   `context_length` in its response. The client falls back to the
+   hardcoded default in `agent/model_metadata.py`:
+   ```python
+   model.get("context_length", 128000)
+   ```
+3. With `auxiliary.compression.threshold: 0.50`, the compression
+   trigger computes to `128000 * 0.50 = 64000` tokens — effectively
+   unreachable for a model that crashes on prefills above ~12k.
+
+This explains why the overnight IG-88 session accumulated a 37,090-token
+prefill (the last successful request before the MLX server hit socket
+errors) without ever triggering compression. The 37k prefill took 59
+seconds to complete, well into the danger zone for Metal GPU timeouts.
+
+The profile-level `custom_providers[].models.<id>.context_length`
+override (invariant 5) fixes this for the main loop but does NOT reach
+the auxiliary client's independent resolver. The auxiliary client's
+behavior is a Hermes-level issue that should be tracked alongside RC5
+as a potential upstream bug report.
+
+### Truncation fix activation
+
+The `DEFAULT_MAX_TOKENS = 32768` vendor patch in
+`~/dev/vendor/mlx-vlm/mlx_vlm/generate.py` — applied during an earlier
+session to cap generation length and prevent runaway decoding — is now
+confirmed active. Both MLX servers were bounced by the user this morning
+(2026-04-10), picking up the patched `generate.py`. Prior to the bounce,
+the servers were running the unpatched code from their last cold start.
+
+### MLX server socket errors (overnight)
+
+The `mlx-vlm-ig88` server on :41988 logged 180+ `socket.send() raised
+exception` errors between approximately 03:51 and 04:00 UTC before
+shutting down. The errors coincide with the IG-88 gateway crash loop
+(RC6) — the gateway was restarting every 15 seconds and likely opening
+connections that were torn down before the server could respond. The
+server restarted automatically via its KeepAlive plist.
+
+### Current operational state (2026-04-10 10:30 UTC)
+
+All three agents confirmed healthy after the morning fixes:
+
+| Service | Port | Status |
+|---------|------|--------|
+| mlx-vlm-factory-shared (Boot + Kelk) | :41966 | Running, 200s on canonical model ID |
+| mlx-vlm-ig88 (dedicated) | :41988 | Running, 200s on canonical model ID |
+| hermes-boot gateway | — | Running, Matrix connected |
+| hermes-kelk gateway | — | Running, Matrix connected |
+| hermes-ig88 gateway | — | Running, Matrix connected (restored 10:18) |
+
+Context bars on all three agents report usage against the declared
+context window (x/22k), confirming the main-loop context resolution is
+reading from config correctly. The auxiliary compression client's
+independent resolution (see above) remains an open issue but is
+mitigated by the profile-level `context_length` override keeping
+conversations shorter via main-loop awareness.
+
+**Open items added by this addendum:**
+
+- Track the auxiliary compression client's independent `context_length`
+  resolution as a potential Hermes upstream bug (separate from RC5).
+- Add a preflight-guard lint to CI or the `factory-profile.sh` switcher
+  that validates all three wrappers use the same grep pattern, preventing
+  future "fix two of three" regressions.
+
+---
+
 ## References
 
 - FCT054 — Factory MLX Tenancy and `factory-mlx-switch.sh` (per-agent
