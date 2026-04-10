@@ -124,6 +124,21 @@ unset OPENROUTER_API_KEY
 export HERMES_INFERENCE_PROVIDER=custom
 unset OPENAI_API_KEY
 
+# FCT064 (2026-04-09): close remaining cloud-escape paths. Two failure modes
+# were observed in ~/.hermes/profiles/*/logs/errors.log:
+#   (a) aux calls (session_search, compression) escaping to Anthropic via
+#       _resolve_auto chain Step-2 payment-fallback after an OpenRouter 402
+#   (b) _resolve_custom_runtime resolving via OPENAI_BASE_URL which, if set
+#       to an Anthropic-compat proxy from Infisical, routes "custom" provider
+#       calls to Anthropic without touching the profile's base_url
+# Anthropic budget is exhausted until 2026-05-01 and OpenRouter is locked
+# out; the safe posture is to make every non-local provider impossible to
+# reach until explicitly re-enabled.
+unset ANTHROPIC_API_KEY
+unset ANTHROPIC_AUTH_TOKEN
+unset OPENAI_BASE_URL
+unset OPENAI_API_BASE
+
 # FCT060: Factory Conductor Webhook Memo Protocol.
 # Bridge the agent-specific WEBHOOK_SECRET_BOOT (injected by infisical-env.sh
 # factory --) into Hermes's generic WEBHOOK_SECRET env var. Hermes's

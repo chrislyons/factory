@@ -121,6 +121,16 @@ unset OPENROUTER_API_KEY
 export HERMES_INFERENCE_PROVIDER=custom
 unset OPENAI_API_KEY
 
+# FCT064 (2026-04-09): close remaining cloud-escape paths. See hermes-boot.sh
+# for the full explanation — same set of scrubs for consistency. IG-88 is
+# especially sensitive: its profile was wedged in a half-unwound FCT062
+# OpenRouter pivot and every inference call was escaping to OR/Anthropic
+# until the profile was reverted. See FCT064 Root Cause 2.
+unset ANTHROPIC_API_KEY
+unset ANTHROPIC_AUTH_TOKEN
+unset OPENAI_BASE_URL
+unset OPENAI_API_BASE
+
 # FCT060: Factory Conductor Webhook Memo Protocol.
 # Bridge WEBHOOK_SECRET_IG88 (from Infisical) into Hermes's generic
 # WEBHOOK_SECRET env var. IG-88's Matrix ACL is @chrislyons-only per FCT055,

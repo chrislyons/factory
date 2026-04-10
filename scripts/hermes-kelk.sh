@@ -116,6 +116,13 @@ unset OPENROUTER_API_KEY
 export HERMES_INFERENCE_PROVIDER=custom
 unset OPENAI_API_KEY
 
+# FCT064 (2026-04-09): close remaining cloud-escape paths. See hermes-boot.sh
+# for the full explanation — same set of scrubs for consistency.
+unset ANTHROPIC_API_KEY
+unset ANTHROPIC_AUTH_TOKEN
+unset OPENAI_BASE_URL
+unset OPENAI_API_BASE
+
 # FCT060: Factory Conductor Webhook Memo Protocol.
 # Bridge WEBHOOK_SECRET_KELK (from Infisical) into Hermes's generic
 # WEBHOOK_SECRET env var. See docs/fct/FCT060 for architecture.
