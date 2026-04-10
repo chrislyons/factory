@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>PATH</key>
+		<string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+	</dict>
+	<key>KeepAlive</key>
+	<true/>
+	<key>Label</key>
+	<string>com.bootindustries.mlx-vlm-factory-26b-a4b</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/Users/nesbitt/dev/vendor/mlx-vlm/.venv/bin/python3</string>
+		<string>-m</string>
+		<string>mlx_vlm.server</string>
+		<string>--model</string>
+		<string>/Users/nesbitt/models/gemma-4-26b-a4b-it-6bit</string>
+		<string>--host</string>
+		<string>127.0.0.1</string>
+		<string>--port</string>
+		<string>41961</string>
+	</array>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>StandardErrorPath</key>
+	<string>/Users/nesbitt/Library/Logs/factory/mlx-vlm-factory-26b-a4b.log</string>
+	<key>StandardOutPath</key>
+	<string>/Users/nesbitt/Library/Logs/factory/mlx-vlm-factory-26b-a4b.log</string>
+	<key>ThrottleInterval</key>
+	<integer>15</integer>
+</dict>
+</plist>

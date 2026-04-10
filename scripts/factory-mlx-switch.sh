@@ -25,11 +25,17 @@
 
 set -eo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=_mlx-lib.sh
+. "${SCRIPT_DIR}/_mlx-lib.sh"
+
 PORT=41962
 PLIST_DIR="$HOME/Library/LaunchAgents"
 REPO_PLIST_DIR="$HOME/dev/factory/plists"
 KELK_CONFIG="$HOME/.hermes/profiles/kelk/config.yaml"
 UID_NUM="$(id -u)"
+
+mlx_lib::refuse_root
 
 # tag → (label, model_path, loader) lookup via case statements
 label_for() {
@@ -146,51 +152,29 @@ switch_to() {
     exit 3
   fi
 
-  # 3. Bootout whatever's currently on the slot
-  local active active_label active_deployed
+  # 3-6. Delegate bootout → install → bootstrap → /v1/models poll to _mlx-lib.sh.
+  # Note: factory-mlx-switch.sh's "active" concept is per-tag (which of the
+  # three tagged labels is up), not per-port, so we compute it locally and pass
+  # it into mlx_lib::swap. The library handles the same-label kickstart case
+  # by detecting old==new and skipping the bootout.
+  local active active_label=""
   active="$(current_active)"
-  if [ "$active" != "none" ] && [ "$active" != "$tag" ]; then
+  if [ "$active" != "none" ]; then
     active_label="$(label_for "$active")"
-    active_deployed="${PLIST_DIR}/${active_label}.plist"
-    echo "Booting out: $active_label ($active)"
-    if [ -f "$active_deployed" ]; then
-      launchctl bootout "gui/${UID_NUM}/${active_label}" 2>&1 || true
-      sleep 1
-    fi
-  elif [ "$active" = "$tag" ]; then
+  fi
+  if [ "$active" = "$tag" ]; then
     echo "Already active: $tag — kickstarting to reload"
     launchctl kickstart -k "gui/${UID_NUM}/${target_label}" 2>&1 || true
-  fi
-
-  # 4. Deploy plist to LaunchAgents (install -m 644 from repo source-of-truth)
-  echo "Deploying: $target_plist → $deployed_plist"
-  install -m 644 "$target_plist" "$deployed_plist"
-
-  # 5. Bootstrap into launchd if not already there
-  if [ "$active" != "$tag" ]; then
-    echo "Bootstrapping: $target_label"
-    launchctl bootstrap "gui/${UID_NUM}" "$deployed_plist" 2>&1 || {
-      echo "WARN: bootstrap exit nonzero — service may already be loaded" >&2
+    install -m 644 "$target_plist" "$deployed_plist"
+    mlx_lib::wait_for_port "$PORT" 20 || {
+      echo "Check log: ~/Library/Logs/factory/${target_label#com.bootindustries.}.log" >&2
+      exit 4
     }
-  fi
-
-  # 6. Wait for /v1/models to come up healthy
-  echo -n "Waiting for /v1/models on :${PORT} "
-  local up=0 i
-  for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20; do
-    sleep 1
-    echo -n "."
-    if curl -sS -m 1 "http://127.0.0.1:${PORT}/v1/models" 2>/dev/null | grep -q '"data"'; then
-      up=1
-      echo " up after ${i}s"
-      break
-    fi
-  done
-  if [ $up -eq 0 ]; then
-    echo
-    echo "ERROR: /v1/models did not respond within 20s" >&2
-    echo "Check log: ~/Library/Logs/factory/${target_label#com.bootindustries.}.log" >&2
-    exit 4
+  else
+    mlx_lib::swap "$active_label" "$target_label" "$target_plist" "$PORT" || {
+      echo "Check log: ~/Library/Logs/factory/${target_label#com.bootindustries.}.log" >&2
+      exit 4
+    }
   fi
 
   # 7. Update Kelk's profile config.yaml model: scalar to match.

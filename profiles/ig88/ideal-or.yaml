@@ -1,0 +1,166 @@
+# FCT064 Phase 3 — Ideal profile for ig88, OpenRouter-aux variant.
+# *** INERT until OpenRouter access is restored. ***
+# Main chat stays on local E4B (:41988); auxiliary.* slots (vision,
+# web_extract, compression, session_search, skills_hub, approval, mcp,
+# flush_memories) all route to OpenRouter's google/gemma-4-31b-it.
+# This is the user's intended Ideal aux shape once OR is back.
+# Apply via: factory-profile.sh ideal --or-aux
+# IG-88 Hermes profile — local MLX inference via dedicated mlx_vlm server
+# Model: gemma-4-e4b-it-6bit on :41988 (IG88011 Tier 1 calibration reference)
+# Dedicated server (not shared with factory) so IG-88's autonomous workloads
+# (scan loops, trade cycles) don't contend with Chris's conversational DMs to
+# Boot/Kelk.
+# FCT064 (2026-04-09): reverted FCT062 OpenRouter pivot. OpenRouter account is
+# locked out (spend cap + 2FA loss), Anthropic budget is exhausted until
+# 2026-05-01, so local MLX is the only viable surface. When OpenRouter is
+# unlocked, use `factory-profile.sh cont-a` to flip IG-88's top-level provider
+# back to openrouter (the `providers:` dict below preserves that entry).
+# FCT064: model id MUST match the plist --model argv exactly
+# (`/Users/nesbitt/models/gemma-4-e4b-it-6bit`). Sending `mlx-community/...`
+# triggers mlx_vlm's hot-reload codepath which attempts an unauthenticated
+# HuggingFace fetch — HF is not part of our plumbing. See FCT064 Root Cause 3.
+model: /Users/nesbitt/models/gemma-4-e4b-it-6bit
+provider: custom
+base_url: http://127.0.0.1:41988/v1
+# FCT061: v0.8.0 custom_providers block — required for CLI /model slash command
+# to accept --provider custom:local-mlx. The top-level base_url above is what
+# the gateway uses; this block is specifically so the interactive CLI can
+# resolve a named custom provider via _get_named_custom_provider() in
+# hermes_cli/runtime_provider.py:253-303. IG-88 uses :41988 (dedicated
+# mlx-vlm instance, not shared with factory).
+# FCT064: explicit context_length overrides the 128000 fallback in
+# model_metadata.py — see Boot profile for the full rationale. IG-88 is the
+# profile that actually triggered the Metal GPU Timeout on a 12k prefill, so
+# this knob is especially critical here.
+custom_providers:
+  - name: local-mlx
+    base_url: http://127.0.0.1:41988/v1
+    api_mode: chat_completions
+    models:
+      /Users/nesbitt/models/gemma-4-e4b-it-6bit:
+        context_length: 8192
+fallback_providers: []
+# max_tokens: deliberately oversized. mlx-vlm defaults to 256 when the request
+# omits this field, which was the Matrix truncation bug fixed 2026-04-08. This
+# value is a "no artificial ceiling" marker — the model will hit its own
+# context-window limit (~8k for Gemma 4 E4B) long before 32768 matters, and
+# setting it high means we do not need to revisit when context windows grow in
+# future model variants. See scripts/hermes-serve.py.
+max_tokens: 32768
+toolsets:
+- terminal
+- file
+- code_execution
+- web
+agent:
+  max_turns: 200  # FCT059: raised from 90 — IG-88 overnight burned ~25 iterations on a single path typo; budget pressure warnings at 70/90% still trigger at 140/180.
+  tool_use_enforcement: none
+terminal:
+  backend: local
+  cwd: /Users/nesbitt/dev/factory/agents/ig88
+  persistent_shell: true
+display:
+  compact: true
+  streaming: false
+  show_cost: true
+memory:
+  memory_enabled: false
+  user_profile_enabled: false
+approvals:
+  mode: 'off'
+gateway:
+  unauthorized_dm_behavior: ignore
+platforms:
+  matrix:
+    enabled: true
+    reply_to_mode: first
+    extra:
+      homeserver: http://localhost:41200
+      user_id: '@ig88bot:matrix.org'
+      encryption: false
+      group_sessions_per_user: true
+      unauthorized_dm_behavior: ignore
+  # FCT060: Factory Conductor Webhook Memo Protocol.
+  # Route metadata only — NO secret field. The HMAC secret lives exclusively
+  # in the WEBHOOK_SECRET environment variable, injected by the wrapper from
+  # Infisical at startup and consumed by Hermes's native env-bridge path in
+  # gateway/config.py:842-855. Secret never touches disk. See docs/fct/FCT060.
+  # Note: IG-88's Matrix ACL is @chrislyons-only per FCT055 — the webhook is
+  # the only path by which a non-Chris operator (e.g., a Factory Conductor
+  # Claude session) can reach IG-88's reasoning context. HMAC replaces the
+  # Matrix user ACL as the trust boundary for this channel.
+  webhook:
+    enabled: true
+    extra:
+      host: 127.0.0.1
+      rate_limit: 30
+      max_body_bytes: 1048576
+      routes:
+        memo:
+          prompt: |
+            Factory Conductor memo from Chris (approved via HMAC signature): {message}
+
+            After completing this memo, post your reply as a regular Matrix message in the Chris<>IG-88 DM room (room_id: !zRnHwXlrVdCfdNbNOx:matrix.org). The reply should be the actual answer or work product the memo asked for, not a meta-acknowledgement.
+          deliver: log
+# Auxiliary slots: route ALL auxiliary subsystems to the dedicated mlx-vlm-ig88
+# on :41988 (IG-88 has its own instance, not the shared :41961). Without these,
+# auxiliaries default to provider=auto which falls through to OpenRouter with
+# the local model path as the model ID (HTTP 400). See FCT055.
+auxiliary:
+  vision:
+    provider: openrouter
+    base_url: https://openrouter.ai/api/v1
+    model: google/gemma-4-31b-it
+  web_extract:
+    provider: openrouter
+    base_url: https://openrouter.ai/api/v1
+    model: google/gemma-4-31b-it
+  compression:
+    provider: openrouter
+    base_url: https://openrouter.ai/api/v1
+    model: google/gemma-4-31b-it
+    summary_provider: openrouter
+    summary_base_url: https://openrouter.ai/api/v1
+    summary_model: google/gemma-4-31b-it
+    # FCT064: fire compression at 50% of the declared context_length (8192).
+    # Effective trigger ≈ 4096 tokens, well under the 12k Metal GPU Timeout
+    # that crashed this exact server on a 12206-token prefill on 2026-04-09.
+    threshold: 0.50
+  session_search:
+    provider: openrouter
+    base_url: https://openrouter.ai/api/v1
+    model: google/gemma-4-31b-it
+  skills_hub:
+    provider: openrouter
+    base_url: https://openrouter.ai/api/v1
+    model: google/gemma-4-31b-it
+  approval:
+    provider: openrouter
+    base_url: https://openrouter.ai/api/v1
+    model: google/gemma-4-31b-it
+  mcp:
+    provider: openrouter
+    base_url: https://openrouter.ai/api/v1
+    model: google/gemma-4-31b-it
+  flush_memories:
+    provider: openrouter
+    base_url: https://openrouter.ai/api/v1
+    model: google/gemma-4-31b-it
+mcp_servers:
+  qdrant-mcp:
+    url: http://localhost:41460/mcp
+    connect_timeout: 10
+  research-mcp:
+    url: http://localhost:41470/mcp
+    connect_timeout: 10
+  graphiti:
+    url: http://localhost:41440/sse
+    enabled: false
+MATRIX_HOME_CHANNEL: '!ReiEgMIHlHqCVZwfTY:matrix.org'
+
+# FCT061: providers dict for /model slash command (v0.8.0 schema)
+providers:
+  local-mlx:
+    name: Local MLX
+    api: http://127.0.0.1:41988/v1
+    transport: openai_chat
