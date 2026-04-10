@@ -178,12 +178,15 @@ switch_to() {
   fi
 
   # 7. Update Kelk's profile config.yaml model: scalar to match.
-  # Use the BASENAME of the model path, not the absolute path. mlx_vlm and
-  # mlx_lm both expose the loaded model as a basename slug via /v1/models,
-  # and Hermes v0.8.0 CLI validates the configured model against that list.
-  # Absolute-path slugs won't match. See FCT054 addendum.
-  local target_slug
-  target_slug="$(basename "$target_model")"
+  # FCT064 CORRECTION: use the ABSOLUTE PATH, not the basename. The FCT054
+  # addendum assumed mlx_vlm's /v1/models listing was authoritative, but
+  # Phase 0 pre-flight (2026-04-09) proved that sending any model-id string
+  # different from the `--model` argv triggers mlx_vlm's hot-reload codepath,
+  # which unloads the local weights and attempts an unauthenticated
+  # HuggingFace fetch (HF is not part of our plumbing). The canonical id is
+  # the absolute path that matches the plist's --model argv exactly.
+  # See FCT064 Root Cause 3 for the reproduced trace.
+  local target_slug="$target_model"
   if [ -f "$KELK_CONFIG" ]; then
     echo "Updating Kelk config.yaml model: → $target_slug"
     python3 - "$KELK_CONFIG" "$target_slug" <<'PY'
