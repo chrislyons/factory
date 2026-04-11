@@ -1,7 +1,7 @@
 # Agent Shared Infrastructure
 
 **Scope:** All agents (Boot, IG-88, Kelk) inherit this file via CLAUDE.md hierarchy.
-**Updated:** 2026-03-31
+**Updated:** 2026-04-10
 
 This file contains shared operational rules for all agents in the factory system. Agent-specific identity (soul, principles, domain rules) lives in each agent's own `CLAUDE.md`.
 
