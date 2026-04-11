@@ -14,7 +14,7 @@ factory/
 ├── jobs/             # Job YAML files + registry.yaml
 ├── scripts/          # Build tooling + agent-add.sh (provisioning) + agent-console.sh (tmux)
 ├── plists/           # launchd plists (gitignored, deployed manually)
-├── docs/fct/         # PREFIX docs (FCT001–FCT048+)
+├── docs/fct/         # PREFIX docs (FCT001–FCT066+)
 └── CLAUDE.md         # This file
 ```
 
@@ -75,19 +75,19 @@ factory/
 | :41455 | Qdrant gRPC |
 | :41460 | Qdrant MCP (projects-vault) |
 | :41470 | Research MCP (research-vault) |
-| :41010 | LiteLLM proxy (planned) |
 | :41910 | Portal Caddy (live) |
 | :41911 | GSD sidecar (jobs.json + status) |
 | :41914 | Auth sidecar (cookie auth) |
 | :41920-41939 | Preview slots |
 | :41940-41949 | Development |
 | :41950-41959 | Coordinator HTTP API (planned) |
-| :41961 | MLX inference — factory shared (Boot+Kelk per FCT054; idle 2026-04-09 during Boot OpenRouter divergence) |
-| :41962 | MLX inference — Kelk dedicated slot (un-retired 2026-04-09, switchable via `scripts/factory-mlx-switch.sh`) |
-| :41963, :41966 | MLX inference — reserved agent slots (see FCT002 §2.3) |
-| :41988 | MLX inference — IG-88 dedicated (per FCT054; idle 2026-04-09 during IG-88 OpenRouter divergence) |
+| :41961 | MLX inference — Boot dedicated (gemma-4-e4b-it-6bit) |
+| :41962 | MLX inference — Kelk dedicated (gemma-4-e4b-it-6bit) |
+| :41960 | MLX inference — reserved (aux/E2B candidate) |
+| :41988 | MLX inference — IG-88 hardware slot (idle; IG-88 runs on OpenRouter since FCT066) |
 
 > **Blackbox retired 2026-03-23.** RP5 serves as dumb watchdog only (cron health checks → Matrix alerts).
+> **IG-88 on OpenRouter since FCT066 (2026-04-10).** Boot + Kelk on local MLX E4B.
 
 ## Agent Console (FCT048)
 
@@ -98,43 +98,3 @@ factory/
 - **Rendering:** Coordinator writes `[HH:MM] matrix/sender message` (input) and `[HH:MM] agent -> tool_call/response` (output) to pty
 - **Plist:** `plists/com.bootindustries.agent-console-boot.plist` (RunAtLoad + KeepAlive)
 
-## Security Notes (FCT040)
-
-**Red-team audit 2026-03-24 — 25 findings, 7 remediated this session:**
-
-| Status | Finding | Fix |
-|--------|---------|-----|
-| ✅ Fixed | F-01: BWS UUIDs in git (plists/) | `plists/` added to `.gitignore`, `git rm --cached` |
-| ✅ Fixed | F-02: Hardcoded bcrypt hash in auth.py | Fail-closed on missing `AUTH_BCRYPT_HASH` |
-| ✅ Fixed | F-11: Login redirect DOM injection | Client-side path validation added |
-| ✅ Fixed | F-16: JSON injection in watchdog.sh | `jq -n --arg` construction |
-| ✅ Fixed | F-17: `StrictHostKeyChecking=no` | Changed to `accept-new` |
-| ✅ Fixed | F-24: Docker `:latest` tag | Pinned to sha256 digest |
-| ✅ Fixed | F-25: `npm install` in deploy script | Changed to `npm ci` |
-| ✅ Fixed | F-03: Caddy cookie bypass → forward_auth | xcaddy build + Caddyfile rewrite |
-| ⏳ Deferred | F-01 history purge | `git filter-repo` would rewrite all SHAs — deferred as low-risk (UUIDs only) |
-
-**Caddy binary:** Whitebox runs `~/bin/caddy-forward-auth` (xcaddy-built with forward_auth support). Plist updated. Homebrew caddy kept as fallback at `/opt/homebrew/bin/caddy`.
-
-**Remaining open:** F-04–F-25 (Rust changes, 0.0.0.0 binding, etc.) — see FCT040 for full list.
-
-## Resilience Notes (FCT041)
-
-**Power outage hardening — 2026-03-24:**
-
-- **RunAtLoad** added to all 12 bootindustries LaunchAgents — Whitebox now self-heals after reboot
-- **Pantalaimon** (`com.pantalaimon`) already had RunAtLoad + KeepAlive (separate plist, not in plists/)
-- **Coordinator error relay** hardened: centralized `is_suppressed_error()` filter covers all 4 output paths (Ok result, subtype=error, activity drain, timer); CLI auth/init errors (invalid API key, authentication_error, fix external API key) are always suppressed regardless of network state
-- **Thread strategy overhaul**: DM rooms use plain messages (no threading — avoids MSC3440 relation conflicts); group rooms thread correctly with fallback to existing thread root when incoming event already has a relation; activity drain skipped entirely for DMs
-- **Sync backoff**: exponential 1s→16s on consecutive failures (was: 3s flat with no backoff)
-- **HUD label**: "Whitebox Status HUD" (was "Blackbox")
-- **Deferred**: CircuitBreaker wiring to send path, task lease persistence, startup ordering (WaitForDependencies), ThrottleInterval tuning
-
-## Matrix Mechanisms (FCT043)
-
-**Implemented 2026-03-24:**
-
-- **m.mentions**: `Mentions` struct in matrix_legacy.rs; approval requests ping `approval_owner`, all other messages emit empty `m.mentions: {}` (no pings); `send_message` and `send_thread_reply` accept `mentions: Option<&Mentions>`
-- **Task-per-thread anchors**: `send_anchor()` sends relation-free `m.notice`, coordinator threads off anchor event_id; eliminates MSC3440 relation conflicts permanently; DMs unchanged (no threading)
-- **"Invalid API key" root cause**: `/Users/nesbitt/.mcp.json` had 4 MCP servers pointing at retired Blackbox (100.87.53.109) — fixed to Whitebox (100.88.222.111) with correct ports. Blackbox coordinator also killed.
-- **Infra checks platform fix**: `infra.rs` now config-driven (`infra_docker_containers`, `infra_systemd_services`, `infra_launchd_services`, `infra_tailscale_peers` in Settings); binary resolution probes multiple paths; `check_launchd_services()` added for macOS; Whitebox agent-config.yaml needs `infra_launchd_services` populated
