@@ -25,7 +25,7 @@
       <p>Primary services host — macOS M1 Max, Tailscale 100.88.222.111</p>
     </div>
     <div class="hero-meta">
-      <div class="meta-chip"><span class="meta-chip__label">UPDATED</span><span class="meta-chip__value">2026-04-03</span></div>
+      <div class="meta-chip"><span class="meta-chip__label">UPDATED</span><span class="meta-chip__value">2026-04-12</span></div>
       <div class="meta-chip"><span class="meta-chip__label">REPO</span><span class="meta-chip__value">~/dev/whitebox</span></div>
     </div>
   </div>
@@ -130,21 +130,21 @@
     <button class="section-header collapsed" type="button" aria-expanded="false">
       <span class="section-arrow">&#x25BC;</span>
       <span class="section-title">MLX-LM Inference</span>
-      <span class="section-count">10</span>
+      <span class="section-count">14</span>
     </button>
     <div class="section-body collapsed">
       <table class="command-table">
         <thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead>
         <tbody>
-          <tr class="command-row" data-search="boot slot health curl -s http://127.0.0.1:41961/v1/models check boot agent mlx-lm slot (nanbeige 3b)">
+          <tr class="command-row" data-search="boot slot health curl -sf http://127.0.0.1:41961/v1/models check boot dedicated e4b mlx slot">
             <td><div class="task-text">Boot slot health</div></td>
-            <td><button class="value-block value-block--shell" data-copy="curl -s http://127.0.0.1:41961/v1/models" title="Copy value"><code class="value-text">curl -s http://127.0.0.1:41961/v1/models</code></button></td>
-            <td class="desc-text">Check Boot agent slot (Nanbeige 3B)</td>
+            <td><button class="value-block value-block--shell" data-copy="curl -sf --max-time 3 http://127.0.0.1:41961/v1/models" title="Copy value"><code class="value-text">curl -sf --max-time 3 http://127.0.0.1:41961/v1/models</code></button></td>
+            <td class="desc-text">Check Boot dedicated MLX (E4B on :41961)</td>
           </tr>
-          <tr class="command-row" data-search="kelk slot health curl -s http://127.0.0.1:41962/v1/models check kelk agent mlx-lm slot (qwen 4b)">
+          <tr class="command-row" data-search="kelk slot health curl -sf http://127.0.0.1:41962/v1/models check kelk dedicated e4b mlx slot">
             <td><div class="task-text">Kelk slot health</div></td>
-            <td><button class="value-block value-block--shell" data-copy="curl -s http://127.0.0.1:41962/v1/models" title="Copy value"><code class="value-text">curl -s http://127.0.0.1:41962/v1/models</code></button></td>
-            <td class="desc-text">Check Kelk agent slot (Qwen 4B)</td>
+            <td><button class="value-block value-block--shell" data-copy="curl -sf --max-time 3 http://127.0.0.1:41962/v1/models" title="Copy value"><code class="value-text">curl -sf --max-time 3 http://127.0.0.1:41962/v1/models</code></button></td>
+            <td class="desc-text">Check Kelk dedicated MLX (E4B on :41962)</td>
           </tr>
           <tr class="command-row" data-search="nan slot health curl -s http://127.0.0.1:41963/v1/models check nan observer slot (lfm 1.2b)">
             <td><div class="task-text">Nan slot health</div></td>
@@ -156,15 +156,35 @@
             <td><button class="value-block value-block--shell" data-copy="curl -s http://127.0.0.1:41966/v1/models" title="Copy value"><code class="value-text">curl -s http://127.0.0.1:41966/v1/models</code></button></td>
             <td class="desc-text">Check reasoning slot (Qwen 9B)</td>
           </tr>
-          <tr class="command-row" data-search="ig-88 slot health curl -s http://127.0.0.1:41988/v1/models check ig-88 dedicated slot (nanbeige 3b)">
+          <tr class="command-row" data-search="ig-88 slot health curl -sf http://127.0.0.1:41988/v1/models check ig-88 mlx slot idle openrouter fct066">
             <td><div class="task-text">IG-88 slot health</div></td>
-            <td><button class="value-block value-block--shell" data-copy="curl -s http://127.0.0.1:41988/v1/models" title="Copy value"><code class="value-text">curl -s http://127.0.0.1:41988/v1/models</code></button></td>
-            <td class="desc-text">Check IG-88 dedicated slot (Nanbeige 3B)</td>
+            <td><button class="value-block value-block--shell" data-copy="curl -sf --max-time 3 http://127.0.0.1:41988/v1/models" title="Copy value"><code class="value-text">curl -sf --max-time 3 http://127.0.0.1:41988/v1/models</code></button></td>
+            <td class="desc-text">Check IG-88 MLX slot (idle -- IG-88 on OpenRouter since FCT066)</td>
           </tr>
           <tr class="command-row" data-search="all slots health for p in 41961 41962 41963 41966 41988; do echo $p: $(curl -so /dev/null -w '%{http_code}' http://127.0.0.1:$p/v1/models); done probe all 5 inference slots at once">
             <td><div class="task-text">All slots health</div></td>
             <td><button class="value-block value-block--shell" data-copy="for p in 41961 41962 41963 41966 41988; do echo \"$p: $(curl -so /dev/null -w '%{http_code}' http://127.0.0.1:$p/v1/models)\"; done" title="Copy value"><code class="value-text">for p in 41961 41962 41963 41966 41988; do echo "$p: $(curl -so /dev/null -w '%{http_code}' http://127.0.0.1:$p/v1/models)"; done</code></button></td>
             <td class="desc-text">Probe all 5 inference slots at once</td>
+          </tr>
+          <tr class="command-row" data-search="kickstart boot mlx launchctl mlx-vlm-boot restart server">
+            <td><div class="task-text">Kickstart Boot MLX</div></td>
+            <td><button class="value-block value-block--shell" data-copy="launchctl kickstart -k gui/$(id -u)/com.bootindustries.mlx-vlm-boot" title="Copy value"><code class="value-text">launchctl kickstart -k gui/$(id -u)/com.bootindustries.mlx-vlm-boot</code></button></td>
+            <td class="desc-text">Restart Boot MLX server</td>
+          </tr>
+          <tr class="command-row" data-search="kickstart kelk mlx launchctl mlx-vlm-kelk restart server">
+            <td><div class="task-text">Kickstart Kelk MLX</div></td>
+            <td><button class="value-block value-block--shell" data-copy="launchctl kickstart -k gui/$(id -u)/com.bootindustries.mlx-vlm-kelk" title="Copy value"><code class="value-text">launchctl kickstart -k gui/$(id -u)/com.bootindustries.mlx-vlm-kelk</code></button></td>
+            <td class="desc-text">Restart Kelk MLX server</td>
+          </tr>
+          <tr class="command-row" data-search="all mlx status launchctl list grep mlx-vlm all servers">
+            <td><div class="task-text">All MLX status</div></td>
+            <td><button class="value-block value-block--shell" data-copy="launchctl list | grep mlx-vlm" title="Copy value"><code class="value-text">launchctl list | grep mlx-vlm</code></button></td>
+            <td class="desc-text">List all MLX server launchd status</td>
+          </tr>
+          <tr class="command-row" data-search="boot mlx log tail mlx-vlm-boot.log library logs factory">
+            <td><div class="task-text">Boot MLX log</div></td>
+            <td><button class="value-block value-block--shell" data-copy="tail -20 ~/Library/Logs/factory/mlx-vlm-boot.log" title="Copy value"><code class="value-text">tail -20 ~/Library/Logs/factory/mlx-vlm-boot.log</code></button></td>
+            <td class="desc-text">View Boot MLX server log</td>
           </tr>
           <tr class="command-row" data-search="start boot mlx mlx_lm.server --model ~/models/nanbeige4.1-3b-8bit --port 41961 launch boot inference server manually">
             <td><div class="task-text">Start Boot MLX</div></td>
@@ -431,6 +451,46 @@
     </div>
   </section>
 
+  <section class="surface-card section-card" data-section="infisical">
+    <button class="section-header collapsed" type="button" aria-expanded="false">
+      <span class="section-arrow">&#x25BC;</span>
+      <span class="section-title">Infisical Secrets</span>
+      <span class="section-count">5</span>
+    </button>
+    <div class="section-body collapsed">
+      <table class="command-table">
+        <thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr class="command-row" data-search="infisical env factory inject secrets run command">
+            <td><div class="task-text">Factory env</div></td>
+            <td><button class="value-block value-block--shell" data-copy="~/dev/factory/scripts/infisical-env.sh factory -- env" title="Copy value"><code class="value-text">~/dev/factory/scripts/infisical-env.sh factory -- env</code></button></td>
+            <td class="desc-text">Inject factory secrets and run a command</td>
+          </tr>
+          <tr class="command-row" data-search="infisical env ig88 inject ig-88 secrets run command">
+            <td><div class="task-text">IG-88 env</div></td>
+            <td><button class="value-block value-block--shell" data-copy="~/dev/factory/scripts/infisical-env.sh ig88 -- env" title="Copy value"><code class="value-text">~/dev/factory/scripts/infisical-env.sh ig88 -- env</code></button></td>
+            <td class="desc-text">Inject IG-88 secrets and run a command</td>
+          </tr>
+          <tr class="command-row" data-search="infisical login infisical login authenticate cli">
+            <td><div class="task-text">Infisical login</div></td>
+            <td><button class="value-block value-block--shell" data-copy="infisical login" title="Copy value"><code class="value-text">infisical login</code></button></td>
+            <td class="desc-text">Authenticate Infisical CLI</td>
+          </tr>
+          <tr class="command-row" data-search="infisical secrets list project environment">
+            <td><div class="task-text">List secrets</div></td>
+            <td><button class="value-block value-block--shell" data-copy="infisical secrets --env prod --projectId PROJECT_ID" title="Copy value"><code class="value-text">infisical secrets --env prod --projectId PROJECT_ID</code></button></td>
+            <td class="desc-text">List secrets for a project/environment</td>
+          </tr>
+          <tr class="command-row" data-search="infisical run inject exec wrapper script location">
+            <td><div class="task-text">Wrapper script</div></td>
+            <td><button class="value-block value-block--shell" data-copy="cat ~/dev/factory/scripts/infisical-env.sh" title="Copy value"><code class="value-text">cat ~/dev/factory/scripts/infisical-env.sh</code></button></td>
+            <td class="desc-text">View infisical-env.sh wrapper script</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
   <section class="surface-card section-card" data-section="secrets">
     <button class="section-header collapsed" type="button" aria-expanded="false">
       <span class="section-arrow">&#x25BC;</span>
@@ -524,32 +584,97 @@
   <section class="surface-card section-card" data-section="hermes">
     <button class="section-header collapsed" type="button" aria-expanded="false">
       <span class="section-arrow">&#x25BC;</span>
-      <span class="section-title">Hermes Agent Runtime</span>
-      <span class="section-count">4</span>
+      <span class="section-title">Hermes Agent Operations</span>
+      <span class="section-count">17</span>
     </button>
     <div class="section-body collapsed">
       <table class="command-table">
         <thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead>
         <tbody>
-          <tr class="command-row" data-search="hermes smoke test hermes --profile boot chat -q hello -Q --source tool test hermes boot runtime">
-            <td><div class="task-text">Hermes smoke test</div></td>
-            <td><button class="value-block value-block--shell" data-copy="hermes --profile boot chat -q 'hello' -Q --source tool" title="Copy value"><code class="value-text">hermes --profile boot chat -q 'hello' -Q --source tool</code></button></td>
-            <td class="desc-text">Test Hermes Boot runtime (FCT047)</td>
+          <tr class="command-row" data-search="start boot cli hermes agent launch boot session alias h-boot">
+            <td><div class="task-text">Start Boot CLI</div></td>
+            <td><button class="value-block value-block--shell" data-copy="HERMES_STREAM_READ_TIMEOUT=600 HERMES_STREAM_STALE_TIMEOUT=600 HERMES_AGENT_TIMEOUT=7200 ~/dev/factory/scripts/infisical-env.sh factory -- env -u OPENROUTER_API_KEY -u ANTHROPIC_API_KEY -u ANTHROPIC_AUTH_TOKEN -u OPENAI_BASE_URL -u OPENAI_API_BASE hermes -p boot chat" title="Copy value"><code class="value-text">HERMES_STREAM_READ_TIMEOUT=600 ... infisical-env.sh factory -- env -u OPENROUTER_API_KEY ... hermes -p boot chat</code></button></td>
+            <td class="desc-text">Launch Boot agent CLI session (alias: h-boot)</td>
           </tr>
-          <tr class="command-row" data-search="hermes boot profile cat ~/.hermes/profiles/boot/config.yaml view hermes boot profile config">
-            <td><div class="task-text">Boot profile</div></td>
+          <tr class="command-row" data-search="start kelk cli hermes agent launch kelk session alias h-kelk">
+            <td><div class="task-text">Start Kelk CLI</div></td>
+            <td><button class="value-block value-block--shell" data-copy="HERMES_STREAM_READ_TIMEOUT=600 HERMES_STREAM_STALE_TIMEOUT=600 HERMES_AGENT_TIMEOUT=7200 ~/dev/factory/scripts/infisical-env.sh factory -- env -u OPENROUTER_API_KEY -u ANTHROPIC_API_KEY -u ANTHROPIC_AUTH_TOKEN -u OPENAI_BASE_URL -u OPENAI_API_BASE hermes -p kelk chat" title="Copy value"><code class="value-text">HERMES_STREAM_READ_TIMEOUT=600 ... infisical-env.sh factory -- env -u OPENROUTER_API_KEY ... hermes -p kelk chat</code></button></td>
+            <td class="desc-text">Launch Kelk agent CLI session (alias: h-kelk)</td>
+          </tr>
+          <tr class="command-row" data-search="start ig-88 cli hermes agent launch ig88 session alias h-ig88 openrouter">
+            <td><div class="task-text">Start IG-88 CLI</div></td>
+            <td><button class="value-block value-block--shell" data-copy="HERMES_STREAM_READ_TIMEOUT=600 HERMES_STREAM_STALE_TIMEOUT=600 HERMES_AGENT_TIMEOUT=7200 ~/dev/factory/scripts/infisical-env.sh factory -- env -u ANTHROPIC_API_KEY -u ANTHROPIC_AUTH_TOKEN -u OPENAI_BASE_URL -u OPENAI_API_BASE hermes -p ig88 chat" title="Copy value"><code class="value-text">HERMES_STREAM_READ_TIMEOUT=600 ... infisical-env.sh factory -- env -u ANTHROPIC_API_KEY ... hermes -p ig88 chat</code></button></td>
+            <td class="desc-text">Launch IG-88 agent CLI (alias: h-ig88). OPENROUTER_API_KEY NOT unset (IG-88 uses OpenRouter)</td>
+          </tr>
+          <tr class="command-row" data-search="resume session hermes h-boot --resume session_id resume specific hermes session">
+            <td><div class="task-text">Resume session</div></td>
+            <td><button class="value-block value-block--shell" data-copy="h-boot --resume SESSION_ID" title="Copy value"><code class="value-text">h-boot --resume SESSION_ID</code></button></td>
+            <td class="desc-text">Resume a specific Hermes session (use -p profile flag)</td>
+          </tr>
+          <tr class="command-row" data-search="list sessions hermes -p ig88 sessions list recent sessions profile">
+            <td><div class="task-text">List sessions</div></td>
+            <td><button class="value-block value-block--shell" data-copy="hermes -p ig88 sessions list" title="Copy value"><code class="value-text">hermes -p ig88 sessions list</code></button></td>
+            <td class="desc-text">List recent sessions for a profile</td>
+          </tr>
+          <tr class="command-row" data-search="kickstart ig-88 gateway launchctl hermes-ig88 restart launchd">
+            <td><div class="task-text">Kickstart IG-88 gateway</div></td>
+            <td><button class="value-block value-block--shell" data-copy="launchctl kickstart -k gui/$(id -u)/com.bootindustries.hermes-ig88" title="Copy value"><code class="value-text">launchctl kickstart -k gui/$(id -u)/com.bootindustries.hermes-ig88</code></button></td>
+            <td class="desc-text">Restart IG-88 gateway (launchd-managed)</td>
+          </tr>
+          <tr class="command-row" data-search="check ig-88 gateway launchctl list grep hermes-ig88 status">
+            <td><div class="task-text">Check IG-88 gateway</div></td>
+            <td><button class="value-block value-block--shell" data-copy="launchctl list | grep hermes-ig88" title="Copy value"><code class="value-text">launchctl list | grep hermes-ig88</code></button></td>
+            <td class="desc-text">Check IG-88 gateway launchd status</td>
+          </tr>
+          <tr class="command-row" data-search="ig-88 gateway log tail agent.log hermes profiles ig88">
+            <td><div class="task-text">IG-88 gateway log</div></td>
+            <td><button class="value-block value-block--shell" data-copy="tail -20 ~/.hermes/profiles/ig88/logs/agent.log" title="Copy value"><code class="value-text">tail -20 ~/.hermes/profiles/ig88/logs/agent.log</code></button></td>
+            <td class="desc-text">View IG-88 agent log</td>
+          </tr>
+          <tr class="command-row" data-search="ig-88 gateway errors tail hermes-ig88.log wrapper errors">
+            <td><div class="task-text">IG-88 gateway errors</div></td>
+            <td><button class="value-block value-block--shell" data-copy="tail -20 ~/Library/Logs/factory/hermes-ig88.log" title="Copy value"><code class="value-text">tail -20 ~/Library/Logs/factory/hermes-ig88.log</code></button></td>
+            <td class="desc-text">View IG-88 wrapper/gateway errors</td>
+          </tr>
+          <tr class="command-row" data-search="boot agent log tail agent.log hermes profiles boot">
+            <td><div class="task-text">Boot agent log</div></td>
+            <td><button class="value-block value-block--shell" data-copy="tail -20 ~/.hermes/profiles/boot/logs/agent.log" title="Copy value"><code class="value-text">tail -20 ~/.hermes/profiles/boot/logs/agent.log</code></button></td>
+            <td class="desc-text">View Boot agent log</td>
+          </tr>
+          <tr class="command-row" data-search="kelk agent log tail agent.log hermes profiles kelk">
+            <td><div class="task-text">Kelk agent log</div></td>
+            <td><button class="value-block value-block--shell" data-copy="tail -20 ~/.hermes/profiles/kelk/logs/agent.log" title="Copy value"><code class="value-text">tail -20 ~/.hermes/profiles/kelk/logs/agent.log</code></button></td>
+            <td class="desc-text">View Kelk agent log</td>
+          </tr>
+          <tr class="command-row" data-search="check profiles ls hermes profiles list all">
+            <td><div class="task-text">Check profiles</div></td>
+            <td><button class="value-block value-block--shell" data-copy="ls ~/.hermes/profiles/" title="Copy value"><code class="value-text">ls ~/.hermes/profiles/</code></button></td>
+            <td class="desc-text">List all Hermes profiles</td>
+          </tr>
+          <tr class="command-row" data-search="edit boot profile cat hermes profiles boot config.yaml view">
+            <td><div class="task-text">Edit Boot profile</div></td>
             <td><button class="value-block value-block--shell" data-copy="cat ~/.hermes/profiles/boot/config.yaml" title="Copy value"><code class="value-text">cat ~/.hermes/profiles/boot/config.yaml</code></button></td>
-            <td class="desc-text">View Hermes Boot profile config</td>
+            <td class="desc-text">View/edit Boot Hermes config</td>
+          </tr>
+          <tr class="command-row" data-search="edit ig-88 profile cat hermes profiles ig88 config.yaml view">
+            <td><div class="task-text">Edit IG-88 profile</div></td>
+            <td><button class="value-block value-block--shell" data-copy="cat ~/.hermes/profiles/ig88/config.yaml" title="Copy value"><code class="value-text">cat ~/.hermes/profiles/ig88/config.yaml</code></button></td>
+            <td class="desc-text">View/edit IG-88 Hermes config</td>
+          </tr>
+          <tr class="command-row" data-search="edit kelk profile cat hermes profiles kelk config.yaml view">
+            <td><div class="task-text">Edit Kelk profile</div></td>
+            <td><button class="value-block value-block--shell" data-copy="cat ~/.hermes/profiles/kelk/config.yaml" title="Copy value"><code class="value-text">cat ~/.hermes/profiles/kelk/config.yaml</code></button></td>
+            <td class="desc-text">View/edit Kelk Hermes config</td>
           </tr>
           <tr class="command-row" data-search="hermes version hermes --version check hermes installation version">
             <td><div class="task-text">Hermes version</div></td>
             <td><button class="value-block value-block--shell" data-copy="hermes --version" title="Copy value"><code class="value-text">hermes --version</code></button></td>
             <td class="desc-text">Check Hermes installation (v0.6.0, ~/.local/bin)</td>
           </tr>
-          <tr class="command-row" data-search="hermes profiles ls ~/.hermes/profiles/ list all hermes profiles">
-            <td><div class="task-text">List profiles</div></td>
-            <td><button class="value-block value-block--shell" data-copy="ls ~/.hermes/profiles/" title="Copy value"><code class="value-text">ls ~/.hermes/profiles/</code></button></td>
-            <td class="desc-text">List all Hermes profiles</td>
+          <tr class="command-row" data-search="hermes smoke test hermes --profile boot chat -q hello -Q --source tool test hermes boot runtime">
+            <td><div class="task-text">Hermes smoke test</div></td>
+            <td><button class="value-block value-block--shell" data-copy="hermes --profile boot chat -q 'hello' -Q --source tool" title="Copy value"><code class="value-text">hermes --profile boot chat -q 'hello' -Q --source tool</code></button></td>
+            <td class="desc-text">Test Hermes Boot runtime (FCT047)</td>
           </tr>
         </tbody>
       </table>
