@@ -8,18 +8,14 @@ if ! command -v goose >/dev/null 2>&1; then
   exit 1
 fi
 
-# Use Goose's native OpenRouter provider (reads OPENROUTER_API_KEY)
 export GOOSE_PROVIDER="openrouter"
 export GOOSE_MODEL="xiaomi/mimo-v2-omni"
+export OPENROUTER_API_KEY=$(/Users/nesbitt/dev/factory/scripts/infisical-env.sh factory -- printenv OPENROUTER_API_KEY 2>/dev/null)
 
-# Pull OPENROUTER_API_KEY from Infisical
-OPENROUTER_KEY=$(/Users/nesbitt/dev/factory/scripts/infisical-env.sh factory -- env | grep OPENROUTER_API_KEY | cut -d= -f2-)
-if [ -z "$OPENROUTER_KEY" ]; then
+if [ -z "$OPENROUTER_API_KEY" ]; then
   echo "  ✗ OPENROUTER_API_KEY not found in Infisical"
   exit 1
 fi
-export OPENROUTER_API_KEY="$OPENROUTER_KEY"
 
 cd /Users/nesbitt/dev/factory/agents/ig88
-
-goose session "$@"
+exec goose session "$@"

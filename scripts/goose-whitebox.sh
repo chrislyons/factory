@@ -117,8 +117,9 @@ trap cleanup EXIT
 
 # ── Launch Goose ──
 # Override global Goose config (which defaults to openrouter/mio2)
+# Model ID must match what mlx-vlm reports at /v1/models
 export GOOSE_PROVIDER="openai"
-export GOOSE_MODEL="/Users/nesbitt/models/gemma-4-26b-a4b-it-6bit"
+export GOOSE_MODEL="gemma-4-26b-a4b-it-6bit"
 export OPENAI_HOST="http://127.0.0.1:41966"
 export OPENAI_API_KEY="local"
 
