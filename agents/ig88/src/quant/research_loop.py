@@ -50,9 +50,7 @@ VENUE = "kraken_spot"
 MAKER_FEE = 0.0016
 
 
-# ---------------------------------------------------------------------------
-# Shared helpers
-# ---------------------------------------------------------------------------
+    # ---------------------------------------------------------------------------\n    # Structured Research Storage Integration\n    # ---------------------------------------------------------------------------\n    def save_structured_result(study_id, asset, tf, category, result_data):\n        from datetime import datetime\n        from pathlib import Path\n        \n        root = Path(\"/Users/nesbitt/dev/factory/agents/ig88\")\n        base_research_dir = root / \"data/research\"\n        target_dir = base_research_dir / category\n        target_dir.mkdir(parents=True, exist_ok=True)\n        \n        timestamp = datetime.now().strftime('%Y%m%d_%H%M')\n        filename = f\"{asset}_{tf}_{study_id}_{timestamp}.json\".replace(\" \", \"_\")\n        target_path = target_dir / filename\n        \n        with open(target_path, 'w') as f:\n            json.dump(result_data, f, indent=2)\n        \n        # Append to Ledger\n        ledger_path = base_research_dir / \"ledger.csv\"\n        with open(ledger_path, 'a') as f:\n            f.write(f\"{datetime.now().isoformat()},{category},{asset},{tf},{target_path}\\n\")\n        \n        return target_path\n
 
 def load_asset(symbol, interval_min):
     try:
@@ -123,31 +121,36 @@ def study1_altcoin_expansion(btc_ts, btc_c):
     for sym, itvl, bh, label in alts:
         df = load_asset(sym, itvl)
         if df is None or len(df) < 200:
-            print(f"  {label:<14} [no data]")
+            print(f"  {label:<<114} [no data]")
             continue
-
+        
         ts, o, h, l, c, v = df_to_arrays(df)
         regime = build_btc_trend_regime(btc_c, ts, btc_ts)
         atr_v = ind.atr(h, l, c, 14)
-
+        
         m_vol, _ = signals_vol_spike_break(c, v, vol_mult=1.5)
         m_rsi, _ = signals_rsi_momentum_cross(c)
         mask = m_vol & m_rsi
-
+        
         tr, te = run_wf(ts, o, h, l, c, v, regime, atr_v, mask, bar_hours=bh)
-
+        
         flag = ""
         if te and te["n"] >= 5:
             if te["pf"] > 2.0 and te["p"] < 0.10: flag = "STRONG*"
             elif te["pf"] > 1.5: flag = "pass"
             elif te["pf"] < 0.8: flag = "fail"
-
+        
         tr_s = f"{tr['n']:5d} {tr['pf']:7.3f} {tr['p']:7.3f}" if tr else "    0       -       -"
         te_s = (f"{te['n']:5d} {te['pf']:7.3f} {te['sharpe']:7.3f} {te['p']:7.3f}"
                 if te else "    0       -       -       -")
-        star = "*" if (te and te["p"] < 0.10) else " "
-        print(f"  {label:<14} {tr_s}  {te_s}{star}  {flag}")
+        star = \"*\" if (te and te[\"p\"] < 0.10) else \" \"
+        print(f"  {label:<<114} {tr_s}  {te_s}{star}  {flag}")
         results[label] = {"train": tr, "test": te}
+        
+        # STRUCTURED SAVE
+        asset_id = label.split(' ')[0]
+        tf_id = label.split(' ')[1] if ' ' in label else "unknown"
+        save_structured_result("H3-B_Expansion", asset_id, tf_id, "indicators", results[label])
 
     pass_assets = [k for k, v in results.items()
                    if v["test"] and v["test"]["n"] >= 5 and v["test"]["pf"] > 1.5]
@@ -394,7 +397,7 @@ def study3_exit_comparison(ts, o, h, l, c, v, regime, atr_v):
             tr_s = f"{tr['n']:5d} {tr['pf']:7.3f} {tr['sharpe']:7.3f}" if tr else "    0       -       -"
             te_s = (f"{te['n']:5d} {te['pf']:7.3f} {te['sharpe']:7.3f} {te['p']:7.3f}"
                     if te else "    0       -       -       -")
-            star = "*" if (te and te["p"] < 0.10) else " "
+        star = \"*\" if (te and te[\"p\"] < 0.10) else \" \"
 
             # Flag vs current best
             note = ""
