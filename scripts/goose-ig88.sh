@@ -22,4 +22,4 @@ export OPENROUTER_API_KEY="$OPENROUTER_KEY"
 
 cd /Users/nesbitt/dev/factory/agents/ig88
 
-goose session start "$@"
+goose session "$@"

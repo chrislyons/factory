@@ -122,4 +122,4 @@ export GOOSE_MODEL="/Users/nesbitt/models/gemma-4-26b-a4b-it-6bit"
 export OPENAI_HOST="http://127.0.0.1:41966"
 export OPENAI_API_KEY="local"
 
-goose session start "$@"
+goose session "$@"
