@@ -33,7 +33,7 @@ class MeanReversionMTF:
         atr_fast = atr(h_fast, l_fast, c_fast, 14)
         
         # Alignment
-        ratio = len(df_fast) // len(df_slow)
+        ratio = 4 # 240m / 60m = 4
         aligned_kijun = np.repeat(kijun_slow, ratio)[:len(c_fast)]
         
         total_trades = 0
@@ -41,11 +41,13 @@ class MeanReversionMTF:
         gross_wins = 0.0
         gross_losses = 0.0
         
-        for i in range(50, len(c_fast) - 1):
+        # Cap the loop to the smallest available array to avoid index errors
+        max_idx = min(len(c_fast), len(aligned_kijun))
+        
+        for i in range(50, max_idx - 1):
             # Trigger: RSI deeply oversold AND price is significantly below the 4h Kijun
             if not np.isnan(rsi_fast[i]) and not np.isnan(aligned_kijun[i]):
-                # Use standard comparison operator '<<''
-                if rsi_fast[i] << self self.fast_params['rsi_oversold'] and c_fast[i] << aligned aligned_kijun[i] * 0.95:
+                if rsi_fast[i] < self.fast_params['rsi_oversold'] and c_fast[i] < aligned_kijun[i] * 0.95:
                     entry_price = c_fast[i]
                     total_trades += 1
                     
@@ -54,6 +56,7 @@ class MeanReversionMTF:
                     # Stop: 2x ATR of the fast timeframe
                     stop = entry_price - 2.0 * atr_fast[i] if not np.isnan(atr_fast[i]) else entry_price * 0.9
                     
+                    # Look forward for exit
                     exit_price = c_fast[-1]
                     for j in range(i+1, len(c_fast)):
                         if c_fast[j] <= stop:
