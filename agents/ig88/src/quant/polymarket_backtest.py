@@ -22,16 +22,7 @@ Dependencies:
 Only stdlib + numpy.  No scipy, no pandas.
 """
 
-from __future__ import annotations
-
-import math
-import uuid
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from typing import Any
-
-import numpy as np
-
+from src.quant.base_backtester import BaseVenueBacktester, BacktestConfig
 from src.quant.backtest_engine import (
     BacktestEngine,
     BacktestStats,
@@ -365,8 +356,8 @@ def simulate_llm_estimate(
 # Strategy 1: Calibration Arbitrage
 # ---------------------------------------------------------------------------
 
-class CalibrationArbitrageBacktester:
-    """Exploit favourite-longshot bias via price-blinded LLM assessment.
+class CalibrationArbitrageBacktester(BaseVenueBacktester):
+    \"\"\"Exploit favourite-longshot bias via price-blinded LLM assessment.
 
     Entry logic:
       1. LLM produces probability estimate WITHOUT seeing market price.
@@ -377,7 +368,7 @@ class CalibrationArbitrageBacktester:
     Sizing: quarter-Kelly based on running win/loss stats.
 
     Tracking: Brier score per trade, calibration curve over all trades.
-    """
+    \"\"\"
 
     def __init__(
         self,
@@ -389,11 +380,14 @@ class CalibrationArbitrageBacktester:
         noise_std: float = 0.15,
         seed: int = 42,
     ):
+        config = BacktestConfig(
+            initial_capital=initial_capital, 
+            kelly_fraction=kelly_fraction, 
+            max_position_pct=max_position_pct
+        )
+        super().__init__(config)
         self.edge_threshold = edge_threshold
         self.confidence_min = confidence_min
-        self.kelly_fraction = kelly_fraction
-        self.max_position_pct = max_position_pct
-        self.initial_capital = initial_capital
         self.noise_std = noise_std
         self.rng = np.random.default_rng(seed)
 
@@ -401,12 +395,6 @@ class CalibrationArbitrageBacktester:
         self.forecasts: list[float] = []
         self.actuals: list[float] = []
         self.brier_scores: list[float] = []
-
-        # Running statistics for Kelly sizing
-        self._wins: int = 0
-        self._losses: int = 0
-        self._win_returns: list[float] = []
-        self._loss_returns: list[float] = []
 
     def _kelly_position_size(self, wallet_usd: float) -> float:
         """Compute quarter-Kelly position size from running stats."""

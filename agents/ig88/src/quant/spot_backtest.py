@@ -31,15 +31,7 @@ Usage:
     stats = engine.compute_stats(venue="kraken_spot")
 """
 
-from __future__ import annotations
-
-import math
-from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
-from typing import Any
-
-import numpy as np
-
+from src.quant.base_backtester import BaseVenueBacktester, BacktestConfig
 from src.quant.backtest_engine import (
     BacktestEngine,
     BacktestStats,
@@ -49,18 +41,16 @@ from src.quant.backtest_engine import (
 )
 from src.quant.regime import RegimeAssessment, RegimeState, regime_allows_venue
 
-
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
 
-VENUE = "kraken_spot"
+VENUE = \"kraken_spot\"
 MAKER_FEE_PCT = 0.0016      # 0.16%
 TAKER_FEE_PCT = 0.0026      # 0.26%
 MIN_HOLD_HOURS = 4.0
 REENTRY_COOLDOWN_HOURS = 2.0
 DAILY_LOSS_HALT_PCT = 0.03   # 3% of wallet
-KELLY_FRACTION = 0.25        # Quarter-Kelly
 
 # Default pairs — loaded from config when available, fallback here
 DEFAULT_PAIRS = [
@@ -266,14 +256,13 @@ def _simulate_regime_series(
 # Strategy 1: Event-Driven Backtester
 # ---------------------------------------------------------------------------
 
-class EventDrivenBacktester:
-    """Kraken spot backtester using catalyst event signals.
-
+class EventDrivenBacktester(BaseVenueBacktester):
+    \"\"\"Kraken spot backtester using catalyst event signals.
+    
     In live trading, events come from news/sentiment analysis.
     In backtest, events are simulated as random signals with
     configurable hit rate and win probability.
-    """
-
+    \"\"\"
     def __init__(
         self,
         initial_capital: float = 10_000.0,
@@ -285,8 +274,8 @@ class EventDrivenBacktester:
         bar_interval_hours: float = 1.0,
         seed: int = 42,
     ):
-        self.initial_capital = initial_capital
-        self.wallet = initial_capital
+        config = BacktestConfig(initial_capital=initial_capital)
+        super().__init__(config)
         self.event_hit_rate = event_hit_rate
         self.event_win_rate = event_win_rate
         self.event_avg_gain_pct = event_avg_gain_pct
@@ -300,13 +289,6 @@ class EventDrivenBacktester:
         self._daily_halted: bool = False
         self._current_day: int = -1
         self._last_exit_bar: int = -999
-        self._trade_counter: int = 0
-
-        # Track historical win/loss for adaptive Kelly
-        self._win_count: int = 0
-        self._loss_count: int = 0
-        self._total_win_pct: float = 0.0
-        self._total_loss_pct: float = 0.0
 
     def _get_fee(self, use_limit: bool = True) -> float:
         """Return fee percentage as decimal."""

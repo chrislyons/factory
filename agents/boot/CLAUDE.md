@@ -170,7 +170,7 @@ Beyond development tasks, you own:
 **Fetch method:** vxtwitter public API (httpx, no auth, no MCP server) for single tweets.
   `GET https://api.vxtwitter.com/Twitter/status/{tweet_id}` — free, no credentials required.
 **Threads:** If `is_thread=True` (conversationID != tweetID or text ends with `...`), Boot runs
-  `/get-tweet {url}` via Claudezilla (installed on Blackbox) to get full thread content.
+  `/get-tweet {url}` via Claudezilla (installed on Cloudkicker, 100.86.68.16 — Blackbox retired 2026-03-23) to get full thread content.
 **Cloudkicker offline:** TX docs created + indexed to Qdrant via local connection; obsidian-headless
   daemon syncs to Cloudkicker automatically in background (non-blocking).
 **Skills:** `/check-bookmarks` (orchestration), `/add-tx-doc` (per-tweet, Sonnet sub-agent)

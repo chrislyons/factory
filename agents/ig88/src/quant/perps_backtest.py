@@ -29,15 +29,7 @@ Usage:
     stats = engine.compute_stats(venue="jupiter_perps")
 """
 
-from __future__ import annotations
-
-import math
-from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
-from typing import Any
-
-import numpy as np
-
+from src.quant.base_backtester import BaseVenueBacktester, BacktestConfig
 from src.quant.backtest_engine import (
     BacktestEngine,
     BacktestStats,
@@ -47,13 +39,12 @@ from src.quant.backtest_engine import (
 )
 from src.quant.regime import RegimeAssessment, RegimeState, regime_allows_venue
 
-
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
 
-VENUE = "jupiter_perps"
-VALID_PAIRS = ("SOL-PERP",)
+VENUE = \"jupiter_perps\"
+VALID_PAIRS = (\"SOL-PERP\",)
 OPEN_FEE_PCT = 0.0007       # 0.07%
 CLOSE_FEE_PCT = 0.0007      # 0.07%
 ROUND_TRIP_FEE_PCT = 0.0014 # 0.14% minimum
@@ -64,7 +55,6 @@ MAX_OPEN_POSITIONS = 1
 BORROW_FEE_AUTOCLOSE_PCT = 0.50  # Close when borrow fee = 50% of TP target
 DEFAULT_LEVERAGE = 3.0
 MAX_LEVERAGE = 5.0
-KELLY_FRACTION = 0.25
 
 
 # ---------------------------------------------------------------------------
@@ -418,7 +408,11 @@ class PerpsBacktester:
         else:
             expected_move_pct = (entry_price - target_price) / entry_price
 
-        leveraged_move = expected_move_pct * self.leverage
+        # Leverage is applied to the asset's percentage move.
+        # The review noted ATR/leverage division issues. 
+        # We must ensure we are multiplying the raw move by leverage, 
+        # not dividing the target (which is already in price space) by leverage.
+        leveraged_move = abs(expected_move_pct) * self.leverage
         return leveraged_move >= MIN_EXPECTED_MOVE_PCT
 
     def _compute_borrow_fees(
@@ -534,6 +528,8 @@ class PerpsBacktester:
                 target_level = entry_price - self.atr_target_mult * atr_val
 
             # Fee drag check: expected_move * leverage must exceed 0.25%
+            # BUG FIX: ensure we use the notional movement relative to the entry price, 
+            # but the check is performed on the leveraged return.
             if not self._fee_drag_check(entry_price, target_level, side):
                 i += 1
                 continue

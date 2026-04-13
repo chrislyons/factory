@@ -226,6 +226,87 @@ export function AnalyticsPage() {
           )}
         </SurfaceCard>
       </div>
+
+      {/* IG-88 Trading Visualizations */}
+      <SurfaceCard title="IG-88 Trading Visualizations" subtitle="Backtest equity curves, Ichimoku signals, and daily summaries — Manim 0.20.1">
+        <div className="ig88-viz-filters" style={{ display: "flex", gap: "0.35rem", marginBottom: "1rem", flexWrap: "wrap" }}>
+          {["all", "equity", "ichimoku", "backtest", "daily"].map((f) => (
+            <button
+              key={f}
+              className="ig88-viz-filter"
+              data-filter={f}
+              style={{
+                fontFamily: "var(--font-body)", fontSize: "0.75rem", padding: "0.35rem 0.75rem",
+                border: "1px solid var(--border-strong)", background: "var(--bg-panel)", color: "var(--text-muted)",
+                borderRadius: "8px", cursor: "pointer", textTransform: "capitalize",
+              }}
+              onClick={(e) => {
+                document.querySelectorAll(".ig88-viz-filter").forEach((b) => {
+                  (b as HTMLElement).style.background = "var(--bg-panel)";
+                  (b as HTMLElement).style.color = "var(--text-muted)";
+                  (b as HTMLElement).style.borderColor = "var(--border-strong)";
+                });
+                e.currentTarget.style.background = "var(--accent)";
+                e.currentTarget.style.color = "#fff";
+                e.currentTarget.style.borderColor = "var(--accent)";
+                document.querySelectorAll<HTMLElement>(".ig88-viz-card").forEach((card) => {
+                  card.style.display = (f === "all" || card.dataset.cat === f) ? "" : "none";
+                });
+              }}
+            >
+              {f === "all" ? "All" : f}
+            </button>
+          ))}
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+          {[
+            { cat: "equity", title: "Equity Curve — H3-Combined", badge: "Backtest", badgeColor: "var(--green)",
+              src: "/renders/ig88/videos/equity_curve/480p15/EquityCurveScene.mp4", poster: "/renders/ig88/poster_equity_curve.png",
+              stats: [["Initial", "$10,000", ""], ["Final", "$26,055", "pos"], ["Return", "+160.6%", "pos"], ["PF", "3.13", "pos"], ["WR", "57.7%", "pos"], ["Trades", "52", ""]],
+              desc: "Regime overlay (green=RISK_ON, yellow=NEUTRAL, red=RISK_OFF). Trade markers: green=win, red=loss.",
+              full: true },
+            { cat: "ichimoku", title: "Ichimoku Cloud — H3-A", badge: "Signal", badgeColor: "var(--accent)",
+              src: "/renders/ig88/videos/ichimoku_cloud/480p15/IchimokuCloudScene.mp4", poster: "/renders/ig88/poster_ichimoku_cloud.png",
+              stats: [["Strategy", "H3-A", ""], ["OOS PF", "4.82", "pos"], ["WR", "57.9%", "pos"]],
+              desc: "TK crossover highlighted. Cloud: green=bearish, red=bullish. Score gauge bottom-right." },
+            { cat: "backtest", title: "Walk-Forward Validation", badge: "OOS", badgeColor: "var(--yellow)",
+              src: "/renders/ig88/videos/backtest_comparison/480p15/BacktestComparisonScene.mp4", poster: "/renders/ig88/poster_backtest_comparison.png",
+              stats: [["Train PF", "4.12", ""], ["OOS PF", "2.13", "pos"], ["Ratio", "51.7%", "pos"]],
+              desc: "Split train(70%) / test(30%). Arrow shows PF decay." },
+            { cat: "daily", title: "Daily Summary — Matrix GIF", badge: "Report", badgeColor: "var(--green)",
+              src: "/renders/ig88/videos/daily_summary/480p15/DailySummaryScene.mp4", poster: "/renders/ig88/poster_daily_summary.png",
+              stats: [["Format", "GIF", ""], ["Size", "70 KB", ""], ["Duration", "6s", ""]],
+              desc: "Regime indicator, trade list + P&L, open positions, stats summary.",
+              full: true },
+          ].map((v) => (
+            <div key={v.cat} className="ig88-viz-card" data-cat={v.cat} style={{
+              gridColumn: v.full ? "1 / -1" : undefined,
+              background: "var(--bg-panel)", border: "1px solid var(--border)", borderRadius: "var(--radius)", overflow: "hidden",
+            }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0.625rem 1rem", borderBottom: "1px solid var(--border)" }}>
+                <span style={{ fontSize: "0.8125rem", fontWeight: 400 }}>{v.title}</span>
+                <span style={{ fontSize: "0.5625rem", textTransform: "uppercase", letterSpacing: "0.05em", padding: "0.2rem 0.45rem", borderRadius: "4px", background: `color-mix(in srgb, ${v.badgeColor} 12%, transparent)`, color: v.badgeColor, border: `1px solid color-mix(in srgb, ${v.badgeColor} 18%, transparent)` }}>{v.badge}</span>
+              </div>
+              <div style={{ padding: "1rem" }}>
+                <div style={{ background: "var(--bg-deep)", borderRadius: "8px", overflow: "hidden", aspectRatio: "16/9" }}>
+                  <video controls preload="metadata" poster={v.poster} style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }}>
+                    <source src={v.src} type="video/mp4" />
+                  </video>
+                </div>
+                <div style={{ display: "flex", gap: 0, marginTop: "0.75rem", background: "var(--bg-deep)", border: "1px solid var(--border)", borderRadius: "8px", overflow: "hidden" }}>
+                  {v.stats.map(([label, value, kind]) => (
+                    <div key={label} style={{ flex: 1, padding: "0.5rem 0.75rem", textAlign: "center", borderRight: "1px solid var(--border)" }}>
+                      <div style={{ fontSize: "0.5625rem", textTransform: "uppercase", letterSpacing: "0.04em", color: "var(--text-muted)", marginBottom: "0.125rem" }}>{label}</div>
+                      <div style={{ fontFamily: "var(--font-body)", fontSize: "0.875rem", color: kind === "pos" ? "var(--green)" : kind === "neg" ? "var(--red)" : "var(--text)" }}>{value}</div>
+                    </div>
+                  ))}
+                </div>
+                <p style={{ fontSize: "0.75rem", color: "var(--text-dim)", marginTop: "0.5rem", lineHeight: 1.5 }}>{v.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </SurfaceCard>
     </AppShell>
   );
 }
