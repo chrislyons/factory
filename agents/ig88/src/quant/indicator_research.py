@@ -468,6 +468,66 @@ def signals_ichimoku_h3a(h, l, c):
     return mask, ichi.kijun_sen
 
 
+def signals_cci_breakout(h, l, c, period=20, threshold=100):
+    """CCI crosses above +100 (breakout) or below -100 (breakdown)."""
+    cci_vals = ind.cci(h, l, c, period)
+    n = len(c)
+    mask = np.zeros(n, dtype=bool)
+    for i in range(1, n):
+        if not np.isnan(cci_vals[i]) and not np.isnan(cci_vals[i-1]):
+            # Breakout above threshold
+            mask[i] = cci_vals[i] > threshold and cci_vals[i-1] <= threshold
+    return mask, None
+
+
+def signals_williams_bounce(h, l, c, period=14, oversold=-80, overbought=-20):
+    """Williams %R bounces up from oversold (crosses above -80 from below)."""
+    wr = ind.williams_r(h, l, c, period)
+    n = len(c)
+    mask = np.zeros(n, dtype=bool)
+    for i in range(1, n):
+        if not np.isnan(wr[i]) and not np.isnan(wr[i-1]):
+            # Cross above oversold level
+            mask[i] = wr[i] > oversold and wr[i-1] <= oversold
+    return mask, None
+
+
+def signals_vwap_position(c, v, threshold=0.5):
+    """Price crosses above VWAP by threshold percentage."""
+    vwap_pos = ind.vwap_position(c, v)
+    n = len(c)
+    mask = np.zeros(n, dtype=bool)
+    for i in range(1, n):
+        if not np.isnan(vwap_pos[i]) and not np.isnan(vwap_pos[i-1]):
+            # Cross above threshold
+            mask[i] = vwap_pos[i] > threshold and vwap_pos[i-1] <= threshold
+    return mask, None
+
+
+def signals_tema_cross(c, fast=9, slow=21):
+    """Fast TEMA crosses above slow TEMA."""
+    t_fast = ind.tema(c, fast)
+    t_slow = ind.tema(c, slow)
+    n = len(c)
+    mask = np.zeros(n, dtype=bool)
+    for i in range(1, n):
+        if not np.isnan(t_fast[i]) and not np.isnan(t_slow[i]):
+            mask[i] = t_fast[i] > t_slow[i] and t_fast[i-1] <= t_slow[i-1]
+    return mask, t_slow
+
+
+def signals_aroon_crossover(h, l, period=25):
+    """Aroon Up crosses above Aroon Down (bullish crossover)."""
+    aroon_result = ind.aroon(h, l, period)
+    n = len(h)
+    mask = np.zeros(n, dtype=bool)
+    for i in range(1, n):
+        if not np.isnan(aroon_result.aroon_up[i]) and not np.isnan(aroon_result.aroon_down[i]):
+            mask[i] = (aroon_result.aroon_up[i] > aroon_result.aroon_down[i] and 
+                      aroon_result.aroon_up[i-1] <= aroon_result.aroon_down[i-1])
+    return mask, None
+
+
 # ---------------------------------------------------------------------------
 # Master runner
 # ---------------------------------------------------------------------------
@@ -498,6 +558,12 @@ def build_all_signals(o, h, l, c, v) -> dict[str, tuple]:
     signals["ichimoku_base"]        = signals_ichimoku_base(h, l, c)
     signals["multi_confluence"]     = signals_multi_confluence(h, l, c, v)
     signals["ichimoku_h3a"]         = signals_ichimoku_h3a(h, l, c)
+    # New indicators for expansion research
+    signals["cci_breakout"]         = signals_cci_breakout(h, l, c)
+    signals["williams_bounce"]      = signals_williams_bounce(h, l, c)
+    signals["vwap_position"]        = signals_vwap_position(c, v)
+    signals["tema_9_21_cross"]      = signals_tema_cross(c, 9, 21)
+    signals["aroon_crossover"]      = signals_aroon_crossover(h, l)
     return signals
 
 

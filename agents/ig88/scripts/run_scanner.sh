@@ -38,4 +38,4 @@ eval "$(infisical export \
     --token="$TOKEN" \
     --format=dotenv 2>/dev/null | sed 's/^/export /')"
 
-exec python3 "$SCANNER" "$@"
+exec /Users/nesbitt/dev/factory/agents/ig88/.venv/bin/python3 "$SCANNER" "$@"

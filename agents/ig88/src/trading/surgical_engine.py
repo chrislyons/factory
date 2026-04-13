@@ -56,6 +56,7 @@ class SurgicalExecutionEngine:
         curr_rsi = rsi_v[-1]
         curr_cloud = cloud_top[-1]
         curr_baseline = atr_baseline[-1]
+        curr_kijun = ichi.kijun_sen[-1]
         
         # 1. VOL_GATED_TREND Logic
         if params['strat'] == "VOL_GATED_TREND":
@@ -67,8 +68,8 @@ class SurgicalExecutionEngine:
                     "action": "BUY",
                     "entry_price": curr_c,
                     "stop_loss": curr_c - (params['stop_mult'] * curr_atr),
-                    "exit_type": "TRAILING_STOP",
-                    "trailing_dist": params['stop_mult'] * curr_atr,
+                    "exit_type": "KIJUN_TRAILING",
+                    "trailing_ref": curr_kijun,
                     "conviction": 0.8,
                     "reason": f"VolGate({curr_atr:.2f} > {curr_baseline*params['vol_gate']:.2f}) + Trend"
                 }
@@ -95,5 +96,4 @@ class SurgicalExecutionEngine:
         return None
 
 if __name__ == "__main__":
-    # This allows the script to be used as a module or tested standalone
-    print("SurgicalExecutionEngine initialized.")
+    print("SurgicalExecutionEngine initialized with Kijun Trailing Stop support.")

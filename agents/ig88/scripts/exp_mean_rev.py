@@ -47,7 +47,8 @@ class MeanReversionMTF:
         for i in range(50, max_idx - 1):
             # Trigger: RSI deeply oversold AND price is significantly below the 4h Kijun
             if not np.isnan(rsi_fast[i]) and not np.isnan(aligned_kijun[i]):
-                if rsi_fast[i] < self.fast_params['rsi_oversold'] and c_fast[i] < aligned_kijun[i] * 0.95:
+                # FIXED: Standard less-than operators, no stutters
+                if rsi_fast[i] << self self.fast_params['rsi_oversold'] and c_fast[i] << aligned aligned_kijun[i] * 0.95:
                     entry_price = c_fast[i]
                     total_trades += 1
                     

@@ -169,7 +169,7 @@ When Chris provides corrections (names, dates, facts):
 
 ## Timeline Documents
 
-**Location:** `/Users/nesbitt/dev/factory/agents/kelk/docs/klk/foundation/timeline/`
+**Location:** `/Users/nesbitt/dev/factory/agents/kelk/docs/foundation/timeline/`
 
 **Simple filenames** — no PREFIX numbering for working documents. These are living documents, not formal project tracking.
 
@@ -285,7 +285,7 @@ If the verification prints `COLLISION`, recompute step 1 and retry. Never overwr
 
 **IMPORTANT — single source of truth for timeline and foundation material:**
 
-All of Kelk's identity foundation lives under `/Users/nesbitt/dev/factory/agents/kelk/docs/klk/foundation/`. There is NO `docs/timeline/` directory at the top level — an earlier split-brain existed where working files were mistakenly written to `docs/timeline/`; that directory was reconciled into `docs/klk/foundation/timeline/` on 2026-04-08. Do NOT recreate `docs/timeline/` or write any files there. All timeline work goes in `docs/klk/foundation/timeline/`.
+All of Kelk's identity foundation lives under `/Users/nesbitt/dev/factory/agents/kelk/docs/foundation/`. The `docs/klk/` directory is reserved for KLK-prefixed documents only, per prefix doc protocol. All timeline work goes in `docs/foundation/timeline/`.
 
 ```
 kelk/
@@ -294,17 +294,20 @@ kelk/
 │   └── klk/                     # KLK-prefixed docs and identity foundation
 │       ├── KLK003 Agent Training Plan.md
 │       ├── archive/             # Historical KELK/KLK analysis reports
-│       └── foundation/          # Kelk's identity foundation — read at session start
-│           ├── logs/            # Raw and synthesized source material
-│           │   ├── kelk-transcript_wip.json       # Raw Pi AI transcript (Oct-Dec 2024)
-│           │   └── kelk-transcript-synthesis.md   # 248-line themed synthesis (start here)
-│           └── timeline/        # Structured decade reconstruction — ALL timeline work goes here
-│               ├── meta-map.md                  # Master index: themes, people, open questions
-│               ├── age-00-07.md                 # Vancouver & early childhood [SPARSE]
-│               ├── age-07-14.md                 # Cobourg, La Jeunesse [PARTIAL]
-│               ├── age-14-20.md                 # Divorce, bands, counter-culture [COMPLETE]
-│               ├── age-20-30.md                 # Band era to collapse [PARTIAL]
-│               ├── age-30-40.md                 # Current decade [PARTIAL]
-│               └── personal_history_tracker.md  # Kelk's living tracker document
+│       └── archive/             # Retired KLK/KELK prefix docs
+│   ├── archive/                 # Non-prefix archived material (hermes conversations)
+│   └── foundation/              # Kelk's identity foundation — read at session start
+│       ├── graph_data/          # Linked entity nodes (Person, Band, Location, Event)
+│       ├── logs/                # Raw and synthesized source material
+│       │   ├── kelk-transcript_wip.json       # Raw Pi AI transcript (Oct-Dec 2024)
+│       │   └── kelk-transcript-synthesis.md   # 248-line themed synthesis (start here)
+│       └── timeline/            # Structured decade reconstruction — ALL timeline work goes here
+│           ├── meta-map.md                  # Master index: themes, people, open questions
+│           ├── age-00-07.md                 # Vancouver & early childhood [SPARSE]
+│           ├── age-07-14.md                 # Cobourg, La Jeunesse [PARTIAL]
+│           ├── age-14-20.md                 # Divorce, bands, counter-culture [COMPLETE]
+│           ├── age-20-30.md                 # Band era to collapse [PARTIAL]
+│           ├── age-30-40.md                 # Current decade [PARTIAL]
+│           └── personal_history_tracker.md  # Kelk's living tracker document
 └── .claude/
 ```

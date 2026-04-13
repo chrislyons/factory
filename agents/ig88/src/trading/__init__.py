@@ -1,1 +1,1 @@
-"""IG-88 Trading System — backtesting, paper trading, and execution."""
+# IG-88 Trading Module

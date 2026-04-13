@@ -1,6 +1,6 @@
 # IG88 Documentation Index
 
-**Agent:** IG-88 | **PREFIX:** IG88 | **Updated:** 2026-04-11
+**Agent:** IG-88 | **PREFIX:** IG88 | **Updated:** 2026-04-12
 
 ---
 
@@ -14,6 +14,9 @@
 | IG88024 | H3-A and H3-B Strategy Validation | active | Validation report for H3-series trend strategies |
 | IG88026 | Combinatorial Strategy Analysis | active | Systematic search for optimal indicator primitives (Trend+Mom+Vol) |
 | IG88027 | Strategy Hardening & Ablation Report | active | Stress tests for slippage, exit sensitivity, and asset distribution |
+| IG88028 | Battle Testing & Infrastructure Hardening | active | Friction model validation, Jupiter removal, shared utilities, Assumptions & Risks |
+| IG88029 | Dual Stream Research - Jupiter Perps & H3 Optimization | active | Jupiter Perps validated (H3-A/B), H3-C optimization failed, cross-asset mixed, 2h marginal |
+| IG88030 | Profit Maximization Research - Exit and Indicator Optimization | active | Exit optimization (H3-A PF 4.820 with time5), indicator expansion, ATR tuning |
 
 ## ⚙️ Infrastructure & Setup
 | Doc | Title | Status | Summary |
@@ -44,6 +47,7 @@
 | IG88011 | Cloud Model Bake-Off Results | active | Tier assignments for T1/T2/T3 models based on Brier scores |
 | IG88013 | Sprint Report - Build | active | Inventory of built components (10 files, ~6.6k lines) |
 | IG88014 | Manim Visualization Skill | exploratory | Animated visualization plan for backtest results |
+| IG88014b | Indicator Expansion: Squeeze, MeanRev, Chandelier | active | New indicator primitives: Squeeze (orthogonal), MeanRev (redundant), Chandelier (inferior to ATR trailing). Regime gate validated for H3-A (PF 4.4→5.6). |
 
 ---
 

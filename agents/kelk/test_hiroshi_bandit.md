@@ -1,0 +1,1 @@
+"# Hiroshi the Bandit\n\nParagraph 1: The mountains of the Eastern Reach were a tapestry of slate and pine

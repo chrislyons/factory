@@ -143,7 +143,7 @@ def study1_altcoin_expansion(btc_ts, btc_c):
         tr_s = f"{tr['n']:5d} {tr['pf']:7.3f} {tr['p']:7.3f}" if tr else "    0       -       -"
         te_s = (f"{te['n']:5d} {te['pf']:7.3f} {te['sharpe']:7.3f} {te['p']:7.3f}"
                 if te else "    0       -       -       -")
-        star = \"*\" if (te and te[\"p\"] < 0.10) else \" \"
+        star = "*" if (te and te["p"] < 0.10) else " "
         print(f"  {label:<<114} {tr_s}  {te_s}{star}  {flag}")
         results[label] = {"train": tr, "test": te}
         
@@ -237,7 +237,7 @@ class ExitResearchBacktester:
         self.bar_hours = bar_hours
 
     def run_exit(self, ts, o, h, l, c, v, regime, signal_mask, exit_method,
-                 atr_stop_mult=2.0, atr_target_mult=3.0):
+                 atr_stop_mult=2.0, atr_target_mult=3.0, atr_trail_mult=2.0):
         n = len(ts)
         wallet = self.initial_capital
         min_hold = max(1, int(2 / max(self.bar_hours, 1)))
@@ -303,7 +303,7 @@ class ExitResearchBacktester:
 
                 # Update trailing stop
                 if exit_method == "atr_trail":
-                    trail_stop = max(trail_stop, c[bar] - 2.0 * cur_av)
+                    trail_stop = max(trail_stop, c[bar] - atr_trail_mult * cur_av)
                     if c[bar] < trail_stop and j >= min_hold:
                         xb = bar; xp = trail_stop; xr = ExitReason.STOP_HIT; break
 
@@ -397,7 +397,7 @@ def study3_exit_comparison(ts, o, h, l, c, v, regime, atr_v):
             tr_s = f"{tr['n']:5d} {tr['pf']:7.3f} {tr['sharpe']:7.3f}" if tr else "    0       -       -"
             te_s = (f"{te['n']:5d} {te['pf']:7.3f} {te['sharpe']:7.3f} {te['p']:7.3f}"
                     if te else "    0       -       -       -")
-        star = \"*\" if (te and te[\"p\"] < 0.10) else \" \"
+            star = "*" if (te and te["p"] < 0.10) else " "
 
             # Flag vs current best
             note = ""

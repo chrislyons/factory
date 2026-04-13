@@ -36,3 +36,34 @@ The combined H3-A and H3-B strategy exhibits exceptional statistical performance
 ## Durable Conclusion
 
 **The ATR Trailing Stop is the superior exit mechanism for high-conviction H3 strategies.** This finding is promoted to `fact/trading.md`.
+
+---
+
+## Assumptions & Risks
+
+### Core Assumptions
+1. **Asset-Specific Edge:** This edge is validated on **SOL 4h only**. Cross-asset and cross-timeframe tests show mixed results (H3-B expansion test: 5 of 17 assets passed). Do not assume transferability without dedicated validation.
+2. **Regime Persistence:** The BTC Trend Regime filter (RISK_ON/OFF) assumes that BTC regime transitions are predictive of altcoin momentum. If BTC regime detection degrades (e.g., choppy consolidation), the filter may block valid signals or permit losing ones.
+3. **Market Structure Stability:** The edge assumes that retail momentum cycles, liquidity provision, and volatility regimes remain consistent with the 2024-2026 backtest window. If retail participation changes significantly (e.g., regulatory shift, new institutional players), the edge may degrade.
+4. **Fee Model Accuracy:** Backtest fees are modeled at Kraken maker rates (0.16%). If execution defaults to taker (0.26%) or slippage exceeds 10bps, performance will degrade proportionally.
+
+### Identified Risks
+| Risk | Likelihood | Impact | Mitigation |
+|------|------------|--------|------------|
+| Cross-asset failure | Medium | High | Never trade H3 on unvalidated assets without dedicated backtest |
+| Regime filter lag | Low | Medium | Monitor regime transitions; consider adding a "regime momentum" buffer |
+| Slippage beyond 10bps | Low | Medium | Use limit orders only; reject signals during low-liquidity hours |
+| Overfitting to SOL 4h | Medium | High | Rolling window stability test (Study 4) passed 8/8 windows; continue monitoring |
+| H3-B signal decay | Medium | Medium | H3-B has lower PF than H3-A; treat as auxiliary, not primary |
+
+### What This Does NOT Prove
+- **H3 works on other timeframes** (1h, 1d not yet tested with ATR trailing stop)
+- **H3 works on other assets** (NEAR, INJ showed promise but n<5 in OOS)
+- **H3 works in perpetuals** (Jupiter Perps integration not validated — mean-reversion strategy is separate)
+- **The edge is permanent** (statistical significance does not imply future persistence)
+
+### Kill-Switch Criteria
+If any of the following occur in live trading, halt H3 signals and re-validate:
+- Win Rate drops below 40% over 30 consecutive trades
+- Max Drawdown exceeds 10% of wallet
+- Profit Factor falls below 1.5 over any 20-trade rolling window
