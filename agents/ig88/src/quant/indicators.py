@@ -1488,3 +1488,437 @@ def multi_indicator_confluence(
             result[i] = max(-1.0, min(1.0, total))
 
     return result
+
+
+# ---------------------------------------------------------------------------
+# Volatility Squeeze (Bollinger inside Keltner)
+# ---------------------------------------------------------------------------
+
+@dataclass
+class SqueezeResult:
+    """Volatility squeeze detection result.
+
+    A squeeze occurs when Bollinger Bands contract inside Keltner Channels.
+    This signals low volatility periods that often precede explosive moves.
+
+    Attributes:
+        squeeze: Boolean array. True when BB is inside KC (squeeze active).
+        momentum: Histogram of momentum direction (positive = bullish, negative = bearish).
+        release: Boolean array. True on first bar where squeeze ends.
+    """
+    squeeze: np.ndarray
+    momentum: np.ndarray
+    release: np.ndarray
+
+
+def squeeze(
+    high: np.ndarray,
+    low: np.ndarray,
+    close: np.ndarray,
+    bb_period: int = 20,
+    bb_mult: float = 2.0,
+    kc_period: int = 20,
+    kc_mult: float = 1.5,
+) -> SqueezeResult:
+    """Detect volatility squeeze (Bollinger Bands inside Keltner Channels).
+
+    A squeeze occurs when the Bollinger Bands contract enough to fit entirely
+    inside the Keltner Channels. This indicates abnormally low volatility
+    and often precedes directional breakouts.
+
+    The momentum histogram tracks the direction of the move during the squeeze.
+    When the squeeze releases, momentum direction often indicates breakout direction.
+
+    Args:
+        high: High prices.
+        low: Low prices.
+        close: Close prices.
+        bb_period: Bollinger Band lookback (default 20).
+        bb_mult: Bollinger Band standard deviation multiplier (default 2.0).
+        kc_period: Keltner Channel EMA lookback (default 20).
+        kc_mult: Keltner Channel ATR multiplier (default 1.5).
+
+    Returns:
+        SqueezeResult with squeeze flags, momentum histogram, and release signals.
+    """
+    n = len(close)
+    squeeze_flag = np.zeros(n, dtype=bool)
+    momentum_hist = np.zeros(n, dtype=float)
+    release_flag = np.zeros(n, dtype=bool)
+
+    # Bollinger Bands
+    bb = bollinger_bands(close, period=bb_period, mult=bb_mult)
+
+    # Keltner Channels: EMA(20) +/- 1.5 * ATR(14)
+    ema_center = ema(close, kc_period)
+    atr_v = atr(high, low, close, 14)
+    kc_upper = ema_center + kc_mult * atr_v
+    kc_lower = ema_center - kc_mult * atr_v
+
+    # Squeeze: BB inside KC (both bands inside)
+    # Upper BB < Upper KC AND Lower BB > Lower KC
+    for i in range(max(bb_period, kc_period, 14), n):
+        if np.isnan(bb.upper[i]) or np.isnan(bb.lower[i]):
+            continue
+        if np.isnan(kc_upper[i]) or np.isnan(kc_lower[i]):
+            continue
+
+        squeeze_flag[i] = (bb.upper[i] < kc_upper[i]) and (bb.lower[i] > kc_lower[i])
+
+        # Momentum histogram: linear regression slope of close over last 5 bars
+        if i >= 5:
+            window = close[i - 4:i + 1]
+            x = np.arange(5, dtype=float)
+            x_mean = 2.0
+            y_mean = float(np.mean(window))
+            num = float(np.sum((x - x_mean) * (window - y_mean)))
+            denom = float(np.sum((x - x_mean) ** 2))
+            if denom > 0:
+                momentum_hist[i] = num / denom
+
+        # Release: squeeze was True last bar, False now
+        if squeeze_flag[i - 1] and not squeeze_flag[i]:
+            release_flag[i] = True
+
+    return SqueezeResult(
+        squeeze=squeeze_flag,
+        momentum=momentum_hist,
+        release=release_flag,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Mean Reversion Score (RSI + Bollinger Z-Score)
+# ---------------------------------------------------------------------------
+
+def mean_reversion_score(
+    close: np.ndarray,
+    rsi_period: int = 14,
+    bb_period: int = 20,
+    bb_mult: float = 2.0,
+) -> np.ndarray:
+    """Mean reversion score from -1.0 (max overbought) to +1.0 (max oversold).
+
+    Combines two mean-reversion signals:
+    1. RSI zone: RSI < 30 = oversold (+1), RSI > 70 = overbought (-1)
+    2. Bollinger %B: < 0 = below lower band (+1), > 1 = above upper band (-1)
+
+    The score is the average of both components, each normalized to [-1, +1].
+    Positive = oversold (potential long entry), Negative = overbought (potential exit).
+
+    Args:
+        close: Close prices.
+        rsi_period: RSI lookback (default 14).
+        bb_period: Bollinger Band lookback (default 20).
+        bb_mult: Bollinger Band standard deviation multiplier (default 2.0).
+
+    Returns:
+        Array of mean reversion scores, normalized to [-1.0, +1.0].
+    """
+    n = len(close)
+    result = np.full(n, np.nan)
+
+    rsi_vals = rsi(close, period=rsi_period)
+    bb = bollinger_bands(close, period=bb_period, mult=bb_mult)
+
+    start = max(rsi_period, bb_period)
+    for i in range(start, n):
+        if np.isnan(rsi_vals[i]) or np.isnan(bb.percent_b[i]):
+            continue
+
+        # RSI component: map 30-70 range to [-1, +1]
+        # RSI < 30 = +1 (max oversold), RSI > 70 = -1 (max overbought)
+        if rsi_vals[i] <= 30:
+            rsi_score = 1.0
+        elif rsi_vals[i] >= 70:
+            rsi_score = -1.0
+        else:
+            rsi_score = -(rsi_vals[i] - 50.0) / 20.0  # Linear in 30-70 range
+            rsi_score = max(-1.0, min(1.0, rsi_score))
+
+        # %B component: 0 = at lower band (+1), 1 = at upper band (-1)
+        # Clamp %B to [-0.5, 1.5] range for score calculation
+        pct_b = max(-0.5, min(1.5, bb.percent_b[i]))
+        bb_score = -(pct_b - 0.5) * 2.0  # 0.5 = 0, 0 = +1, 1 = -1
+        bb_score = max(-1.0, min(1.0, bb_score))
+
+        # Average of both components
+        result[i] = (rsi_score + bb_score) / 2.0
+
+    return result
+
+
+# ---------------------------------------------------------------------------
+# Chandelier Exit (Volatility-Adjusted Trailing Stop)
+# ---------------------------------------------------------------------------
+
+@dataclass
+class ChandelierResult:
+    """Volatility-adjusted trailing stop levels.
+
+    The Chandelier Exit trails the highest high (long) or lowest low (short)
+    minus/plus a multiple of ATR. It adjusts automatically to volatility.
+
+    Attributes:
+        long_stop: Trailing stop for long positions (highest high - mult * ATR).
+        short_stop: Trailing stop for short positions (lowest low + mult * ATR).
+        direction: +1 for long (price above stop), -1 for short (price below stop).
+    """
+    long_stop: np.ndarray
+    short_stop: np.ndarray
+    direction: np.ndarray
+
+
+def chandelier_exit(
+    high: np.ndarray,
+    low: np.ndarray,
+    close: np.ndarray,
+    lookback: int = 22,
+    atr_mult: float = 3.0,
+    atr_period: int = 14,
+) -> ChandelierResult:
+    """Chandelier Exit (volatility-adjusted trailing stop).
+
+    Calculates trailing stop levels based on the highest high (long) or
+    lowest low (short) over a lookback period, offset by ATR multiple.
+
+    This adapts automatically to volatility:
+    - High volatility: wider stops (more room to breathe)
+    - Low volatility: tighter stops (earlier exit)
+
+    Args:
+        high: High prices.
+        low: Low prices.
+        close: Close prices.
+        lookback: Highest high / lowest low lookback period (default 22).
+        atr_mult: ATR multiplier for stop distance (default 3.0).
+        atr_period: ATR calculation period (default 14).
+
+    Returns:
+        ChandelierResult with long/short stop levels and direction.
+    """
+    n = len(close)
+    long_stop = np.full(n, np.nan)
+    short_stop = np.full(n, np.nan)
+    direction = np.zeros(n, dtype=int)
+
+    atr_v = atr(high, low, close, atr_period)
+
+    for i in range(lookback, n):
+        if np.isnan(atr_v[i]):
+            continue
+
+        highest = float(np.max(high[i - lookback + 1:i + 1]))
+        lowest = float(np.min(low[i - lookback + 1:i + 1]))
+
+        long_stop[i] = highest - atr_mult * atr_v[i]
+        short_stop[i] = lowest + atr_mult * atr_v[i]
+
+        # Direction: +1 if price above long stop (bullish), -1 if below short stop (bearish)
+        if close[i] > long_stop[i]:
+            direction[i] = 1
+        elif close[i] < short_stop[i]:
+            direction[i] = -1
+        else:
+            direction[i] = 0  # Inside the chandelier range (neutral)
+
+    return ChandelierResult(
+        long_stop=long_stop,
+        short_stop=short_stop,
+        direction=direction,
+    )
+
+
+# ---------------------------------------------------------------------------
+# CCI (Commodity Channel Index)
+# ---------------------------------------------------------------------------
+
+def cci(high: np.ndarray, low: np.ndarray, close: np.ndarray,
+        period: int = 20) -> np.ndarray:
+    """Commodity Channel Index.
+
+    Measures the difference between the typical price and its moving average,
+    normalized by the mean absolute deviation. High values indicate overbought,
+    low values indicate oversold.
+
+    Args:
+        high: High prices.
+        low: Low prices.
+        close: Close prices.
+        period: Lookback period.
+
+    Returns:
+        CCI values as numpy array.
+    """
+    typical_price = (high + low + close) / 3.0
+    n = len(close)
+    result = np.full(n, np.nan)
+    if n < period:
+        return result
+
+    for i in range(period - 1, n):
+        window = typical_price[i - period + 1:i + 1]
+        sma_tp = np.mean(window)
+        mad = np.mean(np.abs(window - sma_tp))
+        if mad == 0:
+            result[i] = 0.0
+        else:
+            result[i] = (typical_price[i] - sma_tp) / (0.015 * mad)
+
+    return result
+
+
+# ---------------------------------------------------------------------------
+# Williams %R
+# ---------------------------------------------------------------------------
+
+def williams_r(high: np.ndarray, low: np.ndarray, close: np.ndarray,
+               period: int = 14) -> np.ndarray:
+    """Williams %R momentum oscillator.
+
+    Values range from -100 to 0. Above -20 is overbought, below -80 is oversold.
+
+    Args:
+        high: High prices.
+        low: Low prices.
+        close: Close prices.
+        period: Lookback period.
+
+    Returns:
+        Williams %R values as numpy array.
+    """
+    n = len(close)
+    result = np.full(n, np.nan)
+    if n < period:
+        return result
+
+    for i in range(period - 1, n):
+        highest_high = np.max(high[i - period + 1:i + 1])
+        lowest_low = np.min(low[i - period + 1:i + 1])
+        if highest_high - lowest_low == 0:
+            result[i] = -50.0
+        else:
+            result[i] = -100.0 * (highest_high - close[i]) / (highest_high - lowest_low)
+
+    return result
+
+
+# ---------------------------------------------------------------------------
+# TEMA (Triple Exponential Moving Average)
+# ---------------------------------------------------------------------------
+
+def tema(data: np.ndarray, period: int) -> np.ndarray:
+    """Triple Exponential Moving Average.
+
+    TEMA = 3*EMA - 3*EMA(EMA) + EMA(EMA(EMA)). Reduces lag even more than DEMA.
+
+    Args:
+        data: Input price array.
+        period: EMA period.
+
+    Returns:
+        TEMA values as numpy array.
+    """
+    ema1 = ema(data, period)
+    # For EMA of EMA, we need to handle NaN values
+    valid_start = period - 1
+    ema2_input = ema1.copy()
+    ema2 = ema(ema2_input[valid_start:], period)
+
+    # For EMA of EMA of EMA
+    valid_start2 = valid_start + period - 1
+    ema3_input = ema2.copy()
+    ema3 = ema(ema3_input[period - 1:], period)
+
+    result = np.full(len(data), np.nan)
+    offset = valid_start2 + period - 1
+    if offset < len(data):
+        end = min(len(ema3), len(data) - valid_start2)
+        for i in range(period - 1, end):
+            idx = valid_start2 + i
+            if idx < len(data) and not np.isnan(ema1[idx]) and not np.isnan(ema2[i]) and not np.isnan(ema3[i - period + 1]):
+                result[idx] = 3.0 * ema1[idx] - 3.0 * ema2[i] + ema3[i - period + 1]
+
+    return result
+
+
+# ---------------------------------------------------------------------------
+# Aroon
+# ---------------------------------------------------------------------------
+
+@dataclass
+class AroonResult:
+    """Bundle of Aroon oscillator values."""
+    aroon_up: np.ndarray    # 0 to 100, how recently the highest high occurred
+    aroon_down: np.ndarray  # 0 to 100, how recently the lowest low occurred
+    aroon_osc: np.ndarray   # Aroon Up - Aroon Down, range -100 to 100
+
+
+def aroon(high: np.ndarray, low: np.ndarray, period: int = 25) -> AroonResult:
+    """Aroon indicator.
+
+    Measures the time since the highest high and lowest low.
+    Aroon Up = ((period - periods since highest high) / period) * 100
+    Aroon Down = ((period - periods since lowest low) / period) * 100
+
+    Args:
+        high: High prices.
+        low: Low prices.
+        period: Lookback period.
+
+    Returns:
+        AroonResult with aroon_up, aroon_down, and aroon_osc arrays.
+    """
+    n = len(high)
+    aroon_up = np.full(n, np.nan)
+    aroon_down = np.full(n, np.nan)
+    aroon_osc = np.full(n, np.nan)
+
+    if n < period:
+        return AroonResult(aroon_up=aroon_up, aroon_down=aroon_down, aroon_osc=aroon_osc)
+
+    for i in range(period - 1, n):
+        high_window = high[i - period + 1:i + 1]
+        low_window = low[i - period + 1:i + 1]
+
+        # Find most recent highest high
+        highest_idx = i - period + 1 + np.argmax(high_window)
+        periods_since_high = i - highest_idx
+
+        # Find most recent lowest low
+        lowest_idx = i - period + 1 + np.argmin(low_window)
+        periods_since_low = i - lowest_idx
+
+        aroon_up[i] = ((period - periods_since_high) / period) * 100.0
+        aroon_down[i] = ((period - periods_since_low) / period) * 100.0
+        aroon_osc[i] = aroon_up[i] - aroon_down[i]
+
+    return AroonResult(aroon_up=aroon_up, aroon_down=aroon_down, aroon_osc=aroon_osc)
+
+
+# ---------------------------------------------------------------------------
+# VWAP Position
+# ---------------------------------------------------------------------------
+
+def vwap_position(close: np.ndarray, volume: np.ndarray) -> np.ndarray:
+    """VWAP position indicator.
+
+    Returns the percentage distance of close from VWAP.
+    Positive values = above VWAP, negative = below.
+
+    Args:
+        close: Close prices.
+        volume: Volume array.
+
+    Returns:
+        Percentage distance from VWAP as numpy array.
+    """
+    vwap_vals = vwap(close, volume)
+    n = len(close)
+    result = np.full(n, np.nan)
+
+    for i in range(n):
+        if not np.isnan(vwap_vals[i]) and vwap_vals[i] != 0:
+            result[i] = (close[i] - vwap_vals[i]) / vwap_vals[i] * 100.0
+
+    return result

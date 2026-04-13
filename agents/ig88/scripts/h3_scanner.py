@@ -92,14 +92,24 @@ def evaluate_all_signals(df, regime_arr, i: int) -> dict:
                     ichi.senkou_span_b[i] if not np.isnan(ichi.senkou_span_b[i]) else -np.inf)
     atr_now = atr_v[i] if not np.isnan(atr_v[i]) else 0.0
 
+    # Regime gate (H3-A only): Squeeze + %B + ADX filter
+    squeeze_result = ind.squeeze(h, l, c)
+    bb_result = ind.bollinger_bands(c)
+    adx_result = ind.adx(h, l, c, 14)
+    squeeze_active = bool(squeeze_result.squeeze[i])
+    pct_b_extreme = bool(not np.isnan(bb_result.percent_b[i]) and (bb_result.percent_b[i] > 0.9 or bb_result.percent_b[i] < 0.1))
+    adx_weak = bool(not np.isnan(adx_result.adx[i]) and adx_result.adx[i] < 20.0)
+    regime_gate_pass = not squeeze_active and not pct_b_extreme and not adx_weak
+
     results = {}
-    # H3-A
+    # H3-A (with regime gate)
     h3a_conds = {
         "tk_cross": bool(tk[i] == 1),
         "above_cloud": bool(not np.isnan(cloud_top) and c[i] > cloud_top),
         "rsi_55": bool(not np.isnan(rsi_v[i]) and rsi_v[i] > 55),
         "ichi_score3": bool(score[i] >= 3),
         "regime_ok": bool(regime_ok),
+        "regime_gate": bool(regime_gate_pass),
     }
     results["H3-A"] = {"active": all(h3a_conds.values()), "conditions": h3a_conds, "diagnostics": {"close": float(c[i]), "atr": float(atr_now)}}
 

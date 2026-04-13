@@ -4,13 +4,11 @@ Project documentation index for factory.
 
 ## Recent Documents
 
-- [[FCT047 Hermes Runtime Integration Phase 3 Implementation]]
-- [[FCT048 Agent Console Tmux Bridge]]
-- [[FCT049 Agentic Orchestration Philosophy — Hermes Self-Extension vs Factory Frozen Harness]]
-- [[FCT050 Coordinator-rs Deployment Status and Operational Runbook]]
-- [[FCT051 Agent Provisioning System — agent-add Automation]]
-- [[FCT052 Hermes Agent Latency Fix — Phase 4 HTTP Daemon]]
-- BWS to Infisical Secrets Migration → moved to WHB027 (sensitive)
+- [[FCT061 Hermes v0.8.0 Migration and Routing Bug Resolution — 2026-04-08]]
+- [[FCT062 Hermes v0.8.0 Provider Routing Resolution]]
+- [[FCT063 Local Model Restoration and Routing Guide]]
+- [[FCT064 Factory Profile Rotation and Aux-Route Hardening]]
+- [[FCT065 Hermes Agent Recovery and Context Ceiling Research]]
 
 ## All Documents
 
@@ -66,7 +64,6 @@ Project documentation index for factory.
 - [[FCT050 Coordinator-rs Deployment Status and Operational Runbook]]
 - [[FCT051 Agent Provisioning System — agent-add Automation]]
 - [[FCT052 Hermes Agent Latency Fix — Phase 4 HTTP Daemon]]
-- BWS to Infisical Secrets Migration → moved to WHB027 (sensitive)
 - [[FCT053 Matrix Dual-Login Architectural Constraint]]
 - [[FCT054 Local E4B Model Consolidation — All Agents on Gemma 4 E4B 6-bit]]
 - [[FCT055 IG-88 Overnight Failure Post-Mortem and Hermes Routing Hardening]]
@@ -80,7 +77,6 @@ Project documentation index for factory.
 - [[FCT063 Local Model Restoration and Routing Guide]]
 - [[FCT064 Factory Profile Rotation and Aux-Route Hardening]]
 - [[FCT065 Hermes Agent Recovery and Context Ceiling Research]]
-- [[FCT066 E4B LoRA Training Pipeline — Tool-Call Quality Fix]]
 
 ## Navigation
 
@@ -94,4 +90,4 @@ Project documentation index for factory.
 
 ---
 
-**Last Generated:** 2026-04-07
+**Last Generated:** 2026-04-13

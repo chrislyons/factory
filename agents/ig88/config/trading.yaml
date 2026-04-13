@@ -159,19 +159,25 @@ venues:
     paper_mode: true
     pairs:
       - SOL-PERP
+      - AVAX-PERP
+      - ETH-PERP
+      - NEAR-PERP
+      - LINK-PERP
+      - BTC-PERP
     leverage:
-      default: 3
-      max: 5
+      default: 2
+      max: 3
     fees:
       open_close_pct: 0.07    # Each side
       round_trip_pct: 0.14    # Minimum; can reach 0.22% with price impact
       borrow_rate_hourly: true # Varies by utilization
-    min_expected_move_pct: 0.25  # Expected move × leverage must exceed this
-    max_open_positions: 1
+    min_expected_move_pct: 0.01  # Lowered for MR paper trading
+    max_open_positions: 6    # Allow multiple pairs
     min_hold_hours: 2
     max_hold_hours: 8
     tp_sl_required: true       # No naked positions
     borrow_fee_autoclose_pct: 50  # Auto-close when borrow fee hits 50% of TP
+    edge_threshold: 0.01       # Lowered for MR paper trading
 
   solana_dex:
     enabled: true
