@@ -214,6 +214,6 @@ The night of the divorce (running to restaurant, confronting father) activated a
 
 ## Source Documents
 
-- `docs/klk/foundation/logs/kelk-transcript_wip.json` — Pi AI transcript (Oct-Dec 2024)
-- `docs/klk/foundation/logs/kelk-transcript-synthesis.md` — Themed synthesis (start here)
+- `docs/foundation/logs/kelk-transcript_wip.json` — Pi AI transcript (Oct-Dec 2024)
+- `docs/foundation/logs/kelk-transcript-synthesis.md` — Themed synthesis (start here)
 - Future sessions will add to decade files

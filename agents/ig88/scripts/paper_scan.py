@@ -70,6 +70,29 @@ def load_data(pair):
     return None
 
 
+def get_freshness():
+    """Return dict mapping pair to age in hours of most recent bar."""
+    freshness = {}
+    for pair in PORTFOLIO.keys():
+        df = load_data(pair)
+        if df is None:
+            freshness[pair] = None
+            continue
+        # Get last timestamp
+        if df.index.name == 'open_time':
+            last_ts = df.index[-1]
+        elif 'open_time' in df.columns:
+            last_ts = df['open_time'].iloc[-1]
+        else:
+            last_ts = df.index[-1]
+        if last_ts.tzinfo is None:
+            last_ts = last_ts.replace(tzinfo=timezone.utc)
+        now = datetime.now(timezone.utc)
+        age_hours = (now - last_ts).total_seconds() / 3600
+        freshness[pair] = age_hours
+    return freshness
+
+
 def compute_indicators(df):
     c = df['close'].values
     h = df['high'].values
@@ -104,6 +127,18 @@ def run_scan():
     
     events = []
     timestamp = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')
+    
+    # Data freshness check
+    freshness = get_freshness()
+    stale_pairs = []
+    for pair, age in freshness.items():
+        if age is None:
+            events.append(f"⚠️  DATA MISSING: {pair} parquet file not found")
+        elif age > 4:
+            stale_pairs.append(pair)
+            events.append(f"⚠️  DATA STALE: {pair} last bar {age:.1f}h ago")
+    if stale_pairs:
+        events.append(f"⚠️  {len(stale_pairs)} pairs have stale data (>4h)")
     
     # Check exits for existing positions
     for pair, pos in list(positions.items()):
@@ -207,6 +242,10 @@ def run_scan():
     gross_profit = sum(wins) if wins else 0
     gross_loss = abs(sum(losses)) if losses else 0
     
+    # Freshness summary
+    max_age = max([a for a in freshness.values() if a is not None], default=0)
+    stale_count = sum(1 for a in freshness.values() if a is not None and a > 4)
+    
     stats = {
         'scan_count': scan_count,
         'timestamp': timestamp,
@@ -217,6 +256,8 @@ def run_scan():
         'win_rate': round(len(wins) / len(trades) * 100, 1) if trades else 0,
         'total_pnl': round(total_pnl, 3),
         'profit_factor': round(gross_profit / gross_loss, 2) if gross_loss > 0 else (9.99 if gross_profit > 0 else 0),
+        'max_age_hours': round(max_age, 2),
+        'stale_pairs_count': stale_count,
     }
     
     # Save state
