@@ -5,11 +5,11 @@ status: Historical
 themes: [Creative_Pursuit, High_School_Ambition, Community_Loss]
 members:
   - name: Chris
-    role: Rhythm Guitar/Vocalist
+    role: Rhythm Guitar/Vocals
   - name: Matt
     role: Bass
   - name: Julian
-    role: Lead Guitar/Violin
+    role: Lead Guitar
   - name: Randy
     role: Drums
 ---
