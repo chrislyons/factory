@@ -247,7 +247,7 @@ function Preferences({
               <span className="config-pref-row__desc">CLI visual theme</span>
             </div>
             <select
-              className="config-field__select select-input config-field__select--inline"
+              className="config-field__select select-input config-field__select--inline config-field__select--narrow"
               value={skinValue}
               disabled={disabled || patchMutation.isPending}
               onChange={(e) => {
@@ -316,7 +316,7 @@ function Preferences({
               <span className="config-pref-row__desc">Default shell directory</span>
             </div>
             <select
-              className="config-field__select select-input config-field__select--inline"
+              className="config-field__select select-input config-field__select--inline config-field__select--narrow"
               value={cwdValue}
               disabled={disabled || patchMutation.isPending}
               onChange={(e) => {
@@ -340,7 +340,7 @@ function Preferences({
               <span className="config-pref-row__desc">Per-command timeout (s)</span>
             </div>
             <select
-              className="config-field__select select-input config-field__select--inline"
+              className="config-field__select select-input config-field__select--inline config-field__select--narrow"
               value={String(timeoutValue)}
               disabled={disabled || patchMutation.isPending}
               onChange={(e) => patch("terminal.timeout", parseInt(e.target.value, 10))}
@@ -442,6 +442,7 @@ function ModelAndAgent({
   const agentObj = (config.agent ?? {}) as Record<string, unknown>;
   const maxTokens = config.max_tokens as number | undefined;
   const maxTurns = (agentObj.max_turns as number | undefined) ?? (config.max_turns as number | undefined);
+  const contextLength = (config.model as Record<string, unknown>)?.context_length as number | undefined;
   const toolEnforcement = ((agentObj.tool_use_enforcement as string) ?? (config.tool_use_enforcement as string)) ?? "none";
   const approvalMode = ((config.approvals as Record<string, unknown>)?.mode as string) ?? "off";
   const toolsets = (config.toolsets ?? []) as string[];
@@ -584,7 +585,7 @@ function ModelAndAgent({
         {/* Right column: Agent params + Toolsets + MCP */}
         <div className="config-merged-col">
           <span className="config-merged-col__title">Runtime</span>
-          <div className="config-settings-grid">
+          <div className="config-settings-grid config-settings-grid--3col">
             <label className="config-field">
               <span className="config-field__label">Max Tokens</span>
               <select
@@ -618,31 +619,53 @@ function ModelAndAgent({
               </select>
             </label>
             <label className="config-field">
-              <span className="config-field__label">Tool Enforcement</span>
+              <span className="config-field__label">Context</span>
               <select
                 className="config-field__select"
-                value={toolEnforcement}
-                disabled={false}
-                onChange={(e) => patch("agent.tool_use_enforcement", e.target.value)}
+                value={String(contextLength ?? 4096)}
+                disabled={patchMutation.isPending}
+                onChange={(e) => patch("model.context_length", parseInt(e.target.value, 10))}
               >
-                <option value="none">None</option>
-                <option value="warn">Warn</option>
-                <option value="enforce">Enforce</option>
+                {TOKEN_OPTIONS.map((t) => (
+                  <option key={t} value={t}>{t.toLocaleString()}</option>
+                ))}
+                {contextLength != null && !TOKEN_OPTIONS.includes(contextLength) && (
+                  <option value={contextLength}>{contextLength.toLocaleString()}</option>
+                )}
               </select>
             </label>
-            <label className="config-field">
-              <span className="config-field__label">Approval Mode</span>
-              <select
-                className="config-field__select"
-                value={approvalMode}
-                disabled={false}
-                onChange={(e) => patch("approvals.mode", e.target.value)}
-              >
-                <option value="off">Off</option>
-                <option value="per_tool">Per Tool</option>
-                <option value="always">Always</option>
-              </select>
-            </label>
+          </div>
+          <div className="config-segmented-row">
+            <div className="config-segmented-field">
+              <span className="config-segmented-field__label">Enforcement</span>
+              <div className="config-segmented-group">
+                {(["none", "warn", "enforce"] as const).map((v) => (
+                  <button
+                    key={v}
+                    className={cn("config-segmented-btn", toolEnforcement === v && "config-segmented-btn--active")}
+                    disabled={patchMutation.isPending}
+                    onClick={() => patch("agent.tool_use_enforcement", v)}
+                  >
+                    {v.charAt(0).toUpperCase() + v.slice(1)}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="config-segmented-field">
+              <span className="config-segmented-field__label">Approval</span>
+              <div className="config-segmented-group">
+                {(["off", "per_tool", "always"] as const).map((v) => (
+                  <button
+                    key={v}
+                    className={cn("config-segmented-btn", approvalMode === v && "config-segmented-btn--active")}
+                    disabled={patchMutation.isPending}
+                    onClick={() => patch("approvals.mode", v)}
+                  >
+                    {v === "per_tool" ? "Per Tool" : v.charAt(0).toUpperCase() + v.slice(1)}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* Toolsets */}
