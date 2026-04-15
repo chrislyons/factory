@@ -4,10 +4,10 @@ port,service,host,bind,status,launchd_label,notes
 41200,Pantalaimon,whitebox,127.0.0.1,retired,,Matrix E2EE proxy — retired FCT067; native E2EE via python-olm
 41400,Matrix MCP Coord,whitebox,0.0.0.0,live,com.bootindustries.matrix-mcp-coord,@coord:matrix.org via Pan
 41401,Matrix MCP Boot,whitebox,0.0.0.0,live,com.bootindustries.matrix-mcp-boot,@boot.industries:matrix.org via Pan
-41430,FalkorDB,whitebox,127.0.0.1,live,,Graph DB for Graphiti
-41440,Graphiti MCP,whitebox,0.0.0.0,live,,Knowledge graph MCP (SSE)
-41450,Qdrant HTTP,whitebox,0.0.0.0,live,,Vector DB HTTP
-41455,Qdrant gRPC,whitebox,0.0.0.0,live,,Vector DB gRPC
+41430,FalkorDB,whitebox,127.0.0.1,down,,Graph DB for Graphiti — not running post-OOM
+41440,Graphiti MCP,whitebox,0.0.0.0,down,,Knowledge graph MCP (SSE) — disabled in agent configs
+41450,Qdrant HTTP,whitebox,0.0.0.0,unused,,No standalone Qdrant server; access via MCP on :41460/:41470
+41455,Qdrant gRPC,whitebox,0.0.0.0,unused,,No standalone Qdrant server; access via MCP on :41460/:41470
 41460,Qdrant MCP (projects-vault),whitebox,0.0.0.0,live,com.bootindustries.qdrant-mcp,SSE MCP daemon
 41470,Research MCP (research-vault),whitebox,0.0.0.0,live,com.bootindustries.research-mcp,SSE MCP daemon
 41910,Portal Caddy,whitebox,0.0.0.0,live,com.bootindustries.portal-caddy,Static site + reverse proxy

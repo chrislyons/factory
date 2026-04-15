@@ -75,7 +75,7 @@ fi
 
 # 4. mlx-vlm-kelk must be listening on :41962. 15s max (model load takes ~10s).
 if ! curl -sf --max-time 15 "${MLX_VLM_HEALTH_URL}" >/dev/null 2>&1; then
-  echo "ERROR: mlx-vlm-factory not reachable at ${MLX_VLM_HEALTH_URL}" >&2
+  echo "ERROR: mlx-vlm-kelk not reachable at ${MLX_VLM_HEALTH_URL}" >&2
   echo "       Check: launchctl list | grep mlx-vlm-kelk" >&2
   exit 6
 fi

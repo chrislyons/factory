@@ -38,7 +38,7 @@ export HERMES_HOME="/Users/nesbitt/.hermes/profiles/boot"
 #   exit 3  — profile missing or not pinned to `provider: custom`
 #   exit 4  — matrix-nio not importable in hermes-agent venv
 #   exit 5  — local model file missing
-#   exit 6  — mlx-vlm-factory not reachable on :41961
+#   exit 6  — mlx-vlm-boot not reachable on :41961
 # ---------------------------------------------------------------------------
 
 BOOT_PROFILE_CFG="${HERMES_HOME}/config.yaml"
@@ -69,17 +69,17 @@ fi
   exit 4
 }
 
-# 3. Local model weights must be present on disk (FCT054: Boot shares
-#    gemma-4-e4b-it-6bit via mlx-vlm-factory on :41961).
+# 3. Local model weights must be present on disk (Boot uses
+#    gemma-4-e4b-it-6bit via mlx-vlm-boot on :41961).
 if [[ ! -f "${BOOT_MODEL_CONFIG}" ]]; then
   echo "ERROR: local model config missing at ${BOOT_MODEL_CONFIG}" >&2
   exit 5
 fi
 
-# 4. mlx-vlm-factory must be listening on :41961. 3s max.
+# 4. mlx-vlm-boot must be listening on :41961. 3s max.
 if ! curl -sf --max-time 3 "${MLX_VLM_HEALTH_URL}" >/dev/null 2>&1; then
-  echo "ERROR: mlx-vlm-factory not reachable at ${MLX_VLM_HEALTH_URL}" >&2
-  echo "       Check: launchctl list | grep mlx-vlm-factory" >&2
+  echo "ERROR: mlx-vlm-boot not reachable at ${MLX_VLM_HEALTH_URL}" >&2
+  echo "       Check: launchctl list | grep mlx-vlm-boot" >&2
   exit 6
 fi
 
