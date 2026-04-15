@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import {
-  useQuery,
+  useQueries,
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
@@ -9,7 +9,6 @@ import { AppShell, SurfaceCard } from "../components/AppShell";
 import { AGENTS } from "../lib/constants";
 import { cn } from "../lib/utils";
 import {
-  fetchConfigSummaries,
   fetchAgentConfig,
   patchAgentConfig,
   fetchAgentHealth,
@@ -153,7 +152,6 @@ function DisplayToggles({
     mutationFn: (patch: Record<string, unknown>) => patchAgentConfig(agentId, patch),
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["config"] });
-      queryClient.refetchQueries({ queryKey: ["config-summaries"] });
     },
   });
 
@@ -210,7 +208,6 @@ function AgentSettings({
     mutationFn: (patch: Record<string, unknown>) => patchAgentConfig(agentId, patch),
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["config"] });
-      queryClient.refetchQueries({ queryKey: ["config-summaries"] });
     },
   });
 
@@ -346,7 +343,6 @@ function ModelProvider({
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["config"] });
-      queryClient.refetchQueries({ queryKey: ["config-summaries"] });
     },
   });
 
@@ -355,7 +351,6 @@ function ModelProvider({
     onSuccess: () => {
       setRestartConfirm(false);
       queryClient.invalidateQueries({ queryKey: ["config"] });
-      queryClient.refetchQueries({ queryKey: ["config-summaries"] });
     },
   });
 
@@ -525,7 +520,6 @@ function CommandQueue({
       setRestartPending(false);
       onClear();
       queryClient.invalidateQueries({ queryKey: ["config"] });
-      queryClient.refetchQueries({ queryKey: ["config-summaries"] });
     },
     onError: () => {
       setRestartPending(false);
@@ -621,36 +615,44 @@ export function ConfigPage() {
   const [selectedId, setSelectedId] = useState<string>(CONFIG_AGENTS[0].id);
   const [queue, setQueue] = useState<QueueItem[]>([]);
 
-  const summariesQuery = useQuery({
-    queryKey: ["config-summaries"],
-    queryFn: fetchConfigSummaries,
-    refetchInterval: 30_000,
-    staleTime: 0,
-    placeholderData: (previousData) => previousData,
+  // ── Live detail queries for ALL agents ───────────────────────────
+  const detailQueries = useQueries({
+    queries: CONFIG_AGENTS.map((agent) => ({
+      queryKey: ["config-detail", agent.id] as const,
+      queryFn: () => fetchAgentConfig(agent.id),
+      refetchInterval: 30_000,
+      staleTime: 0,
+    })),
   });
 
-  const detailQuery = useQuery({
-    queryKey: ["config-detail", selectedId],
-    queryFn: () => fetchAgentConfig(selectedId),
-    refetchInterval: 30_000,
-    staleTime: 0,
-    enabled: Boolean(selectedId),
-    placeholderData: (previousData) => previousData,
-  });
+  // Build a live configMap from all detail queries
+  const configMap = useMemo(() => {
+    const map: Record<string, { config: Record<string, unknown>; health?: AgentHealth }> = {};
+    detailQueries.forEach((q, i) => {
+      const id = CONFIG_AGENTS[i].id;
+      if (q.data) {
+        map[id] = { config: q.data.config, health: q.data.health };
+      }
+    });
+    return map;
+  }, [detailQueries]);
 
-  const summaries = summariesQuery.data?.agents ?? [];
-  const detail = detailQuery.data;
+  // Selected agent's data
+  const selectedIdx = CONFIG_AGENTS.findIndex((a) => a.id === selectedId);
+  const detail = detailQueries[selectedIdx]?.data;
   const config = detail?.config ?? {};
   const health = detail?.health;
 
-  const updatedAt = Math.max(
-    summariesQuery.dataUpdatedAt || 0,
-    detailQuery.dataUpdatedAt || 0
+  // Newest timestamp across all queries
+  const updatedAt = useMemo(
+    () => Math.max(...detailQueries.map((q) => q.dataUpdatedAt || 0), 0),
+    [detailQueries]
   );
 
-  const hasError = summariesQuery.isError || detailQuery.isError;
+  const hasError = detailQueries.some((q) => q.isError);
+  const allLoaded = detailQueries.some((q) => q.data);
 
-  // Queue management
+  // ── Queue management ─────────────────────────────────────────────
   const addQueued = useCallback((label: string) => {
     setQueue((prev) => [
       ...prev,
@@ -663,15 +665,27 @@ export function ConfigPage() {
     setQueue((prev) => prev.filter((item) => item.id !== id));
   }, []);
 
-  // Clear queue when switching agents
   useEffect(() => {
     setQueue([]);
   }, [selectedId]);
 
   const selectedAgent = CONFIG_AGENTS.find((a) => a.id === selectedId);
-
-  // Decide content visibility: show content whenever we have data (current or placeholder)
   const showContent = Boolean(detail);
+
+  // ── Helpers for card data ────────────────────────────────────────
+  function cardModel(id: string): string {
+    const c = configMap[id]?.config;
+    if (!c) return "—";
+    const m = (c.model ?? {}) as Record<string, unknown>;
+    return (m.default as string) ?? (c.model as string) ?? "—";
+  }
+
+  function cardProvider(id: string): string {
+    const c = configMap[id]?.config;
+    if (!c) return "—";
+    const m = (c.model ?? {}) as Record<string, unknown>;
+    return (m.provider as string) ?? (c.provider as string) ?? "—";
+  }
 
   return (
     <AppShell
@@ -681,39 +695,29 @@ export function ConfigPage() {
         <SyncClock updatedAt={updatedAt} stale={hasError} />
       }
     >
-      {/* Agent Cards Grid — always visible, no loading state */}
+      {/* Agent Cards Grid — all live from configMap */}
       <div className="config-agents-grid">
-        {CONFIG_AGENTS.map((agent) => {
-          const agentDetail = summaries.find((s) => s.id === agent.id);
-          // For the selected agent, overlay live detail data so cards stay in sync
-          let effectiveSummary = agentDetail;
-          if (agent.id === selectedId && detail) {
-            const m = (config.model ?? {}) as Record<string, unknown>;
-            effectiveSummary = {
-              ...agentDetail,
+        {CONFIG_AGENTS.map((agent) => (
+          <AgentCard
+            key={agent.id}
+            agent={agent}
+            summary={{
               id: agent.id,
-              label: agentDetail?.label ?? agent.label,
-              model: (m.default as string) ?? (config.model as string) ?? agentDetail?.model ?? "—",
-              provider: (m.provider as string) ?? (config.provider as string) ?? agentDetail?.provider ?? "—",
-            };
-          }
-          return (
-            <AgentCard
-              key={agent.id}
-              agent={agent}
-              summary={effectiveSummary}
-              health={selectedId === agent.id ? health : undefined}
-              selected={selectedId === agent.id}
-              onClick={() => setSelectedId(agent.id)}
-            />
-          );
-        })}
+              label: agent.label,
+              model: cardModel(agent.id),
+              provider: cardProvider(agent.id),
+            }}
+            health={configMap[agent.id]?.health}
+            selected={selectedId === agent.id}
+            onClick={() => setSelectedId(agent.id)}
+          />
+        ))}
       </div>
 
-      {detailQuery.isError && (
+      {detailQueries[selectedIdx]?.isError && (
         <SurfaceCard title="Error" subtitle="Failed to load agent config" className="surface-card--compact">
           <div className="config-error">
-            {(detailQuery.error as Error)?.message ?? "Unknown error"}
+            {(detailQueries[selectedIdx]?.error as Error)?.message ?? "Unknown error"}
           </div>
         </SurfaceCard>
       )}
