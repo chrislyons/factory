@@ -467,6 +467,34 @@ function ModelAndAgent({
           <div className="config-merged-col">
             <span className="config-merged-col__title">Model & Provider</span>
 
+            {/* Action buttons */}
+            <div className="config-actions config-actions--inline">
+              <button
+                className="config-action-btn"
+                disabled={healthMutation.isPending}
+                onClick={() => healthMutation.mutate()}
+              >
+                {healthMutation.isPending ? "Refreshing…" : "Refresh Status"}
+              </button>
+              {!restartConfirm ? (
+                <button className="config-action-btn config-action-btn--accent" onClick={() => setRestartConfirm(true)}>
+                  Apply (Restart Agent)
+                </button>
+              ) : (
+                <div className="config-restart-confirm">
+                  <span className="config-restart-confirm__text">Restart?</span>
+                  <button
+                    className="config-action-btn config-action-btn--danger"
+                    disabled={restartMutation.isPending}
+                    onClick={() => restartMutation.mutate()}
+                  >
+                    {restartMutation.isPending ? "Restarting…" : "Confirm"}
+                  </button>
+                  <button className="config-action-btn" onClick={() => setRestartConfirm(false)}>Cancel</button>
+                </div>
+              )}
+            </div>
+
             {/* Main model — same row layout as aux */}
             <div className="config-aux-section">
               <div className="config-aux-row">
@@ -553,39 +581,28 @@ function ModelAndAgent({
               })}
             </div>
 
-            {/* Actions */}
-            <div className="config-actions config-actions--inline">
-              <button
-                className="config-action-btn"
-                disabled={healthMutation.isPending}
-                onClick={() => healthMutation.mutate()}
-              >
-                {healthMutation.isPending ? "Checking…" : "Health Check"}
-              </button>
-              {!restartConfirm ? (
-                <button className="config-action-btn config-action-btn--accent" onClick={() => setRestartConfirm(true)}>
-                  Apply Now (Restart)
-                </button>
-              ) : (
-                <div className="config-restart-confirm">
-                  <span className="config-restart-confirm__text">Restart?</span>
-                  <button
-                    className="config-action-btn config-action-btn--danger"
-                    disabled={restartMutation.isPending}
-                    onClick={() => restartMutation.mutate()}
-                  >
-                    {restartMutation.isPending ? "Restarting…" : "Confirm"}
-                  </button>
-                  <button className="config-action-btn" onClick={() => setRestartConfirm(false)}>Cancel</button>
-                </div>
-              )}
-            </div>
           </div>
 
         {/* Right column: Agent params + Toolsets + MCP */}
         <div className="config-merged-col">
           <span className="config-merged-col__title">Runtime</span>
           <div className="config-settings-grid config-settings-grid--3col">
+            <label className="config-field">
+              <span className="config-field__label">Context</span>
+              <select
+                className="config-field__select"
+                value={String(contextLength ?? 4096)}
+                disabled={patchMutation.isPending}
+                onChange={(e) => patch("model.context_length", parseInt(e.target.value, 10))}
+              >
+                {TOKEN_OPTIONS.map((t) => (
+                  <option key={t} value={t}>{t.toLocaleString()}</option>
+                ))}
+                {contextLength != null && !TOKEN_OPTIONS.includes(contextLength) && (
+                  <option value={contextLength}>{contextLength.toLocaleString()}</option>
+                )}
+              </select>
+            </label>
             <label className="config-field">
               <span className="config-field__label">Max Tokens</span>
               <select
@@ -615,22 +632,6 @@ function ModelAndAgent({
                 ))}
                 {maxTurns != null && !TURN_OPTIONS.includes(maxTurns) && (
                   <option value={maxTurns}>{maxTurns}</option>
-                )}
-              </select>
-            </label>
-            <label className="config-field">
-              <span className="config-field__label">Context</span>
-              <select
-                className="config-field__select"
-                value={String(contextLength ?? 4096)}
-                disabled={patchMutation.isPending}
-                onChange={(e) => patch("model.context_length", parseInt(e.target.value, 10))}
-              >
-                {TOKEN_OPTIONS.map((t) => (
-                  <option key={t} value={t}>{t.toLocaleString()}</option>
-                ))}
-                {contextLength != null && !TOKEN_OPTIONS.includes(contextLength) && (
-                  <option value={contextLength}>{contextLength.toLocaleString()}</option>
                 )}
               </select>
             </label>

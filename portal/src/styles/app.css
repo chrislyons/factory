@@ -4004,10 +4004,10 @@ textarea {
 
 .config-segmented-field__label {
   font-size: 11px;
-  font-weight: 600;
-  color: var(--text-muted);
+  font-weight: 700;
+  color: var(--text-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.08em;
 }
 
 .config-segmented-group {
@@ -4256,6 +4256,9 @@ textarea {
 
 .config-field__select--narrow {
   min-width: 90px;
+  max-width: 120px;
+  width: auto;
+  flex: 0 0 auto;
 }
 
 /* Provider select in info row */
@@ -4399,11 +4402,11 @@ textarea {
 }
 
 .config-aux-section__title {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
 }
 
 .config-aux-group {
@@ -4712,9 +4715,9 @@ textarea {
 }
 
 .config-capabilities__title {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
-  color: var(--text-dim);
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
