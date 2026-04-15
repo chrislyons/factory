@@ -46,10 +46,16 @@ function providerLabel(provider?: string) {
   return provider;
 }
 
+/** Replace absolute home paths with ~/ for display */
+function shortenPath(p: string): string {
+  return p.replace(/^\/Users\/[^/]+\//, "~/");
+}
+
 function truncateModel(model?: string, max = 28) {
   if (!model) return "—";
-  if (model.length <= max) return model;
-  return model.slice(0, max - 1) + "…";
+  const short = shortenPath(model);
+  if (short.length <= max) return short;
+  return short.slice(0, max - 1) + "…";
 }
 
 // ── Toggle Switch ────────────────────────────────────────────────────
@@ -146,8 +152,8 @@ function DisplayToggles({
   const patchMutation = useMutation({
     mutationFn: (patch: Record<string, unknown>) => patchAgentConfig(agentId, patch),
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["config-detail", agentId] });
-      queryClient.invalidateQueries({ queryKey: ["config-summaries"] });
+      queryClient.invalidateQueries({ queryKey: ["config"] });
+      queryClient.refetchQueries({ queryKey: ["config-summaries"] });
     },
   });
 
@@ -203,8 +209,8 @@ function AgentSettings({
   const patchMutation = useMutation({
     mutationFn: (patch: Record<string, unknown>) => patchAgentConfig(agentId, patch),
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["config-detail", agentId] });
-      queryClient.invalidateQueries({ queryKey: ["config-summaries"] });
+      queryClient.invalidateQueries({ queryKey: ["config"] });
+      queryClient.refetchQueries({ queryKey: ["config-summaries"] });
     },
   });
 
@@ -339,8 +345,8 @@ function ModelProvider({
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["config-detail", agentId] });
-      queryClient.invalidateQueries({ queryKey: ["config-summaries"] });
+      queryClient.invalidateQueries({ queryKey: ["config"] });
+      queryClient.refetchQueries({ queryKey: ["config-summaries"] });
     },
   });
 
@@ -348,8 +354,8 @@ function ModelProvider({
     mutationFn: () => restartAgentGateway(agentId),
     onSuccess: () => {
       setRestartConfirm(false);
-      queryClient.invalidateQueries({ queryKey: ["config-detail", agentId] });
-      queryClient.invalidateQueries({ queryKey: ["config-summaries"] });
+      queryClient.invalidateQueries({ queryKey: ["config"] });
+      queryClient.refetchQueries({ queryKey: ["config-summaries"] });
     },
   });
 
@@ -407,11 +413,11 @@ function ModelProvider({
               onChange={(e) => handleModelChange(e.target.value)}
             >
               {modelOptions.map((m) => (
-                <option key={m} value={m}>{m}</option>
+                <option key={m} value={m}>{shortenPath(m)}</option>
               ))}
             </select>
           ) : (
-            <span className="config-info-row__val">{currentModel || "—"}</span>
+            <span className="config-info-row__val">{shortenPath(currentModel) || "—"}</span>
           )}
         </div>
 
@@ -431,7 +437,7 @@ function ModelProvider({
 
         <div className="config-info-row">
           <span className="config-info-row__key">URL</span>
-          <code className="config-info-row__code">{baseUrl}</code>
+          <code className="config-info-row__code">{shortenPath(baseUrl)}</code>
         </div>
 
         {contextLength != null && (
@@ -518,8 +524,8 @@ function CommandQueue({
     onSuccess: () => {
       setRestartPending(false);
       onClear();
-      queryClient.invalidateQueries({ queryKey: ["config-detail", agentId] });
-      queryClient.invalidateQueries({ queryKey: ["config-summaries"] });
+      queryClient.invalidateQueries({ queryKey: ["config"] });
+      queryClient.refetchQueries({ queryKey: ["config-summaries"] });
     },
     onError: () => {
       setRestartPending(false);
@@ -619,6 +625,7 @@ export function ConfigPage() {
     queryKey: ["config-summaries"],
     queryFn: fetchConfigSummaries,
     refetchInterval: 30_000,
+    staleTime: 0,
     placeholderData: (previousData) => previousData,
   });
 
@@ -626,6 +633,7 @@ export function ConfigPage() {
     queryKey: ["config-detail", selectedId],
     queryFn: () => fetchAgentConfig(selectedId),
     refetchInterval: 30_000,
+    staleTime: 0,
     enabled: Boolean(selectedId),
     placeholderData: (previousData) => previousData,
   });
