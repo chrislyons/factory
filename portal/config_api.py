@@ -55,6 +55,7 @@ SAFE_PATCH_FIELDS = {
     "display.streaming": bool,
     "display.show_cost": bool,
     "display.show_reasoning": bool,
+    "display.skin": str,
     "agent.max_turns": int,
     "agent.tool_use_enforcement": str,
     "approvals.mode": str,
@@ -63,6 +64,12 @@ SAFE_PATCH_FIELDS = {
     "model.provider": str,
     "model.base_url": str,
     "model.context_length": int,
+    "memory.memory_enabled": bool,
+    "memory.user_profile_enabled": bool,
+    "terminal.cwd": str,
+    "terminal.timeout": int,
+    "auxiliary.compression.threshold": (int, float),
+    "toolsets": list,
 }
 
 # Valid values for enum-like fields
@@ -142,7 +149,13 @@ def validate_patch(agent: str, patch: dict[str, Any]) -> list[str]:
             errors.append(f"Field '{key}' is not patchable")
             continue
         expected_type = SAFE_PATCH_FIELDS[key]
-        if not isinstance(value, expected_type):
+        # Handle tuple of types (e.g., (int, float) for threshold)
+        if isinstance(expected_type, tuple):
+            if not isinstance(value, expected_type):
+                type_names = " or ".join(t.__name__ for t in expected_type)
+                errors.append(f"Field '{key}' expects {type_names}, got {type(value).__name__}")
+                continue
+        elif not isinstance(value, expected_type):
             errors.append(f"Field '{key}' expects {expected_type.__name__}, got {type(value).__name__}")
             continue
         if key in FIELD_VALIDATORS:
@@ -264,12 +277,23 @@ def get_agent_summaries() -> list[dict]:
                     "streaming": _get_nested(config, "display.streaming"),
                     "show_cost": _get_nested(config, "display.show_cost"),
                     "show_reasoning": _get_nested(config, "display.show_reasoning"),
+                    "skin": _get_nested(config, "display.skin"),
                 },
                 "max_turns": _get_nested(config, "agent.max_turns"),
                 "max_tokens": _get_nested(config, "max_tokens"),
                 "tool_use_enforcement": _get_nested(config, "agent.tool_use_enforcement"),
                 "approval_mode": _get_nested(config, "approvals.mode"),
                 "toolsets": _get_nested(config, "toolsets") or [],
+                "memory": {
+                    "memory_enabled": _get_nested(config, "memory.memory_enabled"),
+                    "user_profile_enabled": _get_nested(config, "memory.user_profile_enabled"),
+                },
+                "terminal": {
+                    "cwd": _get_nested(config, "terminal.cwd"),
+                    "timeout": _get_nested(config, "terminal.timeout"),
+                },
+                "compression_threshold": _get_nested(config, "auxiliary.compression.threshold"),
+                "mcp_servers": _get_nested(config, "mcp_servers") or {},
             }
         except Exception as e:
             summary = {
@@ -310,6 +334,28 @@ def handle_request(method: str, path: str, body: bytes | None = None) -> tuple[i
     if action == "restart" and method == "POST":
         result = restart_gateway(agent)
         return 200 if result["ok"] else 500, result
+
+    # POST /api/config/{agent}/mcp/{server_name}/toggle
+    if action == "mcp" and method == "POST" and len(parts) >= 6 and parts[5] == "toggle":
+        server_name = parts[4]
+        try:
+            body_data = json.loads(body or b"{}")
+            enabled = body_data.get("enabled")
+            if enabled is None or not isinstance(enabled, bool):
+                return 400, {"error": "Body must include 'enabled' (bool)"}
+            path_key = f"mcp_servers.{server_name}.enabled"
+            # Directly modify the YAML since mcp_servers isn't in SAFE_PATCH_FIELDS
+            config = read_config(agent)
+            mcp = config.get("mcp_servers", {})
+            if server_name not in mcp:
+                return 404, {"error": f"MCP server '{server_name}' not found"}
+            mcp[server_name]["enabled"] = enabled
+            config_path = _config_path(agent)
+            with open(config_path, "w") as f:
+                yaml.dump(config, f, default_flow_style=False, sort_keys=False, allow_unicode=True)
+            return 200, {"ok": True, "agent": agent, "server": server_name, "enabled": enabled}
+        except Exception as e:
+            return 500, {"error": str(e)}
 
     # GET /api/config/{agent}
     if action is None and method == "GET":

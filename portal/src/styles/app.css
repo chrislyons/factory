@@ -4333,3 +4333,179 @@ textarea {
   padding: 1px 6px;
   text-transform: lowercase;
 }
+
+/* Preferences Section */
+
+.config-pref-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.config-pref-section:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.config-pref-section__title {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 2px;
+}
+
+.config-pref-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 0;
+}
+
+.config-pref-row__label {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.config-pref-row__name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.config-pref-row__desc {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+/* Toolset Chips */
+
+.config-toolsets {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.config-toolsets__title {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 6px;
+}
+
+.config-toolsets__grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.config-toolset-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--text-primary) 4%, transparent);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 3px 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.config-toolset-chip input[type="checkbox"] {
+  display: none;
+}
+
+.config-toolset-chip:hover {
+  border-color: var(--text-muted);
+}
+
+.config-toolset-chip--active {
+  color: var(--text-primary);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+.config-toolset-chip--active:hover {
+  border-color: var(--accent);
+}
+
+/* MCP Servers */
+
+.config-mcp-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.config-mcp-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  background: color-mix(in srgb, var(--text-primary) 2%, transparent);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.config-mcp-row__info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.config-mcp-row__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.config-mcp-row__name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.config-mcp-row__url {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-family: var(--font-mono, monospace);
+  word-break: break-all;
+}
+
+/* Threshold Control */
+
+.config-threshold-control {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.config-threshold-control__label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  min-width: 30px;
+  text-align: right;
+}
+
+/* Compact input for inline use in preference rows */
+
+.config-field__input--compact {
+  min-height: 28px;
+  max-width: 120px;
+  padding: 2px 8px;
+  font-size: 11px;
+  border-radius: 6px;
+}

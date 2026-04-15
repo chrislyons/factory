@@ -233,3 +233,10 @@ export async function restartAgentGateway(agentId: string) {
     { method: "POST" }
   );
 }
+
+export async function toggleMcpServer(agentId: string, serverName: string, enabled: boolean) {
+  return fetchJson<{ ok: boolean; agent?: string; server?: string; enabled?: boolean; error?: string }>(
+    `/api/config/${agentId}/mcp/${serverName}/toggle`,
+    { method: "POST", body: JSON.stringify({ enabled }) }
+  );
+}

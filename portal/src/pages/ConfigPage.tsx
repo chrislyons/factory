@@ -13,6 +13,7 @@ import {
   patchAgentConfig,
   fetchAgentHealth,
   restartAgentGateway,
+  toggleMcpServer,
 } from "../lib/api";
 import type {
   AgentConfigSummary,
@@ -30,6 +31,23 @@ const PROVIDER_OPTIONS = [
   { value: "openrouter", label: "OpenRouter" },
   { value: "anthropic", label: "Anthropic" },
   { value: "openai", label: "OpenAI" },
+];
+
+const SKIN_OPTIONS = [
+  { value: "", label: "Default" },
+  { value: "mono", label: "Mono" },
+  { value: "slate", label: "Slate" },
+  { value: "dracula", label: "Dracula" },
+  { value: "solarized", label: "Solarized" },
+  { value: "nord", label: "Nord" },
+  { value: "gruvbox", label: "Gruvbox" },
+  { value: "tokyo-night", label: "Tokyo Night" },
+];
+
+const ALL_TOOLSETS = [
+  "terminal", "file", "code_execution", "web", "delegation",
+  "memory", "session_search", "todo", "skills", "clarify",
+  "image_gen", "cronjob", "vision", "tts", "browser", "homeassistant",
 ];
 
 function providerBadgeClass(provider?: string) {
@@ -142,9 +160,9 @@ function AgentCard({
   );
 }
 
-// ── Display Toggles Section ──────────────────────────────────────────
+// ── Preferences Section (expanded Display Toggles) ───────────────────
 
-function DisplayToggles({
+function Preferences({
   agentId,
   config,
   disabled,
@@ -154,7 +172,9 @@ function DisplayToggles({
   disabled: boolean;
 }) {
   const queryClient = useQueryClient();
-  const display = (config.display ?? {}) as Record<string, boolean>;
+  const display = (config.display ?? {}) as Record<string, unknown>;
+  const memory = (config.memory ?? {}) as Record<string, unknown>;
+  const terminal = (config.terminal ?? {}) as Record<string, unknown>;
 
   const patchMutation = useMutation({
     mutationFn: (patch: Record<string, unknown>) => patchAgentConfig(agentId, patch),
@@ -163,11 +183,39 @@ function DisplayToggles({
     },
   });
 
-  function toggle(key: string, value: boolean) {
-    patchMutation.mutate({ [`display.${key}`]: value });
+  function patch(field: string, value: unknown) {
+    patchMutation.mutate({ [field]: value });
   }
 
-  const fields = [
+  const skinValue = (display.skin as string) ?? "";
+  const compressionThreshold = config.compression_threshold as number | undefined;
+  const [localThreshold, setLocalThreshold] = useState(String(compressionThreshold ?? 0.5));
+  const [localCwd, setLocalCwd] = useState(shortenPath((terminal.cwd as string) ?? ""));
+  const [localTimeout, setLocalTimeout] = useState(String((terminal.timeout as number) ?? 180));
+
+  const thresholdRef = useRef<HTMLInputElement>(null);
+  const cwdRef = useRef<HTMLInputElement>(null);
+  const timeoutRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (document.activeElement !== thresholdRef.current) {
+      setLocalThreshold(String(compressionThreshold ?? 0.5));
+    }
+  }, [compressionThreshold]);
+
+  useEffect(() => {
+    if (document.activeElement !== cwdRef.current) {
+      setLocalCwd(shortenPath((terminal.cwd as string) ?? ""));
+    }
+  }, [terminal.cwd]);
+
+  useEffect(() => {
+    if (document.activeElement !== timeoutRef.current) {
+      setLocalTimeout(String((terminal.timeout as number) ?? 180));
+    }
+  }, [terminal.timeout]);
+
+  const displayFields = [
     { key: "compact", label: "Compact mode", desc: "Reduce output verbosity" },
     { key: "streaming", label: "Streaming output", desc: "Stream tokens as generated" },
     { key: "show_cost", label: "Show cost", desc: "Display per-request cost" },
@@ -175,25 +223,146 @@ function DisplayToggles({
   ] as const;
 
   return (
-    <SurfaceCard title="Display Toggles" subtitle="Output rendering options" className="surface-card--compact">
-      <div className="config-toggles-grid">
-        {fields.map((f) => {
+    <SurfaceCard title="Preferences" subtitle="Display, memory, and terminal settings" className="surface-card--compact">
+      {/* Display toggals */}
+      <div className="config-pref-section">
+        <span className="config-pref-section__title">Display</span>
+        <div className="config-pref-row">
+          <div className="config-pref-row__label">
+            <span className="config-pref-row__name">Skin</span>
+            <span className="config-pref-row__desc">CLI visual theme</span>
+          </div>
+          <select
+            className="config-field__select select-input config-field__select--inline"
+            value={skinValue}
+            disabled={disabled || patchMutation.isPending}
+            onChange={(e) => patch("display.skin", e.target.value || null)}
+          >
+            {SKIN_OPTIONS.map((s) => (
+              <option key={s.value} value={s.value}>{s.label}</option>
+            ))}
+          </select>
+        </div>
+        {displayFields.map((f) => {
           const current = Boolean(display[f.key]);
           const isPending = patchMutation.isPending;
           return (
-            <div key={f.key} className="config-toggle-row">
-              <div className="config-toggle-row__label">
-                <span className="config-toggle-row__name">{f.label}</span>
-                <span className="config-toggle-row__desc">{f.desc}</span>
+            <div key={f.key} className="config-pref-row">
+              <div className="config-pref-row__label">
+                <span className="config-pref-row__name">{f.label}</span>
+                <span className="config-pref-row__desc">{f.desc}</span>
               </div>
               <Toggle
                 checked={current}
                 disabled={disabled || isPending}
-                onChange={(v) => toggle(f.key, v)}
+                onChange={(v) => patch(`display.${f.key}`, v)}
               />
             </div>
           );
         })}
+      </div>
+
+      {/* Memory section */}
+      <div className="config-pref-section">
+        <span className="config-pref-section__title">Memory</span>
+        <div className="config-pref-row">
+          <div className="config-pref-row__label">
+            <span className="config-pref-row__name">Memory enabled</span>
+            <span className="config-pref-row__desc">Persistent memory across sessions</span>
+          </div>
+          <Toggle
+            checked={Boolean(memory.memory_enabled)}
+            disabled={disabled || patchMutation.isPending}
+            onChange={(v) => patch("memory.memory_enabled", v)}
+          />
+        </div>
+        <div className="config-pref-row">
+          <div className="config-pref-row__label">
+            <span className="config-pref-row__name">User profile</span>
+            <span className="config-pref-row__desc">Learn and remember user preferences</span>
+          </div>
+          <Toggle
+            checked={Boolean(memory.user_profile_enabled)}
+            disabled={disabled || patchMutation.isPending}
+            onChange={(v) => patch("memory.user_profile_enabled", v)}
+          />
+        </div>
+      </div>
+
+      {/* Terminal section */}
+      <div className="config-pref-section">
+        <span className="config-pref-section__title">Terminal</span>
+        <div className="config-pref-row">
+          <div className="config-pref-row__label">
+            <span className="config-pref-row__name">Working dir</span>
+            <span className="config-pref-row__desc">Default shell directory</span>
+          </div>
+          <input
+            ref={cwdRef}
+            className="config-field__input config-field__input--compact"
+            type="text"
+            value={localCwd}
+            disabled={disabled}
+            onChange={(e) => setLocalCwd(e.target.value)}
+            onBlur={() => {
+              // Expand ~/ back to absolute on blur for saving
+              const home = (terminal.cwd as string)?.match(/^\/Users\/[^/]+\//)?.[0] ?? "";
+              const expanded = localCwd.startsWith("~/") ? home + localCwd.slice(2) : localCwd;
+              if (expanded !== terminal.cwd) patch("terminal.cwd", expanded);
+            }}
+          />
+        </div>
+        <div className="config-pref-row">
+          <div className="config-pref-row__label">
+            <span className="config-pref-row__name">Timeout</span>
+            <span className="config-pref-row__desc">Per-command timeout (seconds)</span>
+          </div>
+          <input
+            ref={timeoutRef}
+            className="config-field__input config-field__input--compact"
+            type="number"
+            value={localTimeout}
+            min={1}
+            max={600}
+            disabled={disabled}
+            onChange={(e) => setLocalTimeout(e.target.value)}
+            onBlur={() => {
+              const v = parseInt(localTimeout, 10);
+              if (!Number.isNaN(v) && v !== terminal.timeout) patch("terminal.timeout", v);
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Compression */}
+      <div className="config-pref-section">
+        <span className="config-pref-section__title">Compression</span>
+        <div className="config-pref-row">
+          <div className="config-pref-row__label">
+            <span className="config-pref-row__name">Threshold</span>
+            <span className="config-pref-row__desc">Context fill ratio to trigger compression</span>
+          </div>
+          <div className="config-threshold-control">
+            <input
+              ref={thresholdRef}
+              className="config-field__input config-field__input--compact"
+              type="number"
+              value={localThreshold}
+              min={0.1}
+              max={1.0}
+              step={0.05}
+              disabled={disabled}
+              onChange={(e) => setLocalThreshold(e.target.value)}
+              onBlur={() => {
+                const v = parseFloat(localThreshold);
+                if (!Number.isNaN(v) && v !== compressionThreshold) {
+                  patch("auxiliary.compression.threshold", v);
+                }
+              }}
+            />
+            <span className="config-threshold-control__label">{Math.round(parseFloat(localThreshold || "0.5") * 100)}%</span>
+          </div>
+        </div>
       </div>
     </SurfaceCard>
   );
@@ -228,6 +397,7 @@ function AgentSettings({
   const maxTurns = (agentObj.max_turns as number | undefined) ?? (config.max_turns as number | undefined);
   const toolEnforcement = ((agentObj.tool_use_enforcement as string) ?? (config.tool_use_enforcement as string)) ?? "none";
   const approvalMode = ((config.approvals as Record<string, unknown>)?.mode as string) ?? "off";
+  const toolsets = (config.toolsets ?? []) as string[];
 
   const [localMaxTokens, setLocalMaxTokens] = useState(String(maxTokens ?? 4096));
   const [localMaxTurns, setLocalMaxTurns] = useState(String(maxTurns ?? 10));
@@ -246,6 +416,13 @@ function AgentSettings({
       setLocalMaxTurns(String(maxTurns ?? 10));
     }
   }, [maxTurns]);
+
+  function toggleToolset(tool: string, enabled: boolean) {
+    const next = enabled
+      ? [...toolsets, tool]
+      : toolsets.filter((t) => t !== tool);
+    patch("toolsets", next);
+  }
 
   return (
     <SurfaceCard title="Agent Settings" subtitle="Runtime parameters" className="surface-card--compact">
@@ -313,6 +490,30 @@ function AgentSettings({
             <option value="always">Always</option>
           </select>
         </label>
+      </div>
+
+      {/* Toolsets checkboxes */}
+      <div className="config-toolsets">
+        <span className="config-toolsets__title">Toolsets</span>
+        <div className="config-toolsets__grid">
+          {ALL_TOOLSETS.map((tool) => {
+            const enabled = toolsets.includes(tool);
+            return (
+              <label
+                key={tool}
+                className={cn("config-toolset-chip", enabled && "config-toolset-chip--active")}
+              >
+                <input
+                  type="checkbox"
+                  checked={enabled}
+                  disabled={disabled || patchMutation.isPending}
+                  onChange={(e) => toggleToolset(tool, e.target.checked)}
+                />
+                <span>{tool.replace(/_/g, " ")}</span>
+              </label>
+            );
+          })}
+        </div>
       </div>
     </SurfaceCard>
   );
@@ -526,6 +727,61 @@ function ModelProvider({
             </button>
           </div>
         )}
+      </div>
+    </SurfaceCard>
+  );
+}
+
+// ── MCP Servers Section ──────────────────────────────────────────────
+
+function McpServers({
+  agentId,
+  config,
+  disabled,
+}: {
+  agentId: string;
+  config: Record<string, unknown>;
+  disabled: boolean;
+}) {
+  const queryClient = useQueryClient();
+  const mcpServers = (config.mcp_servers ?? {}) as Record<string, Record<string, unknown>>;
+  const entries = Object.entries(mcpServers);
+
+  const toggleMutation = useMutation({
+    mutationFn: ({ server, enabled }: { server: string; enabled: boolean }) =>
+      toggleMcpServer(agentId, server, enabled),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["config"] });
+    },
+  });
+
+  if (entries.length === 0) return null;
+
+  return (
+    <SurfaceCard title="MCP Servers" subtitle="Model Context Protocol integrations" className="surface-card--compact">
+      <div className="config-mcp-grid">
+        {entries.map(([name, server]) => {
+          const enabled = server.enabled !== false; // default true if not specified
+          const url = (server.url as string) ?? "";
+          const command = (server.command as string) ?? "";
+          const displayUrl = url || (command ? `${command} ${(server.args as string[] ?? []).join(" ")}` : "—");
+
+          return (
+            <div key={name} className="config-mcp-row">
+              <div className="config-mcp-row__info">
+                <div className="config-mcp-row__header">
+                  <span className="config-mcp-row__name">{name}</span>
+                  <Toggle
+                    checked={enabled}
+                    disabled={disabled || toggleMutation.isPending}
+                    onChange={(v) => toggleMutation.mutate({ server: name, enabled: v })}
+                  />
+                </div>
+                <code className="config-mcp-row__url">{shortenPath(displayUrl)}</code>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </SurfaceCard>
   );
@@ -775,32 +1031,41 @@ export function ConfigPage() {
       )}
 
       {showContent && (
-        <div className="config-grid-2x2">
-          <AgentSettings
+        <>
+          <div className="config-grid-2x2">
+            <AgentSettings
+              agentId={selectedId}
+              config={config}
+              disabled={false}
+            />
+            <ModelProvider
+              agentId={selectedId}
+              config={config}
+              health={health}
+              onQueued={addQueued}
+            />
+            <Preferences
+              agentId={selectedId}
+              config={config}
+              disabled={false}
+            />
+            <CommandQueue
+              agentId={selectedId}
+              agentLabel={selectedAgent?.label ?? selectedId}
+              items={queue}
+              onClear={clearQueue}
+              onClearOne={clearOne}
+              onApplyNow={clearQueue}
+            />
+          </div>
+
+          {/* MCP Servers below the main grid */}
+          <McpServers
             agentId={selectedId}
             config={config}
             disabled={false}
           />
-          <ModelProvider
-            agentId={selectedId}
-            config={config}
-            health={health}
-            onQueued={addQueued}
-          />
-          <DisplayToggles
-            agentId={selectedId}
-            config={config}
-            disabled={false}
-          />
-          <CommandQueue
-            agentId={selectedId}
-            agentLabel={selectedAgent?.label ?? selectedId}
-            items={queue}
-            onClear={clearQueue}
-            onClearOne={clearOne}
-            onApplyNow={clearQueue}
-          />
-        </div>
+        </>
       )}
     </AppShell>
   );
