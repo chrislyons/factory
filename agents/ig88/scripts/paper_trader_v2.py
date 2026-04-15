@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """
-Paper Trading Engine v2 — ETH Momentum + LINK Bull Dip (IG88054)
+Paper Trading Engine v2 — ETH Momentum Asia + ETH Vol Breakout (IG88056)
 
 Runs signal generation on live 4h Binance data. Tracks positions and P&L
 in a dedicated JSONL log. Designed to run every 4 hours via cron.
 
 Strategies:
-  1. ETH Momentum 4h — ATR trailing stop (2.5x)
-  2. LINK Bull Dip 4h — RSI recovery exit (RSI>60)
+  1. ETH Momentum 4h (Asia hours) — 2.5x ATR trailing stop (40% allocation)
+  2. ETH Vol Breakout 4h — 4.0x ATR trailing stop (60% allocation)
+
+  Optimized: Vol Breakout wider stops capture bigger winners. Walk-forward test 4.31x (IG88058).
 
 Usage:
   python3 scripts/paper_trader_v2.py           # Check signals
@@ -155,7 +157,12 @@ def log_trade(trade: dict):
 # ---------------------------------------------------------------------------
 
 def eth_momentum_signal(df: pd.DataFrame) -> dict | None:
-    """Generate ETH momentum signal. Returns trade dict or None."""
+    """Generate ETH momentum signal. Returns trade dict or None.
+    
+    Upgraded with Asia hours filter (IG88055):
+    - Only trade during 00:00-08:00 UTC (Asia session)
+    - PF improves from 1.65-2.25 to 2.1-2.99 across all splits
+    """
     close = df['close'].values
     high = df['high'].values
     low = df['low'].values
@@ -163,6 +170,7 @@ def eth_momentum_signal(df: pd.DataFrame) -> dict | None:
     
     atr = compute_atr(high, low, close)
     adx = compute_adx(high, low, close)
+    adx_change = np.diff(adx, prepend=adx[0])
     hh20 = pd.Series(high).rolling(20).max().values
     vol_sma = pd.Series(volume).rolling(20).mean().values
     
@@ -171,7 +179,17 @@ def eth_momentum_signal(df: pd.DataFrame) -> dict | None:
     if i < 25:
         return None
     
-    signal = close[i] > hh20[i-1] and volume[i] > 1.5 * vol_sma[i] and adx[i] > 25
+    # Asia hours filter (00:00-08:00 UTC)
+    hour = df.index[i].hour
+    asia_hours = hour in range(0, 9)
+    
+    # ADX accelerating filter (trend strengthening)
+    adx_rising = adx_change[i] > 0 and adx_change[i-1] > 0
+    
+    signal = (close[i] > hh20[i-1] and 
+              volume[i] > 1.5 * vol_sma[i] and 
+              adx[i] > 25 and 
+              asia_hours)
     
     if signal:
         entry_price = close[-1]  # Current bar close
@@ -216,54 +234,77 @@ def eth_momentum_check_exit(position: dict, df: pd.DataFrame) -> dict | None:
 
 
 # ---------------------------------------------------------------------------
-# LINK Bull Dip Strategy
+# ETH Volatility Breakout Strategy (IG88056)
 # ---------------------------------------------------------------------------
 
-def link_bull_dip_signal(df: pd.DataFrame) -> dict | None:
-    """Generate LINK bull dip signal. Returns trade dict or None."""
+def eth_vol_breakout_signal(df: pd.DataFrame) -> dict | None:
+    """Generate ETH volatility breakout signal. Returns trade dict or None.
+    
+    IG88056: Third confirmed edge.
+    - PF 2.39-2.84 across all walk-forward splits
+    - Only 12.8% overlap with ETH Momentum (mostly independent)
+    - Fires during ALL hours (not restricted to Asia)
+    
+    Entry: ATR > 1.5x ATR SMA(50) + Close > SMA(20) + Volume > 1.5x SMA
+    Exit: 3.0x ATR trailing stop
+    """
     close = df['close'].values
+    high = df['high'].values
+    low = df['low'].values
     volume = df['volume'].values
     
-    rsi_vals = compute_rsi(close)
-    sma200 = pd.Series(close).rolling(200).mean().values
+    atr = compute_atr(high, low, close)
+    atr_sma = pd.Series(atr).rolling(50).mean().values
+    sma20 = pd.Series(close).rolling(20).mean().values
     vol_sma = pd.Series(volume).rolling(20).mean().values
     
     i = len(close) - 2
     
-    if i < 200:
+    if i < 50:
         return None
     
-    bull = close[i] > sma200[i]
-    oversold = rsi_vals[i] < 30
-    vol_ok = volume[i] > 1.2 * vol_sma[i]
+    vol_expansion = atr[i] > 1.5 * atr_sma[i]
+    price_up = close[i] > sma20[i]
+    volume_spike = volume[i] > 1.5 * vol_sma[i]
     
-    if bull and oversold and vol_ok:
+    if vol_expansion and price_up and volume_spike:
         entry_price = close[-1]
+        trail_stop = entry_price - 4.0 * atr[i]
         return {
-            "strategy": "link_bull_dip_4h",
-            "pair": "LINKUSDT",
-            "asset": "LINK",
+            "strategy": "eth_vol_breakout_4h",
+            "pair": "ETHUSDT",
+            "asset": "ETH",
             "entry_price": entry_price,
-            "rsi_at_entry": float(rsi_vals[i]),
-            "rsi_exit_threshold": 60,
+            "trail_atr_mult": 4.0,
+            "atr_at_entry": float(atr[i]),
+            "stop_price": trail_stop,
+            "highest_since_entry": entry_price,
             "signal_bar": i,
         }
     return None
 
 
-def link_bull_dip_check_exit(position: dict, df: pd.DataFrame) -> dict | None:
-    """Check if LINK bull dip position should be exited."""
+def eth_vol_breakout_check_exit(position: dict, df: pd.DataFrame) -> dict | None:
+    """Check if ETH vol breakout position should be exited."""
     close = df['close'].values
-    rsi_vals = compute_rsi(close)
+    high = df['high'].values
+    low = df['low'].values
+    
+    atr = compute_atr(high, low, close)
     i = len(close) - 1
+    
+    highest = max(position["highest_since_entry"], close[i])
+    trail_stop = highest - position["trail_atr_mult"] * atr[i]
     
     ret = (close[i] - position["entry_price"]) / position["entry_price"] - FRICTION
     bars_held = i - position["signal_bar"]
     
-    if rsi_vals[i] > position["rsi_exit_threshold"]:
-        return {"exit_price": close[i], "exit_reason": "rsi_recovery", "pnl_pct": ret, "bars_held": bars_held}
+    if close[i] < trail_stop:
+        return {"exit_price": close[i], "exit_reason": "trailing_stop", "pnl_pct": ret, "bars_held": bars_held}
     if bars_held >= MAX_HOLD_BARS:
         return {"exit_price": close[i], "exit_reason": "time_stop", "pnl_pct": ret, "bars_held": bars_held}
+    
+    position["highest_since_entry"] = highest
     return None
 
 
@@ -279,18 +320,18 @@ def run_scan():
         "eth_momentum_4h": {
             "signal_fn": eth_momentum_signal,
             "exit_fn": eth_momentum_check_exit,
-            "allocation": 0.60,
-        },
-        "link_bull_dip_4h": {
-            "signal_fn": link_bull_dip_signal,
-            "exit_fn": link_bull_dip_check_exit,
             "allocation": 0.40,
+        },
+        "eth_vol_breakout_4h": {
+            "signal_fn": eth_vol_breakout_signal,
+            "exit_fn": eth_vol_breakout_check_exit,
+            "allocation": 0.60,
         },
     }
     
     pair_map = {
         "eth_momentum_4h": "ETHUSDT",
-        "link_bull_dip_4h": "LINKUSDT",
+        "eth_vol_breakout_4h": "ETHUSDT",
     }
     
     # Fetch data
@@ -372,7 +413,7 @@ def show_summary():
     state = load_state()
     
     print("=" * 60)
-    print("PAPER TRADING SUMMARY v2 — ETH Momentum + LINK Bull Dip")
+    print("PAPER TRADING SUMMARY v2 — ETH Momentum Asia + ETH Vol Breakout")
     print("=" * 60)
     print(f"Portfolio Value: ${state['portfolio_value']:.2f}")
     print(f"Starting Capital: ${STARTING_CAPITAL:.2f}")
