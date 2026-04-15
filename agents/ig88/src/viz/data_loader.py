@@ -81,7 +81,10 @@ def load_ohlcv(pair="SOL", timeframe="240m", exchange="binance"):
     for path in paths_to_try:
         if path.exists():
             try:
-                import pandas as pd
+                try:
+                    import pandas as pd
+                except ImportError:
+                    return None  # pandas not available, use fallback
                 df = pd.read_parquet(path)
                 # Normalize column names
                 col_map = {

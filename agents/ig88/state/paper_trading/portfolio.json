@@ -1,17 +1,19 @@
 {
   "positions": {},
   "completed_trades": [],
-  "scan_count": 2,
+  "scan_count": 10,
   "stats": {
-    "scan_count": 2,
-    "timestamp": "2026-04-13 16:30:30 UTC",
+    "scan_count": 10,
+    "timestamp": "2026-04-14 20:04:49 UTC",
     "positions": 0,
     "total_trades": 0,
     "winning_trades": 0,
     "losing_trades": 0,
     "win_rate": 0,
     "total_pnl": 0,
-    "profit_factor": 0
+    "profit_factor": 0,
+    "max_age_hours": 13964.08,
+    "stale_pairs_count": 12
   },
-  "last_update": "2026-04-13T16:30:30.085921+00:00"
+  "last_update": "2026-04-14T20:04:49.513977+00:00"
 }

@@ -14,10 +14,13 @@ The script outputs a structured JSON report that IG-88 can post to Matrix.
 from __future__ import annotations
 
 import json
+import logging
 import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 # Add ig88 root to path
 IG88_ROOT = Path(__file__).resolve().parents[1]
@@ -25,6 +28,69 @@ sys.path.insert(0, str(IG88_ROOT))
 
 from src.trading.config import load_config
 from src.quant.regime import assess_regime, regime_allows_venue, RegimeState, MarketDataCollector
+from src.trading.polymarket_paper_trader import PolymarketPaperTrader
+
+
+def run_polymarket_scan(trader: PolymarketPaperTrader) -> dict:
+    """Run a Polymarket paper trading scan cycle."""
+    scan_result = {
+        "signals_found": 0,
+        "positions_opened": 0,
+        "positions_checked": 0,
+        "resolutions": 0,
+        "open_positions": [],
+        "signals": [],
+    }
+    
+    # Check for resolutions first
+    resolutions = trader.check_resolutions()
+    scan_result["resolutions"] = len(resolutions)
+    if resolutions:
+        scan_result["resolution_trades"] = [
+            {
+                "id": r.trade_id,
+                "question": r.question[:60],
+                "pnl": r.pnl_usd,
+                "outcome": r.outcome,
+            }
+            for r in resolutions
+        ]
+    
+    # Scan for new opportunities
+    signals = trader.scan_markets()
+    scan_result["signals_found"] = len(signals)
+    
+    # Record top signals
+    for sig in signals[:5]:
+        scan_result["signals"].append({
+            "side": sig.side,
+            "question": sig.question[:60],
+            "market_price": sig.market_price,
+            "llm_estimate": sig.llm_estimate,
+            "edge": sig.edge,
+            "confidence": sig.llm_confidence,
+        })
+    
+    # Execute top signals (up to 3 per cycle)
+    if signals and len(trader.positions) < 5:
+        opened = trader.execute_signals(signals, max_positions=3)
+        scan_result["positions_opened"] = len(opened)
+    
+    # Report open positions
+    scan_result["positions_checked"] = len(trader.positions)
+    for pos_id, pos in trader.positions.items():
+        scan_result["open_positions"].append({
+            "id": pos_id,
+            "side": pos.side,
+            "question": pos.question[:50],
+            "entry_price": pos.entry_price,
+            "size_usd": pos.position_size_usd,
+        })
+    
+    # Get summary stats
+    scan_result["summary"] = trader.get_summary()
+    
+    return scan_result
 
 
 def run_scan_cycle() -> dict:
@@ -38,22 +104,11 @@ def run_scan_cycle() -> dict:
         "regime": None,
         "venues": {},
         "actions": [],
+        "polymarket": None,
         "next_scan_minutes": 5,
     }
 
     # Step 1: Regime assessment
-    # In production, these values come from live API calls.
-    # For now, output placeholder indicating what data sources are needed.
-    regime_inputs_needed = {
-        "btc_trend": "7-day BTC price change % (from CoinGecko or Kraken API)",
-        "total_mcap_trend": "7-day total crypto market cap change % (from CoinGecko)",
-        "fear_greed_index": "Current Fear & Greed Index (from api.alternative.me/fng/)",
-        "funding_rates": "Avg perp funding rate across major pairs (from venue APIs)",
-        "stablecoin_flows": "Net USDT/USDC mint/burn 7-day in millions (from DeFiLlama)",
-        "btc_dominance_delta": "BTC dominance change 7-day in pp (from CoinGecko)",
-        "volatility_regime": "GARCH vol percentile (from internal model)",
-    }
-
     # Live regime assessment
     collector = MarketDataCollector()
     live_inputs = collector.get_regime_inputs()
@@ -65,7 +120,6 @@ def run_scan_cycle() -> dict:
     )
 
     results["regime"] = regime.to_dict()
-    results["regime_data_sources"] = regime_inputs_needed
 
     # Step 2: Per-venue scan
     for venue_name, venue_cfg in cfg.enabled_venues().items():
@@ -102,7 +156,27 @@ def run_scan_cycle() -> dict:
 
         results["venues"][venue_name] = venue_result
 
-    # Step 3: Actions summary
+    # Step 3: Polymarket paper trading scan
+    # Polymarket runs regardless of regime (regime-independent venue)
+    try:
+        pm_cfg = cfg.get_venue("polymarket")
+        pm_trader = PolymarketPaperTrader(
+            initial_capital=1000.0,
+            edge_threshold=pm_cfg.edge_threshold,
+            confidence_min=pm_cfg.confidence_min,
+        )
+        pm_trader.load_positions()  # Load any existing positions
+        results["polymarket"] = run_polymarket_scan(pm_trader)
+    except KeyError:
+        # Polymarket not in config, use defaults
+        pm_trader = PolymarketPaperTrader()
+        pm_trader.load_positions()
+        results["polymarket"] = run_polymarket_scan(pm_trader)
+    except Exception as e:
+        results["polymarket"] = {"error": str(e), "status": "failed"}
+        logger.error(f"Polymarket scan failed: {e}")
+
+    # Step 4: Actions summary
     if regime.state == RegimeState.RISK_OFF:
         results["actions"].append("REGIME_HALT: No new positions on regime-gated venues")
         results["actions"].append("Polymarket scanning continues (regime-independent)")

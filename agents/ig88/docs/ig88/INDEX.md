@@ -49,6 +49,12 @@
 | IG88014 | Manim Visualization Skill | exploratory | Animated visualization plan for backtest results |
 | IG88014b | Indicator Expansion: Squeeze, MeanRev, Chandelier | active | New indicator primitives: Squeeze (orthogonal), MeanRev (redundant), Chandelier (inferior to ATR trailing). Regime gate validated for H3-A (PF 4.4→5.6). |
 
+## 📊 Current Research & Paper Trading
+|| Doc | Title | Status | Summary ||
+| :--- | :--- | :--- | :--- |
+|| IG88045 | System Status and Strategy Research Documentation | current | Comprehensive status: 350+ tests, no validated edge (p>0.05), paper trading active ||
+|| IG88046 | External Agent Quick Start Guide | current | Fast onboarding for outside agents helping with research ||
+
 ---
 
 ## 🛠️ Operational Notes

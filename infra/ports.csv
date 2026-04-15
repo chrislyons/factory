@@ -1,13 +1,13 @@
 port,service,host,bind,status,launchd_label,notes
-# Updated per FCT055 to reflect FCT054 local-E4B consolidation (2026-04-08)
+# Updated 2026-04-15: corrected MLX port assignments to match live state
 41010,LiteLLM proxy,whitebox,127.0.0.1,planned,,Unified LLM API (Phase 2)
-41200,Pantalaimon,whitebox,127.0.0.1,live,,Matrix E2EE proxy
-41400,Matrix MCP Coord,whitebox,0.0.0.0,live,com.bootindustries.matrix-mcp-coord,@coord:matrix.org via Pan
-41401,Matrix MCP Boot,whitebox,0.0.0.0,live,com.bootindustries.matrix-mcp-boot,@boot.industries:matrix.org via Pan
-41430,FalkorDB,whitebox,127.0.0.1,live,,Graph DB for Graphiti
-41440,Graphiti MCP,whitebox,0.0.0.0,live,,Knowledge graph MCP (SSE)
-41450,Qdrant HTTP,whitebox,0.0.0.0,live,,Vector DB HTTP
-41455,Qdrant gRPC,whitebox,0.0.0.0,live,,Vector DB gRPC
+41200,Pantalaimon,whitebox,127.0.0.1,retired,,Matrix E2EE proxy — retired FCT067; native E2EE via python-olm
+41400,Matrix MCP Coord,whitebox,0.0.0.0,deprecated,com.bootindustries.matrix-mcp-coord,@coord:matrix.org — coordinator deprecated
+41401,Matrix MCP Boot,whitebox,0.0.0.0,live,com.bootindustries.matrix-mcp-boot,@boot.industries:matrix.org (native E2EE)
+41430,FalkorDB,whitebox,127.0.0.1,down,,Graph DB for Graphiti — not running post-OOM
+41440,Graphiti MCP,whitebox,0.0.0.0,down,,Knowledge graph MCP (SSE) — disabled in agent configs
+41450,Qdrant HTTP,whitebox,0.0.0.0,unused,,No standalone Qdrant server; access via MCP on :41460/:41470
+41455,Qdrant gRPC,whitebox,0.0.0.0,unused,,No standalone Qdrant server; access via MCP on :41460/:41470
 41460,Qdrant MCP (projects-vault),whitebox,0.0.0.0,live,com.bootindustries.qdrant-mcp,SSE MCP daemon
 41470,Research MCP (research-vault),whitebox,0.0.0.0,live,com.bootindustries.research-mcp,SSE MCP daemon
 41910,Portal Caddy,whitebox,0.0.0.0,live,com.bootindustries.portal-caddy,Static site + reverse proxy
@@ -17,15 +17,15 @@ port,service,host,bind,status,launchd_label,notes
 41915-41919,Coding agents block,whitebox,,reserved,,Coding agent slots (reserved)
 41920-41939,Preview slots,whitebox,,reserved,,A/B deploys and version comparison
 41940-41949,Development,whitebox,,reserved,,Local dev servers
-41950-41959,Coordinator HTTP API,whitebox,,planned,,coordinator-rs REST endpoints
+41950-41959,Reserved,whitebox,,reserved,,Was coordinator HTTP API (deprecated)
 41960,Reserved,whitebox,,reserved,,No binding
-41961,mlx-vlm-factory (gemma-4-e4b-it-6bit),whitebox,127.0.0.1,live,com.bootindustries.mlx-vlm-factory,Shared mlx_vlm server for Boot + Kelk; loads /Users/nesbitt/models/gemma-4-e4b-it-6bit
-41962,RETIRED,whitebox,,retired,,Was Kelk Qwen3.5-4B; consolidated into :41961 per FCT054
+41961,mlx-vlm-boot (gemma-4-e4b-it-6bit),whitebox,127.0.0.1,live,com.bootindustries.mlx-vlm-boot,Boot main chat; loads /Users/nesbitt/models/gemma-4-e4b-it-6bit
+41962,mlx-vlm-kelk (gemma-4-e4b-it-6bit),whitebox,127.0.0.1,live,com.bootindustries.mlx-vlm-kelk,Kelk main chat; loads /Users/nesbitt/models/gemma-4-e4b-it-6bit
 41963,UNUSED,whitebox,,retired,,Was Nan LFM2.5-1.2B-Thinking; retired
 41964,Xamm,whitebox,0.0.0.0,reserved,,Reserved — no model assigned
-41966,UNUSED,whitebox,,retired,,Was heavy-reasoning tier (Qwen3.5-9B); retired
+41966,mlx-vlm-whitebox (gemma-4-26b-a4b-it-6bit),whitebox,127.0.0.1,live,com.bootindustries.mlx-vlm-whitebox,Shared 26B aux for Boot + Kelk; SSD expert streaming
 41970,hermes-boot,whitebox,127.0.0.1,live,com.bootindustries.hermes-boot,Hermes HTTP daemon for Boot (hermes-serve.py --profile boot --port 41970); backed by mlx-vlm-factory on :41961
 41971,RETIRED,whitebox,,retired,,Was planned Hermes IG-88 API; IG-88 runs standalone gateway with no HTTP daemon per FCT054
-41972,hermes-kelk,whitebox,127.0.0.1,live,com.bootindustries.hermes-kelk,Hermes HTTP daemon for Kelk (hermes-serve.py --profile kelk --port 41972); backed by mlx-vlm-factory on :41961
+41972,hermes-kelk,whitebox,127.0.0.1,live,com.bootindustries.hermes-kelk,Hermes HTTP daemon for Kelk (hermes-serve.py --profile kelk --port 41972); backed by mlx-vlm-kelk on :41962
 41977,Research,whitebox,0.0.0.0,reserved,,Reserved — research agent slot
-41988,mlx-vlm-ig88 (gemma-4-e4b-it-6bit),whitebox,127.0.0.1,live,com.bootindustries.mlx-vlm-ig88,Dedicated mlx_vlm server for IG-88; reached by IG-88 Hermes gateway via base_url http://127.0.0.1:41988/v1
+41988,RETIRED,whitebox,,retired,,Was IG-88 local MLX; IG-88 moved to OpenRouter (Nous Mimo Pro) per FCT067

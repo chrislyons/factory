@@ -26,7 +26,6 @@ tokio-util     = { version = "0.7", features = ["codec"] }
 futures        = "0.3"
 regex          = "1"
 hex            = "0.4"
-rand           = "0.8"
 pulldown-cmark = { version = "0.10", default-features = false, features = ["html"] }
 base64         = "0.22"
 matrix-sdk     = { version = "0.16", optional = true }

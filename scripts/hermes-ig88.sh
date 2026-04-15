@@ -1,10 +1,9 @@
 #!/bin/bash
 # hermes-ig88.sh — launch IG-88 Hermes gateway with Matrix adapter
 #
-# IG-88 was migrated from coordinator-managed mode to a standalone Hermes
-# gateway running matrix-nio directly. This wrapper is invoked by
-# com.bootindustries.hermes-ig88.plist via Infisical, which already
-# supplies MATRIX_TOKEN_PAN_IG88 in the environment.
+# FCT067: Standalone Hermes gateway with native E2EE (python-olm + matrix-nio[e2e]).
+# Direct to matrix.org — Pantalaimon retired. Main model: Nous Mimo Pro.
+# Invoked by com.bootindustries.hermes-ig88.plist via infisical-env.sh factory.
 #
 # Room isolation: IG-88 has no room allowlist in the Hermes Matrix adapter.
 # We rely on GATEWAY_ALLOWED_USERS=@chrislyons:matrix.org to silently drop
@@ -15,20 +14,26 @@
 
 set -euo pipefail
 
-# Required: Infisical-provided Pantalaimon access token for @ig88bot.
-if [[ -z "${MATRIX_TOKEN_PAN_IG88:-}" ]]; then
-  echo "ERROR: MATRIX_TOKEN_PAN_IG88 not set — Infisical injection failed" >&2
+# Required: Infisical-provided Matrix access token for @ig88bot.
+if [[ -z "${MATRIX_TOKEN_IG88:-}" ]]; then
+  echo "ERROR: MATRIX_TOKEN_IG88 not set — Infisical injection failed" >&2
   exit 2
 fi
 
 # Map the Infisical variable name into what matrix-nio expects.
-MATRIX_ACCESS_TOKEN=${MATRIX_TOKEN_PAN_IG88}
+MATRIX_ACCESS_TOKEN=${MATRIX_TOKEN_IG88}
 export MATRIX_ACCESS_TOKEN
 
-# Matrix homeserver (Pantalaimon local proxy — handles E2EE for us).
-export MATRIX_HOMESERVER="http://localhost:41200"
+# Matrix homeserver (direct — native E2EE via python-olm + matrix-nio[e2e]).
+export MATRIX_HOMESERVER="https://matrix.org"
 export MATRIX_USER_ID="@ig88bot:matrix.org"
-export MATRIX_ENCRYPTION="false"
+export MATRIX_ENCRYPTION="true"
+
+# Recovery key enables mautrix to self-sign the device on startup via SSSS.
+if [[ -n "${MATRIX_RECOVERY_KEY_IG88:-}" ]]; then
+  export MATRIX_RECOVERY_KEY="${MATRIX_RECOVERY_KEY_IG88}"
+  unset MATRIX_RECOVERY_KEY_IG88
+fi
 
 # User allowlist — the primary room-isolation mechanism. Only Chris can
 # address IG-88. Any other sender (Boot, Kelk, other Matrix users) is
@@ -47,7 +52,7 @@ export HERMES_HOME="/Users/nesbitt/.hermes/profiles/ig88"
 # failure class). All checks must complete in <5s total so launchd start is
 # not delayed. Distinct exit codes so errors are grep-able in launchd logs.
 #
-#   exit 2  — MATRIX_TOKEN_PAN_IG88 missing (existing)
+#   exit 2  — MATRIX_TOKEN_IG88 missing (above)
 #   exit 3  — profile missing or not pinned to `provider: custom`
 #   exit 4  — matrix-nio not importable in hermes-agent venv
 #   exit 5  — local model file missing
@@ -72,11 +77,11 @@ if ! grep -qE '^[[:space:]]*provider:[[:space:]]*(custom|openrouter)([[:space:]]
   exit 3
 fi
 
-# 2. matrix-nio must be importable in the hermes-agent venv. Missing dep was
-#    the cause of the 00:32 KeepAlive respawn loop during FCT054 cutover.
-"${HERMES_AGENT_PY}" -c 'import nio' 2>/dev/null || {
-  echo "ERROR: matrix-nio not installed in hermes-agent venv (${HERMES_AGENT_PY})" >&2
-  echo "       Install with: uv tool install --with matrix-nio hermes-agent" >&2
+# 2. mautrix must be importable in the hermes-agent venv. Hermes 0.9.0 uses
+#    mautrix[encryption] for native Matrix E2EE (not matrix-nio).
+"${HERMES_AGENT_PY}" -c 'import mautrix' 2>/dev/null || {
+  echo "ERROR: mautrix not installed in hermes-agent venv (${HERMES_AGENT_PY})" >&2
+  echo "       Install with: uv pip install --python ${HERMES_AGENT_PY} 'mautrix[encryption]' aiosqlite asyncpg Markdown" >&2
   exit 4
 }
 
@@ -130,22 +135,6 @@ unset ANTHROPIC_API_KEY
 unset ANTHROPIC_AUTH_TOKEN
 unset OPENAI_BASE_URL
 unset OPENAI_API_BASE
-
-# FCT060: Factory Conductor Webhook Memo Protocol.
-# Bridge WEBHOOK_SECRET_IG88 (from Infisical) into Hermes's generic
-# WEBHOOK_SECRET env var. IG-88's Matrix ACL is @chrislyons-only per FCT055,
-# so the webhook is the only non-Matrix channel into IG-88's reasoning loop.
-# HMAC replaces the Matrix user ACL as the trust boundary for this path.
-# See docs/fct/FCT060 for architecture.
-if [[ -z "${WEBHOOK_SECRET_IG88:-}" ]]; then
-  echo "ERROR: WEBHOOK_SECRET_IG88 not set — Infisical injection failed" >&2
-  exit 2
-fi
-export WEBHOOK_ENABLED=true
-export WEBHOOK_PORT=41977
-# Unquoted intentional: see hermes-boot.sh for rationale.
-export WEBHOOK_SECRET=$WEBHOOK_SECRET_IG88
-unset WEBHOOK_SECRET_IG88
 
 exec /Users/nesbitt/.local/bin/hermes \
   --profile ig88 \

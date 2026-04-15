@@ -26,7 +26,7 @@ export const NAV_LINKS = [
   { href: "/pages/loops.html", label: "Loops" },
   { href: "/pages/docs.html", label: "Docs" },
   { href: "/pages/analytics.html", label: "Stats" },
-  { href: "/pages/topology.html", label: "Config" },
+  { href: "/pages/config.html", label: "Config" },
 ];
 
 export const DOC_LINKS = [

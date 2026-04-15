@@ -1,41 +1,36 @@
 #!/bin/bash
 # hermes-boot.sh — launch Boot Hermes gateway with Matrix adapter
 #
-# FCT059: migrated from coordinator-dispatched HTTP mode (hermes-serve.py on
-# :41970) to standalone `hermes gateway run`, matching the IG-88 pattern.
-# Boot now owns its Matrix connection via matrix-nio -> Pantalaimon rather
-# than receiving dispatched prompts over HTTP from coordinator-rs.
-#
-# The coordinator remains the inter-agent conductor at the Matrix protocol
-# level (room routing, allowlists, approvals), but no longer speaks HTTP
-# to Boot. Removes the hermes-serve.py shutdown race and eliminates the
-# HTTP dispatch failure mode.
-#
-# Invoked by com.bootindustries.hermes-boot.plist via infisical-env.sh,
-# which already supplies MATRIX_TOKEN_PAN_BOOT in the environment.
+# FCT067: Standalone Hermes gateway with native E2EE (python-olm + matrix-nio[e2e]).
+# Direct to matrix.org — Pantalaimon retired.
+# Invoked by com.bootindustries.hermes-boot.plist via infisical-env.sh factory.
 
 set -euo pipefail
 
-# Required: Infisical-provided Pantalaimon access token for @boot.industries.
-if [[ -z "${MATRIX_TOKEN_PAN_BOOT:-}" ]]; then
-  echo "ERROR: MATRIX_TOKEN_PAN_BOOT not set — Infisical injection failed" >&2
+# Required: Infisical-provided Matrix access token for @boot.industries.
+if [[ -z "${MATRIX_TOKEN_BOOT:-}" ]]; then
+  echo "ERROR: MATRIX_TOKEN_BOOT not set — Infisical injection failed" >&2
   exit 2
 fi
 
 # Map the Infisical variable name into what matrix-nio expects.
-MATRIX_ACCESS_TOKEN=${MATRIX_TOKEN_PAN_BOOT}
+MATRIX_ACCESS_TOKEN=${MATRIX_TOKEN_BOOT}
 export MATRIX_ACCESS_TOKEN
 
-# Matrix homeserver (Pantalaimon local proxy — handles E2EE for us).
-export MATRIX_HOMESERVER="http://localhost:41200"
+# Matrix homeserver (direct — native E2EE via python-olm + matrix-nio[e2e]).
+export MATRIX_HOMESERVER="https://matrix.org"
 export MATRIX_USER_ID="@boot.industries:matrix.org"
-export MATRIX_ENCRYPTION="false"
+export MATRIX_ENCRYPTION="true"
+
+# Recovery key enables mautrix to self-sign the device on startup via SSSS.
+if [[ -n "${MATRIX_RECOVERY_KEY_BOOT:-}" ]]; then
+  export MATRIX_RECOVERY_KEY="${MATRIX_RECOVERY_KEY_BOOT}"
+  unset MATRIX_RECOVERY_KEY_BOOT
+fi
 
 # User allowlist. Boot responds to Chris plus other agents for cross-agent
-# coordination (teammate tagging, handoffs) and the coordinator user for
-# system messages, approvals, and infra alerts. Matches coordinator's room
-# allowlist semantics.
-export GATEWAY_ALLOWED_USERS="@chrislyons:matrix.org,@coord:matrix.org,@ig88bot:matrix.org,@sir.kelk:matrix.org"
+# coordination (teammate tagging, handoffs).
+export GATEWAY_ALLOWED_USERS="@chrislyons:matrix.org,@ig88bot:matrix.org,@sir.kelk:matrix.org"
 
 # Hermes profile directory (isolates state, sessions, matrix store, logs).
 export HERMES_HOME="/Users/nesbitt/.hermes/profiles/boot"
@@ -43,17 +38,17 @@ export HERMES_HOME="/Users/nesbitt/.hermes/profiles/boot"
 # ---------------------------------------------------------------------------
 # Preflight guards (FCT055 Phase 4 — structural defenses).
 #
-#   exit 2  — MATRIX_TOKEN_PAN_BOOT missing (above)
+#   exit 2  — MATRIX_TOKEN_BOOT missing (above)
 #   exit 3  — profile missing or not pinned to `provider: custom`
 #   exit 4  — matrix-nio not importable in hermes-agent venv
 #   exit 5  — local model file missing
-#   exit 6  — mlx-vlm-factory not reachable on :41961
+#   exit 6  — mlx-vlm-boot not reachable on :41961
 # ---------------------------------------------------------------------------
 
 BOOT_PROFILE_CFG="${HERMES_HOME}/config.yaml"
 HERMES_AGENT_PY="/Users/nesbitt/.local/share/uv/tools/hermes-agent/bin/python3"
 BOOT_MODEL_CONFIG="/Users/nesbitt/models/gemma-4-e4b-it-6bit/config.json"
-MLX_VLM_HEALTH_URL="http://127.0.0.1:41961/health"
+MLX_VLM_HEALTH_URL="http://127.0.0.1:41961/v1/models"
 
 # 1. Profile must exist AND pin provider: custom. See FCT055 RC-1 for why.
 # FCT064: provider: custom may be top-level (legacy) or indented under model:
@@ -69,26 +64,25 @@ if ! grep -qE '^[[:space:]]*provider:[[:space:]]*custom([[:space:]]|$)' "${BOOT_
   exit 3
 fi
 
-# 2. matrix-nio must be importable in the hermes-agent venv. Boot now uses
-#    matrix-nio directly at runtime (gateway mode), so missing dep is a hard
-#    startup failure — not a latent crash-import.
-"${HERMES_AGENT_PY}" -c 'import nio' 2>/dev/null || {
-  echo "ERROR: matrix-nio not installed in hermes-agent venv (${HERMES_AGENT_PY})" >&2
-  echo "       Install with: uv tool install --with matrix-nio hermes-agent" >&2
+# 2. mautrix must be importable in the hermes-agent venv. Hermes 0.9.0 uses
+#    mautrix[encryption] for native Matrix E2EE (not matrix-nio).
+"${HERMES_AGENT_PY}" -c 'import mautrix' 2>/dev/null || {
+  echo "ERROR: mautrix not installed in hermes-agent venv (${HERMES_AGENT_PY})" >&2
+  echo "       Install with: uv pip install --python ${HERMES_AGENT_PY} 'mautrix[encryption]' aiosqlite asyncpg Markdown" >&2
   exit 4
 }
 
-# 3. Local model weights must be present on disk (FCT054: Boot shares
-#    gemma-4-e4b-it-6bit via mlx-vlm-factory on :41961).
+# 3. Local model weights must be present on disk (Boot uses
+#    gemma-4-e4b-it-6bit via mlx-vlm-boot on :41961).
 if [[ ! -f "${BOOT_MODEL_CONFIG}" ]]; then
   echo "ERROR: local model config missing at ${BOOT_MODEL_CONFIG}" >&2
   exit 5
 fi
 
-# 4. mlx-vlm-factory must be listening on :41961. 3s max.
+# 4. mlx-vlm-boot must be listening on :41961. 3s max.
 if ! curl -sf --max-time 3 "${MLX_VLM_HEALTH_URL}" >/dev/null 2>&1; then
-  echo "ERROR: mlx-vlm-factory not reachable at ${MLX_VLM_HEALTH_URL}" >&2
-  echo "       Check: launchctl list | grep mlx-vlm-factory" >&2
+  echo "ERROR: mlx-vlm-boot not reachable at ${MLX_VLM_HEALTH_URL}" >&2
+  echo "       Check: launchctl list | grep mlx-vlm-boot" >&2
   exit 6
 fi
 
@@ -146,27 +140,7 @@ unset ANTHROPIC_API_KEY
 unset ANTHROPIC_AUTH_TOKEN
 unset OPENAI_BASE_URL
 unset OPENAI_API_BASE
-
-# FCT060: Factory Conductor Webhook Memo Protocol.
-# Bridge the agent-specific WEBHOOK_SECRET_BOOT (injected by infisical-env.sh
-# factory --) into Hermes's generic WEBHOOK_SECRET env var. Hermes's
-# gateway/config.py:842-855 reads WEBHOOK_ENABLED / WEBHOOK_PORT /
-# WEBHOOK_SECRET from os.environ at gateway startup and writes them into
-# the webhook PlatformConfig's in-memory extra dict. The secret never
-# touches disk — it exists only in the running gateway process's memory.
-# See docs/fct/FCT060 for the full architecture.
-if [[ -z "${WEBHOOK_SECRET_BOOT:-}" ]]; then
-  echo "ERROR: WEBHOOK_SECRET_BOOT not set — Infisical injection failed" >&2
-  exit 2
-fi
-export WEBHOOK_ENABLED=true
-export WEBHOOK_PORT=41951
-# Unquoted variable reference is intentional: the quoted form would
-# pattern-match the scan-secrets-commit.sh hook's generic credential
-# regex. The HMAC value is a single hex string with no whitespace, so
-# dropping the quotes is safe against word-splitting.
-export WEBHOOK_SECRET=$WEBHOOK_SECRET_BOOT
-unset WEBHOOK_SECRET_BOOT  # only the generic name should exist at exec time
+unset NOUS_MIMO_FACTORY_KEY
 
 exec /Users/nesbitt/.local/bin/hermes \
   --profile boot \

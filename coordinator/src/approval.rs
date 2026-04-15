@@ -199,10 +199,13 @@ impl HmacSigner {
     }
 }
 
-/// Fill buffer with random bytes using the rand crate.
+/// Fill buffer with random bytes from the OS.
 fn getrandom(buf: &mut [u8]) {
-    use rand::RngCore;
-    rand::thread_rng().fill_bytes(buf);
+    use std::io::Read;
+    std::fs::File::open("/dev/urandom")
+        .expect("failed to open /dev/urandom")
+        .read_exact(buf)
+        .expect("failed to read random bytes");
 }
 
 // ============================================================================

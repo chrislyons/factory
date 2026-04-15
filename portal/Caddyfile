@@ -43,6 +43,10 @@ http://100.88.222.111:41910, http://whitebox.taila25a34.ts.net:41910 {
 		reverse_proxy 127.0.0.1:41914
 	}
 
+	handle /api/config/* {
+		reverse_proxy 127.0.0.1:41914
+	}
+
 	handle /repos/* {
 		root * /Users/nesbitt/dev/factory/portal
 		file_server

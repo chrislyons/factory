@@ -24,7 +24,7 @@ import "fake-indexeddb/auto";
 import * as sdk from "matrix-js-sdk";
 import { decodeRecoveryKey } from "matrix-js-sdk/lib/crypto-api";
 import * as readline from "node:readline";
-import { execSync } from "node:child_process";
+// execSync removed — Pantalaimon retired (FCT067).
 import { suppressMatrixSdkLogs } from "./utils/suppress-sdk-logs";
 import { startAndSync } from "./utils/matrix-client-utils";
 import { bootstrapAndImportCrossSigningKeys } from "./utils/matrix-crypto-utils";
@@ -268,31 +268,8 @@ async function crossSignDevices(
 
   console.log(`\nSigned ${signed.length}/${unsigned.length} device(s).`);
 
-  // Pantalaimon integration
-  if (!noPanctl && signed.length > 0) {
-    console.log("\n── Pantalaimon Integration ──");
-    const userId = client.getUserId()!;
-
-    for (const deviceId of signed) {
-      if (deviceId === ownDeviceId) continue;
-      try {
-        console.error(`  Verifying ${deviceId} in Pantalaimon...`);
-        execSync(
-          `ssh whitebox "panctl verify-device '${userId}' '${deviceId}'"`,
-          { stdio: ["pipe", "pipe", "pipe"], timeout: 15_000 }
-        );
-        console.log(`  ✓ Pantalaimon: ${deviceId}`);
-      } catch (err: any) {
-        console.error(
-          `  ✗ Pantalaimon failed for ${deviceId}: ${err.message}`
-        );
-        console.error(
-          "    (Run manually: ssh whitebox \"panctl verify-device" +
-            ` '${userId}' '${deviceId}'\")`
-        );
-      }
-    }
-  }
+  // Pantalaimon retired (FCT067). Cross-signing via SDK is sufficient
+  // with native E2EE (mautrix + python-olm).
 }
 
 // ── Cleanup ────────────────────────────────────────────────────
@@ -317,7 +294,13 @@ async function main(): Promise<void> {
   const args = process.argv.slice(2);
   const command = args.find((a) => !a.startsWith("-")) || "sign";
   const dryRun = args.includes("--dry-run");
-  const noPanctl = args.includes("--no-panctl");
+  const noPanctl = true; // Pantalaimon retired
+
+  // --user flag overrides MATRIX_USER env var
+  const userIdx = args.indexOf("--user");
+  if (userIdx !== -1 && args[userIdx + 1]) {
+    process.env.MATRIX_USER = args[userIdx + 1];
+  }
 
   if (args.includes("--help") || args.includes("-h")) {
     console.log(`
@@ -381,8 +364,14 @@ Security:
       await crossSignDevices(client, dryRun, noPanctl);
 
       if (!dryRun) {
+        // Wait for the sync loop to flush outgoing signature uploads.
+        // Without Pantalaimon (which provided a natural delay), we must
+        // explicitly wait for the SDK's OutgoingRequestsManager to process
+        // the queued signature upload requests.
+        console.log("\nFlushing signatures to server...");
+        await new Promise((r) => setTimeout(r, 5000));
+
         console.log(`\nUpdated device state:`);
-        // Re-fetch after signing
         const after = await getDevices(client);
         printDeviceTable(after);
       }

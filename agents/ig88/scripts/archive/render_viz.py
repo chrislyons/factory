@@ -33,6 +33,10 @@ SCENES = {
     "mr": ("mr_validation.py", "MRValidationScene"),
     "mr_config": ("mr_validation.py", "MRConfigComparisonScene"),
     "mr_regime": ("mr_validation.py", "MRRegimeScene"),
+    "regime": ("regime_detection.py", "RegimeDetectionScene"),
+    "correlation": ("correlation_matrix.py", "CorrelationMatrixScene"),
+    "decay": ("walkforward_decay.py", "WalkForwardDecayScene"),
+    "attribution": ("performance_attribution.py", "PerformanceAttributionScene"),
 }
 
 

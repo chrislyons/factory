@@ -14,6 +14,13 @@ import sys
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
 
+# Config API module (Hermes agent config management)
+try:
+    import config_api
+    CONFIG_API_AVAILABLE = True
+except ImportError:
+    CONFIG_API_AVAILABLE = False
+
 HOST = os.environ.get("GSD_HOST", "127.0.0.1")
 PORT = int(os.environ.get("GSD_PORT", 41935))
 DATA_ROOT = Path(os.environ.get("GSD_DATA_ROOT", Path(__file__).resolve().parent)).resolve()
@@ -37,10 +44,45 @@ class PortalDataHandler(SimpleHTTPRequestHandler):
         self.send_error(401, "Unauthorized")
         return False
 
+    def _is_api_request(self) -> bool:
+        return self.path.startswith("/api/config")
+
+    def _handle_api_request(self, method: str) -> None:
+        """Route /api/config/* to the config API module."""
+        length = int(self.headers.get("Content-Length", 0))
+        body = self.rfile.read(length) if length > 0 else None
+        status, response = config_api.handle_request(method, self.path, body)
+        payload = json.dumps(response).encode("utf-8")
+        self.send_response(status)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("Content-Length", str(len(payload)))
+        self.end_headers()
+        self.wfile.write(payload)
+
     def do_GET(self) -> None:  # noqa: N802
         if not self._check_auth():
             return
+        if CONFIG_API_AVAILABLE and self._is_api_request():
+            self._handle_api_request("GET")
+            return
         super().do_GET()
+
+    def do_PATCH(self) -> None:  # noqa: N802
+        if not self._check_auth():
+            return
+        if CONFIG_API_AVAILABLE and self._is_api_request():
+            self._handle_api_request("PATCH")
+            return
+        self.send_error(405, "PATCH not supported for this path")
+
+    def do_POST(self) -> None:  # noqa: N802
+        if not self._check_auth():
+            return
+        if CONFIG_API_AVAILABLE and self._is_api_request():
+            self._handle_api_request("POST")
+            return
+        self.send_error(405, "POST not supported for this path")
 
     def do_PUT(self) -> None:  # noqa: N802 - stdlib hook name
         if not self._check_auth():

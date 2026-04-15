@@ -42,6 +42,7 @@ if not SECRET_KEY:
     sys.exit(1)
 
 DATA_PATHS = ("/jobs.json", "/tasks.json")
+CONFIG_API_PATHS = ("/api/config",)
 
 
 def sign_cookie(payload: str) -> str:
@@ -147,6 +148,15 @@ class AuthHandler(http.server.BaseHTTPRequestHandler):
                 self.end_headers()
             return
 
+        # Config API — validate cookie then forward to GSD
+        if self.path.startswith(CONFIG_API_PATHS):
+            if self._cookie_valid():
+                self.proxy_to_gsd(self.path)
+            else:
+                self.send_response(401)
+                self.end_headers()
+            return
+
         # Data proxy paths — validate cookie then forward to GSD
         if self.path.startswith(DATA_PATHS) or self.path.startswith("/status/"):
             if self._cookie_valid():
@@ -211,6 +221,18 @@ class AuthHandler(http.server.BaseHTTPRequestHandler):
                 self.wfile.write(resp)
             return
 
+        # Config API POST (restart gateways etc.)
+        if self.path.startswith(CONFIG_API_PATHS):
+            if self._cookie_valid() and self._check_csrf():
+                self.proxy_to_gsd(self.path)
+            elif not self._cookie_valid():
+                self.send_response(401)
+                self.end_headers()
+            else:
+                self.send_response(403)
+                self.end_headers()
+            return
+
         # Data proxy POST paths
         if self.path.startswith(DATA_PATHS) or self.path.startswith("/status/"):
             if self._cookie_valid() and self._check_csrf():
@@ -223,6 +245,21 @@ class AuthHandler(http.server.BaseHTTPRequestHandler):
                 self.end_headers()
             return
 
+        self.send_response(404)
+        self.end_headers()
+
+    def do_PATCH(self):
+        """Handle PATCH requests for config API."""
+        if self.path.startswith(CONFIG_API_PATHS):
+            if self._cookie_valid() and self._check_csrf():
+                self.proxy_to_gsd(self.path)
+            elif not self._cookie_valid():
+                self.send_response(401)
+                self.end_headers()
+            else:
+                self.send_response(403)
+                self.end_headers()
+            return
         self.send_response(404)
         self.end_headers()
 

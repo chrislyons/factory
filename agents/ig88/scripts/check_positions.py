@@ -1,228 +1,167 @@
 #!/usr/bin/env python3
-"""Fast position monitor - checks stops/targets on open paper positions.
+"""Fast position check — check stops/targets on open paper positions, no signal detection."""
 
-This script runs frequently (every 15 min) to catch stop/target hits
-between 4h signal scans. Also checks volatility regime for circuit breakers.
-"""
 import json
-import sys
-from datetime import datetime, timezone
+import re
 from pathlib import Path
+from datetime import datetime, timezone
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+import requests
 
 DATA_DIR = Path('/Users/nesbitt/dev/factory/agents/ig88/data')
-PAPER_TRADES_PATH = DATA_DIR / 'paper_trades.jsonl'
-LOG_PATH = DATA_DIR / 'paper_trading_log_20260413.md'
-REGIME_STATE_PATH = DATA_DIR / 'current_regime.json'
+TRADES_PATH = DATA_DIR / 'paper_trades.jsonl'
 
-# Import volatility monitor
-from volatility_monitor import get_regime, get_stop_adjustment, should_close_all, should_tighten_stops, THRESHOLDS
+# Load trades
+trades = []
+with open(TRADES_PATH) as f:
+    for line in f:
+        if line.strip():
+            trades.append(json.loads(line))
 
-def load_open_positions():
-    """Load open positions from trades log."""
-    positions = []
-    if not PAPER_TRADES_PATH.exists():
-        return positions
-    
-    with open(PAPER_TRADES_PATH) as f:
-        for line in f:
-            line = line.strip()
-            if not line:
-                continue
-            trade = json.loads(line)
-            if trade.get('outcome') == 'open':
-                positions.append(trade)
-    return positions
+# Open trades have outcome=None
+open_trades = [(i, t) for i, t in enumerate(trades) if t.get('outcome') is None]
 
-def get_current_prices(pairs):
-    """Fetch current prices from Binance."""
-    prices = {}
-    for pair in pairs:
-        # Extract base symbol (e.g., SOL-PERP -> SOLUSDT)
-        base = pair.replace('-PERP', '')
-        symbol = f"{base}USDT"
-        
-        try:
-            import urllib.request
-            url = f"https://api.binance.com/api/v3/ticker/price?symbol={symbol}"
-            with urllib.request.urlopen(url, timeout=5) as resp:
-                data = json.loads(resp.read())
-                prices[pair] = float(data['price'])
-        except Exception as e:
-            print(f"  Error fetching {symbol}: {e}")
-    
-    return prices
+if not open_trades:
+    print("[POSITION CHECK] No open positions.")
+    exit(0)
 
-def check_and_close(position, current_price):
-    """Check if stop or target hit, return exit info or None."""
-    entry = position['entry_price']
-    side = position['side']
-    stop = position.get('stop_level')
-    target = position.get('target_level')
+print(f"[POSITION CHECK] {len(open_trades)} open positions found.")
+print(f"[POSITION CHECK] Timestamp: {datetime.now(timezone.utc).isoformat()}")
+print("=" * 70)
+
+# Get unique pairs
+pairs_needed = set()
+for _, t in open_trades:
+    pair = t['pair'].replace('-PERP', '').replace('/', '')
+    if not pair.endswith('USDT'):
+        pair = pair + 'USDT'
+    pairs_needed.add(pair)
+
+# Fetch current prices from Binance
+prices = {}
+for pair in sorted(pairs_needed):
+    try:
+        url = f"https://api.binance.com/api/v3/klines?symbol={pair}&interval=4h&limit=2"
+        resp = requests.get(url, timeout=30)
+        resp.raise_for_status()
+        data = resp.json()
+        # Use the most recent completed candle's close
+        current_price = float(data[-1][4])
+        prices[pair] = current_price
+        print(f"  Price {pair}: ${current_price:.4f}")
+    except Exception as e:
+        print(f"  ERROR fetching {pair}: {e}")
+
+print()
+
+# Check each open position
+closed_count = 0
+now = datetime.now(timezone.utc)
+
+for idx, t in open_trades:
+    pair_key = t['pair'].replace('-PERP', '').replace('/', '')
+    if not pair_key.endswith('USDT'):
+        pair_key = pair_key + 'USDT'
     
-    if not stop or not target:
-        return None
+    current_price = prices.get(pair_key)
+    if current_price is None:
+        print(f"  SKIP {t['pair']}: no price data")
+        continue
     
-    if side == 'short':
-        # Short: stop is above entry, target below
-        if current_price >= stop:
-            return {'exit_price': stop, 'reason': 'stop'}
-        elif current_price <= target:
-            return {'exit_price': target, 'reason': 'target'}
+    entry = t['entry_price']
+    side = t['side']
+    leverage = t.get('leverage', 1.0)
+    position_size = t.get('position_size_usd', 500)
+    
+    # Parse stop/target from notes or fields
+    notes = t.get('notes', '')
+    stop_pct = None
+    target_pct = None
+    
+    # Check direct fields first
+    if t.get('stop_price') and t.get('target_price'):
+        stop_price = t['stop_price']
+        target_price = t['target_price']
     else:
-        # Long: stop below entry, target above
-        if current_price <= stop:
-            return {'exit_price': stop, 'reason': 'stop'}
-        elif current_price >= target:
-            return {'exit_price': target, 'reason': 'target'}
-    
-    return None
-
-def close_position(trade_id, exit_price, reason):
-    """Update the trade record with exit info."""
-    trades = []
-    with open(PAPER_TRADES_PATH) as f:
-        for line in f:
-            if line.strip():
-                trades.append(json.loads(line))
-    
-    # Update the matching trade
-    for trade in trades:
-        if trade['trade_id'] == trade_id:
-            entry = trade['entry_price']
-            side = trade['side']
-            size = trade['position_size_usd']
-            leverage = trade.get('leverage', 1.0)
-            friction = 0.0042
-            
-            # Calculate P&L
-            if side == 'short':
-                raw_pnl_pct = (entry - exit_price) / entry
-            else:
-                raw_pnl_pct = (exit_price - entry) / entry
-            
-            pnl_pct = raw_pnl_pct - friction
-            pnl_usd = pnl_pct * size * leverage
-            
-            trade['exit_timestamp'] = datetime.now(timezone.utc).isoformat()
-            trade['exit_price'] = exit_price
-            trade['exit_reason'] = reason
-            trade['outcome'] = 'win' if pnl_usd > 0 else 'loss'
-            trade['pnl_usd'] = round(pnl_usd, 2)
-            trade['pnl_pct'] = round(pnl_pct * 100, 3)
-            break
-    
-    # Write back
-    with open(PAPER_TRADES_PATH, 'w') as f:
-        for trade in trades:
-            f.write(json.dumps(trade) + '\n')
-    
-    return trade
-
-def close_all_positions(positions, prices, reason):
-    """Emergency close all positions."""
-    closed = []
-    for pos in positions:
-        pair = pos['pair']
-        price = prices.get(pair)
-        if price is None:
-            continue
-        trade = close_position(pos['trade_id'], price, reason)
-        closed.append(trade)
-        print(f"  CLOSED: {pair} {pos['side']} @ ${price:.4f} | P&L: ${trade['pnl_usd']:+.2f}")
-    return closed
-
-def adjust_stops_for_volatility(positions, regime):
-    """Tighten stops based on volatility regime."""
-    adjustment = get_stop_adjustment(regime)
-    
-    if adjustment >= 1.0:
-        return  # No adjustment needed
-    
-    print(f"  Volatility adjustment: tightening stops to {adjustment*100:.0f}%")
-    
-    for pos in positions:
-        if pos.get('stop_level') and pos.get('target_level'):
-            entry = pos['entry_price']
-            stop = pos['stop_level']
-            target = pos['target_level']
-            
-            # Tighten stop (move closer to entry)
-            if pos['side'] == 'short':
-                # Short stop is above entry - move it down
-                new_stop = entry + (stop - entry) * adjustment
-            else:
-                # Long stop is below entry - move it up
-                new_stop = entry - (entry - stop) * adjustment
-            
-            pos['stop_level'] = new_stop
-            print(f"    {pos['pair']}: Stop ${stop:.4f} -> ${new_stop:.4f}")
-
-def main():
-    print(f"=== Position Check {datetime.now(timezone.utc).strftime('%H:%M UTC')} ===")
-    
-    # Check volatility regime first
-    regime = get_regime()
-    if regime:
-        print(f"  Regime: {regime['state']} - {regime['message']}")
-    
-    positions = load_open_positions()
-    if not positions:
-        print("  No open positions")
-        return
-    
-    print(f"  Open positions: {len(positions)}")
-    
-    # Get unique pairs
-    pairs = list(set(p['pair'] for p in positions))
-    prices = get_current_prices(pairs)
-    
-    # CIRCUIT BREAKER: Close all positions in crash
-    if regime and should_close_all(regime):
-        print("\n  ⚠️  CIRCUIT BREAKER TRIGGERED")
-        print(f"  {regime['message']}")
-        closed = close_all_positions(positions, prices, 'circuit_breaker')
-        print(f"  Emergency closed {len(closed)} positions")
-        return
-    
-    # Tighten stops if volatility elevated
-    if regime and should_tighten_stops(regime):
-        adjust_stops_for_volatility(positions, regime)
-    
-    # Normal position checking
-    for pos in positions:
-        pair = pos['pair']
-        price = prices.get(pair)
+        # Parse from notes
+        if 'Stop=' in notes:
+            stop_match = re.search(r'Stop=([\d.]+)%', notes)
+            target_match = re.search(r'Target=([\d.]+)%', notes)
+            if stop_match:
+                stop_pct = float(stop_match.group(1))
+            if target_match:
+                target_pct = float(target_match.group(1))
         
-        if price is None:
-            print(f"  {pair}: No price data")
-            continue
+        if stop_pct is None:
+            stop_pct = 2.0
+        if target_pct is None:
+            target_pct = 3.0
         
-        result = check_and_close(pos, price)
-        
-        if result:
-            trade = close_position(pos['trade_id'], result['exit_price'], result['reason'])
-            print(f"  CLOSED: {pair} {pos['side']} | {result['reason'].upper()} | P&L: ${trade['pnl_usd']:+.2f}")
-        else:
-            # Calculate unrealized P&L
-            entry = pos['entry_price']
-            if pos['side'] == 'short':
-                upnl = (entry - price) / entry
-            else:
-                upnl = (price - entry) / entry
-            
-            leverage = pos.get('leverage', 1.0)
-            upnl_usd = upnl * pos['position_size_usd'] * leverage
-            
-            # Show adjusted stop if volatility is high
-            stop_note = ""
-            if regime and should_tighten_stops(regime) and pos.get('stop_level'):
-                stop_note = f" | Stop: ${pos['stop_level']:.4f}"
-            
-            print(f"  {pair} {pos['side']}: ${price:.4f} | Unrealized: ${upnl_usd:+.2f}{stop_note}")
+        if side == 'short':
+            stop_price = entry * (1 + stop_pct / 100)
+            target_price = entry * (1 - target_pct / 100)
+        else:  # long
+            stop_price = entry * (1 - stop_pct / 100)
+            target_price = entry * (1 + target_pct / 100)
     
-    print("  Done.")
+    # Check if hit
+    if side == 'short':
+        raw_pct = ((current_price - entry) / entry) * 100
+        hit_stop = current_price >= stop_price
+        hit_target = current_price <= target_price
+    else:
+        raw_pct = ((current_price - entry) / entry) * 100
+        hit_stop = current_price <= stop_price
+        hit_target = current_price >= target_price
+    
+    leveraged_pct = raw_pct * (-1 if side == 'short' else 1) * leverage
+    unrealized_pnl = position_size * (raw_pct / 100) * (-1 if side == 'short' else 1) * leverage
+    
+    if hit_stop or hit_target:
+        exit_reason = 'target' if hit_target else 'stop'
+        pnl_pct = raw_pct * (-1 if side == 'short' else 1) * leverage
+        pnl_usd = position_size * (pnl_pct / 100)
+        outcome = 'win' if pnl_pct > 0 else 'loss'
+        
+        entry_ts = t.get('entry_timestamp', '')
+        try:
+            entry_dt = datetime.fromisoformat(entry_ts)
+            hold_hours = (now - entry_dt).total_seconds() / 3600
+        except:
+            hold_hours = 0
+        
+        trades[idx]['exit_timestamp'] = now.isoformat()
+        trades[idx]['exit_price'] = current_price
+        trades[idx]['outcome'] = outcome
+        trades[idx]['exit_reason'] = exit_reason
+        trades[idx]['pnl_usd'] = round(pnl_usd, 2)
+        trades[idx]['pnl_pct'] = round(pnl_pct, 2)
+        trades[idx]['hold_duration_hours'] = round(hold_hours, 1)
+        
+        closed_count += 1
+        action = "STOP HIT" if hit_stop else "TARGET HIT"
+        print(f"  *** {action} *** {t['pair']} {side.upper()}")
+        print(f"      Entry: ${entry:.4f} -> Exit: ${current_price:.4f}")
+        print(f"      P&L: {pnl_pct:+.2f}% (${pnl_usd:+.2f}) | Hold: {hold_hours:.1f}h")
+    else:
+        dist_to_stop = abs(stop_price - current_price)
+        dist_to_target = abs(target_price - current_price)
+        print(f"  [OPEN] {t['pair']} {side.upper()} @ ${entry:.4f}, now=${current_price:.4f}")
+        print(f"      Unrealized: {leveraged_pct:+.2f}% (${unrealized_pnl:+.2f})")
+        print(f"      Stop: ${stop_price:.4f} (dist: ${dist_to_stop:.4f}) | Target: ${target_price:.4f} (dist: ${dist_to_target:.4f})")
 
-if __name__ == '__main__':
-    main()
+# Write updated trades back
+if closed_count > 0:
+    with open(TRADES_PATH, 'w') as f:
+        for t in trades:
+            f.write(json.dumps(t, default=str) + '\n')
+    print(f"\n[CLOSED] {closed_count} position(s) closed and saved.")
+else:
+    print(f"\n[STATUS] All positions remain open. No stops/targets hit.")
+
+# Summary
+still_open = sum(1 for t in trades if t.get('outcome') is None)
+total_closed = sum(1 for t in trades if t.get('outcome') is not None)
+wins = sum(1 for t in trades if t.get('outcome') in ('win', 'target'))
+realized_pnl = sum(t.get('pnl_usd', 0) for t in trades if t.get('outcome') is not None)
+print(f"\n[SUMMARY] Open: {still_open} | Closed: {total_closed} | Win rate: {wins}/{total_closed} | Realized P&L: ${realized_pnl:+.2f}")

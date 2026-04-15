@@ -25,7 +25,7 @@
       <p>Primary services host — macOS M1 Max, Tailscale 100.88.222.111</p>
     </div>
     <div class="hero-meta">
-      <div class="meta-chip"><span class="meta-chip__label">UPDATED</span><span class="meta-chip__value">2026-04-12</span></div>
+      <div class="meta-chip"><span class="meta-chip__label">UPDATED</span><span class="meta-chip__value">2026-04-14</span></div>
       <div class="meta-chip"><span class="meta-chip__label">REPO</span><span class="meta-chip__value">~/dev/whitebox</span></div>
     </div>
   </div>
@@ -46,10 +46,10 @@
             <td><button class="value-block value-block--shell" data-copy="launchctl list | grep bootindustries" title="Copy value"><code class="value-text">launchctl list | grep bootindustries</code></button></td>
             <td class="desc-text">Show all factory launchd agents</td>
           </tr>
-          <tr class="command-row" data-search="pantalaimon status launchctl list | grep pantalaimon check pantalaimon launchd service">
+          <tr class="command-row" data-search="pantalaimon status launchctl list | grep pantalaimon check pantalaimon launchd service retired">
             <td><div class="task-text">Pantalaimon status</div></td>
             <td><button class="value-block value-block--shell" data-copy="launchctl list | grep pantalaimon" title="Copy value"><code class="value-text">launchctl list | grep pantalaimon</code></button></td>
-            <td class="desc-text">Check Pantalaimon launchd service</td>
+            <td class="desc-text">RETIRED — Pantalaimon replaced by native E2EE (python-olm)</td>
           </tr>
           <tr class="command-row" data-search="restart service launchctl kickstart -k gui/$(id -u)/com.bootindustries.SERVICE force-restart a launchd service">
             <td><div class="task-text">Restart service</div></td>
@@ -76,10 +76,10 @@
             <td><button class="value-block value-block--shell" data-copy="tail -f ~/logs/SERVICE.log" title="Copy value"><code class="value-text">tail -f ~/logs/SERVICE.log</code></button></td>
             <td class="desc-text">Tail logs for a launchd service</td>
           </tr>
-          <tr class="command-row" data-search="pantalaimon logs tail -f ~/logs/pantalaimon.log tail pantalaimon log output">
+          <tr class="command-row" data-search="pantalaimon logs tail -f ~/logs/pantalaimon.log tail pantalaimon log output retired">
             <td><div class="task-text">Pantalaimon logs</div></td>
             <td><button class="value-block value-block--shell" data-copy="tail -f ~/logs/pantalaimon.log" title="Copy value"><code class="value-text">tail -f ~/logs/pantalaimon.log</code></button></td>
-            <td class="desc-text">Tail Pantalaimon log output</td>
+            <td class="desc-text">RETIRED — Pantalaimon log (historical only)</td>
           </tr>
         </tbody>
       </table>
@@ -151,15 +151,15 @@
             <td><button class="value-block value-block--shell" data-copy="curl -s http://127.0.0.1:41963/v1/models" title="Copy value"><code class="value-text">curl -s http://127.0.0.1:41963/v1/models</code></button></td>
             <td class="desc-text">Check Nan observer slot (LFM 1.2B)</td>
           </tr>
-          <tr class="command-row" data-search="reasoning slot health curl -s http://127.0.0.1:41966/v1/models check on-demand reasoning slot (qwen 9b)">
-            <td><div class="task-text">Reasoning slot health</div></td>
+          <tr class="command-row" data-search="shared 26b aux slot health curl -s http://127.0.0.1:41966/v1/models check shared 26b aux gemma">
+            <td><div class="task-text">Shared 26B aux health</div></td>
             <td><button class="value-block value-block--shell" data-copy="curl -s http://127.0.0.1:41966/v1/models" title="Copy value"><code class="value-text">curl -s http://127.0.0.1:41966/v1/models</code></button></td>
-            <td class="desc-text">Check reasoning slot (Qwen 9B)</td>
+            <td class="desc-text">Check shared 26B aux (Gemma 4 26B A4B, SSD expert streaming, ~5.4 tok/s)</td>
           </tr>
-          <tr class="command-row" data-search="ig-88 slot health curl -sf http://127.0.0.1:41988/v1/models check ig-88 mlx slot idle openrouter fct066">
+          <tr class="command-row" data-search="ig-88 slot health curl -sf http://127.0.0.1:41988/v1/models check ig-88 mlx slot retired openrouter">
             <td><div class="task-text">IG-88 slot health</div></td>
             <td><button class="value-block value-block--shell" data-copy="curl -sf --max-time 3 http://127.0.0.1:41988/v1/models" title="Copy value"><code class="value-text">curl -sf --max-time 3 http://127.0.0.1:41988/v1/models</code></button></td>
-            <td class="desc-text">Check IG-88 MLX slot (idle -- IG-88 on OpenRouter since FCT066)</td>
+            <td class="desc-text">RETIRED — IG-88 on OpenRouter (Nous Mimo Pro since FCT067)</td>
           </tr>
           <tr class="command-row" data-search="all slots health for p in 41961 41962 41963 41966 41988; do echo $p: $(curl -so /dev/null -w '%{http_code}' http://127.0.0.1:$p/v1/models); done probe all 5 inference slots at once">
             <td><div class="task-text">All slots health</div></td>
@@ -214,7 +214,7 @@
   <section class="surface-card section-card" data-section="matrix">
     <button class="section-header collapsed" type="button" aria-expanded="false">
       <span class="section-arrow">&#x25BC;</span>
-      <span class="section-title">Matrix / Pantalaimon</span>
+      <span class="section-title">Matrix / Pantalaimon — RETIRED</span>
       <span class="section-count">5</span>
     </button>
     <div class="section-body collapsed">
@@ -224,27 +224,27 @@
           <tr class="command-row" data-search="pantalaimon health curl -s http://127.0.0.1:41200/_matrix/client/versions check pantalaimon is responding">
             <td><div class="task-text">Pantalaimon health</div></td>
             <td><button class="value-block value-block--shell" data-copy="curl -s http://127.0.0.1:41200/_matrix/client/versions" title="Copy value"><code class="value-text">curl -s http://127.0.0.1:41200/_matrix/client/versions</code></button></td>
-            <td class="desc-text">Check Pantalaimon is responding</td>
+            <td class="desc-text">RETIRED — Pantalaimon replaced by native E2EE (python-olm)</td>
           </tr>
           <tr class="command-row" data-search="pantalaimon config cat ~/.config/pantalaimon/pantalaimon.conf view pantalaimon configuration">
             <td><div class="task-text">Pantalaimon config</div></td>
             <td><button class="value-block value-block--shell" data-copy="cat ~/.config/pantalaimon/pantalaimon.conf" title="Copy value"><code class="value-text">cat ~/.config/pantalaimon/pantalaimon.conf</code></button></td>
-            <td class="desc-text">View Pantalaimon configuration</td>
+            <td class="desc-text">RETIRED — Pantalaimon config (historical only)</td>
           </tr>
           <tr class="command-row" data-search="restart pantalaimon launchctl kickstart -k gui/$(id -u)/com.pantalaimon force-restart pantalaimon service">
             <td><div class="task-text">Restart Pantalaimon</div></td>
             <td><button class="value-block value-block--shell" data-copy="launchctl kickstart -k gui/$(id -u)/com.pantalaimon" title="Copy value"><code class="value-text">launchctl kickstart -k gui/$(id -u)/com.pantalaimon</code></button></td>
-            <td class="desc-text">Force-restart Pantalaimon service</td>
+            <td class="desc-text">RETIRED — Pantalaimon no longer in use</td>
           </tr>
           <tr class="command-row" data-search="olm database ls -la ~/.local/share/pantalaimon/pan.db check olm session database size">
             <td><div class="task-text">Olm database</div></td>
             <td><button class="value-block value-block--shell" data-copy="ls -la ~/.local/share/pantalaimon/pan.db" title="Copy value"><code class="value-text">ls -la ~/.local/share/pantalaimon/pan.db</code></button></td>
-            <td class="desc-text">Check Olm session database size</td>
+            <td class="desc-text">RETIRED — Olm sessions now managed by Hermes native E2EE</td>
           </tr>
           <tr class="command-row" data-search="pantalaimon remote curl -s http://100.88.222.111:41200/_matrix/client/versions probe pantalaimon over tailscale">
             <td><div class="task-text">Pantalaimon remote</div></td>
             <td><button class="value-block value-block--shell" data-copy="curl -s http://100.88.222.111:41200/_matrix/client/versions" title="Copy value"><code class="value-text">curl -s http://100.88.222.111:41200/_matrix/client/versions</code></button></td>
-            <td class="desc-text">Probe Pantalaimon over Tailscale</td>
+            <td class="desc-text">RETIRED — Pantalaimon no longer running</td>
           </tr>
         </tbody>
       </table>
@@ -274,7 +274,7 @@
           <tr class="command-row" data-search="matrix coord mcp curl -so /dev/null -w '%{http_code}' http://127.0.0.1:41400/ check matrix coord mcp (405=healthy)">
             <td><div class="task-text">Matrix Coord MCP</div></td>
             <td><button class="value-block value-block--shell" data-copy="curl -so /dev/null -w '%{http_code}' http://127.0.0.1:41400/" title="Copy value"><code class="value-text">curl -so /dev/null -w '%{http_code}' http://127.0.0.1:41400/</code></button></td>
-            <td class="desc-text">Check Matrix Coord MCP (405=healthy)</td>
+            <td class="desc-text">DEPRECATED — Matrix Coord MCP (@coord removed from allowlists)</td>
           </tr>
           <tr class="command-row" data-search="matrix boot mcp curl -so /dev/null -w '%{http_code}' http://127.0.0.1:41401/ check matrix boot mcp (405=healthy)">
             <td><div class="task-text">Matrix Boot MCP</div></td>
@@ -284,22 +284,22 @@
           <tr class="command-row" data-search="graphiti mcp status curl -so /dev/null -w '%{http_code}' http://127.0.0.1:41440/sse check graphiti mcp sse endpoint">
             <td><div class="task-text">Graphiti MCP status</div></td>
             <td><button class="value-block value-block--shell" data-copy="curl -so /dev/null -w '%{http_code}' http://127.0.0.1:41440/sse" title="Copy value"><code class="value-text">curl -so /dev/null -w '%{http_code}' http://127.0.0.1:41440/sse</code></button></td>
-            <td class="desc-text">Check Graphiti MCP SSE endpoint</td>
+            <td class="desc-text">DOWN — Graphiti MCP disabled (FalkorDB down)</td>
           </tr>
           <tr class="command-row" data-search="all mcp health for p in 41400 41401 41440 41460 41470; do echo $p: $(curl -so /dev/null -w '%{http_code}' http://127.0.0.1:$p/); done probe all mcp servers at once">
             <td><div class="task-text">All MCP health</div></td>
             <td><button class="value-block value-block--shell" data-copy="for p in 41400 41401 41440 41460 41470; do echo \"$p: $(curl -so /dev/null -w '%{http_code}' http://127.0.0.1:$p/)\"; done" title="Copy value"><code class="value-text">for p in 41400 41401 41440 41460 41470; do echo "$p: $(curl -so /dev/null -w '%{http_code}' http://127.0.0.1:$p/)"; done</code></button></td>
             <td class="desc-text">Probe all MCP servers at once</td>
           </tr>
-          <tr class="command-row" data-search="qdrant collections curl -s http://127.0.0.1:41450/collections list qdrant collections and point counts">
-            <td><div class="task-text">Qdrant collections</div></td>
-            <td><button class="value-block value-block--shell" data-copy="curl -s http://127.0.0.1:41450/collections" title="Copy value"><code class="value-text">curl -s http://127.0.0.1:41450/collections</code></button></td>
-            <td class="desc-text">List Qdrant collections and point counts</td>
+          <tr class="command-row" data-search="qdrant access via mcp 41460 41470 no standalone server">
+            <td><div class="task-text">Qdrant access</div></td>
+            <td><button class="value-block value-block--text" data-copy="Qdrant MCP :41460 / Research MCP :41470 — no standalone Qdrant server on :41450/:41455" title="Copy value"><code class="value-text">Qdrant via MCP only (:41460 / :41470)</code></button></td>
+            <td class="desc-text">No standalone Qdrant HTTP (:41450) or gRPC (:41455) — access via MCP servers only</td>
           </tr>
           <tr class="command-row" data-search="falkordb ping docker exec graphiti-falkordb redis-cli -a $FALKORDB_PASSWORD ping ping falkordb with auth">
             <td><div class="task-text">FalkorDB ping</div></td>
             <td><button class="value-block value-block--shell" data-copy="docker exec graphiti-falkordb redis-cli -a $FALKORDB_PASSWORD PING" title="Copy value"><code class="value-text">docker exec graphiti-falkordb redis-cli -a $FALKORDB_PASSWORD PING</code></button></td>
-            <td class="desc-text">Ping FalkorDB with auth</td>
+            <td class="desc-text">DOWN — FalkorDB not running (:41430)</td>
           </tr>
         </tbody>
       </table>
@@ -309,7 +309,7 @@
   <section class="surface-card section-card" data-section="coordinator">
     <button class="section-header collapsed" type="button" aria-expanded="false">
       <span class="section-arrow">&#x25BC;</span>
-      <span class="section-title">Coordinator</span>
+      <span class="section-title">Coordinator — DEPRECATED</span>
       <span class="section-count">6</span>
     </button>
     <div class="section-body collapsed">
@@ -319,22 +319,22 @@
           <tr class="command-row" data-search="coordinator status launchctl list | grep coordinator check coordinator launchd state">
             <td><div class="task-text">Coordinator status</div></td>
             <td><button class="value-block value-block--shell" data-copy="launchctl list | grep coordinator" title="Copy value"><code class="value-text">launchctl list | grep coordinator</code></button></td>
-            <td class="desc-text">Check coordinator launchd state</td>
+            <td class="desc-text">DEPRECATED — coordinator-rs replaced by Hermes gateways</td>
           </tr>
           <tr class="command-row" data-search="restart coordinator launchctl kickstart -k gui/$(id -u)/com.bootindustries.coordinator force-restart coordinator-rs">
             <td><div class="task-text">Restart coordinator</div></td>
             <td><button class="value-block value-block--shell" data-copy="launchctl kickstart -k gui/$(id -u)/com.bootindustries.coordinator" title="Copy value"><code class="value-text">launchctl kickstart -k gui/$(id -u)/com.bootindustries.coordinator</code></button></td>
-            <td class="desc-text">Force-restart coordinator-rs</td>
+            <td class="desc-text">DEPRECATED — coordinator-rs no longer primary</td>
           </tr>
           <tr class="command-row" data-search="coordinator logs tail -f ~/library/logs/factory/coordinator.log tail coordinator log output">
             <td><div class="task-text">Coordinator logs</div></td>
             <td><button class="value-block value-block--shell" data-copy="tail -f ~/Library/Logs/factory/coordinator.log" title="Copy value"><code class="value-text">tail -f ~/Library/Logs/factory/coordinator.log</code></button></td>
-            <td class="desc-text">Tail coordinator log output</td>
+            <td class="desc-text">DEPRECATED — coordinator log (historical)</td>
           </tr>
           <tr class="command-row" data-search="reload config kill -hup $(pgrep coordinator-rs) sighup reload config without restart">
             <td><div class="task-text">Reload config</div></td>
             <td><button class="value-block value-block--shell" data-copy="kill -HUP $(pgrep coordinator-rs)" title="Copy value"><code class="value-text">kill -HUP $(pgrep coordinator-rs)</code></button></td>
-            <td class="desc-text">SIGHUP reload config without restart</td>
+            <td class="desc-text">DEPRECATED — coordinator config reload</td>
           </tr>
           <tr class="command-row" data-search="runtime state cat ~/.config/ig88/runtime-state.json check agent runtime state and token usage">
             <td><div class="task-text">Runtime state</div></td>

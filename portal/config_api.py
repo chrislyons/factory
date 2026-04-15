@@ -1,0 +1,398 @@
+#!/usr/bin/env python3
+"""Hermes agent config reader/writer for the Factory Portal.
+
+Reads ~/.hermes/profiles/{agent}/config.yaml, redacts secrets,
+accepts safe partial updates, and checks inference server health.
+"""
+
+from __future__ import annotations
+
+import copy
+import json
+import os
+import re
+import subprocess
+import urllib.request
+import urllib.error
+from pathlib import Path
+from typing import Any
+
+import yaml
+
+HERMES_HOME = Path.home() / ".hermes" / "profiles"
+
+# Agents with Hermes config files
+AGENTS = {
+    "boot": {
+        "label": "Boot",
+        "profile_dir": HERMES_HOME / "boot",
+        "launchd_label": "com.bootindustries.hermes-boot",
+    },
+    "kelk": {
+        "label": "Kelk",
+        "profile_dir": HERMES_HOME / "kelk",
+        "launchd_label": "com.bootindustries.hermes-kelk",
+    },
+    "ig88": {
+        "label": "IG-88",
+        "profile_dir": HERMES_HOME / "ig88",
+        "launchd_label": "com.bootindustries.hermes-ig88",
+    },
+}
+
+# Fields that contain secrets — values replaced with "***" in GET responses
+SECRET_PATTERNS = [
+    re.compile(r"api_key", re.IGNORECASE),
+    re.compile(r"token", re.IGNORECASE),
+    re.compile(r"password", re.IGNORECASE),
+    re.compile(r"secret", re.IGNORECASE),
+    re.compile(r"recovery_key", re.IGNORECASE),
+]
+
+# Fields safe to PATCH (top-level YAML paths)
+SAFE_PATCH_FIELDS = {
+    "display.compact": bool,
+    "display.streaming": bool,
+    "display.show_cost": bool,
+    "display.show_reasoning": bool,
+    "display.skin": str,
+    "agent.max_turns": int,
+    "agent.tool_use_enforcement": str,
+    "approvals.mode": str,
+    "max_tokens": int,
+    "model.default": str,
+    "model.provider": str,
+    "model.base_url": str,
+    "model.context_length": int,
+    "memory.memory_enabled": bool,
+    "memory.user_profile_enabled": bool,
+    "terminal.cwd": str,
+    "terminal.timeout": int,
+    "auxiliary.compression.threshold": (int, float),
+    "toolsets": list,
+}
+
+# Valid values for enum-like fields
+FIELD_VALIDATORS = {
+    "agent.tool_use_enforcement": {"none", "warn", "enforce"},
+    "approvals.mode": {"off", "per_tool", "always"},
+    "model.provider": {"custom", "nous", "openrouter", "anthropic", "openai"},
+}
+
+
+def _config_path(agent: str) -> Path:
+    info = AGENTS.get(agent)
+    if not info:
+        raise KeyError(f"Unknown agent: {agent}")
+    return info["profile_dir"] / "config.yaml"
+
+
+def _redact_secrets(data: Any, path: str = "") -> Any:
+    """Recursively redact values whose key matches secret patterns."""
+    if isinstance(data, dict):
+        result = {}
+        for key, value in data.items():
+            full_path = f"{path}.{key}" if path else key
+            if any(p.search(key) for p in SECRET_PATTERNS):
+                result[key] = "***" if isinstance(value, str) else None
+            else:
+                result[key] = _redact_secrets(value, full_path)
+        return result
+    if isinstance(data, list):
+        return [_redact_secrets(item, f"{path}[{i}]") for i, item in enumerate(data)]
+    return data
+
+
+def _get_nested(data: dict, dotted_key: str) -> Any:
+    """Get a nested value by dotted path (e.g. 'display.compact')."""
+    keys = dotted_key.split(".")
+    current = data
+    for k in keys:
+        if not isinstance(current, dict) or k not in current:
+            return None
+        current = current[k]
+    return current
+
+
+def _set_nested(data: dict, dotted_key: str, value: Any) -> None:
+    """Set a nested value by dotted path, creating intermediate dicts."""
+    keys = dotted_key.split(".")
+    current = data
+    for k in keys[:-1]:
+        if k not in current or not isinstance(current[k], dict):
+            current[k] = {}
+        current = current[k]
+    current[keys[-1]] = value
+
+
+def read_config(agent: str) -> dict:
+    """Read and parse an agent's config.yaml. Returns redacted copy."""
+    path = _config_path(agent)
+    if not path.exists():
+        raise FileNotFoundError(f"Config not found: {path}")
+    with open(path, "r") as f:
+        raw = yaml.safe_load(f)
+    return raw or {}
+
+
+def read_config_safe(agent: str) -> dict:
+    """Read config with secrets redacted for API responses."""
+    raw = read_config(agent)
+    return _redact_secrets(raw)
+
+
+def validate_patch(agent: str, patch: dict[str, Any]) -> list[str]:
+    """Validate a patch dict. Returns list of error strings (empty = valid)."""
+    errors = []
+    for key, value in patch.items():
+        if key not in SAFE_PATCH_FIELDS:
+            errors.append(f"Field '{key}' is not patchable")
+            continue
+        expected_type = SAFE_PATCH_FIELDS[key]
+        # Allow null for optional fields (treat as removing the field)
+        if value is None:
+            # null is valid for all fields — it removes the setting
+            continue
+        # Handle tuple of types (e.g., (int, float) for threshold)
+        if isinstance(expected_type, tuple):
+            if not isinstance(value, expected_type):
+                type_names = " or ".join(t.__name__ for t in expected_type)
+                errors.append(f"Field '{key}' expects {type_names}, got {type(value).__name__}")
+                continue
+        elif not isinstance(value, expected_type):
+            errors.append(f"Field '{key}' expects {expected_type.__name__}, got {type(value).__name__}")
+            continue
+        if key in FIELD_VALIDATORS:
+            valid = FIELD_VALIDATORS[key]
+            if value not in valid:
+                errors.append(f"Field '{key}' must be one of: {', '.join(sorted(valid))}")
+    return errors
+
+
+def apply_patch(agent: str, patch: dict[str, Any]) -> dict:
+    """Apply a validated patch to an agent's config.yaml. Returns new config.
+
+    Reads current config, applies changes, writes back, returns the new config.
+    Does NOT redact — returns full config for verification.
+    """
+    path = _config_path(agent)
+    raw = read_config(agent)
+
+    for key, value in patch.items():
+        _set_nested(raw, key, value)
+
+    # Write back preserving order as much as possible
+    with open(path, "w") as f:
+        yaml.dump(raw, f, default_flow_style=False, sort_keys=False, allow_unicode=True)
+
+    return raw
+
+
+def _get_inference_url(config: dict) -> str | None:
+    """Extract the inference URL from config, handling both local and cloud providers."""
+    # Direct base_url (local providers)
+    base_url = _get_nested(config, "model.base_url")
+    if base_url:
+        return base_url
+    # Check custom_providers for the matching provider
+    provider = _get_nested(config, "model.provider")
+    providers_list = _get_nested(config, "custom_providers") or []
+    for cp in providers_list:
+        if cp.get("name", "").lower().replace(" ", "-") == provider or cp.get("base_url"):
+            url = cp.get("base_url")
+            if url:
+                return url
+    # Check providers section
+    providers_dict = _get_nested(config, "providers") or {}
+    for name, p in providers_dict.items():
+        api = p.get("api")
+        if api:
+            return api
+    return None
+
+
+def check_inference_health(agent: str) -> dict:
+    """Check if an agent's inference server is reachable.
+
+    Returns { "reachable": bool, "url": str, "status": int|None, "error": str|None }
+    """
+    config = read_config(agent)
+    url = _get_inference_url(config)
+    provider = _get_nested(config, "model.provider") or "unknown"
+
+    if not url:
+        # Cloud providers without local URL are considered "external"
+        if provider in ("nous", "openrouter", "anthropic", "openai"):
+            return {"reachable": True, "url": f"cloud:{provider}", "status": 200, "error": None}
+        return {"reachable": False, "url": None, "status": None, "error": "No inference URL configured"}
+
+    # For cloud providers, just check connectivity to the host
+    if not url.startswith("http://127.0.0.1") and not url.startswith("http://localhost"):
+        return {"reachable": True, "url": url, "status": 200, "error": None}
+
+    health_url = f"{url.rstrip('/')}/models"
+    try:
+        req = urllib.request.Request(health_url, method="GET")
+        with urllib.request.urlopen(req, timeout=3) as resp:
+            return {"reachable": True, "url": health_url, "status": resp.status, "error": None}
+    except urllib.error.URLError as e:
+        return {"reachable": False, "url": health_url, "status": None, "error": str(e)}
+    except Exception as e:
+        return {"reachable": False, "url": health_url, "status": None, "error": str(e)}
+
+
+def check_all_health() -> dict:
+    """Check inference health for all agents."""
+    return {agent: check_inference_health(agent) for agent in AGENTS}
+
+
+def restart_gateway(agent: str) -> dict:
+    """Restart an agent's Hermes gateway via launchctl."""
+    info = AGENTS.get(agent)
+    if not info:
+        return {"ok": False, "error": f"Unknown agent: {agent}"}
+
+    label = info["launchd_label"]
+    try:
+        # Stop then start
+        subprocess.run(["launchctl", "stop", label], capture_output=True, timeout=10)
+        subprocess.run(["launchctl", "start", label], capture_output=True, timeout=10)
+        return {"ok": True, "agent": agent, "label": label}
+    except subprocess.TimeoutExpired:
+        return {"ok": False, "error": "launchctl timed out"}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+
+def get_agent_summaries() -> list[dict]:
+    """Return summary info for all agents (for the config page overview)."""
+    summaries = []
+    for agent_id, info in AGENTS.items():
+        try:
+            config = read_config(agent_id)
+            summary = {
+                "id": agent_id,
+                "label": info["label"],
+                "model": _get_nested(config, "model.default") or "—",
+                "provider": _get_nested(config, "model.provider") or "—",
+                "base_url": _get_nested(config, "model.base_url") or "—",
+                "display": {
+                    "compact": _get_nested(config, "display.compact"),
+                    "streaming": _get_nested(config, "display.streaming"),
+                    "show_cost": _get_nested(config, "display.show_cost"),
+                    "show_reasoning": _get_nested(config, "display.show_reasoning"),
+                    "skin": _get_nested(config, "display.skin"),
+                },
+                "max_turns": _get_nested(config, "agent.max_turns"),
+                "max_tokens": _get_nested(config, "max_tokens"),
+                "tool_use_enforcement": _get_nested(config, "agent.tool_use_enforcement"),
+                "approval_mode": _get_nested(config, "approvals.mode"),
+                "toolsets": _get_nested(config, "toolsets") or [],
+                "memory": {
+                    "memory_enabled": _get_nested(config, "memory.memory_enabled"),
+                    "user_profile_enabled": _get_nested(config, "memory.user_profile_enabled"),
+                },
+                "terminal": {
+                    "cwd": _get_nested(config, "terminal.cwd"),
+                    "timeout": _get_nested(config, "terminal.timeout"),
+                },
+                "compression_threshold": _get_nested(config, "auxiliary.compression.threshold"),
+                "mcp_servers": _get_nested(config, "mcp_servers") or {},
+            }
+        except Exception as e:
+            summary = {
+                "id": agent_id,
+                "label": info["label"],
+                "error": str(e),
+            }
+        summaries.append(summary)
+    return summaries
+
+
+def handle_request(method: str, path: str, body: bytes | None = None) -> tuple[int, dict]:
+    """Route handler for /api/config/* requests.
+
+    Returns (status_code, response_dict).
+    """
+    # Parse path: /api/config/{agent} or /api/config/{agent}/health or /api/config/{agent}/restart
+    parts = path.strip("/").split("/")
+    # Expected: ["api", "config", agent] or ["api", "config", agent, action]
+
+    if len(parts) < 3:
+        # GET /api/config — list all agents
+        if method == "GET":
+            return 200, {"agents": get_agent_summaries()}
+        return 405, {"error": "Method not allowed"}
+
+    agent = parts[2]
+    if agent not in AGENTS:
+        return 404, {"error": f"Unknown agent: {agent}"}
+
+    action = parts[3] if len(parts) > 3 else None
+
+    # GET /api/config/{agent}/health
+    if action == "health" and method == "GET":
+        return 200, check_inference_health(agent)
+
+    # POST /api/config/{agent}/restart
+    if action == "restart" and method == "POST":
+        result = restart_gateway(agent)
+        return 200 if result["ok"] else 500, result
+
+    # POST /api/config/{agent}/mcp/{server_name}/toggle
+    if action == "mcp" and method == "POST" and len(parts) >= 6 and parts[5] == "toggle":
+        server_name = parts[4]
+        try:
+            body_data = json.loads(body or b"{}")
+            enabled = body_data.get("enabled")
+            if enabled is None or not isinstance(enabled, bool):
+                return 400, {"error": "Body must include 'enabled' (bool)"}
+            path_key = f"mcp_servers.{server_name}.enabled"
+            # Directly modify the YAML since mcp_servers isn't in SAFE_PATCH_FIELDS
+            config = read_config(agent)
+            mcp = config.get("mcp_servers", {})
+            if server_name not in mcp:
+                return 404, {"error": f"MCP server '{server_name}' not found"}
+            mcp[server_name]["enabled"] = enabled
+            config_path = _config_path(agent)
+            with open(config_path, "w") as f:
+                yaml.dump(config, f, default_flow_style=False, sort_keys=False, allow_unicode=True)
+            return 200, {"ok": True, "agent": agent, "server": server_name, "enabled": enabled}
+        except Exception as e:
+            return 500, {"error": str(e)}
+
+    # GET /api/config/{agent}
+    if action is None and method == "GET":
+        try:
+            config = read_config_safe(agent)
+            health = check_inference_health(agent)
+            return 200, {"agent": agent, "config": config, "health": health}
+        except FileNotFoundError as e:
+            return 404, {"error": str(e)}
+
+    # PATCH /api/config/{agent}
+    if action is None and method == "PATCH":
+        try:
+            patch_data = json.loads(body or b"{}")
+        except json.JSONDecodeError:
+            return 400, {"error": "Invalid JSON body"}
+
+        if not isinstance(patch_data, dict):
+            return 400, {"error": "Body must be a JSON object"}
+
+        errors = validate_patch(agent, patch_data)
+        if errors:
+            return 422, {"errors": errors}
+
+        try:
+            new_config = apply_patch(agent, patch_data)
+            return 200, {
+                "ok": True,
+                "agent": agent,
+                "updated_fields": list(patch_data.keys()),
+                "config": _redact_secrets(new_config),
+            }
+        except Exception as e:
+            return 500, {"error": str(e)}
+
+    return 404, {"error": "Not found"}

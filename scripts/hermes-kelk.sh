@@ -1,40 +1,36 @@
 #!/bin/bash
 # hermes-kelk.sh — launch Kelk Hermes gateway with Matrix adapter
 #
-# FCT059: migrated from coordinator-dispatched HTTP mode (hermes-serve.py on
-# :41972) to standalone `hermes gateway run`, matching the IG-88 pattern.
-# Kelk now owns its Matrix connection via matrix-nio -> Pantalaimon rather
-# than receiving dispatched prompts over HTTP from coordinator-rs.
-#
-# The coordinator remains the inter-agent conductor at the Matrix protocol
-# level (room routing, allowlists, approvals), but no longer speaks HTTP
-# to Kelk. Removes the hermes-serve.py shutdown race and eliminates the
-# HTTP dispatch failure mode.
-#
-# Invoked by com.bootindustries.hermes-kelk.plist via infisical-env.sh,
-# which already supplies MATRIX_TOKEN_PAN_KELK in the environment.
+# FCT067: Standalone Hermes gateway with native E2EE (python-olm + matrix-nio[e2e]).
+# Direct to matrix.org — Pantalaimon retired.
+# Invoked by com.bootindustries.hermes-kelk.plist via infisical-env.sh factory.
 
 set -euo pipefail
 
-# Required: Infisical-provided Pantalaimon access token for @sir.kelk.
-if [[ -z "${MATRIX_TOKEN_PAN_KELK:-}" ]]; then
-  echo "ERROR: MATRIX_TOKEN_PAN_KELK not set — Infisical injection failed" >&2
+# Required: Infisical-provided Matrix access token for @sir.kelk.
+if [[ -z "${MATRIX_TOKEN_KELK:-}" ]]; then
+  echo "ERROR: MATRIX_TOKEN_KELK not set — Infisical injection failed" >&2
   exit 2
 fi
 
 # Map the Infisical variable name into what matrix-nio expects.
-MATRIX_ACCESS_TOKEN=${MATRIX_TOKEN_PAN_KELK}
+MATRIX_ACCESS_TOKEN=${MATRIX_TOKEN_KELK}
 export MATRIX_ACCESS_TOKEN
 
-# Matrix homeserver (Pantalaimon local proxy — handles E2EE for us).
-export MATRIX_HOMESERVER="http://localhost:41200"
+# Matrix homeserver (direct — native E2EE via python-olm + matrix-nio[e2e]).
+export MATRIX_HOMESERVER="https://matrix.org"
 export MATRIX_USER_ID="@sir.kelk:matrix.org"
-export MATRIX_ENCRYPTION="false"
+export MATRIX_ENCRYPTION="true"
+
+# Recovery key enables mautrix to self-sign the device on startup via SSSS.
+if [[ -n "${MATRIX_RECOVERY_KEY_KELK:-}" ]]; then
+  export MATRIX_RECOVERY_KEY="${MATRIX_RECOVERY_KEY_KELK}"
+  unset MATRIX_RECOVERY_KEY_KELK
+fi
 
 # User allowlist. Kelk responds to Chris plus other agents for cross-agent
-# coordination and the coordinator user for system messages/approvals.
-# Matches coordinator's room allowlist semantics.
-export GATEWAY_ALLOWED_USERS="@chrislyons:matrix.org,@coord:matrix.org,@boot.industries:matrix.org,@ig88bot:matrix.org"
+# coordination.
+export GATEWAY_ALLOWED_USERS="@chrislyons:matrix.org,@boot.industries:matrix.org,@ig88bot:matrix.org"
 
 # Hermes profile directory (isolates state, sessions, matrix store, logs).
 export HERMES_HOME="/Users/nesbitt/.hermes/profiles/kelk"
@@ -42,7 +38,7 @@ export HERMES_HOME="/Users/nesbitt/.hermes/profiles/kelk"
 # ---------------------------------------------------------------------------
 # Preflight guards (FCT055 Phase 4 — structural defenses).
 #
-#   exit 2  — MATRIX_TOKEN_PAN_KELK missing (above)
+#   exit 2  — MATRIX_TOKEN_KELK missing (above)
 #   exit 3  — profile missing or not pinned to `provider: custom`
 #   exit 4  — matrix-nio not importable in hermes-agent venv
 #   exit 5  — local model file missing
@@ -52,7 +48,7 @@ export HERMES_HOME="/Users/nesbitt/.hermes/profiles/kelk"
 KELK_PROFILE_CFG="${HERMES_HOME}/config.yaml"
 HERMES_AGENT_PY="/Users/nesbitt/.local/share/uv/tools/hermes-agent/bin/python3"
 KELK_MODEL_CONFIG="/Users/nesbitt/models/gemma-4-e4b-it-6bit/config.json"
-MLX_VLM_HEALTH_URL="http://127.0.0.1:41962/health"
+MLX_VLM_HEALTH_URL="http://127.0.0.1:41962/v1/models"
 
 # 1. Profile must exist AND pin provider: custom. See FCT055 RC-1.
 # FCT064: provider: custom may be top-level or indented under model: dict.
@@ -67,11 +63,11 @@ if ! grep -qE '^[[:space:]]*provider:[[:space:]]*custom([[:space:]]|$)' "${KELK_
   exit 3
 fi
 
-# 2. matrix-nio must be importable in the hermes-agent venv. Kelk now uses
-#    matrix-nio directly at runtime (gateway mode).
-"${HERMES_AGENT_PY}" -c 'import nio' 2>/dev/null || {
-  echo "ERROR: matrix-nio not installed in hermes-agent venv (${HERMES_AGENT_PY})" >&2
-  echo "       Install with: uv tool install --with matrix-nio hermes-agent" >&2
+# 2. mautrix must be importable in the hermes-agent venv. Hermes 0.9.0 uses
+#    mautrix[encryption] for native Matrix E2EE (not matrix-nio).
+"${HERMES_AGENT_PY}" -c 'import mautrix' 2>/dev/null || {
+  echo "ERROR: mautrix not installed in hermes-agent venv (${HERMES_AGENT_PY})" >&2
+  echo "       Install with: uv pip install --python ${HERMES_AGENT_PY} 'mautrix[encryption]' aiosqlite asyncpg Markdown" >&2
   exit 4
 }
 
@@ -82,9 +78,9 @@ if [[ ! -f "${KELK_MODEL_CONFIG}" ]]; then
   exit 5
 fi
 
-# 4. mlx-vlm-kelk must be listening on :41962. 3s max.
-if ! curl -sf --max-time 3 "${MLX_VLM_HEALTH_URL}" >/dev/null 2>&1; then
-  echo "ERROR: mlx-vlm-factory not reachable at ${MLX_VLM_HEALTH_URL}" >&2
+# 4. mlx-vlm-kelk must be listening on :41962. 15s max (model load takes ~10s).
+if ! curl -sf --max-time 15 "${MLX_VLM_HEALTH_URL}" >/dev/null 2>&1; then
+  echo "ERROR: mlx-vlm-kelk not reachable at ${MLX_VLM_HEALTH_URL}" >&2
   echo "       Check: launchctl list | grep mlx-vlm-kelk" >&2
   exit 6
 fi
@@ -129,19 +125,7 @@ unset ANTHROPIC_API_KEY
 unset ANTHROPIC_AUTH_TOKEN
 unset OPENAI_BASE_URL
 unset OPENAI_API_BASE
-
-# FCT060: Factory Conductor Webhook Memo Protocol.
-# Bridge WEBHOOK_SECRET_KELK (from Infisical) into Hermes's generic
-# WEBHOOK_SECRET env var. See docs/fct/FCT060 for architecture.
-if [[ -z "${WEBHOOK_SECRET_KELK:-}" ]]; then
-  echo "ERROR: WEBHOOK_SECRET_KELK not set — Infisical injection failed" >&2
-  exit 2
-fi
-export WEBHOOK_ENABLED=true
-export WEBHOOK_PORT=41952
-# Unquoted intentional: see hermes-boot.sh for rationale.
-export WEBHOOK_SECRET=$WEBHOOK_SECRET_KELK
-unset WEBHOOK_SECRET_KELK
+unset NOUS_MIMO_FACTORY_KEY
 
 exec /Users/nesbitt/.local/bin/hermes \
   --profile kelk \

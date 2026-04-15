@@ -14,7 +14,7 @@ factory/
 ├── jobs/             # Job YAML files + registry.yaml
 ├── scripts/          # Build tooling + agent-add.sh (provisioning) + agent-console.sh (tmux)
 ├── plists/           # launchd plists (gitignored, deployed manually)
-├── docs/fct/         # PREFIX docs (FCT001–FCT066+)
+├── docs/fct/         # PREFIX docs (FCT001–FCT067+)
 └── CLAUDE.md         # This file
 ```
 
@@ -45,11 +45,11 @@ factory/
 - **Build:** `python3 scripts/build-jobs-json.py` → `jobs.json`
 - **Portal consumption:** `jobs.json` served via GSD sidecar on :41911
 
-## Coordinator-rs
+## Coordinator-rs (deprecated)
 
 - **Location:** `coordinator/` (~11,600 lines Rust, 41 tests)
-- **Build:** `cargo build` / `cargo test`
-- **Config:** YAML-based (agents, rooms, settings, LLM providers)
+- **Status:** Deprecated. Agents now use standalone Hermes gateways with native Matrix E2EE.
+- **Build:** `cargo build` / `cargo test` (code preserved, not running)
 
 ## Conventions
 
@@ -66,7 +66,7 @@ factory/
 
 | Port | Service |
 |------|---------|
-| :41200 | Pantalaimon (E2EE proxy) |
+| :41200 | Pantalaimon (E2EE proxy) — **retired FCT067**, native E2EE via python-olm |
 | :41400 | Matrix MCP Coord |
 | :41401 | Matrix MCP Boot |
 | :41430 | FalkorDB (graph DB) |
@@ -80,14 +80,16 @@ factory/
 | :41914 | Auth sidecar (cookie auth) |
 | :41920-41939 | Preview slots |
 | :41940-41949 | Development |
-| :41950-41959 | Coordinator HTTP API (planned) |
-| :41961 | MLX inference — Boot dedicated (gemma-4-e4b-it-6bit) |
-| :41962 | MLX inference — Kelk dedicated (gemma-4-e4b-it-6bit) |
-| :41960 | MLX inference — reserved (aux/E2B candidate) |
-| :41988 | MLX inference — IG-88 hardware slot (idle; IG-88 runs on OpenRouter since FCT066) |
+| :41950-41959 | Reserved (was Coordinator HTTP API) |
+| :41960 | Reserved (no binding) |
+| :41961 | MLX inference — Boot main chat (gemma-4-e4b-it-6bit, mlx-vlm) |
+| :41962 | MLX inference — Kelk main chat (gemma-4-e4b-it-6bit, mlx-vlm) |
+| :41966 | flash-moe — Shared 26B aux (gemma-4-26b-a4b-it-6bit, SSD expert streaming, 2.88GB resident, ~5.4 tok/s) |
+| :41988 | MLX inference — retired (IG-88 on Nous Mimo Pro) |
 
 > **Blackbox retired 2026-03-23.** RP5 serves as dumb watchdog only (cron health checks → Matrix alerts).
-> **IG-88 on OpenRouter since FCT066 (2026-04-10).** Boot + Kelk on local MLX E4B.
+> **IG-88 on Nous Mimo Pro since FCT067 (2026-04-14).** Boot + Kelk fully local (E4B main + 26B aux via SSD streaming).
+> **Pantalaimon retired FCT067 (2026-04-14).** All agents use native E2EE via python-olm + matrix-nio[e2e].
 
 ## Agent Console (FCT048)
 
