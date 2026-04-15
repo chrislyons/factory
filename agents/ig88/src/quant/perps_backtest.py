@@ -29,6 +29,13 @@ Usage:
     stats = engine.compute_stats(venue="jupiter_perps")
 """
 
+from __future__ import annotations
+
+import math
+from datetime import datetime, timezone
+
+import numpy as np
+
 from src.quant.base_backtester import BaseVenueBacktester, BacktestConfig
 from src.quant.backtest_engine import (
     BacktestEngine,
@@ -43,8 +50,8 @@ from src.quant.regime import RegimeAssessment, RegimeState, regime_allows_venue
 # Constants
 # ---------------------------------------------------------------------------
 
-VENUE = \"jupiter_perps\"
-VALID_PAIRS = (\"SOL-PERP\",)
+VENUE = "jupiter_perps"
+VALID_PAIRS = ("SOL-PERP",)
 OPEN_FEE_PCT = 0.0007       # 0.07%
 CLOSE_FEE_PCT = 0.0007      # 0.07%
 ROUND_TRIP_FEE_PCT = 0.0014 # 0.14% minimum
@@ -55,6 +62,7 @@ MAX_OPEN_POSITIONS = 1
 BORROW_FEE_AUTOCLOSE_PCT = 0.50  # Close when borrow fee = 50% of TP target
 DEFAULT_LEVERAGE = 3.0
 MAX_LEVERAGE = 5.0
+KELLY_FRACTION = 0.25       # Quarter-Kelly sizing
 
 
 # ---------------------------------------------------------------------------
