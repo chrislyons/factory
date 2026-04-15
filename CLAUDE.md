@@ -45,11 +45,11 @@ factory/
 - **Build:** `python3 scripts/build-jobs-json.py` → `jobs.json`
 - **Portal consumption:** `jobs.json` served via GSD sidecar on :41911
 
-## Coordinator-rs
+## Coordinator-rs (deprecated)
 
 - **Location:** `coordinator/` (~11,600 lines Rust, 41 tests)
-- **Build:** `cargo build` / `cargo test`
-- **Config:** YAML-based (agents, rooms, settings, LLM providers)
+- **Status:** Deprecated. Agents now use standalone Hermes gateways with native Matrix E2EE.
+- **Build:** `cargo build` / `cargo test` (code preserved, not running)
 
 ## Conventions
 
@@ -80,7 +80,7 @@ factory/
 | :41914 | Auth sidecar (cookie auth) |
 | :41920-41939 | Preview slots |
 | :41940-41949 | Development |
-| :41950-41959 | Coordinator HTTP API (planned) |
+| :41950-41959 | Reserved (was Coordinator HTTP API) |
 | :41960 | Reserved (no binding) |
 | :41961 | MLX inference — Boot main chat (gemma-4-e4b-it-6bit, mlx-vlm) |
 | :41962 | MLX inference — Kelk main chat (gemma-4-e4b-it-6bit, mlx-vlm) |

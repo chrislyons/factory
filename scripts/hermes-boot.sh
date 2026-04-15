@@ -23,10 +23,8 @@ export MATRIX_USER_ID="@boot.industries:matrix.org"
 export MATRIX_ENCRYPTION="true"
 
 # User allowlist. Boot responds to Chris plus other agents for cross-agent
-# coordination (teammate tagging, handoffs) and the coordinator user for
-# system messages, approvals, and infra alerts. Matches coordinator's room
-# allowlist semantics.
-export GATEWAY_ALLOWED_USERS="@chrislyons:matrix.org,@coord:matrix.org,@ig88bot:matrix.org,@sir.kelk:matrix.org"
+# coordination (teammate tagging, handoffs).
+export GATEWAY_ALLOWED_USERS="@chrislyons:matrix.org,@ig88bot:matrix.org,@sir.kelk:matrix.org"
 
 # Hermes profile directory (isolates state, sessions, matrix store, logs).
 export HERMES_HOME="/Users/nesbitt/.hermes/profiles/boot"
