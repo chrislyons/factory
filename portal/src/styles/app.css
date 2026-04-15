@@ -4509,3 +4509,87 @@ textarea {
   font-size: 11px;
   border-radius: 6px;
 }
+
+/* Config Rows (single-column stacking) */
+
+.config-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Preferences full-width layout — 4 equal columns */
+
+.config-prefs-layout {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.config-prefs-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.config-prefs-col__title {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 4px;
+}
+
+/* Merged Model & Agent layout — 2 equal columns */
+
+.config-merged-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.config-merged-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.config-merged-col__title {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Capabilities sections (toolsets, MCP) within merged panel */
+
+.config-capabilities {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.config-capabilities__title {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* Inline actions within merged panel */
+
+.config-actions--inline {
+  display: flex;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
