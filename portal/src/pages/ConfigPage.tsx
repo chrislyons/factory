@@ -677,11 +677,23 @@ export function ConfigPage() {
       <div className="config-agents-grid">
         {CONFIG_AGENTS.map((agent) => {
           const agentDetail = summaries.find((s) => s.id === agent.id);
+          // For the selected agent, overlay live detail data so cards stay in sync
+          let effectiveSummary = agentDetail;
+          if (agent.id === selectedId && detail) {
+            const m = (config.model ?? {}) as Record<string, unknown>;
+            effectiveSummary = {
+              ...agentDetail,
+              id: agent.id,
+              label: agentDetail?.label ?? agent.label,
+              model: (m.default as string) ?? (config.model as string) ?? agentDetail?.model ?? "—",
+              provider: (m.provider as string) ?? (config.provider as string) ?? agentDetail?.provider ?? "—",
+            };
+          }
           return (
             <AgentCard
               key={agent.id}
               agent={agent}
-              summary={agentDetail}
+              summary={effectiveSummary}
               health={selectedId === agent.id ? health : undefined}
               selected={selectedId === agent.id}
               onClick={() => setSelectedId(agent.id)}
