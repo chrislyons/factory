@@ -306,9 +306,6 @@ async function purgeDeadDevices(
     `\n${dryRun ? "[DRY RUN] " : ""}${dead.length} dead device(s) to purge:\n`
   );
 
-  // Batch delete via deleteMultipleDevices (UIA flow)
-  const deadIds = dead.map((d: any) => d.device_id);
-
   if (dryRun) {
     for (const d of dead) {
       console.log(`  Would delete: ${d.device_id} (${d.display_name || "unnamed"})`);
@@ -317,54 +314,58 @@ async function purgeDeadDevices(
     return;
   }
 
-  try {
-    const password = process.env._MATRIX_PASSWORD_CACHED;
-    const userId = client.getUserId()!;
+  const password = process.env._MATRIX_PASSWORD_CACHED;
+  const userId = client.getUserId()!;
+  let deleted = 0;
 
-    // Step 1: Initial request to get UIA session
-    let session: string | undefined;
+  for (const d of dead) {
+    const label = `${d.device_id} (${d.display_name || "unnamed"})`;
     try {
+      // Step 1: DELETE without auth to get UIA session
+      let session: string | undefined;
+      try {
+        await client.http.authedRequest(
+          sdk.Method.Delete,
+          `/devices/${encodeURIComponent(d.device_id)}`,
+          undefined,
+          undefined,
+          { prefix: "/_matrix/client/v3" }
+        );
+        // If no 401, device was deleted without UIA (unlikely but possible)
+        console.log(`  ✓ Deleted: ${label}`);
+        deleted++;
+        continue;
+      } catch (err: any) {
+        if (err.httpStatus === 401 && err.data?.session) {
+          session = err.data.session;
+        } else {
+          throw err;
+        }
+      }
+
+      // Step 2: Retry with UIA auth
       await client.http.authedRequest(
-        sdk.Method.Post,
-        "/delete_devices",
+        sdk.Method.Delete,
+        `/devices/${encodeURIComponent(d.device_id)}`,
         undefined,
-        { devices: deadIds },
+        {
+          auth: {
+            type: "m.login.password",
+            identifier: { type: "m.id.user", user: userId },
+            password,
+            session,
+          },
+        },
         { prefix: "/_matrix/client/v3" }
       );
+      console.log(`  ✓ Deleted: ${label}`);
+      deleted++;
     } catch (err: any) {
-      // 401 with session is expected — UIA flow
-      if (err.httpStatus === 401 && err.data?.session) {
-        session = err.data.session;
-      } else {
-        throw err;
-      }
+      console.error(`  ✗ Failed: ${label} — ${err.message}`);
     }
-
-    // Step 2: Retry with auth
-    await client.http.authedRequest(
-      sdk.Method.Post,
-      "/delete_devices",
-      undefined,
-      {
-        devices: deadIds,
-        auth: {
-          type: "m.login.password",
-          identifier: { type: "m.id.user", user: userId },
-          password,
-          session,
-        },
-      },
-      { prefix: "/_matrix/client/v3" }
-    );
-
-    for (const d of dead) {
-      console.log(`  ✓ Deleted: ${d.device_id} (${d.display_name || "unnamed"})`);
-    }
-    console.log(`\nPurged ${dead.length} dead device(s).`);
-  } catch (err: any) {
-    console.error(`  ✗ Batch delete failed: ${err.message}`);
-    if (err.data) console.error("  Server response:", JSON.stringify(err.data));
   }
+
+  console.log(`\nPurged ${deleted}/${dead.length} dead device(s).`);
 
   if (dryRun) {
     console.log("\nDry run complete. No devices deleted.");
