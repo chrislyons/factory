@@ -23,6 +23,6 @@ unset ANTHROPIC_AUTH_TOKEN 2>/dev/null || true
 unset OPENAI_BASE_URL 2>/dev/null || true
 unset OPENAI_API_BASE 2>/dev/null || true
 
-exec /Users/nesbitt/.local/bin/hermes \
-  --profile gonzo \
-  chat "$@"
+exec /Users/nesbitt/.local/bin/hermes 
+  --profile gonzo 
+  gateway run --replace
