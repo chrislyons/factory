@@ -1,22 +1,13 @@
 #!/bin/bash
 # hermes-boot.sh — launch Boot Hermes gateway with Matrix adapter
 #
-# FCT059: migrated from coordinator-dispatched HTTP mode (hermes-serve.py on
-# :41970) to standalone `hermes gateway run`, matching the IG-88 pattern.
-# Boot now owns its Matrix connection via matrix-nio -> Pantalaimon rather
-# than receiving dispatched prompts over HTTP from coordinator-rs.
-#
-# The coordinator remains the inter-agent conductor at the Matrix protocol
-# level (room routing, allowlists, approvals), but no longer speaks HTTP
-# to Boot. Removes the hermes-serve.py shutdown race and eliminates the
-# HTTP dispatch failure mode.
-#
-# Invoked by com.bootindustries.hermes-boot.plist via infisical-env.sh,
-# which already supplies MATRIX_TOKEN_PAN_BOOT in the environment.
+# FCT067: Standalone Hermes gateway with native E2EE (python-olm + matrix-nio[e2e]).
+# Direct to matrix.org — Pantalaimon retired.
+# Invoked by com.bootindustries.hermes-boot.plist via infisical-env.sh factory.
 
 set -euo pipefail
 
-# Required: Infisical-provided Pantalaimon access token for @boot.industries.
+# Required: Infisical-provided Matrix access token for @boot.industries.
 if [[ -z "${MATRIX_TOKEN_BOOT:-}" ]]; then
   echo "ERROR: MATRIX_TOKEN_BOOT not set — Infisical injection failed" >&2
   exit 2
@@ -43,7 +34,7 @@ export HERMES_HOME="/Users/nesbitt/.hermes/profiles/boot"
 # ---------------------------------------------------------------------------
 # Preflight guards (FCT055 Phase 4 — structural defenses).
 #
-#   exit 2  — MATRIX_TOKEN_PAN_BOOT missing (above)
+#   exit 2  — MATRIX_TOKEN_BOOT missing (above)
 #   exit 3  — profile missing or not pinned to `provider: custom`
 #   exit 4  — matrix-nio not importable in hermes-agent venv
 #   exit 5  — local model file missing
@@ -53,7 +44,7 @@ export HERMES_HOME="/Users/nesbitt/.hermes/profiles/boot"
 BOOT_PROFILE_CFG="${HERMES_HOME}/config.yaml"
 HERMES_AGENT_PY="/Users/nesbitt/.local/share/uv/tools/hermes-agent/bin/python3"
 BOOT_MODEL_CONFIG="/Users/nesbitt/models/gemma-4-e4b-it-6bit/config.json"
-MLX_VLM_HEALTH_URL="http://127.0.0.1:41961/health"
+MLX_VLM_HEALTH_URL="http://127.0.0.1:41961/v1/models"
 
 # 1. Profile must exist AND pin provider: custom. See FCT055 RC-1 for why.
 # FCT064: provider: custom may be top-level (legacy) or indented under model:

@@ -1,10 +1,9 @@
 #!/bin/bash
 # hermes-ig88.sh — launch IG-88 Hermes gateway with Matrix adapter
 #
-# IG-88 was migrated from coordinator-managed mode to a standalone Hermes
-# gateway running matrix-nio directly. This wrapper is invoked by
-# com.bootindustries.hermes-ig88.plist via Infisical, which already
-# supplies MATRIX_TOKEN_PAN_IG88 in the environment.
+# FCT067: Standalone Hermes gateway with native E2EE (python-olm + matrix-nio[e2e]).
+# Direct to matrix.org — Pantalaimon retired. Main model: Nous Mimo Pro.
+# Invoked by com.bootindustries.hermes-ig88.plist via infisical-env.sh factory.
 #
 # Room isolation: IG-88 has no room allowlist in the Hermes Matrix adapter.
 # We rely on GATEWAY_ALLOWED_USERS=@chrislyons:matrix.org to silently drop
@@ -47,7 +46,7 @@ export HERMES_HOME="/Users/nesbitt/.hermes/profiles/ig88"
 # failure class). All checks must complete in <5s total so launchd start is
 # not delayed. Distinct exit codes so errors are grep-able in launchd logs.
 #
-#   exit 2  — MATRIX_TOKEN_PAN_IG88 missing (existing)
+#   exit 2  — MATRIX_TOKEN_IG88 missing (above)
 #   exit 3  — profile missing or not pinned to `provider: custom`
 #   exit 4  — matrix-nio not importable in hermes-agent venv
 #   exit 5  — local model file missing

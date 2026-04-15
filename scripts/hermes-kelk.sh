@@ -1,22 +1,13 @@
 #!/bin/bash
 # hermes-kelk.sh — launch Kelk Hermes gateway with Matrix adapter
 #
-# FCT059: migrated from coordinator-dispatched HTTP mode (hermes-serve.py on
-# :41972) to standalone `hermes gateway run`, matching the IG-88 pattern.
-# Kelk now owns its Matrix connection via matrix-nio -> Pantalaimon rather
-# than receiving dispatched prompts over HTTP from coordinator-rs.
-#
-# The coordinator remains the inter-agent conductor at the Matrix protocol
-# level (room routing, allowlists, approvals), but no longer speaks HTTP
-# to Kelk. Removes the hermes-serve.py shutdown race and eliminates the
-# HTTP dispatch failure mode.
-#
-# Invoked by com.bootindustries.hermes-kelk.plist via infisical-env.sh,
-# which already supplies MATRIX_TOKEN_PAN_KELK in the environment.
+# FCT067: Standalone Hermes gateway with native E2EE (python-olm + matrix-nio[e2e]).
+# Direct to matrix.org — Pantalaimon retired.
+# Invoked by com.bootindustries.hermes-kelk.plist via infisical-env.sh factory.
 
 set -euo pipefail
 
-# Required: Infisical-provided Pantalaimon access token for @sir.kelk.
+# Required: Infisical-provided Matrix access token for @sir.kelk.
 if [[ -z "${MATRIX_TOKEN_KELK:-}" ]]; then
   echo "ERROR: MATRIX_TOKEN_KELK not set — Infisical injection failed" >&2
   exit 2
@@ -42,7 +33,7 @@ export HERMES_HOME="/Users/nesbitt/.hermes/profiles/kelk"
 # ---------------------------------------------------------------------------
 # Preflight guards (FCT055 Phase 4 — structural defenses).
 #
-#   exit 2  — MATRIX_TOKEN_PAN_KELK missing (above)
+#   exit 2  — MATRIX_TOKEN_KELK missing (above)
 #   exit 3  — profile missing or not pinned to `provider: custom`
 #   exit 4  — matrix-nio not importable in hermes-agent venv
 #   exit 5  — local model file missing
@@ -52,7 +43,7 @@ export HERMES_HOME="/Users/nesbitt/.hermes/profiles/kelk"
 KELK_PROFILE_CFG="${HERMES_HOME}/config.yaml"
 HERMES_AGENT_PY="/Users/nesbitt/.local/share/uv/tools/hermes-agent/bin/python3"
 KELK_MODEL_CONFIG="/Users/nesbitt/models/gemma-4-e4b-it-6bit/config.json"
-MLX_VLM_HEALTH_URL="http://127.0.0.1:41962/health"
+MLX_VLM_HEALTH_URL="http://127.0.0.1:41962/v1/models"
 
 # 1. Profile must exist AND pin provider: custom. See FCT055 RC-1.
 # FCT064: provider: custom may be top-level or indented under model: dict.
@@ -82,8 +73,8 @@ if [[ ! -f "${KELK_MODEL_CONFIG}" ]]; then
   exit 5
 fi
 
-# 4. mlx-vlm-kelk must be listening on :41962. 3s max.
-if ! curl -sf --max-time 3 "${MLX_VLM_HEALTH_URL}" >/dev/null 2>&1; then
+# 4. mlx-vlm-kelk must be listening on :41962. 15s max (model load takes ~10s).
+if ! curl -sf --max-time 15 "${MLX_VLM_HEALTH_URL}" >/dev/null 2>&1; then
   echo "ERROR: mlx-vlm-factory not reachable at ${MLX_VLM_HEALTH_URL}" >&2
   echo "       Check: launchctl list | grep mlx-vlm-kelk" >&2
   exit 6
