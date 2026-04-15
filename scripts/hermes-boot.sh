@@ -17,19 +17,19 @@
 set -euo pipefail
 
 # Required: Infisical-provided Pantalaimon access token for @boot.industries.
-if [[ -z "${MATRIX_TOKEN_PAN_BOOT:-}" ]]; then
-  echo "ERROR: MATRIX_TOKEN_PAN_BOOT not set — Infisical injection failed" >&2
+if [[ -z "${MATRIX_TOKEN_BOOT:-}" ]]; then
+  echo "ERROR: MATRIX_TOKEN_BOOT not set — Infisical injection failed" >&2
   exit 2
 fi
 
 # Map the Infisical variable name into what matrix-nio expects.
-MATRIX_ACCESS_TOKEN=${MATRIX_TOKEN_PAN_BOOT}
+MATRIX_ACCESS_TOKEN=${MATRIX_TOKEN_BOOT}
 export MATRIX_ACCESS_TOKEN
 
-# Matrix homeserver (Pantalaimon local proxy — handles E2EE for us).
-export MATRIX_HOMESERVER="http://localhost:41200"
+# Matrix homeserver (direct — native E2EE via python-olm + matrix-nio[e2e]).
+export MATRIX_HOMESERVER="https://matrix.org"
 export MATRIX_USER_ID="@boot.industries:matrix.org"
-export MATRIX_ENCRYPTION="false"
+export MATRIX_ENCRYPTION="true"
 
 # User allowlist. Boot responds to Chris plus other agents for cross-agent
 # coordination (teammate tagging, handoffs) and the coordinator user for
@@ -146,6 +146,7 @@ unset ANTHROPIC_API_KEY
 unset ANTHROPIC_AUTH_TOKEN
 unset OPENAI_BASE_URL
 unset OPENAI_API_BASE
+unset NOUS_MIMO_FACTORY_KEY
 
 # FCT060: Factory Conductor Webhook Memo Protocol.
 # Bridge the agent-specific WEBHOOK_SECRET_BOOT (injected by infisical-env.sh

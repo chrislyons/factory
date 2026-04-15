@@ -15,20 +15,20 @@
 
 set -euo pipefail
 
-# Required: Infisical-provided Pantalaimon access token for @ig88bot.
-if [[ -z "${MATRIX_TOKEN_PAN_IG88:-}" ]]; then
-  echo "ERROR: MATRIX_TOKEN_PAN_IG88 not set — Infisical injection failed" >&2
+# Required: Infisical-provided Matrix access token for @ig88bot.
+if [[ -z "${MATRIX_TOKEN_IG88:-}" ]]; then
+  echo "ERROR: MATRIX_TOKEN_IG88 not set — Infisical injection failed" >&2
   exit 2
 fi
 
 # Map the Infisical variable name into what matrix-nio expects.
-MATRIX_ACCESS_TOKEN=${MATRIX_TOKEN_PAN_IG88}
+MATRIX_ACCESS_TOKEN=${MATRIX_TOKEN_IG88}
 export MATRIX_ACCESS_TOKEN
 
-# Matrix homeserver (Pantalaimon local proxy — handles E2EE for us).
-export MATRIX_HOMESERVER="http://localhost:41200"
+# Matrix homeserver (direct — native E2EE via python-olm + matrix-nio[e2e]).
+export MATRIX_HOMESERVER="https://matrix.org"
 export MATRIX_USER_ID="@ig88bot:matrix.org"
-export MATRIX_ENCRYPTION="false"
+export MATRIX_ENCRYPTION="true"
 
 # User allowlist — the primary room-isolation mechanism. Only Chris can
 # address IG-88. Any other sender (Boot, Kelk, other Matrix users) is

@@ -9,22 +9,25 @@
  *   npx tsx cross-sign.ts list              # List devices + verification status
  *   npx tsx cross-sign.ts sign              # Cross-sign unverified devices
  *   npx tsx cross-sign.ts sign --dry-run    # Preview what would be signed
- *   npx tsx cross-sign.ts sign --no-panctl  # Skip Pantalaimon verification
+ *   npx tsx cross-sign.ts sign --user @ig88bot:matrix.org  # Cross-sign a specific bot
  *
- * Environment:
+ * Environment (optional — prompts interactively if not set):
  *   MATRIX_RECOVERY_KEY   - Element security/recovery key (base58)
  *   MATRIX_PASSWORD        - Account password
  *   MATRIX_USER            - User ID (default: @chrislyons:matrix.org)
  *   MATRIX_HOMESERVER      - Homeserver URL (default: https://matrix.org)
  *
- * If env vars are not set, prompts interactively via stdin.
+ * Recommended: pass secrets via short-lived subshell, not persistent env:
+ *   MATRIX_PASSWORD=... MATRIX_RECOVERY_KEY=... npx tsx cross-sign.ts sign --user @ig88bot:matrix.org
+ *
+ * If env vars are not set, prompts interactively via stdin (secrets not echoed).
  */
 
 import "fake-indexeddb/auto";
 import * as sdk from "matrix-js-sdk";
 import { decodeRecoveryKey } from "matrix-js-sdk/lib/crypto-api";
 import * as readline from "node:readline";
-import { execSync } from "node:child_process";
+// execSync removed — Pantalaimon integration retired.
 import { suppressMatrixSdkLogs } from "./utils/suppress-sdk-logs";
 import { startAndSync } from "./utils/matrix-client-utils";
 import { bootstrapAndImportCrossSigningKeys } from "./utils/matrix-crypto-utils";
@@ -268,31 +271,7 @@ async function crossSignDevices(
 
   console.log(`\nSigned ${signed.length}/${unsigned.length} device(s).`);
 
-  // Pantalaimon integration
-  if (!noPanctl && signed.length > 0) {
-    console.log("\n── Pantalaimon Integration ──");
-    const userId = client.getUserId()!;
-
-    for (const deviceId of signed) {
-      if (deviceId === ownDeviceId) continue;
-      try {
-        console.error(`  Verifying ${deviceId} in Pantalaimon...`);
-        execSync(
-          `ssh whitebox "panctl verify-device '${userId}' '${deviceId}'"`,
-          { stdio: ["pipe", "pipe", "pipe"], timeout: 15_000 }
-        );
-        console.log(`  ✓ Pantalaimon: ${deviceId}`);
-      } catch (err: any) {
-        console.error(
-          `  ✗ Pantalaimon failed for ${deviceId}: ${err.message}`
-        );
-        console.error(
-          "    (Run manually: ssh whitebox \"panctl verify-device" +
-            ` '${userId}' '${deviceId}'\")`
-        );
-      }
-    }
-  }
+  // Pantalaimon integration removed — native E2EE via python-olm + matrix-nio[e2e].
 }
 
 // ── Cleanup ────────────────────────────────────────────────────
@@ -318,6 +297,12 @@ async function main(): Promise<void> {
   const command = args.find((a) => !a.startsWith("-")) || "sign";
   const dryRun = args.includes("--dry-run");
   const noPanctl = args.includes("--no-panctl");
+
+  // --user flag overrides MATRIX_USER env var
+  const userIdx = args.indexOf("--user");
+  if (userIdx !== -1 && args[userIdx + 1]) {
+    process.env.MATRIX_USER = args[userIdx + 1];
+  }
 
   if (args.includes("--help") || args.includes("-h")) {
     console.log(`

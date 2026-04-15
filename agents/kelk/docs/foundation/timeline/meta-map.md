@@ -61,107 +61,92 @@ theme_threads:
     appears_in: [age-14-20, age-20-30, age-30-40]
 
 people_index:
-  - name: James Lyons
+  - name: James
     role: brother
     status: estranged
     appears_in: [age-00-07, age-07-14, age-14-20, age-20-30, age-30-40]
 
-  - name: Michael Lyons
+  - name: Michael
     role: father
     status: unknown
     appears_in: [age-00-07, age-07-14, age-14-20, age-20-30, age-30-40]
 
-  - name: Cathy Borowec (formerly Lyons, née Reid)
+  - name: Cathy
     role: mother
     status: active
     appears_in: [age-00-07, age-07-14, age-14-20, age-20-30, age-30-40]
 
-  - name: Randy Lyons
-    role: paternal uncle
-    status: unknown
-    appears_in: [ ]
-
-  - name: Janet Lyons
-    role: paternal aunt
-    status: unknown
-    appears_in: [ ]
-
-  - name: Judy Hamre (née Reid)
-    role: maternal aunt
-    status: unknown
-    appears_in: [ ]
-
-  - name: Marie Anderson
+  - name: Marie
     role: family friend, choir director
     status: hostile
     appears_in: [age-07-14, age-14-20]
 
-  - name: Dan Borowec
+  - name: Dan
     role: Marie's husband, affair partner
     status: hostile
     appears_in: [age-07-14, age-14-20]
 
-  - name: Kate Borowec
+  - name: Kate
     role: childhood friend (Marie's daughter)
     status: complex
     appears_in: [age-07-14, age-14-20, age-30-40]
 
-  - name: Connor Borowec
+  - name: Connor
     role: childhood friend (Marie's son)
     status: complex
     appears_in: [age-07-14, age-14-20, age-30-40]
 
-  - name: Kelly Wallraff
+  - name: Kelly
     role: girlfriend
     status: ended
     appears_in: [age-14-20]
 
-  - name: Matt Mitchell
-    role: bandmate (The Agnostics, Mariposa, Heartbeat Hotel)
-    status: unknown
-    appears_in: [age-14-20]
-
-  - name: Julian Gregg
+  - name: Matt
     role: bandmate (The Agnostics)
     status: unknown
     appears_in: [age-14-20]
 
-  - name: Randy Lee
-    role: bandmate
+  - name: Julian
+    role: bandmate (The Agnostics)
     status: unknown
     appears_in: [age-14-20]
 
-  - name: Dave Connolly
+  - name: Randy
+    role: bandmate / paternal uncle
+    status: unknown
+    appears_in: [age-14-20]
+
+  - name: Dave
     role: bandmate
     status: unknown
     appears_in: [age-14-20, age-20-30]
 
-  - name: Andy Smith
+  - name: Andy
     role: bandmate (Heartbeat Hotel)
     status: unknown
     appears_in: [age-14-20, age-20-30]
 
-  - name: Markus Gilgan
+  - name: Markus
     role: supporter, lent recording gear
     status: unknown
     appears_in: [age-20-30]
 
-  - name: Lucie Handley-Girard
+  - name: Lucie
     role: girlfriend
     status: ended
     appears_in: [age-20-30]
 
-  - name: Rollie Lyons
+  - name: Rollie
     role: paternal grandmother
     status: unknown
     appears_in: [age-07-14, age-14-20]
 
-  - name: Tamara Mitchell 
+  - name: Tamara
     role: Matt's sister
     status: unknown
     appears_in: [age-14-20]
 
-  - name: Amanda Rekker
+  - name: Amanda
     role: friend (clarinet quintet)
     status: unknown
     appears_in: [age-14-20]
@@ -175,7 +160,9 @@ open_questions:
   - Where has Chris lived between Cobourg and Toronto?
 ---
 
-# Meta Map
+# Kelk Meta Map
+
+The river that runs through all decades.
 
 ## Purpose
 

@@ -9,6 +9,7 @@ Project documentation index for factory.
 - [[FCT063 Local Model Restoration and Routing Guide]]
 - [[FCT064 Factory Profile Rotation and Aux-Route Hardening]]
 - [[FCT065 Hermes Agent Recovery and Context Ceiling Research]]
+- [[FCT067 SSD Expert Streaming, E2EE Migration, and Gemma Tool Call Parser Fix]]
 
 ## All Documents
 
@@ -77,6 +78,7 @@ Project documentation index for factory.
 - [[FCT063 Local Model Restoration and Routing Guide]]
 - [[FCT064 Factory Profile Rotation and Aux-Route Hardening]]
 - [[FCT065 Hermes Agent Recovery and Context Ceiling Research]]
+- [[FCT067 SSD Expert Streaming, E2EE Migration, and Gemma Tool Call Parser Fix]]
 
 ## Navigation
 
@@ -90,4 +92,4 @@ Project documentation index for factory.
 
 ---
 
-**Last Generated:** 2026-04-13
+**Last Generated:** 2026-04-14
