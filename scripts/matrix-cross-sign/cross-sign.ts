@@ -9,25 +9,22 @@
  *   npx tsx cross-sign.ts list              # List devices + verification status
  *   npx tsx cross-sign.ts sign              # Cross-sign unverified devices
  *   npx tsx cross-sign.ts sign --dry-run    # Preview what would be signed
- *   npx tsx cross-sign.ts sign --user @ig88bot:matrix.org  # Cross-sign a specific bot
+ *   npx tsx cross-sign.ts sign --no-panctl  # Skip Pantalaimon verification
  *
- * Environment (optional — prompts interactively if not set):
+ * Environment:
  *   MATRIX_RECOVERY_KEY   - Element security/recovery key (base58)
  *   MATRIX_PASSWORD        - Account password
  *   MATRIX_USER            - User ID (default: @chrislyons:matrix.org)
  *   MATRIX_HOMESERVER      - Homeserver URL (default: https://matrix.org)
  *
- * Recommended: pass secrets via short-lived subshell, not persistent env:
- *   MATRIX_PASSWORD=... MATRIX_RECOVERY_KEY=... npx tsx cross-sign.ts sign --user @ig88bot:matrix.org
- *
- * If env vars are not set, prompts interactively via stdin (secrets not echoed).
+ * If env vars are not set, prompts interactively via stdin.
  */
 
 import "fake-indexeddb/auto";
 import * as sdk from "matrix-js-sdk";
 import { decodeRecoveryKey } from "matrix-js-sdk/lib/crypto-api";
 import * as readline from "node:readline";
-// execSync removed — Pantalaimon integration retired.
+// execSync removed — Pantalaimon retired (FCT067).
 import { suppressMatrixSdkLogs } from "./utils/suppress-sdk-logs";
 import { startAndSync } from "./utils/matrix-client-utils";
 import { bootstrapAndImportCrossSigningKeys } from "./utils/matrix-crypto-utils";
@@ -91,8 +88,6 @@ async function createAuthenticatedClient(): Promise<sdk.MatrixClient> {
     "MATRIX_PASSWORD",
     "Matrix password: "
   );
-  // Cache password for interactive auth (device deletion)
-  process.env._MATRIX_PASSWORD_CACHED = password;
   const recoveryKey = await getCredential(
     "MATRIX_RECOVERY_KEY",
     "Recovery key (base58): "
@@ -221,7 +216,8 @@ function printDeviceTable(devices: DeviceInfo[]): void {
 
 async function crossSignDevices(
   client: sdk.MatrixClient,
-  dryRun: boolean
+  dryRun: boolean,
+  noPanctl: boolean
 ): Promise<void> {
   const crypto = client.getCrypto();
   if (!crypto) throw new Error("Crypto not initialized");
@@ -258,15 +254,6 @@ async function crossSignDevices(
       // uploads the signature to the server via outgoingRequestProcessor.
       // This is different from setDeviceVerified which only sets LOCAL trust.
       await crypto.crossSignDevice(device.deviceId);
-      // Force flush outgoing requests — the Rust crypto engine queues
-      // signature uploads that must be sent before logout.
-      const olmMachine = (crypto as any).olmMachine;
-      if (olmMachine) {
-        const requests = await olmMachine.outgoingRequests();
-        for (const req of requests) {
-          await (crypto as any).outgoingRequestProcessor.makeOutgoingRequest(req);
-        }
-      }
       console.log(`  ✓ Cross-signed: ${label}`);
       signed.push(device.deviceId);
     } catch (err: any) {
@@ -281,130 +268,8 @@ async function crossSignDevices(
 
   console.log(`\nSigned ${signed.length}/${unsigned.length} device(s).`);
 
-}
-
-// ── Purge Dead Devices ───────────────────────────────────────────
-
-/** Known dead device display names that should be purged. */
-const DEAD_DEVICE_NAMES = ["pantalaimon"];
-
-async function purgeDeadDevices(
-  client: sdk.MatrixClient,
-  dryRun: boolean
-): Promise<void> {
-  // Fetch the account's actual device list from the server.
-  // IMPORTANT: the crypto store may contain device keys from OTHER users'
-  // devices (e.g. Pantalaimon proxied devices). These appear in getDevices()
-  // from crypto but are NOT deletable because they don't belong to this account.
-  // Only the server's /_matrix/client/v3/devices endpoint returns real devices.
-  const resp = await client.getDevices();
-  if (!resp?.devices) {
-    console.log("No devices returned from server.");
-    return;
-  }
-
-  const serverDeviceIds = new Set(resp.devices.map((d: any) => d.device_id));
-  const ownDeviceId = client.getDeviceId()!;
-
-  // Also check the crypto store for phantom devices not on the server
-  const cryptoDevices = await getDevices(client);
-  const phantoms = cryptoDevices.filter(
-    (d) => !serverDeviceIds.has(d.deviceId) && !d.isCurrentDevice &&
-    DEAD_DEVICE_NAMES.some((n) => (d.displayName || "").toLowerCase().includes(n))
-  );
-  if (phantoms.length > 0) {
-    console.log(`\n${phantoms.length} phantom device(s) in crypto store (not on server — cannot delete, only visible in E2EE key list):`);
-    for (const p of phantoms) {
-      console.log(`  ⊘ ${p.deviceId} (${p.displayName}) — phantom, not deletable`);
-    }
-  }
-
-  const dead = resp.devices.filter((d: any) => {
-    if (d.device_id === ownDeviceId) return false; // never delete self
-    const name = (d.display_name || "").toLowerCase();
-    return DEAD_DEVICE_NAMES.some((n) => name.includes(n));
-  });
-
-  if (dead.length === 0) {
-    console.log("\nNo dead devices found. Nothing to purge.");
-    return;
-  }
-
-  console.log(
-    `\n${dryRun ? "[DRY RUN] " : ""}${dead.length} dead device(s) to purge:\n`
-  );
-
-  if (dryRun) {
-    for (const d of dead) {
-      console.log(`  Would delete: ${d.device_id} (${d.display_name || "unnamed"})`);
-    }
-    console.log("\nDry run complete. No devices deleted.");
-    return;
-  }
-
-  const password = process.env._MATRIX_PASSWORD_CACHED;
-  const userId = client.getUserId()!;
-  let deleted = 0;
-
-  for (const d of dead) {
-    const label = `${d.device_id} (${d.display_name || "unnamed"})`;
-    try {
-      // Step 1: DELETE without auth to get UIA session
-      let session: string | undefined;
-      try {
-        await client.http.authedRequest(
-          sdk.Method.Delete,
-          `/devices/${encodeURIComponent(d.device_id)}`,
-          undefined,
-          undefined,
-          { prefix: "/_matrix/client/v3" }
-        );
-        console.log(`  ✓ Deleted: ${label}`);
-        deleted++;
-        continue;
-      } catch (err: any) {
-        if (err.httpStatus === 401 && err.data?.session) {
-          session = err.data.session;
-        } else if (err.httpStatus === 404) {
-          // Device listed in account but not deletable (proxy/appservice ghost)
-          console.log(`  ⊘ Phantom: ${label} — listed on account but not deletable (likely proxy-created)`);
-          continue;
-        } else {
-          throw err;
-        }
-      }
-
-      // Step 2: Retry with UIA auth
-      await client.http.authedRequest(
-        sdk.Method.Delete,
-        `/devices/${encodeURIComponent(d.device_id)}`,
-        undefined,
-        {
-          auth: {
-            type: "m.login.password",
-            identifier: { type: "m.id.user", user: userId },
-            password,
-            session,
-          },
-        },
-        { prefix: "/_matrix/client/v3" }
-      );
-      console.log(`  ✓ Deleted: ${label}`);
-      deleted++;
-    } catch (err: any) {
-      if (err.httpStatus === 404) {
-        console.log(`  ⊘ Phantom: ${label} — not deletable`);
-      } else {
-        console.error(`  ✗ Failed: ${label} — ${err.message}`);
-      }
-    }
-  }
-
-  console.log(`\nPurged ${deleted}/${dead.length} dead device(s).`);
-
-  if (dryRun) {
-    console.log("\nDry run complete. No devices deleted.");
-  }
+  // Pantalaimon retired (FCT067). Cross-signing via SDK is sufficient
+  // with native E2EE (mautrix + python-olm).
 }
 
 // ── Cleanup ────────────────────────────────────────────────────
@@ -429,6 +294,7 @@ async function main(): Promise<void> {
   const args = process.argv.slice(2);
   const command = args.find((a) => !a.startsWith("-")) || "sign";
   const dryRun = args.includes("--dry-run");
+  const noPanctl = true; // Pantalaimon retired
 
   // --user flag overrides MATRIX_USER env var
   const userIdx = args.indexOf("--user");
@@ -441,12 +307,10 @@ async function main(): Promise<void> {
 Matrix E2EE Cross-Signing Tool
 
 Usage:
-  npx tsx cross-sign.ts list                           List devices + verification status
-  npx tsx cross-sign.ts sign                           Cross-sign unverified devices
-  npx tsx cross-sign.ts sign --dry-run                 Preview (no changes)
-  npx tsx cross-sign.ts sign --user @bot:matrix.org    Cross-sign a specific bot's devices
-  npx tsx cross-sign.ts purge                          Delete dead devices (pantalaimon, etc.)
-  npx tsx cross-sign.ts purge --dry-run                Preview purge (no deletions)
+  npx tsx cross-sign.ts list              List devices + verification status
+  npx tsx cross-sign.ts sign              Cross-sign unverified devices
+  npx tsx cross-sign.ts sign --dry-run    Preview (no changes)
+  npx tsx cross-sign.ts sign --no-panctl  Skip Pantalaimon verification
 
 Environment variables:
   MATRIX_RECOVERY_KEY   Recovery key (base58, from Element security settings)
@@ -457,11 +321,12 @@ Environment variables:
 Security:
   Credentials are never logged or written to disk. Use env vars or stdin.
   After running: unset MATRIX_RECOVERY_KEY MATRIX_PASSWORD
+  Or use a subshell: (export MATRIX_RECOVERY_KEY=...; npx tsx cross-sign.ts)
 `);
     process.exit(0);
   }
 
-  if (!["list", "sign", "purge"].includes(command)) {
+  if (command !== "list" && command !== "sign") {
     console.error(`Unknown command: ${command}`);
     console.error("Use --help for usage information.");
     process.exit(1);
@@ -491,22 +356,24 @@ Security:
       console.log(
         `\n${verified}/${devices.length} cross-signed, ${devices.length - verified} unverified`
       );
-    } else if (command === "purge") {
-      await bootstrapSecretStorage(client);
-      console.log(`\nDevices for ${client.getUserId()}:\n`);
-      const before = await getDevices(client);
-      printDeviceTable(before);
-      await purgeDeadDevices(client, dryRun);
     } else {
-      // sign
       await bootstrapSecretStorage(client);
       console.log(`\nCurrent device state:`);
       const before = await getDevices(client);
       printDeviceTable(before);
-      await crossSignDevices(client, dryRun);
+      await crossSignDevices(client, dryRun, noPanctl);
 
       if (!dryRun) {
-        console.log("\nSignatures uploaded to server. Run `list` to verify (server needs a moment to propagate).");
+        // Wait for the sync loop to flush outgoing signature uploads.
+        // Without Pantalaimon (which provided a natural delay), we must
+        // explicitly wait for the SDK's OutgoingRequestsManager to process
+        // the queued signature upload requests.
+        console.log("\nFlushing signatures to server...");
+        await new Promise((r) => setTimeout(r, 5000));
+
+        console.log(`\nUpdated device state:`);
+        const after = await getDevices(client);
+        printDeviceTable(after);
       }
     }
   } catch (err: any) {

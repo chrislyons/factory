@@ -22,6 +22,12 @@ export MATRIX_HOMESERVER="https://matrix.org"
 export MATRIX_USER_ID="@sir.kelk:matrix.org"
 export MATRIX_ENCRYPTION="true"
 
+# Recovery key enables mautrix to self-sign the device on startup via SSSS.
+if [[ -n "${MATRIX_RECOVERY_KEY_KELK:-}" ]]; then
+  export MATRIX_RECOVERY_KEY="${MATRIX_RECOVERY_KEY_KELK}"
+  unset MATRIX_RECOVERY_KEY_KELK
+fi
+
 # User allowlist. Kelk responds to Chris plus other agents for cross-agent
 # coordination.
 export GATEWAY_ALLOWED_USERS="@chrislyons:matrix.org,@boot.industries:matrix.org,@ig88bot:matrix.org"
@@ -57,11 +63,11 @@ if ! grep -qE '^[[:space:]]*provider:[[:space:]]*custom([[:space:]]|$)' "${KELK_
   exit 3
 fi
 
-# 2. matrix-nio must be importable in the hermes-agent venv. Kelk now uses
-#    matrix-nio directly at runtime (gateway mode).
-"${HERMES_AGENT_PY}" -c 'import nio' 2>/dev/null || {
-  echo "ERROR: matrix-nio not installed in hermes-agent venv (${HERMES_AGENT_PY})" >&2
-  echo "       Install with: uv tool install --with matrix-nio hermes-agent" >&2
+# 2. mautrix must be importable in the hermes-agent venv. Hermes 0.9.0 uses
+#    mautrix[encryption] for native Matrix E2EE (not matrix-nio).
+"${HERMES_AGENT_PY}" -c 'import mautrix' 2>/dev/null || {
+  echo "ERROR: mautrix not installed in hermes-agent venv (${HERMES_AGENT_PY})" >&2
+  echo "       Install with: uv pip install --python ${HERMES_AGENT_PY} 'mautrix[encryption]' aiosqlite asyncpg Markdown" >&2
   exit 4
 }
 
