@@ -25,12 +25,29 @@ const CONFIG_AGENTS = AGENTS.filter((a) =>
 );
 
 const PROVIDER_OPTIONS = [
-  { value: "custom", label: "Custom (local)" },
-  { value: "nous", label: "Nous" },
+  { value: "mlx-vlm:41961", label: "MLX-VLM :41961" },
+  { value: "mlx-vlm:41962", label: "MLX-VLM :41962" },
+  { value: "flash-moe:41966", label: "Flash-MoE :41966" },
+  { value: "nous", label: "Nous Portal" },
   { value: "openrouter", label: "OpenRouter" },
   { value: "anthropic", label: "Anthropic" },
   { value: "openai", label: "OpenAI" },
 ];
+
+const PROVIDER_MODELS: Record<string, string[]> = {
+  "mlx-vlm:41961": ["gemma-4-e4b-it-6bit"],
+  "mlx-vlm:41962": ["gemma-4-e4b-it-6bit"],
+  "flash-moe:41966": ["gemma-4-26b-a4b-it-6bit"],
+  "nous": ["xiaomi/mimo-v2-pro"],
+  "openrouter": ["xiaomi/mimo-v2-omni", "anthropic/claude-sonnet-4", "anthropic/claude-opus-4", "openai/gpt-4o", "openai/o3-mini"],
+  "anthropic": ["claude-sonnet-4-20250514", "claude-opus-4-20250514", "claude-haiku-3.5"],
+  "openai": ["gpt-4o", "o3-mini", "gpt-4.1"],
+};
+
+function providerModelOptions(provider: string): string[] {
+  if (!provider) return [];
+  return PROVIDER_MODELS[provider] ?? [];
+}
 
 const SKIN_OPTIONS = [
   { value: "", label: "Default" },
@@ -67,11 +84,18 @@ function providerBadgeClass(provider?: string) {
   const key = provider.toLowerCase();
   if (key === "nous") return "config-provider-badge--nous";
   if (key === "openrouter") return "config-provider-badge--openrouter";
-  return "config-provider-badge--custom";
+  if (key.startsWith("mlx-vlm")) return "config-provider-badge--mlx";
+  if (key.startsWith("flash-moe")) return "config-provider-badge--flash";
+  return "config-provider-badge--default";
 }
 
 function providerLabel(provider?: string) {
   if (!provider) return "—";
+  // Legacy "custom" value
+  if (provider === "custom") return "local";
+  // Find in options for nice label
+  const opt = PROVIDER_OPTIONS.find((p) => p.value === provider);
+  if (opt) return opt.label;
   return provider;
 }
 
@@ -133,35 +157,20 @@ function HealthDot({ health }: { health?: AgentHealth }) {
 function AgentCard({
   agent,
   summary,
-  configMap,
-  health,
   selected,
   onClick,
 }: {
   agent: (typeof CONFIG_AGENTS)[number];
   summary?: AgentConfigSummary;
-  configMap: Record<string, { config: Record<string, unknown>; health?: AgentHealth }>;
-  health?: AgentHealth;
   selected: boolean;
   onClick: () => void;
 }) {
-  const agentConfig = configMap[agent.id]?.config;
-  const aux = (agentConfig?.auxiliary ?? {}) as Record<string, Record<string, unknown>>;
-  const auxSlots = AUX_SLOTS
-    .filter((name) => aux[name] && (aux[name].model || aux[name].provider))
-    .map((name) => ({
-      name,
-      model: ((aux[name].model as string) ?? "—"),
-      provider: (aux[name].provider as string) ?? "",
-    }));
-
   return (
     <button
       className={cn("config-agent-card", selected && "config-agent-card--selected")}
       style={{ ["--agent-accent" as string]: agent.color }}
       onClick={onClick}
     >
-      {/* Header: ● Name ... provider badge */}
       <div className="config-agent-card__header">
         <span className="config-agent-card__dot" style={{ background: agent.color }} />
         <div className="config-agent-card__identity">
@@ -172,28 +181,6 @@ function AgentCard({
           {providerLabel(summary?.provider)}
         </span>
       </div>
-
-      {/* AUX section */}
-      {auxSlots.length > 0 && (
-        <div className="config-agent-card__aux">
-          {auxSlots.map((slot) => (
-            <div key={slot.name} className="config-agent-card__aux-row">
-              <div className="config-agent-card__aux-head">
-                <div className="config-agent-card__aux-label-group">
-                  <HealthDot health={health} />
-                  <span className="config-agent-card__aux-label">{slot.name.replace(/_/g, " ")}</span>
-                </div>
-                {slot.provider && (
-                  <span className={cn("config-provider-badge", providerBadgeClass(slot.provider))}>
-                    {providerLabel(slot.provider)}
-                  </span>
-                )}
-              </div>
-              <div className="config-agent-card__aux-model">{truncateModel(slot.model, 34)}</div>
-            </div>
-          ))}
-        </div>
-      )}
     </button>
   );
 }
@@ -449,24 +436,7 @@ function ModelAndAgent({
   const modelObj = (config.model ?? {}) as Record<string, unknown>;
   const currentModel = (modelObj.default as string) ?? (config.model as string) ?? "";
   const currentProvider = (modelObj.provider as string) ?? (config.provider as string) ?? "";
-  const baseUrl = (modelObj.base_url as string) ?? (config.base_url as string) ?? health?.url ?? "—";
-  const contextLength = (modelObj.context_length as number | undefined) ?? undefined;
   const liveHealth = healthMutation.data ?? health;
-
-  const customProviders = (config.custom_providers ?? []) as Array<{
-    name?: string;
-    base_url?: string;
-    models?: Record<string, unknown>;
-  }>;
-
-  const modelOptions: string[] = [];
-  for (const cp of customProviders) {
-    const models = cp.models ?? {};
-    for (const modelName of Object.keys(models)) {
-      if (!modelOptions.includes(modelName)) modelOptions.push(modelName);
-    }
-  }
-  if (currentModel && !modelOptions.includes(currentModel)) modelOptions.unshift(currentModel);
 
   // ── Agent params data ──
   const agentObj = (config.agent ?? {}) as Record<string, unknown>;
@@ -493,63 +463,51 @@ function ModelAndAgent({
     >
       <div className="config-merged-layout">
         {/* Left column: Model & Provider info */}
-        <div className="config-merged-col">
-          <span className="config-merged-col__title">Model & Provider</span>
-          <div className="config-info-grid">
-            <div className="config-info-row">
-              <span className="config-info-row__key">Model</span>
-              <span className="config-info-row__val config-info-row__val--inline">
-                <HealthDot health={liveHealth} />
-                {modelOptions.length > 1 ? (
-                  <select
-                    className="config-field__select select-input config-field__select--inline"
-                    value={currentModel}
-                    disabled={patchMutation.isPending}
-                    onChange={(e) => {
-                      if (e.target.value !== currentModel) patchMutation.mutate({ "model.default": e.target.value });
-                    }}
-                  >
-                    {modelOptions.map((m) => (
-                      <option key={m} value={m}>{shortenPath(m)}</option>
-                    ))}
-                  </select>
-                ) : (
-                  <span>{shortenPath(currentModel) || "—"}</span>
-                )}
-              </span>
-            </div>
+          <div className="config-merged-col">
+            <span className="config-merged-col__title">Model & Provider</span>
 
-            <div className="config-info-row">
-              <span className="config-info-row__key">Provider</span>
-              <select
-                className="config-field__select select-input config-field__select--inline"
-                value={currentProvider}
-                disabled={patchMutation.isPending}
-                onChange={(e) => {
-                  if (e.target.value !== currentProvider) patchMutation.mutate({ "model.provider": e.target.value });
-                }}
-              >
-                {PROVIDER_OPTIONS.map((p) => (
-                  <option key={p.value} value={p.value}>{p.label}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="config-info-row">
-              <span className="config-info-row__key">URL</span>
-              <code className="config-info-row__code">{shortenPath(baseUrl)}</code>
-            </div>
-
-            {contextLength != null && (
-              <div className="config-info-row">
-                <span className="config-info-row__key">Context</span>
-                <span className="config-info-row__val">{contextLength.toLocaleString()} tokens</span>
-              </div>
-            )}
-
-            {/* Auxiliary Slots — individual dropdowns */}
+            {/* Main model — same row layout as aux */}
             <div className="config-aux-section">
-              <span className="config-aux-section__title">Auxiliary Slots</span>
+              <div className="config-aux-row">
+                <div className="config-aux-row__label">
+                  <HealthDot health={liveHealth} />
+                  <span className="config-aux-row__name">main chat</span>
+                </div>
+                <select
+                  className="config-field__select select-input config-field__select--inline"
+                  value={currentProvider}
+                  disabled={patchMutation.isPending}
+                  onChange={(e) => {
+                    if (e.target.value !== currentProvider) patchMutation.mutate({ "model.provider": e.target.value });
+                  }}
+                >
+                  <option value="">—</option>
+                  {PROVIDER_OPTIONS.map((p) => (
+                    <option key={p.value} value={p.value}>{p.label}</option>
+                  ))}
+                </select>
+                <select
+                  className="config-field__select select-input config-field__select--inline"
+                  value={currentModel}
+                  disabled={patchMutation.isPending}
+                  onChange={(e) => {
+                    if (e.target.value !== currentModel) patchMutation.mutate({ "model.default": e.target.value });
+                  }}
+                >
+                  <option value="">—</option>
+                  {providerModelOptions(currentProvider).map((m) => (
+                    <option key={m} value={m}>{shortenPath(m)}</option>
+                  ))}
+                  {currentModel && !providerModelOptions(currentProvider).includes(currentModel) && (
+                    <option value={currentModel}>{shortenPath(currentModel)}</option>
+                  )}
+                </select>
+              </div>
+            </div>
+
+            {/* Auxiliary Slots */}
+            <div className="config-aux-section">
+              <span className="config-aux-section__title">Auxiliary</span>
               {AUX_SLOTS.map((slotName) => {
                 const aux = (config.auxiliary ?? {}) as Record<string, Record<string, unknown>>;
                 const slot = (aux[slotName] ?? {}) as Record<string, unknown>;
@@ -557,21 +515,6 @@ function ModelAndAgent({
 
                 const currentProvider = (slot.provider as string) ?? "";
                 const currentModel = (slot.model as string) ?? "";
-                const providerOptions = PROVIDER_OPTIONS;
-
-                // Model options from custom_providers
-                const customProviders = (config.custom_providers ?? []) as Array<{
-                  name?: string; base_url?: string; models?: Record<string, unknown>;
-                }>;
-                const modelOptions: string[] = [];
-                for (const cp of customProviders) {
-                  for (const mName of Object.keys(cp.models ?? {})) {
-                    if (!modelOptions.includes(mName)) modelOptions.push(mName);
-                  }
-                }
-                if (currentModel && !modelOptions.includes(currentModel)) {
-                  modelOptions.unshift(currentModel);
-                }
 
                 return (
                   <div key={slotName} className="config-aux-row">
@@ -586,7 +529,7 @@ function ModelAndAgent({
                       onChange={(e) => patch(`auxiliary.${slotName}.provider`, e.target.value)}
                     >
                       <option value="">—</option>
-                      {providerOptions.map((p) => (
+                      {PROVIDER_OPTIONS.map((p) => (
                         <option key={p.value} value={p.value}>{p.label}</option>
                       ))}
                     </select>
@@ -597,9 +540,12 @@ function ModelAndAgent({
                       onChange={(e) => patch(`auxiliary.${slotName}.model`, e.target.value)}
                     >
                       <option value="">—</option>
-                      {modelOptions.map((m) => (
+                      {providerModelOptions(currentProvider).map((m) => (
                         <option key={m} value={m}>{shortenPath(m)}</option>
                       ))}
+                      {currentModel && !providerModelOptions(currentProvider).includes(currentModel) && (
+                        <option value={currentModel}>{shortenPath(currentModel)}</option>
+                      )}
                     </select>
                   </div>
                 );
@@ -634,7 +580,6 @@ function ModelAndAgent({
               )}
             </div>
           </div>
-        </div>
 
         {/* Right column: Agent params + Toolsets + MCP */}
         <div className="config-merged-col">
@@ -831,8 +776,6 @@ export function ConfigPage() {
             key={agent.id}
             agent={agent}
             summary={{ id: agent.id, label: agent.label, model: cardModel(agent.id), provider: cardProvider(agent.id) }}
-            configMap={configMap}
-            health={configMap[agent.id]?.health}
             selected={selectedId === agent.id}
             onClick={() => setSelectedId(agent.id)}
           />
