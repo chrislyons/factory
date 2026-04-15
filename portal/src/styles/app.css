@@ -3946,7 +3946,7 @@ textarea {
 .config-settings-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 16px;
 }
 
 @media (max-width: 600px) {
@@ -3958,15 +3958,15 @@ textarea {
 .config-field {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .config-field__label {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
-  color: var(--text-muted);
+  color: var(--text-dim);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
 }
 
 .config-field__input,
@@ -4008,7 +4008,7 @@ textarea {
 .config-info-grid {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .config-info-row {
@@ -4020,11 +4020,11 @@ textarea {
 }
 
 .config-info-row__key {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
-  color: var(--text-muted);
+  color: var(--text-dim);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
   flex-shrink: 0;
   min-width: 100px;
 }
@@ -4362,26 +4362,27 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding: 4px 0;
+  gap: 16px;
+  padding: 8px 0;
 }
 
 .config-pref-row__label {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 2px;
   min-width: 0;
+  flex: 1;
 }
 
 .config-pref-row__name {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--text-primary);
 }
 
 .config-pref-row__desc {
-  font-size: 10px;
-  color: var(--text-muted);
+  font-size: 11px;
+  color: var(--text-dim);
 }
 
 /* Toolset Chips */
@@ -4404,20 +4405,20 @@ textarea {
 .config-toolsets__grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: 6px;
 }
 
 .config-toolset-chip {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 10px;
+  gap: 6px;
+  font-size: 11px;
   font-weight: 500;
-  color: var(--text-muted);
-  background: color-mix(in srgb, var(--text-primary) 4%, transparent);
+  color: var(--text-dim);
+  background: color-mix(in srgb, var(--text-primary) 5%, transparent);
   border: 1px solid var(--border);
-  border-radius: 5px;
-  padding: 3px 8px;
+  border-radius: 6px;
+  padding: 4px 10px;
   cursor: pointer;
   transition: all 0.15s ease;
   user-select: none;
@@ -4446,17 +4447,17 @@ textarea {
 .config-mcp-grid {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .config-mcp-row {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 8px;
-  background: color-mix(in srgb, var(--text-primary) 2%, transparent);
+  gap: 6px;
+  padding: 10px;
+  background: color-mix(in srgb, var(--text-primary) 3%, transparent);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 8px;
 }
 
 .config-mcp-row__info {
@@ -4515,32 +4516,36 @@ textarea {
 .config-rows {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
 }
 
-/* Preferences full-width layout — 4 equal columns */
+/* Preferences full-width layout — 2 balanced columns */
 
 .config-prefs-layout {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
 }
 
 .config-prefs-col {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
+  padding: 12px;
+  background: color-mix(in srgb, var(--text-primary) 2%, transparent);
+  border-radius: 8px;
+  border: 1px solid var(--border);
 }
 
 .config-prefs-col__title {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  padding-bottom: 6px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 4px;
+  letter-spacing: 0.08em;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-strong);
+  margin-bottom: 6px;
 }
 
 /* Merged Model & Agent layout — 2 equal columns */
@@ -4548,23 +4553,23 @@ textarea {
 .config-merged-layout {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  gap: 24px;
 }
 
 .config-merged-col {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .config-merged-col__title {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  padding-bottom: 6px;
-  border-bottom: 1px solid var(--border);
+  letter-spacing: 0.08em;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-strong);
   margin-bottom: 4px;
 }
 
@@ -4579,11 +4584,11 @@ textarea {
 }
 
 .config-capabilities__title {
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 700;
-  color: var(--text-muted);
+  color: var(--text-dim);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
 }
 
 /* Inline actions within merged panel */
@@ -4610,5 +4615,19 @@ textarea {
 
   .config-merged-layout {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .config-pref-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .config-info-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
   }
 }
