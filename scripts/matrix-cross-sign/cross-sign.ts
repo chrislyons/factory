@@ -258,6 +258,15 @@ async function crossSignDevices(
       // uploads the signature to the server via outgoingRequestProcessor.
       // This is different from setDeviceVerified which only sets LOCAL trust.
       await crypto.crossSignDevice(device.deviceId);
+      // Force flush outgoing requests — the Rust crypto engine queues
+      // signature uploads that must be sent before logout.
+      const olmMachine = (crypto as any).olmMachine;
+      if (olmMachine) {
+        const requests = await olmMachine.outgoingRequests();
+        for (const req of requests) {
+          await (crypto as any).outgoingRequestProcessor.makeOutgoingRequest(req);
+        }
+      }
       console.log(`  ✓ Cross-signed: ${label}`);
       signed.push(device.deviceId);
     } catch (err: any) {
