@@ -4016,7 +4016,7 @@ textarea {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 6px 0;
+  padding: 4px 0;
 }
 
 .config-info-row__key {
@@ -4565,6 +4565,7 @@ textarea {
   letter-spacing: 0.06em;
   padding-bottom: 6px;
   border-bottom: 1px solid var(--border);
+  margin-bottom: 4px;
 }
 
 /* Capabilities sections (toolsets, MCP) within merged panel */
@@ -4573,7 +4574,7 @@ textarea {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding-top: 10px;
+  padding-top: 8px;
   border-top: 1px solid var(--border);
 }
 
@@ -4590,6 +4591,24 @@ textarea {
 .config-actions--inline {
   display: flex;
   gap: 8px;
-  padding-top: 8px;
+  padding-top: 6px;
   border-top: 1px solid var(--border);
+}
+
+/* ── Config Page Responsive ──────────────────────────────────────── */
+
+@media (max-width: 800px) {
+  .config-prefs-layout {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .config-prefs-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .config-merged-layout {
+    grid-template-columns: 1fr;
+  }
 }
