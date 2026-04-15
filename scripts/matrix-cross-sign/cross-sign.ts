@@ -283,14 +283,33 @@ async function purgeDeadDevices(
   client: sdk.MatrixClient,
   dryRun: boolean
 ): Promise<void> {
-  // Fetch all devices from the server (not crypto — we want the full list)
+  // Fetch the account's actual device list from the server.
+  // IMPORTANT: the crypto store may contain device keys from OTHER users'
+  // devices (e.g. Pantalaimon proxied devices). These appear in getDevices()
+  // from crypto but are NOT deletable because they don't belong to this account.
+  // Only the server's /_matrix/client/v3/devices endpoint returns real devices.
   const resp = await client.getDevices();
   if (!resp?.devices) {
     console.log("No devices returned from server.");
     return;
   }
 
+  const serverDeviceIds = new Set(resp.devices.map((d: any) => d.device_id));
   const ownDeviceId = client.getDeviceId()!;
+
+  // Also check the crypto store for phantom devices not on the server
+  const cryptoDevices = await getDevices(client);
+  const phantoms = cryptoDevices.filter(
+    (d) => !serverDeviceIds.has(d.deviceId) && !d.isCurrentDevice &&
+    DEAD_DEVICE_NAMES.some((n) => (d.displayName || "").toLowerCase().includes(n))
+  );
+  if (phantoms.length > 0) {
+    console.log(`\n${phantoms.length} phantom device(s) in crypto store (not on server — cannot delete, only visible in E2EE key list):`);
+    for (const p of phantoms) {
+      console.log(`  ⊘ ${p.deviceId} (${p.displayName}) — phantom, not deletable`);
+    }
+  }
+
   const dead = resp.devices.filter((d: any) => {
     if (d.device_id === ownDeviceId) return false; // never delete self
     const name = (d.display_name || "").toLowerCase();
