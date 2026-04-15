@@ -91,6 +91,8 @@ async function createAuthenticatedClient(): Promise<sdk.MatrixClient> {
     "MATRIX_PASSWORD",
     "Matrix password: "
   );
+  // Cache password for interactive auth (device deletion)
+  process.env._MATRIX_PASSWORD_CACHED = password;
   const recoveryKey = await getCredential(
     "MATRIX_RECOVERY_KEY",
     "Recovery key (base58): "
@@ -219,8 +221,7 @@ function printDeviceTable(devices: DeviceInfo[]): void {
 
 async function crossSignDevices(
   client: sdk.MatrixClient,
-  dryRun: boolean,
-  noPanctl: boolean
+  dryRun: boolean
 ): Promise<void> {
   const crypto = client.getCrypto();
   if (!crypto) throw new Error("Crypto not initialized");
@@ -271,7 +272,64 @@ async function crossSignDevices(
 
   console.log(`\nSigned ${signed.length}/${unsigned.length} device(s).`);
 
-  // Pantalaimon integration removed — native E2EE via python-olm + matrix-nio[e2e].
+}
+
+// ── Purge Dead Devices ───────────────────────────────────────────
+
+/** Known dead device display names that should be purged. */
+const DEAD_DEVICE_NAMES = ["pantalaimon"];
+
+async function purgeDeadDevices(
+  client: sdk.MatrixClient,
+  dryRun: boolean
+): Promise<void> {
+  // Fetch all devices from the server (not crypto — we want the full list)
+  const resp = await client.getDevices();
+  if (!resp?.devices) {
+    console.log("No devices returned from server.");
+    return;
+  }
+
+  const ownDeviceId = client.getDeviceId()!;
+  const dead = resp.devices.filter((d: any) => {
+    if (d.device_id === ownDeviceId) return false; // never delete self
+    const name = (d.display_name || "").toLowerCase();
+    return DEAD_DEVICE_NAMES.some((n) => name.includes(n));
+  });
+
+  if (dead.length === 0) {
+    console.log("\nNo dead devices found. Nothing to purge.");
+    return;
+  }
+
+  console.log(
+    `\n${dryRun ? "[DRY RUN] " : ""}${dead.length} dead device(s) to purge:\n`
+  );
+
+  for (const d of dead) {
+    const label = `${d.device_id} (${d.display_name || "unnamed"})`;
+    if (dryRun) {
+      console.log(`  Would delete: ${label}`);
+      continue;
+    }
+
+    try {
+      // deleteDevice requires interactive auth — use password from env
+      const password = process.env._MATRIX_PASSWORD_CACHED;
+      await client.deleteDevice(d.device_id, {
+        type: "m.login.password",
+        identifier: { type: "m.id.user", user: client.getUserId()! },
+        password,
+      });
+      console.log(`  ✓ Deleted: ${label}`);
+    } catch (err: any) {
+      console.error(`  ✗ Failed: ${label} — ${err.message}`);
+    }
+  }
+
+  if (dryRun) {
+    console.log("\nDry run complete. No devices deleted.");
+  }
 }
 
 // ── Cleanup ────────────────────────────────────────────────────
@@ -296,7 +354,6 @@ async function main(): Promise<void> {
   const args = process.argv.slice(2);
   const command = args.find((a) => !a.startsWith("-")) || "sign";
   const dryRun = args.includes("--dry-run");
-  const noPanctl = args.includes("--no-panctl");
 
   // --user flag overrides MATRIX_USER env var
   const userIdx = args.indexOf("--user");
@@ -309,10 +366,12 @@ async function main(): Promise<void> {
 Matrix E2EE Cross-Signing Tool
 
 Usage:
-  npx tsx cross-sign.ts list              List devices + verification status
-  npx tsx cross-sign.ts sign              Cross-sign unverified devices
-  npx tsx cross-sign.ts sign --dry-run    Preview (no changes)
-  npx tsx cross-sign.ts sign --no-panctl  Skip Pantalaimon verification
+  npx tsx cross-sign.ts list                           List devices + verification status
+  npx tsx cross-sign.ts sign                           Cross-sign unverified devices
+  npx tsx cross-sign.ts sign --dry-run                 Preview (no changes)
+  npx tsx cross-sign.ts sign --user @bot:matrix.org    Cross-sign a specific bot's devices
+  npx tsx cross-sign.ts purge                          Delete dead devices (pantalaimon, etc.)
+  npx tsx cross-sign.ts purge --dry-run                Preview purge (no deletions)
 
 Environment variables:
   MATRIX_RECOVERY_KEY   Recovery key (base58, from Element security settings)
@@ -323,12 +382,11 @@ Environment variables:
 Security:
   Credentials are never logged or written to disk. Use env vars or stdin.
   After running: unset MATRIX_RECOVERY_KEY MATRIX_PASSWORD
-  Or use a subshell: (export MATRIX_RECOVERY_KEY=...; npx tsx cross-sign.ts)
 `);
     process.exit(0);
   }
 
-  if (command !== "list" && command !== "sign") {
+  if (!["list", "sign", "purge"].includes(command)) {
     console.error(`Unknown command: ${command}`);
     console.error("Use --help for usage information.");
     process.exit(1);
@@ -358,16 +416,25 @@ Security:
       console.log(
         `\n${verified}/${devices.length} cross-signed, ${devices.length - verified} unverified`
       );
+    } else if (command === "purge") {
+      await bootstrapSecretStorage(client);
+      console.log(`\nDevices for ${client.getUserId()}:\n`);
+      const before = await getDevices(client);
+      printDeviceTable(before);
+      await purgeDeadDevices(client, dryRun);
     } else {
+      // sign
       await bootstrapSecretStorage(client);
       console.log(`\nCurrent device state:`);
       const before = await getDevices(client);
       printDeviceTable(before);
-      await crossSignDevices(client, dryRun, noPanctl);
+      await crossSignDevices(client, dryRun);
 
       if (!dryRun) {
+        // Wait for server to propagate signatures before re-fetching
+        console.log("\nWaiting for server propagation...");
+        await new Promise((r) => setTimeout(r, 3000));
         console.log(`\nUpdated device state:`);
-        // Re-fetch after signing
         const after = await getDevices(client);
         printDeviceTable(after);
       }
