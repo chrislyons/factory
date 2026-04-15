@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   useQuery,
   useMutation,
@@ -93,22 +93,6 @@ function HealthDot({ health }: { health?: AgentHealth }) {
   );
 }
 
-// ── Queued Badge ─────────────────────────────────────────────────────
-
-function QueuedBadge({ pending }: { pending: string[] }) {
-  if (pending.length === 0) return null;
-  return (
-    <div className="config-queued-badge">
-      <span className="config-queued-badge__dot" />
-      <span className="config-queued-badge__text">
-        {pending.length === 1
-          ? `Queued: ${pending[0]} — applied after current task`
-          : `${pending.length} changes queued`}
-      </span>
-    </div>
-  );
-}
-
 // ── Agent Card ───────────────────────────────────────────────────────
 
 function AgentCard({
@@ -151,24 +135,16 @@ function DisplayToggles({
   agentId,
   config,
   disabled,
-  onQueued,
 }: {
   agentId: string;
   config: Record<string, unknown>;
   disabled: boolean;
-  onQueued?: (label: string) => void;
 }) {
   const queryClient = useQueryClient();
   const display = (config.display ?? {}) as Record<string, boolean>;
 
   const patchMutation = useMutation({
     mutationFn: (patch: Record<string, unknown>) => patchAgentConfig(agentId, patch),
-    onSuccess: (_data, variables) => {
-      const keys = Object.keys(variables);
-      if (keys.length > 0 && onQueued) {
-        onQueued(keys.map((k) => k.replace("display.", "")).join(", "));
-      }
-    },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["config-detail", agentId] });
       queryClient.invalidateQueries({ queryKey: ["config-summaries"] });
@@ -217,23 +193,15 @@ function AgentSettings({
   agentId,
   config,
   disabled,
-  onQueued,
 }: {
   agentId: string;
   config: Record<string, unknown>;
   disabled: boolean;
-  onQueued?: (label: string) => void;
 }) {
   const queryClient = useQueryClient();
 
   const patchMutation = useMutation({
     mutationFn: (patch: Record<string, unknown>) => patchAgentConfig(agentId, patch),
-    onSuccess: (_data, variables) => {
-      const keys = Object.keys(variables);
-      if (keys.length > 0 && onQueued) {
-        onQueued(keys.join(", "));
-      }
-    },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["config-detail", agentId] });
       queryClient.invalidateQueries({ queryKey: ["config-summaries"] });
@@ -250,11 +218,9 @@ function AgentSettings({
   const toolEnforcement = ((agentObj.tool_use_enforcement as string) ?? (config.tool_use_enforcement as string)) ?? "none";
   const approvalMode = ((config.approvals as Record<string, unknown>)?.mode as string) ?? "off";
 
-  // Local state for controlled inputs that accept freeform typing
   const [localMaxTokens, setLocalMaxTokens] = useState(String(maxTokens ?? 4096));
   const [localMaxTurns, setLocalMaxTurns] = useState(String(maxTurns ?? 10));
 
-  // Sync local state when server data changes (but not while input is focused)
   const tokensRef = useRef<HTMLInputElement>(null);
   const turnsRef = useRef<HTMLInputElement>(null);
 
@@ -410,7 +376,6 @@ function ModelProvider({
       }
     }
   }
-  // Always include the current model even if not in custom_providers
   if (currentModel && !modelOptions.includes(currentModel)) {
     modelOptions.unshift(currentModel);
   }
@@ -428,24 +393,21 @@ function ModelProvider({
   return (
     <SurfaceCard
       title="Model & Provider"
-      subtitle="Inference endpoint — changes queued, non-interrupting"
+      subtitle="Inference endpoint — changes are queued"
       className="surface-card--compact"
     >
       <div className="config-info-grid">
-        {/* Model selector */}
         <div className="config-info-row">
           <span className="config-info-row__key">Model</span>
           {modelOptions.length > 1 ? (
             <select
-              className="config-field__select config-field__select--inline"
+              className="config-field__select select-input config-field__select--inline"
               value={currentModel}
               disabled={patchMutation.isPending}
               onChange={(e) => handleModelChange(e.target.value)}
             >
               {modelOptions.map((m) => (
-                <option key={m} value={m}>
-                  {m}
-                </option>
+                <option key={m} value={m}>{m}</option>
               ))}
             </select>
           ) : (
@@ -453,34 +415,28 @@ function ModelProvider({
           )}
         </div>
 
-        {/* Provider selector */}
         <div className="config-info-row">
           <span className="config-info-row__key">Provider</span>
           <select
-            className={cn(
-              "config-field__select config-field__select--inline config-provider-select",
-              providerBadgeClass(currentProvider)
-            )}
+            className="config-field__select select-input config-field__select--inline"
             value={currentProvider}
             disabled={patchMutation.isPending}
             onChange={(e) => handleProviderChange(e.target.value)}
           >
             {PROVIDER_OPTIONS.map((p) => (
-              <option key={p.value} value={p.value}>
-                {p.label}
-              </option>
+              <option key={p.value} value={p.value}>{p.label}</option>
             ))}
           </select>
         </div>
 
         <div className="config-info-row">
-          <span className="config-info-row__key">Inference URL</span>
+          <span className="config-info-row__key">URL</span>
           <code className="config-info-row__code">{baseUrl}</code>
         </div>
 
         {contextLength != null && (
           <div className="config-info-row">
-            <span className="config-info-row__key">Context Length</span>
+            <span className="config-info-row__key">Context</span>
             <span className="config-info-row__val">{contextLength.toLocaleString()} tokens</span>
           </div>
         )}
@@ -537,23 +493,139 @@ function ModelProvider({
   );
 }
 
+// ── Command Queue Section ────────────────────────────────────────────
+
+function CommandQueue({
+  agentId,
+  agentLabel,
+  items,
+  onClear,
+  onClearOne,
+  onApplyNow,
+}: {
+  agentId: string;
+  agentLabel: string;
+  items: Array<{ id: string; label: string; timestamp: number }>;
+  onClear: () => void;
+  onClearOne: (id: string) => void;
+  onApplyNow: () => void;
+}) {
+  const [restartPending, setRestartPending] = useState(false);
+  const queryClient = useQueryClient();
+
+  const restartMutation = useMutation({
+    mutationFn: () => restartAgentGateway(agentId),
+    onSuccess: () => {
+      setRestartPending(false);
+      onClear();
+      queryClient.invalidateQueries({ queryKey: ["config-detail", agentId] });
+      queryClient.invalidateQueries({ queryKey: ["config-summaries"] });
+    },
+    onError: () => {
+      setRestartPending(false);
+    },
+  });
+
+  function formatAge(ts: number) {
+    const secs = Math.floor((Date.now() - ts) / 1000);
+    if (secs < 60) return `${secs}s ago`;
+    return `${Math.floor(secs / 60)}m ago`;
+  }
+
+  return (
+    <SurfaceCard
+      title="Command Queue"
+      subtitle="Pending changes applied on next restart"
+      className="surface-card--compact"
+    >
+      {items.length === 0 ? (
+        <div className="config-queue-empty">
+          <span className="config-queue-empty__icon">✓</span>
+          <span className="config-queue-empty__text">No pending changes</span>
+        </div>
+      ) : (
+        <div className="config-queue-list">
+          {items.map((item) => (
+            <div key={item.id} className="config-queue-item">
+              <div className="config-queue-item__info">
+                <span className="config-queue-item__label">{item.label}</span>
+                <span className="config-queue-item__time">{formatAge(item.timestamp)}</span>
+              </div>
+              <button
+                className="config-queue-item__remove"
+                onClick={() => onClearOne(item.id)}
+                title="Remove"
+              >
+                ×
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {items.length > 0 && (
+        <div className="config-actions">
+          <button
+            className="config-action-btn"
+            onClick={onClear}
+          >
+            Clear All
+          </button>
+
+          {!restartPending ? (
+            <button
+              className="config-action-btn config-action-btn--accent"
+              onClick={() => setRestartPending(true)}
+            >
+              Apply Now ({items.length})
+            </button>
+          ) : (
+            <div className="config-restart-confirm">
+              <span className="config-restart-confirm__text">Restart {agentLabel}?</span>
+              <button
+                className="config-action-btn config-action-btn--danger"
+                disabled={restartMutation.isPending}
+                onClick={() => restartMutation.mutate()}
+              >
+                {restartMutation.isPending ? "Restarting…" : "Confirm"}
+              </button>
+              <button
+                className="config-action-btn"
+                onClick={() => setRestartPending(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </SurfaceCard>
+  );
+}
+
 // ── Main Page ────────────────────────────────────────────────────────
+
+interface QueueItem {
+  id: string;
+  label: string;
+  timestamp: number;
+}
 
 export function ConfigPage() {
   const [selectedId, setSelectedId] = useState<string>(CONFIG_AGENTS[0].id);
-  const [queuedChanges, setQueuedChanges] = useState<string[]>([]);
+  const [queue, setQueue] = useState<QueueItem[]>([]);
 
   const summariesQuery = useQuery({
     queryKey: ["config-summaries"],
     queryFn: fetchConfigSummaries,
-    refetchInterval: 15_000,
+    refetchInterval: 30_000,
     placeholderData: (previousData) => previousData,
   });
 
   const detailQuery = useQuery({
     queryKey: ["config-detail", selectedId],
     queryFn: () => fetchAgentConfig(selectedId),
-    refetchInterval: 15_000,
+    refetchInterval: 30_000,
     enabled: Boolean(selectedId),
     placeholderData: (previousData) => previousData,
   });
@@ -569,20 +641,29 @@ export function ConfigPage() {
   );
 
   const hasError = summariesQuery.isError || detailQuery.isError;
-  const isLoading = summariesQuery.isLoading && !summariesQuery.data;
 
-  function handleQueued(label: string) {
-    setQueuedChanges((prev) => [...prev, label]);
-    // Auto-clear after 8 seconds
-    setTimeout(() => {
-      setQueuedChanges((prev) => prev.slice(1));
-    }, 8000);
-  }
+  // Queue management
+  const addQueued = useCallback((label: string) => {
+    setQueue((prev) => [
+      ...prev,
+      { id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, label, timestamp: Date.now() },
+    ]);
+  }, []);
 
-  // Clear queued changes when switching agents
+  const clearQueue = useCallback(() => setQueue([]), []);
+  const clearOne = useCallback((id: string) => {
+    setQueue((prev) => prev.filter((item) => item.id !== id));
+  }, []);
+
+  // Clear queue when switching agents
   useEffect(() => {
-    setQueuedChanges([]);
+    setQueue([]);
   }, [selectedId]);
+
+  const selectedAgent = CONFIG_AGENTS.find((a) => a.id === selectedId);
+
+  // Decide content visibility: show content whenever we have data (current or placeholder)
+  const showContent = Boolean(detail);
 
   return (
     <AppShell
@@ -592,7 +673,7 @@ export function ConfigPage() {
         <SyncClock updatedAt={updatedAt} stale={hasError} />
       }
     >
-      {/* Agent Cards Grid */}
+      {/* Agent Cards Grid — always visible, no loading state */}
       <div className="config-agents-grid">
         {CONFIG_AGENTS.map((agent) => {
           const agentDetail = summaries.find((s) => s.id === agent.id);
@@ -609,13 +690,6 @@ export function ConfigPage() {
         })}
       </div>
 
-      {/* Queued changes indicator */}
-      <QueuedBadge pending={queuedChanges} />
-
-      {isLoading && (
-        <div className="config-loading">Loading configuration…</div>
-      )}
-
       {detailQuery.isError && (
         <SurfaceCard title="Error" subtitle="Failed to load agent config" className="surface-card--compact">
           <div className="config-error">
@@ -624,32 +698,33 @@ export function ConfigPage() {
         </SurfaceCard>
       )}
 
-      {selectedId && detail && (
-        <>
-          {/* Primary columns: Agent Settings + Model & Provider */}
-          <div className="config-columns">
-            <AgentSettings
-              agentId={selectedId}
-              config={config}
-              disabled={detailQuery.isFetching}
-              onQueued={handleQueued}
-            />
-            <ModelProvider
-              agentId={selectedId}
-              config={config}
-              health={health}
-              onQueued={handleQueued}
-            />
-          </div>
-
-          {/* Display Toggles: full width, below primary columns */}
+      {showContent && (
+        <div className="config-grid-2x2">
+          <AgentSettings
+            agentId={selectedId}
+            config={config}
+            disabled={false}
+          />
+          <ModelProvider
+            agentId={selectedId}
+            config={config}
+            health={health}
+            onQueued={addQueued}
+          />
           <DisplayToggles
             agentId={selectedId}
             config={config}
-            disabled={detailQuery.isFetching}
-            onQueued={handleQueued}
+            disabled={false}
           />
-        </>
+          <CommandQueue
+            agentId={selectedId}
+            agentLabel={selectedAgent?.label ?? selectedId}
+            items={queue}
+            onClear={clearQueue}
+            onClearOne={clearOne}
+            onApplyNow={clearQueue}
+          />
+        </div>
       )}
     </AppShell>
   );
