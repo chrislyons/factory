@@ -431,12 +431,7 @@ Security:
       await crossSignDevices(client, dryRun);
 
       if (!dryRun) {
-        // Wait for server to propagate signatures before re-fetching
-        console.log("\nWaiting for server propagation...");
-        await new Promise((r) => setTimeout(r, 3000));
-        console.log(`\nUpdated device state:`);
-        const after = await getDevices(client);
-        printDeviceTable(after);
+        console.log("\nSignatures uploaded to server. Run `list` to verify (server needs a moment to propagate).");
       }
     }
   } catch (err: any) {
