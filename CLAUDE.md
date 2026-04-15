@@ -81,7 +81,7 @@ factory/
 | :41920-41939 | Preview slots |
 | :41940-41949 | Development |
 | :41950-41959 | Coordinator HTTP API (planned) |
-| :41960 | MLX inference — reserved (future E2B sidecar) |
+| :41960 | Reserved (no binding) |
 | :41961 | MLX inference — Boot main chat (gemma-4-e4b-it-6bit, mlx-vlm) |
 | :41962 | MLX inference — Kelk main chat (gemma-4-e4b-it-6bit, mlx-vlm) |
 | :41966 | flash-moe — Shared 26B aux (gemma-4-26b-a4b-it-6bit, SSD expert streaming, 2.88GB resident, ~5.4 tok/s) |
