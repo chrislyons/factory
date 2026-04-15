@@ -224,9 +224,11 @@ function Preferences({
   return (
     <SurfaceCard title="Preferences" subtitle="Display, memory, terminal, and compression" className="surface-card--compact">
       <div className="config-prefs-layout">
-        {/* Column 1: Display */}
+        {/* Left Column: Display & Memory */}
         <div className="config-prefs-col">
-          <span className="config-prefs-col__title">Display</span>
+          <span className="config-prefs-col__title">Display & Memory</span>
+          
+          {/* Display section */}
           <div className="config-pref-row">
             <div className="config-pref-row__label">
               <span className="config-pref-row__name">Skin</span>
@@ -265,11 +267,8 @@ function Preferences({
               </div>
             );
           })}
-        </div>
-
-        {/* Column 2: Memory */}
-        <div className="config-prefs-col">
-          <span className="config-prefs-col__title">Memory</span>
+          
+          {/* Memory section */}
           <div className="config-pref-row">
             <div className="config-pref-row__label">
               <span className="config-pref-row__name">Memory enabled</span>
@@ -294,9 +293,11 @@ function Preferences({
           </div>
         </div>
 
-        {/* Column 3: Terminal */}
+        {/* Right Column: Terminal & Compression */}
         <div className="config-prefs-col">
-          <span className="config-prefs-col__title">Terminal</span>
+          <span className="config-prefs-col__title">Terminal & Compression</span>
+          
+          {/* Terminal section */}
           <div className="config-pref-row">
             <div className="config-pref-row__label">
               <span className="config-pref-row__name">Working dir</span>
@@ -336,11 +337,8 @@ function Preferences({
               }}
             />
           </div>
-        </div>
-
-        {/* Column 4: Compression */}
-        <div className="config-prefs-col">
-          <span className="config-prefs-col__title">Compression</span>
+          
+          {/* Compression section */}
           <div className="config-pref-row">
             <div className="config-pref-row__label">
               <span className="config-pref-row__name">Threshold</span>
