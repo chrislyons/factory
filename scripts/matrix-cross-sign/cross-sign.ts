@@ -350,13 +350,16 @@ async function purgeDeadDevices(
           undefined,
           { prefix: "/_matrix/client/v3" }
         );
-        // If no 401, device was deleted without UIA (unlikely but possible)
         console.log(`  ✓ Deleted: ${label}`);
         deleted++;
         continue;
       } catch (err: any) {
         if (err.httpStatus === 401 && err.data?.session) {
           session = err.data.session;
+        } else if (err.httpStatus === 404) {
+          // Device listed in account but not deletable (proxy/appservice ghost)
+          console.log(`  ⊘ Phantom: ${label} — listed on account but not deletable (likely proxy-created)`);
+          continue;
         } else {
           throw err;
         }
@@ -380,7 +383,11 @@ async function purgeDeadDevices(
       console.log(`  ✓ Deleted: ${label}`);
       deleted++;
     } catch (err: any) {
-      console.error(`  ✗ Failed: ${label} — ${err.message}`);
+      if (err.httpStatus === 404) {
+        console.log(`  ⊘ Phantom: ${label} — not deletable`);
+      } else {
+        console.error(`  ✗ Failed: ${label} — ${err.message}`);
+      }
     }
   }
 
