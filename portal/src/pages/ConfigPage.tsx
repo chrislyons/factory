@@ -236,7 +236,15 @@ function Preferences({
             className="config-field__select select-input config-field__select--inline"
             value={skinValue}
             disabled={disabled || patchMutation.isPending}
-            onChange={(e) => patch("display.skin", e.target.value || null)}
+            onChange={(e) => {
+              const val = e.target.value;
+              if (val) {
+                patch("display.skin", val);
+              } else {
+                // Remove skin field by setting to null — backend will ignore if not supported
+                patchMutation.mutate({ "display.skin": null });
+              }
+            }}
           >
             {SKIN_OPTIONS.map((s) => (
               <option key={s.value} value={s.value}>{s.label}</option>

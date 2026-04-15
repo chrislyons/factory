@@ -149,6 +149,10 @@ def validate_patch(agent: str, patch: dict[str, Any]) -> list[str]:
             errors.append(f"Field '{key}' is not patchable")
             continue
         expected_type = SAFE_PATCH_FIELDS[key]
+        # Allow null for optional fields (treat as removing the field)
+        if value is None:
+            # null is valid for all fields — it removes the setting
+            continue
         # Handle tuple of types (e.g., (int, float) for threshold)
         if isinstance(expected_type, tuple):
             if not isinstance(value, expected_type):
