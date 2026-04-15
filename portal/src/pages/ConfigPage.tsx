@@ -205,9 +205,10 @@ function AgentSettings({
     patchMutation.mutate({ [field]: value });
   }
 
+  const agentObj = (config.agent ?? {}) as Record<string, unknown>;
   const maxTokens = config.max_tokens as number | undefined;
-  const maxTurns = config.max_turns as number | undefined;
-  const toolEnforcement = (config.tool_use_enforcement as string) ?? "none";
+  const maxTurns = (agentObj.max_turns as number | undefined) ?? (config.max_turns as number | undefined);
+  const toolEnforcement = ((agentObj.tool_use_enforcement as string) ?? (config.tool_use_enforcement as string)) ?? "none";
   const approvalMode = ((config.approvals as Record<string, unknown>)?.mode as string) ?? "off";
 
   return (
@@ -240,7 +241,7 @@ function AgentSettings({
             disabled={disabled}
             onBlur={(e) => {
               const v = parseInt(e.target.value, 10);
-              if (!Number.isNaN(v) && v !== maxTurns) patch("max_turns", v);
+              if (!Number.isNaN(v) && v !== maxTurns) patch("agent.max_turns", v);
             }}
           />
         </label>
@@ -307,9 +308,10 @@ function ModelProvider({
     },
   });
 
-  const model = (config.model as string) ?? "—";
-  const provider = (config.provider as string) ?? "—";
-  const baseUrl = (config.base_url as string) ?? health?.url ?? "—";
+  const modelObj = (config.model ?? {}) as Record<string, unknown>;
+  const model = (modelObj.default as string) ?? (config.model as string) ?? "—";
+  const provider = (modelObj.provider as string) ?? (config.provider as string) ?? "—";
+  const baseUrl = (modelObj.base_url as string) ?? (config.base_url as string) ?? health?.url ?? "—";
   const liveHealth = healthMutation.data ?? health;
 
   return (
@@ -405,9 +407,6 @@ export function ConfigPage() {
   const health = detail?.health;
 
   const summaryMap = new Map(summaries.map((s) => [s.id, s]));
-  const healthMap = new Map(
-    summaries.map((s) => [s.id, s.error ? undefined : undefined])
-  );
 
   const updatedAt = Math.max(
     summariesQuery.dataUpdatedAt || 0,
@@ -420,7 +419,7 @@ export function ConfigPage() {
   return (
     <AppShell
       title="Configuration"
-      pageKey="/pages/topology.html"
+      pageKey="/pages/config.html"
       statusSlot={
         <SyncClock updatedAt={updatedAt} stale={hasError} />
       }
@@ -428,14 +427,13 @@ export function ConfigPage() {
       {/* Agent Cards Grid */}
       <div className="config-agents-grid">
         {CONFIG_AGENTS.map((agent) => {
-          const summary = summaryMap.get(agent.id);
           const agentDetail = summaries.find((s) => s.id === agent.id);
           return (
             <AgentCard
               key={agent.id}
               agent={agent}
               summary={agentDetail}
-              health={undefined}
+              health={selectedId === agent.id ? health : undefined}
               selected={selectedId === agent.id}
               onClick={() => setSelectedId(agent.id)}
             />
