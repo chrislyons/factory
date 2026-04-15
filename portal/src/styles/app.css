@@ -3763,6 +3763,33 @@ textarea {
   margin-top: 2px;
 }
 
+.config-agent-card__aux {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  padding-top: 6px;
+  border-top: 1px solid var(--border);
+}
+
+.config-agent-card__aux-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  flex-shrink: 0;
+}
+
+.config-agent-card__aux-model {
+  font-size: 10px;
+  color: var(--text-secondary);
+  font-family: var(--font-mono, monospace);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* Health Dot */
 
 .config-health-dot {
@@ -4257,4 +4284,52 @@ textarea {
 .config-queue-item__remove:hover {
   background: color-mix(in srgb, var(--red, #ef4444) 10%, transparent);
   color: var(--red, #ef4444);
+}
+
+/* Aux Section in Model & Provider */
+
+.config-aux-section {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.config-aux-section__title {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.config-aux-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.config-aux-group__model {
+  font-size: 11px;
+  color: var(--text-primary);
+  font-family: var(--font-mono, monospace);
+}
+
+.config-aux-group__slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.config-aux-chip {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: color-mix(in srgb, var(--text-primary) 5%, transparent);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 6px;
+  text-transform: lowercase;
 }

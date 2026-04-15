@@ -103,12 +103,14 @@ function HealthDot({ health }: { health?: AgentHealth }) {
 function AgentCard({
   agent,
   summary,
+  auxModel,
   health,
   selected,
   onClick,
 }: {
   agent: (typeof CONFIG_AGENTS)[number];
   summary?: AgentConfigSummary;
+  auxModel?: string;
   health?: AgentHealth;
   selected: boolean;
   onClick: () => void;
@@ -130,6 +132,12 @@ function AgentCard({
           {providerLabel(summary?.provider)}
         </span>
       </div>
+      {auxModel && (
+        <div className="config-agent-card__aux">
+          <span className="config-agent-card__aux-label">aux</span>
+          <span className="config-agent-card__aux-model">{truncateModel(auxModel, 30)}</span>
+        </div>
+      )}
     </button>
   );
 }
@@ -453,6 +461,35 @@ function ModelProvider({
               : "Unknown"}
           </span>
         </div>
+
+        {/* Aux slots */}
+        {(() => {
+          const aux = (config.auxiliary ?? {}) as Record<string, Record<string, unknown>>;
+          const entries = Object.entries(aux);
+          if (entries.length === 0) return null;
+          // Group by unique model
+          const modelSlots = new Map<string, string[]>();
+          for (const [slotName, slot] of entries) {
+            const m = ((slot as Record<string, unknown>)?.model as string) ?? "—";
+            if (!modelSlots.has(m)) modelSlots.set(m, []);
+            modelSlots.get(m)!.push(slotName);
+          }
+          return (
+            <div className="config-aux-section">
+              <span className="config-aux-section__title">Auxiliary Slots</span>
+              {[...modelSlots.entries()].map(([model, slots]) => (
+                <div key={model} className="config-aux-group">
+                  <code className="config-aux-group__model">{shortenPath(model)}</code>
+                  <div className="config-aux-group__slots">
+                    {slots.map((s) => (
+                      <span key={s} className="config-aux-chip">{s}</span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          );
+        })()}
       </div>
 
       <div className="config-actions">
@@ -687,6 +724,20 @@ export function ConfigPage() {
     return (m.provider as string) ?? (c.provider as string) ?? "—";
   }
 
+  /** Extract unique aux model names from auxiliary config */
+  function cardAuxModel(id: string): string | undefined {
+    const c = configMap[id]?.config;
+    if (!c) return undefined;
+    const aux = (c.auxiliary ?? {}) as Record<string, Record<string, unknown>>;
+    const models = new Set<string>();
+    for (const slot of Object.values(aux)) {
+      const m = (slot as Record<string, unknown>)?.model as string | undefined;
+      if (m) models.add(m);
+    }
+    if (models.size === 0) return undefined;
+    return [...models].join(", ");
+  }
+
   return (
     <AppShell
       title="Configuration"
@@ -707,6 +758,7 @@ export function ConfigPage() {
               model: cardModel(agent.id),
               provider: cardProvider(agent.id),
             }}
+            auxModel={cardAuxModel(agent.id)}
             health={configMap[agent.id]?.health}
             selected={selectedId === agent.id}
             onClick={() => setSelectedId(agent.id)}
