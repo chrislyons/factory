@@ -27,7 +27,7 @@ describe("TopologyPage", () => {
     });
 
     await waitFor(() => expect(queryClient.isFetching()).toBe(0));
-    expect(screen.getAllByText("waiting")).toHaveLength(4);
+    expect(screen.getAllByText("waiting")).toHaveLength(6);
   });
 
   it("renders live agent statuses inside the topology cards", async () => {

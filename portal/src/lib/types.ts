@@ -42,7 +42,7 @@ export interface TaskRecord {
   id: string;
   title: string;
   description?: string;
-  status: "pending" | "in-progress" | "done" | "blocked";
+  status: "pending" | "in-progress" | "done" | "blocked" | "deferred" | "deprecated";
   effort?: string;
   order: number;
   blocked_by: string[];

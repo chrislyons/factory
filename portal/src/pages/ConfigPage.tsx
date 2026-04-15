@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import {
   useQueries,
   useMutation,
@@ -47,6 +47,19 @@ const ALL_TOOLSETS = [
   "terminal", "file", "code_execution", "web", "delegation",
   "memory", "session_search", "todo", "skills", "clarify",
   "image_gen", "cronjob", "vision", "tts", "browser", "homeassistant",
+];
+
+const AUX_SLOTS = [
+  "vision", "web_extract", "compression", "session_search",
+  "skills_hub", "approval", "mcp", "flush_memories",
+];
+
+const TOKEN_OPTIONS = [512, 1024, 2048, 4096, 8192, 16384, 32768, 65536];
+const TURN_OPTIONS = [3, 5, 10, 15, 20, 50, 100];
+const TIMEOUT_OPTIONS = [30, 60, 120, 180, 300, 600];
+const CWD_OPTIONS = [
+  "~/dev/factory", "~/dev/factory/agents/boot",
+  "~/dev/factory/agents/kelk", "~/dev/factory/agents/ig88", "/tmp",
 ];
 
 function providerBadgeClass(provider?: string) {
@@ -120,39 +133,65 @@ function HealthDot({ health }: { health?: AgentHealth }) {
 function AgentCard({
   agent,
   summary,
-  auxModel,
+  configMap,
   health,
   selected,
   onClick,
 }: {
   agent: (typeof CONFIG_AGENTS)[number];
   summary?: AgentConfigSummary;
-  auxModel?: string;
+  configMap: Record<string, { config: Record<string, unknown>; health?: AgentHealth }>;
   health?: AgentHealth;
   selected: boolean;
   onClick: () => void;
 }) {
+  const agentConfig = configMap[agent.id]?.config;
+  const aux = (agentConfig?.auxiliary ?? {}) as Record<string, Record<string, unknown>>;
+  const auxSlots = AUX_SLOTS
+    .filter((name) => aux[name] && (aux[name].model || aux[name].provider))
+    .map((name) => ({
+      name,
+      model: ((aux[name].model as string) ?? "—"),
+      provider: (aux[name].provider as string) ?? "",
+    }));
+
   return (
     <button
       className={cn("config-agent-card", selected && "config-agent-card--selected")}
       style={{ ["--agent-accent" as string]: agent.color }}
       onClick={onClick}
     >
+      {/* Header: ● Name ... provider badge */}
       <div className="config-agent-card__header">
         <span className="config-agent-card__dot" style={{ background: agent.color }} />
-        <span className="config-agent-card__name">{agent.label}</span>
-        <HealthDot health={health} />
-      </div>
-      <div className="config-agent-card__model">{truncateModel(summary?.model ?? agent.model)}</div>
-      <div className="config-agent-card__provider-row">
+        <div className="config-agent-card__identity">
+          <span className="config-agent-card__name">{agent.label}</span>
+          <span className="config-agent-card__model">{truncateModel(summary?.model ?? agent.model)}</span>
+        </div>
         <span className={cn("config-provider-badge", providerBadgeClass(summary?.provider))}>
           {providerLabel(summary?.provider)}
         </span>
       </div>
-      {auxModel && (
+
+      {/* AUX section */}
+      {auxSlots.length > 0 && (
         <div className="config-agent-card__aux">
-          <span className="config-agent-card__aux-label">aux</span>
-          <span className="config-agent-card__aux-model">{truncateModel(auxModel, 30)}</span>
+          {auxSlots.map((slot) => (
+            <div key={slot.name} className="config-agent-card__aux-row">
+              <div className="config-agent-card__aux-head">
+                <div className="config-agent-card__aux-label-group">
+                  <HealthDot health={health} />
+                  <span className="config-agent-card__aux-label">{slot.name.replace(/_/g, " ")}</span>
+                </div>
+                {slot.provider && (
+                  <span className={cn("config-provider-badge", providerBadgeClass(slot.provider))}>
+                    {providerLabel(slot.provider)}
+                  </span>
+                )}
+              </div>
+              <div className="config-agent-card__aux-model">{truncateModel(slot.model, 34)}</div>
+            </div>
+          ))}
         </div>
       )}
     </button>
@@ -189,12 +228,7 @@ function Preferences({
   const skinValue = (display.skin as string) ?? "";
   const compressionThreshold = config.compression_threshold as number | undefined;
   const [localThreshold, setLocalThreshold] = useState(String(compressionThreshold ?? 0.5));
-  const [localCwd, setLocalCwd] = useState(shortenPath((terminal.cwd as string) ?? ""));
-  const [localTimeout, setLocalTimeout] = useState(String((terminal.timeout as number) ?? 180));
-
   const thresholdRef = useRef<HTMLInputElement>(null);
-  const cwdRef = useRef<HTMLInputElement>(null);
-  const timeoutRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (document.activeElement !== thresholdRef.current) {
@@ -202,17 +236,8 @@ function Preferences({
     }
   }, [compressionThreshold]);
 
-  useEffect(() => {
-    if (document.activeElement !== cwdRef.current) {
-      setLocalCwd(shortenPath((terminal.cwd as string) ?? ""));
-    }
-  }, [terminal.cwd]);
-
-  useEffect(() => {
-    if (document.activeElement !== timeoutRef.current) {
-      setLocalTimeout(String((terminal.timeout as number) ?? 180));
-    }
-  }, [terminal.timeout]);
+  const cwdValue = shortenPath((terminal.cwd as string) ?? "~/dev/factory");
+  const timeoutValue = (terminal.timeout as number) ?? 180;
 
   const displayFields = [
     { key: "compact", label: "Compact mode", desc: "Reduce output verbosity" },
@@ -303,39 +328,43 @@ function Preferences({
               <span className="config-pref-row__name">Working dir</span>
               <span className="config-pref-row__desc">Default shell directory</span>
             </div>
-            <input
-              ref={cwdRef}
-              className="config-field__input config-field__input--compact"
-              type="text"
-              value={localCwd}
-              disabled={disabled}
-              onChange={(e) => setLocalCwd(e.target.value)}
-              onBlur={() => {
+            <select
+              className="config-field__select select-input config-field__select--inline"
+              value={cwdValue}
+              disabled={disabled || patchMutation.isPending}
+              onChange={(e) => {
+                const val = e.target.value;
                 const home = (terminal.cwd as string)?.match(/^\/Users\/[^/]+\//)?.[0] ?? "";
-                const expanded = localCwd.startsWith("~/") ? home + localCwd.slice(2) : localCwd;
-                if (expanded !== terminal.cwd) patch("terminal.cwd", expanded);
+                const expanded = val.startsWith("~/") ? home + val.slice(2) : val;
+                patch("terminal.cwd", expanded);
               }}
-            />
+            >
+              {CWD_OPTIONS.map((d) => (
+                <option key={d} value={d}>{d}</option>
+              ))}
+              {cwdValue && !CWD_OPTIONS.includes(cwdValue) && (
+                <option value={cwdValue}>{cwdValue}</option>
+              )}
+            </select>
           </div>
           <div className="config-pref-row">
             <div className="config-pref-row__label">
               <span className="config-pref-row__name">Timeout</span>
               <span className="config-pref-row__desc">Per-command timeout (s)</span>
             </div>
-            <input
-              ref={timeoutRef}
-              className="config-field__input config-field__input--compact"
-              type="number"
-              value={localTimeout}
-              min={1}
-              max={600}
-              disabled={disabled}
-              onChange={(e) => setLocalTimeout(e.target.value)}
-              onBlur={() => {
-                const v = parseInt(localTimeout, 10);
-                if (!Number.isNaN(v) && v !== terminal.timeout) patch("terminal.timeout", v);
-              }}
-            />
+            <select
+              className="config-field__select select-input config-field__select--inline"
+              value={String(timeoutValue)}
+              disabled={disabled || patchMutation.isPending}
+              onChange={(e) => patch("terminal.timeout", parseInt(e.target.value, 10))}
+            >
+              {TIMEOUT_OPTIONS.map((t) => (
+                <option key={t} value={t}>{t}s</option>
+              ))}
+              {!TIMEOUT_OPTIONS.includes(timeoutValue) && (
+                <option value={timeoutValue}>{timeoutValue}s</option>
+              )}
+            </select>
           </div>
           
           {/* Compression section */}
@@ -447,18 +476,6 @@ function ModelAndAgent({
   const approvalMode = ((config.approvals as Record<string, unknown>)?.mode as string) ?? "off";
   const toolsets = (config.toolsets ?? []) as string[];
 
-  const [localMaxTokens, setLocalMaxTokens] = useState(String(maxTokens ?? 4096));
-  const [localMaxTurns, setLocalMaxTurns] = useState(String(maxTurns ?? 10));
-  const tokensRef = useRef<HTMLInputElement>(null);
-  const turnsRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (document.activeElement !== tokensRef.current) setLocalMaxTokens(String(maxTokens ?? 4096));
-  }, [maxTokens]);
-  useEffect(() => {
-    if (document.activeElement !== turnsRef.current) setLocalMaxTurns(String(maxTurns ?? 10));
-  }, [maxTurns]);
-
   // ── MCP data ──
   const mcpServers = (config.mcp_servers ?? {}) as Record<string, Record<string, unknown>>;
   const mcpEntries = Object.entries(mcpServers);
@@ -481,22 +498,25 @@ function ModelAndAgent({
           <div className="config-info-grid">
             <div className="config-info-row">
               <span className="config-info-row__key">Model</span>
-              {modelOptions.length > 1 ? (
-                <select
-                  className="config-field__select select-input config-field__select--inline"
-                  value={currentModel}
-                  disabled={patchMutation.isPending}
-                  onChange={(e) => {
-                    if (e.target.value !== currentModel) patchMutation.mutate({ "model.default": e.target.value });
-                  }}
-                >
-                  {modelOptions.map((m) => (
-                    <option key={m} value={m}>{shortenPath(m)}</option>
-                  ))}
-                </select>
-              ) : (
-                <span className="config-info-row__val">{shortenPath(currentModel) || "—"}</span>
-              )}
+              <span className="config-info-row__val config-info-row__val--inline">
+                <HealthDot health={liveHealth} />
+                {modelOptions.length > 1 ? (
+                  <select
+                    className="config-field__select select-input config-field__select--inline"
+                    value={currentModel}
+                    disabled={patchMutation.isPending}
+                    onChange={(e) => {
+                      if (e.target.value !== currentModel) patchMutation.mutate({ "model.default": e.target.value });
+                    }}
+                  >
+                    {modelOptions.map((m) => (
+                      <option key={m} value={m}>{shortenPath(m)}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <span>{shortenPath(currentModel) || "—"}</span>
+                )}
+              </span>
             </div>
 
             <div className="config-info-row">
@@ -527,43 +547,64 @@ function ModelAndAgent({
               </div>
             )}
 
-            <div className="config-info-row">
-              <span className="config-info-row__key">Health</span>
-              <span className="config-info-row__val config-info-row__val--inline">
-                <HealthDot health={liveHealth} />
-                {liveHealth
-                  ? liveHealth.reachable
-                    ? `OK (${liveHealth.status ?? "200"})`
-                    : `Down — ${liveHealth.error ?? "unreachable"}`
-                  : "Unknown"}
-              </span>
-            </div>
+            {/* Auxiliary Slots — individual dropdowns */}
+            <div className="config-aux-section">
+              <span className="config-aux-section__title">Auxiliary Slots</span>
+              {AUX_SLOTS.map((slotName) => {
+                const aux = (config.auxiliary ?? {}) as Record<string, Record<string, unknown>>;
+                const slot = (aux[slotName] ?? {}) as Record<string, unknown>;
+                if (!slot.provider && !slot.model && !aux[slotName]) return null;
 
-            {/* Aux slots */}
-            {(() => {
-              const aux = (config.auxiliary ?? {}) as Record<string, Record<string, unknown>>;
-              const entries = Object.entries(aux);
-              if (entries.length === 0) return null;
-              const modelSlots = new Map<string, string[]>();
-              for (const [slotName, slot] of entries) {
-                const m = ((slot as Record<string, unknown>)?.model as string) ?? "—";
-                if (!modelSlots.has(m)) modelSlots.set(m, []);
-                modelSlots.get(m)!.push(slotName);
-              }
-              return (
-                <div className="config-aux-section">
-                  <span className="config-aux-section__title">Auxiliary Slots</span>
-                  {[...modelSlots.entries()].map(([model, slots]) => (
-                    <div key={model} className="config-aux-group">
-                      <code className="config-aux-group__model">{shortenPath(model)}</code>
-                      <div className="config-aux-group__slots">
-                        {slots.map((s) => <span key={s} className="config-aux-chip">{s}</span>)}
-                      </div>
+                const currentProvider = (slot.provider as string) ?? "";
+                const currentModel = (slot.model as string) ?? "";
+                const providerOptions = PROVIDER_OPTIONS;
+
+                // Model options from custom_providers
+                const customProviders = (config.custom_providers ?? []) as Array<{
+                  name?: string; base_url?: string; models?: Record<string, unknown>;
+                }>;
+                const modelOptions: string[] = [];
+                for (const cp of customProviders) {
+                  for (const mName of Object.keys(cp.models ?? {})) {
+                    if (!modelOptions.includes(mName)) modelOptions.push(mName);
+                  }
+                }
+                if (currentModel && !modelOptions.includes(currentModel)) {
+                  modelOptions.unshift(currentModel);
+                }
+
+                return (
+                  <div key={slotName} className="config-aux-row">
+                    <div className="config-aux-row__label">
+                      <HealthDot health={liveHealth} />
+                      <span className="config-aux-row__name">{slotName.replace(/_/g, " ")}</span>
                     </div>
-                  ))}
-                </div>
-              );
-            })()}
+                    <select
+                      className="config-field__select select-input config-field__select--inline"
+                      value={currentProvider}
+                      disabled={patchMutation.isPending}
+                      onChange={(e) => patch(`auxiliary.${slotName}.provider`, e.target.value)}
+                    >
+                      <option value="">—</option>
+                      {providerOptions.map((p) => (
+                        <option key={p.value} value={p.value}>{p.label}</option>
+                      ))}
+                    </select>
+                    <select
+                      className="config-field__select select-input config-field__select--inline"
+                      value={currentModel}
+                      disabled={patchMutation.isPending}
+                      onChange={(e) => patch(`auxiliary.${slotName}.model`, e.target.value)}
+                    >
+                      <option value="">—</option>
+                      {modelOptions.map((m) => (
+                        <option key={m} value={m}>{shortenPath(m)}</option>
+                      ))}
+                    </select>
+                  </div>
+                );
+              })}
+            </div>
 
             {/* Actions */}
             <div className="config-actions config-actions--inline">
@@ -601,37 +642,35 @@ function ModelAndAgent({
           <div className="config-settings-grid">
             <label className="config-field">
               <span className="config-field__label">Max Tokens</span>
-              <input
-                ref={tokensRef}
-                className="config-field__input"
-                type="number"
-                value={localMaxTokens}
-                min={256}
-                max={128000}
-                disabled={false}
-                onChange={(e) => setLocalMaxTokens(e.target.value)}
-                onBlur={() => {
-                  const v = parseInt(localMaxTokens, 10);
-                  if (!Number.isNaN(v) && v !== maxTokens) patch("max_tokens", v);
-                }}
-              />
+              <select
+                className="config-field__select"
+                value={String(maxTokens ?? 4096)}
+                disabled={patchMutation.isPending}
+                onChange={(e) => patch("max_tokens", parseInt(e.target.value, 10))}
+              >
+                {TOKEN_OPTIONS.map((t) => (
+                  <option key={t} value={t}>{t.toLocaleString()}</option>
+                ))}
+                {maxTokens != null && !TOKEN_OPTIONS.includes(maxTokens) && (
+                  <option value={maxTokens}>{maxTokens.toLocaleString()}</option>
+                )}
+              </select>
             </label>
             <label className="config-field">
               <span className="config-field__label">Max Turns</span>
-              <input
-                ref={turnsRef}
-                className="config-field__input"
-                type="number"
-                value={localMaxTurns}
-                min={1}
-                max={100}
-                disabled={false}
-                onChange={(e) => setLocalMaxTurns(e.target.value)}
-                onBlur={() => {
-                  const v = parseInt(localMaxTurns, 10);
-                  if (!Number.isNaN(v) && v !== maxTurns) patch("agent.max_turns", v);
-                }}
-              />
+              <select
+                className="config-field__select"
+                value={String(maxTurns ?? 10)}
+                disabled={patchMutation.isPending}
+                onChange={(e) => patch("agent.max_turns", parseInt(e.target.value, 10))}
+              >
+                {TURN_OPTIONS.map((t) => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+                {maxTurns != null && !TURN_OPTIONS.includes(maxTurns) && (
+                  <option value={maxTurns}>{maxTurns}</option>
+                )}
+              </select>
             </label>
             <label className="config-field">
               <span className="config-field__label">Tool Enforcement</span>
@@ -792,7 +831,7 @@ export function ConfigPage() {
             key={agent.id}
             agent={agent}
             summary={{ id: agent.id, label: agent.label, model: cardModel(agent.id), provider: cardProvider(agent.id) }}
-            auxModel={cardAuxModel(agent.id)}
+            configMap={configMap}
             health={configMap[agent.id]?.health}
             selected={selectedId === agent.id}
             onClick={() => setSelectedId(agent.id)}
