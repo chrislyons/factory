@@ -306,25 +306,64 @@ async function purgeDeadDevices(
     `\n${dryRun ? "[DRY RUN] " : ""}${dead.length} dead device(s) to purge:\n`
   );
 
-  for (const d of dead) {
-    const label = `${d.device_id} (${d.display_name || "unnamed"})`;
-    if (dryRun) {
-      console.log(`  Would delete: ${label}`);
-      continue;
+  // Batch delete via deleteMultipleDevices (UIA flow)
+  const deadIds = dead.map((d: any) => d.device_id);
+
+  if (dryRun) {
+    for (const d of dead) {
+      console.log(`  Would delete: ${d.device_id} (${d.display_name || "unnamed"})`);
+    }
+    console.log("\nDry run complete. No devices deleted.");
+    return;
+  }
+
+  try {
+    const password = process.env._MATRIX_PASSWORD_CACHED;
+    const userId = client.getUserId()!;
+
+    // Step 1: Initial request to get UIA session
+    let session: string | undefined;
+    try {
+      await client.http.authedRequest(
+        sdk.Method.Post,
+        "/delete_devices",
+        undefined,
+        { devices: deadIds },
+        { prefix: "/_matrix/client/v3" }
+      );
+    } catch (err: any) {
+      // 401 with session is expected — UIA flow
+      if (err.httpStatus === 401 && err.data?.session) {
+        session = err.data.session;
+      } else {
+        throw err;
+      }
     }
 
-    try {
-      // deleteDevice requires interactive auth — use password from env
-      const password = process.env._MATRIX_PASSWORD_CACHED;
-      await client.deleteDevice(d.device_id, {
-        type: "m.login.password",
-        identifier: { type: "m.id.user", user: client.getUserId()! },
-        password,
-      });
-      console.log(`  ✓ Deleted: ${label}`);
-    } catch (err: any) {
-      console.error(`  ✗ Failed: ${label} — ${err.message}`);
+    // Step 2: Retry with auth
+    await client.http.authedRequest(
+      sdk.Method.Post,
+      "/delete_devices",
+      undefined,
+      {
+        devices: deadIds,
+        auth: {
+          type: "m.login.password",
+          identifier: { type: "m.id.user", user: userId },
+          password,
+          session,
+        },
+      },
+      { prefix: "/_matrix/client/v3" }
+    );
+
+    for (const d of dead) {
+      console.log(`  ✓ Deleted: ${d.device_id} (${d.display_name || "unnamed"})`);
     }
+    console.log(`\nPurged ${dead.length} dead device(s).`);
+  } catch (err: any) {
+    console.error(`  ✗ Batch delete failed: ${err.message}`);
+    if (err.data) console.error("  Server response:", JSON.stringify(err.data));
   }
 
   if (dryRun) {
