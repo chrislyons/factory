@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   useQuery,
   useMutation,
@@ -24,6 +24,14 @@ import type {
 const CONFIG_AGENTS = AGENTS.filter((a) =>
   ["boot", "kelk", "ig88"].includes(a.id)
 );
+
+const PROVIDER_OPTIONS = [
+  { value: "custom", label: "Custom (local)" },
+  { value: "nous", label: "Nous" },
+  { value: "openrouter", label: "OpenRouter" },
+  { value: "anthropic", label: "Anthropic" },
+  { value: "openai", label: "OpenAI" },
+];
 
 function providerBadgeClass(provider?: string) {
   if (!provider) return "config-provider-badge--default";
@@ -85,6 +93,22 @@ function HealthDot({ health }: { health?: AgentHealth }) {
   );
 }
 
+// ── Queued Badge ─────────────────────────────────────────────────────
+
+function QueuedBadge({ pending }: { pending: string[] }) {
+  if (pending.length === 0) return null;
+  return (
+    <div className="config-queued-badge">
+      <span className="config-queued-badge__dot" />
+      <span className="config-queued-badge__text">
+        {pending.length === 1
+          ? `Queued: ${pending[0]} — applied after current task`
+          : `${pending.length} changes queued`}
+      </span>
+    </div>
+  );
+}
+
 // ── Agent Card ───────────────────────────────────────────────────────
 
 function AgentCard({
@@ -127,16 +151,24 @@ function DisplayToggles({
   agentId,
   config,
   disabled,
+  onQueued,
 }: {
   agentId: string;
   config: Record<string, unknown>;
   disabled: boolean;
+  onQueued?: (label: string) => void;
 }) {
   const queryClient = useQueryClient();
   const display = (config.display ?? {}) as Record<string, boolean>;
 
   const patchMutation = useMutation({
     mutationFn: (patch: Record<string, unknown>) => patchAgentConfig(agentId, patch),
+    onSuccess: (_data, variables) => {
+      const keys = Object.keys(variables);
+      if (keys.length > 0 && onQueued) {
+        onQueued(keys.map((k) => k.replace("display.", "")).join(", "));
+      }
+    },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["config-detail", agentId] });
       queryClient.invalidateQueries({ queryKey: ["config-summaries"] });
@@ -159,7 +191,6 @@ function DisplayToggles({
       <div className="config-toggles-grid">
         {fields.map((f) => {
           const current = Boolean(display[f.key]);
-          const optimisticKey = `display.${f.key}`;
           const isPending = patchMutation.isPending;
           return (
             <div key={f.key} className="config-toggle-row">
@@ -186,15 +217,23 @@ function AgentSettings({
   agentId,
   config,
   disabled,
+  onQueued,
 }: {
   agentId: string;
   config: Record<string, unknown>;
   disabled: boolean;
+  onQueued?: (label: string) => void;
 }) {
   const queryClient = useQueryClient();
 
   const patchMutation = useMutation({
     mutationFn: (patch: Record<string, unknown>) => patchAgentConfig(agentId, patch),
+    onSuccess: (_data, variables) => {
+      const keys = Object.keys(variables);
+      if (keys.length > 0 && onQueued) {
+        onQueued(keys.join(", "));
+      }
+    },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["config-detail", agentId] });
       queryClient.invalidateQueries({ queryKey: ["config-summaries"] });
@@ -211,20 +250,42 @@ function AgentSettings({
   const toolEnforcement = ((agentObj.tool_use_enforcement as string) ?? (config.tool_use_enforcement as string)) ?? "none";
   const approvalMode = ((config.approvals as Record<string, unknown>)?.mode as string) ?? "off";
 
+  // Local state for controlled inputs that accept freeform typing
+  const [localMaxTokens, setLocalMaxTokens] = useState(String(maxTokens ?? 4096));
+  const [localMaxTurns, setLocalMaxTurns] = useState(String(maxTurns ?? 10));
+
+  // Sync local state when server data changes (but not while input is focused)
+  const tokensRef = useRef<HTMLInputElement>(null);
+  const turnsRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (document.activeElement !== tokensRef.current) {
+      setLocalMaxTokens(String(maxTokens ?? 4096));
+    }
+  }, [maxTokens]);
+
+  useEffect(() => {
+    if (document.activeElement !== turnsRef.current) {
+      setLocalMaxTurns(String(maxTurns ?? 10));
+    }
+  }, [maxTurns]);
+
   return (
     <SurfaceCard title="Agent Settings" subtitle="Runtime parameters" className="surface-card--compact">
       <div className="config-settings-grid">
         <label className="config-field">
           <span className="config-field__label">Max Tokens</span>
           <input
+            ref={tokensRef}
             className="config-field__input"
             type="number"
-            defaultValue={maxTokens ?? 4096}
+            value={localMaxTokens}
             min={256}
             max={128000}
             disabled={disabled}
-            onBlur={(e) => {
-              const v = parseInt(e.target.value, 10);
+            onChange={(e) => setLocalMaxTokens(e.target.value)}
+            onBlur={() => {
+              const v = parseInt(localMaxTokens, 10);
               if (!Number.isNaN(v) && v !== maxTokens) patch("max_tokens", v);
             }}
           />
@@ -233,14 +294,16 @@ function AgentSettings({
         <label className="config-field">
           <span className="config-field__label">Max Turns</span>
           <input
+            ref={turnsRef}
             className="config-field__input"
             type="number"
-            defaultValue={maxTurns ?? 10}
+            value={localMaxTurns}
             min={1}
             max={100}
             disabled={disabled}
-            onBlur={(e) => {
-              const v = parseInt(e.target.value, 10);
+            onChange={(e) => setLocalMaxTurns(e.target.value)}
+            onBlur={() => {
+              const v = parseInt(localMaxTurns, 10);
               if (!Number.isNaN(v) && v !== maxTurns) patch("agent.max_turns", v);
             }}
           />
@@ -252,7 +315,7 @@ function AgentSettings({
             className="config-field__select"
             value={toolEnforcement}
             disabled={disabled}
-            onChange={(e) => patch("tool_use_enforcement", e.target.value)}
+            onChange={(e) => patch("agent.tool_use_enforcement", e.target.value)}
           >
             <option value="none">None</option>
             <option value="warn">Warn</option>
@@ -284,10 +347,12 @@ function ModelProvider({
   agentId,
   config,
   health,
+  onQueued,
 }: {
   agentId: string;
   config: Record<string, unknown>;
   health?: AgentHealth;
+  onQueued?: (label: string) => void;
 }) {
   const queryClient = useQueryClient();
   const [restartConfirm, setRestartConfirm] = useState(false);
@@ -296,6 +361,20 @@ function ModelProvider({
     mutationFn: () => fetchAgentHealth(agentId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["config-detail", agentId] });
+    },
+  });
+
+  const patchMutation = useMutation({
+    mutationFn: (patch: Record<string, unknown>) => patchAgentConfig(agentId, patch),
+    onSuccess: (_data, variables) => {
+      const keys = Object.keys(variables);
+      if (keys.length > 0 && onQueued) {
+        onQueued(keys.join(", "));
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["config-detail", agentId] });
+      queryClient.invalidateQueries({ queryKey: ["config-summaries"] });
     },
   });
 
@@ -309,28 +388,103 @@ function ModelProvider({
   });
 
   const modelObj = (config.model ?? {}) as Record<string, unknown>;
-  const model = (modelObj.default as string) ?? (config.model as string) ?? "—";
-  const provider = (modelObj.provider as string) ?? (config.provider as string) ?? "—";
+  const currentModel = (modelObj.default as string) ?? (config.model as string) ?? "";
+  const currentProvider = (modelObj.provider as string) ?? (config.provider as string) ?? "";
   const baseUrl = (modelObj.base_url as string) ?? (config.base_url as string) ?? health?.url ?? "—";
+  const contextLength = (modelObj.context_length as number | undefined) ?? undefined;
   const liveHealth = healthMutation.data ?? health;
 
+  // Extract available models from custom_providers in the config
+  const customProviders = (config.custom_providers ?? []) as Array<{
+    name?: string;
+    base_url?: string;
+    models?: Record<string, unknown>;
+  }>;
+
+  const modelOptions: string[] = [];
+  for (const cp of customProviders) {
+    const models = cp.models ?? {};
+    for (const modelName of Object.keys(models)) {
+      if (!modelOptions.includes(modelName)) {
+        modelOptions.push(modelName);
+      }
+    }
+  }
+  // Always include the current model even if not in custom_providers
+  if (currentModel && !modelOptions.includes(currentModel)) {
+    modelOptions.unshift(currentModel);
+  }
+
+  function handleModelChange(newModel: string) {
+    if (newModel === currentModel) return;
+    patchMutation.mutate({ "model.default": newModel });
+  }
+
+  function handleProviderChange(newProvider: string) {
+    if (newProvider === currentProvider) return;
+    patchMutation.mutate({ "model.provider": newProvider });
+  }
+
   return (
-    <SurfaceCard title="Model & Provider" subtitle="Inference endpoint details" className="surface-card--compact">
+    <SurfaceCard
+      title="Model & Provider"
+      subtitle="Inference endpoint — changes queued, non-interrupting"
+      className="surface-card--compact"
+    >
       <div className="config-info-grid">
+        {/* Model selector */}
         <div className="config-info-row">
           <span className="config-info-row__key">Model</span>
-          <span className="config-info-row__val">{model}</span>
+          {modelOptions.length > 1 ? (
+            <select
+              className="config-field__select config-field__select--inline"
+              value={currentModel}
+              disabled={patchMutation.isPending}
+              onChange={(e) => handleModelChange(e.target.value)}
+            >
+              {modelOptions.map((m) => (
+                <option key={m} value={m}>
+                  {m}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <span className="config-info-row__val">{currentModel || "—"}</span>
+          )}
         </div>
+
+        {/* Provider selector */}
         <div className="config-info-row">
           <span className="config-info-row__key">Provider</span>
-          <span className={cn("config-provider-badge", providerBadgeClass(provider))}>
-            {providerLabel(provider)}
-          </span>
+          <select
+            className={cn(
+              "config-field__select config-field__select--inline config-provider-select",
+              providerBadgeClass(currentProvider)
+            )}
+            value={currentProvider}
+            disabled={patchMutation.isPending}
+            onChange={(e) => handleProviderChange(e.target.value)}
+          >
+            {PROVIDER_OPTIONS.map((p) => (
+              <option key={p.value} value={p.value}>
+                {p.label}
+              </option>
+            ))}
+          </select>
         </div>
+
         <div className="config-info-row">
           <span className="config-info-row__key">Inference URL</span>
           <code className="config-info-row__code">{baseUrl}</code>
         </div>
+
+        {contextLength != null && (
+          <div className="config-info-row">
+            <span className="config-info-row__key">Context Length</span>
+            <span className="config-info-row__val">{contextLength.toLocaleString()} tokens</span>
+          </div>
+        )}
+
         <div className="config-info-row">
           <span className="config-info-row__key">Health</span>
           <span className="config-info-row__val config-info-row__val--inline">
@@ -355,10 +509,10 @@ function ModelProvider({
 
         {!restartConfirm ? (
           <button
-            className="config-action-btn config-action-btn--danger"
+            className="config-action-btn config-action-btn--accent"
             onClick={() => setRestartConfirm(true)}
           >
-            Restart Gateway
+            Apply Now (Restart)
           </button>
         ) : (
           <div className="config-restart-confirm">
@@ -387,26 +541,27 @@ function ModelProvider({
 
 export function ConfigPage() {
   const [selectedId, setSelectedId] = useState<string>(CONFIG_AGENTS[0].id);
+  const [queuedChanges, setQueuedChanges] = useState<string[]>([]);
 
   const summariesQuery = useQuery({
     queryKey: ["config-summaries"],
     queryFn: fetchConfigSummaries,
-    refetchInterval: 10_000,
+    refetchInterval: 15_000,
+    placeholderData: (previousData) => previousData,
   });
 
   const detailQuery = useQuery({
     queryKey: ["config-detail", selectedId],
     queryFn: () => fetchAgentConfig(selectedId),
-    refetchInterval: 10_000,
+    refetchInterval: 15_000,
     enabled: Boolean(selectedId),
+    placeholderData: (previousData) => previousData,
   });
 
   const summaries = summariesQuery.data?.agents ?? [];
   const detail = detailQuery.data;
   const config = detail?.config ?? {};
   const health = detail?.health;
-
-  const summaryMap = new Map(summaries.map((s) => [s.id, s]));
 
   const updatedAt = Math.max(
     summariesQuery.dataUpdatedAt || 0,
@@ -415,6 +570,19 @@ export function ConfigPage() {
 
   const hasError = summariesQuery.isError || detailQuery.isError;
   const isLoading = summariesQuery.isLoading && !summariesQuery.data;
+
+  function handleQueued(label: string) {
+    setQueuedChanges((prev) => [...prev, label]);
+    // Auto-clear after 8 seconds
+    setTimeout(() => {
+      setQueuedChanges((prev) => prev.slice(1));
+    }, 8000);
+  }
+
+  // Clear queued changes when switching agents
+  useEffect(() => {
+    setQueuedChanges([]);
+  }, [selectedId]);
 
   return (
     <AppShell
@@ -441,6 +609,9 @@ export function ConfigPage() {
         })}
       </div>
 
+      {/* Queued changes indicator */}
+      <QueuedBadge pending={queuedChanges} />
+
       {isLoading && (
         <div className="config-loading">Loading configuration…</div>
       )}
@@ -455,24 +626,29 @@ export function ConfigPage() {
 
       {selectedId && detail && (
         <>
-          <DisplayToggles
-            agentId={selectedId}
-            config={config}
-            disabled={detailQuery.isFetching}
-          />
-
+          {/* Primary columns: Agent Settings + Model & Provider */}
           <div className="config-columns">
             <AgentSettings
               agentId={selectedId}
               config={config}
               disabled={detailQuery.isFetching}
+              onQueued={handleQueued}
             />
             <ModelProvider
               agentId={selectedId}
               config={config}
               health={health}
+              onQueued={handleQueued}
             />
           </div>
+
+          {/* Display Toggles: full width, below primary columns */}
+          <DisplayToggles
+            agentId={selectedId}
+            config={config}
+            disabled={detailQuery.isFetching}
+            onQueued={handleQueued}
+          />
         </>
       )}
     </AppShell>

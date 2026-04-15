@@ -61,7 +61,7 @@ async function parseResponse<T>(response: Response): Promise<T> {
 export async function fetchJson<T>(input: string, init?: RequestInit) {
   const method = init?.method?.toUpperCase() ?? "GET";
   const csrfHeaders: Record<string, string> =
-    method === "POST" || method === "PUT" || method === "DELETE"
+    method === "POST" || method === "PUT" || method === "DELETE" || method === "PATCH"
       ? { "X-CSRF-Token": getCsrfToken() }
       : {};
 
