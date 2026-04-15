@@ -139,27 +139,6 @@ unset OPENAI_BASE_URL
 unset OPENAI_API_BASE
 unset NOUS_MIMO_FACTORY_KEY
 
-# FCT060: Factory Conductor Webhook Memo Protocol.
-# Bridge the agent-specific WEBHOOK_SECRET_BOOT (injected by infisical-env.sh
-# factory --) into Hermes's generic WEBHOOK_SECRET env var. Hermes's
-# gateway/config.py:842-855 reads WEBHOOK_ENABLED / WEBHOOK_PORT /
-# WEBHOOK_SECRET from os.environ at gateway startup and writes them into
-# the webhook PlatformConfig's in-memory extra dict. The secret never
-# touches disk — it exists only in the running gateway process's memory.
-# See docs/fct/FCT060 for the full architecture.
-if [[ -z "${WEBHOOK_SECRET_BOOT:-}" ]]; then
-  echo "ERROR: WEBHOOK_SECRET_BOOT not set — Infisical injection failed" >&2
-  exit 2
-fi
-export WEBHOOK_ENABLED=true
-export WEBHOOK_PORT=41951
-# Unquoted variable reference is intentional: the quoted form would
-# pattern-match the scan-secrets-commit.sh hook's generic credential
-# regex. The HMAC value is a single hex string with no whitespace, so
-# dropping the quotes is safe against word-splitting.
-export WEBHOOK_SECRET=$WEBHOOK_SECRET_BOOT
-unset WEBHOOK_SECRET_BOOT  # only the generic name should exist at exec time
-
 exec /Users/nesbitt/.local/bin/hermes \
   --profile boot \
   gateway run --replace
