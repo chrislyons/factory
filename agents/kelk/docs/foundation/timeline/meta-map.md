@@ -65,6 +65,8 @@ people_index:
     role: brother
     status: estranged
     appears_in: [age-00-07, age-07-14, age-14-20, age-20-30, age-30-40]
+    notes: |
+      Moved in with Chris at 187 Madison Ave (late 2011) due to housing difficulties. Was struggling with heavy drinking and pills (OxyContin). A major conflict with Cathy over my drinking vs. his substance use led to Cathy calling him, which Chris felt was a betrayal. This event is an undying source of anger for Chris.
 
   - name: Michael
     role: father
