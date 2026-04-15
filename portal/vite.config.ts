@@ -21,6 +21,7 @@ export default defineConfig({
         analytics: resolve(root, "pages/analytics.html"),
         loops: resolve(root, "pages/loops.html"),
         docs: resolve(root, "pages/docs.html"),
+        config: resolve(root, "pages/config.html"),
         agentBoot: resolve(root, "pages/agents/boot.html"),
         agentIg88: resolve(root, "pages/agents/ig88.html"),
         agentKelk: resolve(root, "pages/agents/kelk.html"),

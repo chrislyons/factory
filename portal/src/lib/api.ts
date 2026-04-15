@@ -161,3 +161,75 @@ export async function abortLoop(loopId: string) {
     method: "POST"
   });
 }
+
+// ─── Config API (Hermes agent config management) ─────────────────────────
+
+export interface AgentConfigSummary {
+  id: string;
+  label: string;
+  model?: string;
+  provider?: string;
+  base_url?: string;
+  display?: {
+    compact?: boolean;
+    streaming?: boolean;
+    show_cost?: boolean;
+    show_reasoning?: boolean;
+  };
+  max_turns?: number;
+  max_tokens?: number;
+  tool_use_enforcement?: string;
+  approval_mode?: string;
+  toolsets?: string[];
+  error?: string;
+}
+
+export interface AgentHealth {
+  reachable: boolean;
+  url: string | null;
+  status: number | null;
+  error: string | null;
+}
+
+export interface ConfigListResponse {
+  agents: AgentConfigSummary[];
+}
+
+export interface ConfigDetailResponse {
+  agent: string;
+  config: Record<string, unknown>;
+  health: AgentHealth;
+}
+
+export interface ConfigPatchResponse {
+  ok: boolean;
+  agent: string;
+  updated_fields: string[];
+  config: Record<string, unknown>;
+}
+
+export async function fetchConfigSummaries() {
+  return fetchJson<ConfigListResponse>("/api/config");
+}
+
+export async function fetchAgentConfig(agentId: string) {
+  return fetchJson<ConfigDetailResponse>(`/api/config/${agentId}`);
+}
+
+export async function patchAgentConfig(agentId: string, patch: Record<string, unknown>) {
+  return fetchJson<ConfigPatchResponse>(`/api/config/${agentId}`, {
+    method: "PATCH",
+    body: JSON.stringify(patch)
+  });
+}
+
+export async function fetchAgentHealth(agentId: string) {
+  return fetchJson<AgentHealth>(`/api/config/${agentId}/health`);
+}
+
+export async function restartAgentGateway(agentId: string) {
+  return fetchJson<{ ok: boolean; agent?: string; label?: string; error?: string }>(
+    `/api/config/${agentId}/restart`,
+    { method: "POST" }
+  );
+}
