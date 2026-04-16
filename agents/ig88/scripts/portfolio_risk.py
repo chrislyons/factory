@@ -20,18 +20,19 @@ STATE_DIR = BASE_DIR / "data" / "risk_state"
 STATE_DIR.mkdir(parents=True, exist_ok=True)
 
 
-# === CORRELATION MATRIX (from backtest) ===
-# Pre-computed from 2yr daily returns (pearson r)
+# === CORRELATION MATRIX (2yr daily returns, pearson r) ===
+# Pairwise correlation from 729 daily bars (2 years)
+# Two clusters: CORE (ETH/AVAX/LINK/NEAR/SOL, r=0.72-0.83) and SATELLITE (FIL/RNDR/SUI/WLD, r≈0 with core)
 CORR_MATRIX = {
-    "ETH":  {"ETH": 1.00, "AVAX": 0.82, "LINK": 0.78, "NEAR": 0.75, "SOL": 0.80, "SUI": 0.72, "FIL": 0.68, "RNDR": 0.65, "WLD": 0.62},
-    "AVAX": {"ETH": 0.82, "AVAX": 1.00, "LINK": 0.76, "NEAR": 0.80, "SOL": 0.83, "SUI": 0.78, "FIL": 0.70, "RNDR": 0.67, "WLD": 0.64},
-    "LINK": {"ETH": 0.78, "AVAX": 0.76, "LINK": 1.00, "NEAR": 0.73, "SOL": 0.75, "SUI": 0.70, "FIL": 0.66, "RNDR": 0.63, "WLD": 0.60},
-    "NEAR": {"ETH": 0.75, "AVAX": 0.80, "LINK": 0.73, "NEAR": 1.00, "SOL": 0.78, "SUI": 0.82, "FIL": 0.72, "RNDR": 0.68, "WLD": 0.65},
-    "SOL":  {"ETH": 0.80, "AVAX": 0.83, "LINK": 0.75, "NEAR": 0.78, "SOL": 1.00, "SUI": 0.80, "FIL": 0.71, "RNDR": 0.66, "WLD": 0.63},
-    "SUI":  {"ETH": 0.72, "AVAX": 0.78, "LINK": 0.70, "NEAR": 0.82, "SOL": 0.80, "SUI": 1.00, "FIL": 0.74, "RNDR": 0.69, "WLD": 0.66},
-    "FIL":  {"ETH": 0.68, "AVAX": 0.70, "LINK": 0.66, "NEAR": 0.72, "SOL": 0.71, "SUI": 0.74, "FIL": 1.00, "RNDR": 0.62, "WLD": 0.58},
-    "RNDR": {"ETH": 0.65, "AVAX": 0.67, "LINK": 0.63, "NEAR": 0.68, "SOL": 0.66, "SUI": 0.69, "FIL": 0.62, "RNDR": 1.00, "WLD": 0.70},
-    "WLD":  {"ETH": 0.62, "AVAX": 0.64, "LINK": 0.60, "NEAR": 0.65, "SOL": 0.63, "SUI": 0.66, "FIL": 0.58, "RNDR": 0.70, "WLD": 1.00},
+    "ETH":  {"ETH": 1.00, "AVAX": 0.77, "LINK": 0.78, "NEAR": 0.72, "SOL": 0.78, "SUI": -0.05, "FIL": 0.01, "RNDR": 0.03, "WLD": -0.04},
+    "AVAX": {"ETH": 0.77, "AVAX": 1.00, "LINK": 0.83, "NEAR": 0.79, "SOL": 0.76, "SUI": -0.03, "FIL": -0.00, "RNDR": 0.05, "WLD": -0.02},
+    "LINK": {"ETH": 0.78, "AVAX": 0.83, "LINK": 1.00, "NEAR": 0.78, "SOL": 0.74, "SUI": -0.03, "FIL": 0.01, "RNDR": 0.05, "WLD": -0.02},
+    "NEAR": {"ETH": 0.72, "AVAX": 0.79, "LINK": 0.78, "NEAR": 1.00, "SOL": 0.72, "SUI": -0.06, "FIL": 0.01, "RNDR": 0.05, "WLD": -0.04},
+    "SOL":  {"ETH": 0.78, "AVAX": 0.76, "LINK": 0.74, "NEAR": 0.72, "SOL": 1.00, "SUI": -0.05, "FIL": 0.03, "RNDR": 0.04, "WLD": -0.05},
+    "SUI":  {"ETH": -0.05, "AVAX": -0.03, "LINK": -0.03, "NEAR": -0.06, "SOL": -0.05, "SUI": 1.00, "FIL": 0.07, "RNDR": -0.00, "WLD": 0.63},
+    "FIL":  {"ETH": 0.01, "AVAX": -0.00, "LINK": 0.01, "NEAR": 0.01, "SOL": 0.03, "SUI": 0.07, "FIL": 1.00, "RNDR": -0.03, "WLD": 0.03},
+    "RNDR": {"ETH": 0.03, "AVAX": 0.05, "LINK": 0.05, "NEAR": 0.05, "SOL": 0.04, "SUI": -0.00, "FIL": -0.03, "RNDR": 1.00, "WLD": -0.03},
+    "WLD":  {"ETH": -0.04, "AVAX": -0.02, "LINK": -0.02, "NEAR": -0.04, "SOL": -0.05, "SUI": 0.63, "FIL": 0.03, "RNDR": -0.03, "WLD": 1.00},
 }
 
 ASSETS = ["ETH", "AVAX", "LINK", "NEAR", "SOL", "SUI", "FIL", "RNDR", "WLD"]
