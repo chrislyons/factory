@@ -12,17 +12,32 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 from datetime import datetime, timezone
+from typing import Optional
 import json
 
 DATA_DIR = Path('/Users/nesbitt/dev/factory/agents/ig88/data')
 STATE_FILE = Path('/Users/nesbitt/dev/factory/agents/ig88/data/regime_state.json')
 
 
+def _find_btc_parquet() -> Optional[Path]:
+    """Find BTC parquet file in multiple possible locations."""
+    candidates = [
+        DATA_DIR / 'binance_BTC_USDT_240m.parquet',
+        DATA_DIR / 'ohlcv' / '4h' / 'binance_BTC_USDT_240m.parquet',
+        DATA_DIR / 'ohlcv' / '4h' / 'binance_BTCUSD_240m.parquet',
+        DATA_DIR / 'ohlcv' / '1h' / 'binance_BTC_USDT_240m.parquet',
+    ]
+    for p in candidates:
+        if p.exists():
+            return p
+    return None
+
+
 def load_btc_data():
     """Load BTC 4h OHLCV data."""
-    path = DATA_DIR / 'binance_BTC_USDT_240m.parquet'
-    if not path.exists():
-        raise FileNotFoundError(f"BTC data not found: {path}")
+    path = _find_btc_parquet()
+    if path is None:
+        raise FileNotFoundError("BTC 4h data not found in any standard location")
     return pd.read_parquet(path)
 
 

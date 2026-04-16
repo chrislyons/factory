@@ -112,7 +112,8 @@ def _redact_secrets(data: Any, path: str = "") -> Any:
         result = {}
         for key, value in data.items():
             full_path = f"{path}.{key}" if path else key
-            if any(p.search(key) for p in SECRET_PATTERNS):
+            # max_tokens is a legitimate config field, not a secret
+            if key != "max_tokens" and any(p.search(key) for p in SECRET_PATTERNS):
                 result[key] = "***" if isinstance(value, str) else None
             else:
                 result[key] = _redact_secrets(value, full_path)
@@ -154,17 +155,21 @@ def read_config(agent: str) -> dict:
     return raw or {}
 
 
-def _derive_provider(config: dict) -> str:
+def _derive_provider(config: dict, dotted_prefix: str = "model") -> str:
     """Derive the actual inference provider from config.
 
-    Checks base_url for local engine:port mapping first,
-    then falls back to model path, then stored provider.
+    Checks base_url for local engine:port mapping FIRST,
+    then cloud providers by host, then falls back to stored provider.
+    The dotted_prefix param allows re-use for auxiliary.* slots.
     """
-    base_url = _get_nested(config, "model.base_url") or ""
-    model_path = _get_nested(config, "model.default") or ""
-    stored = _get_nested(config, "model.provider") or "unknown"
+    base_url = _get_nested(config, f"{dotted_prefix}.base_url") or ""
+    model_path = _get_nested(config, f"{dotted_prefix}.default") or ""
+    # For aux slots, model path might be under 'model' key directly
+    if not model_path and dotted_prefix != "model":
+        model_path = _get_nested(config, f"{dotted_prefix}.model") or ""
+    stored = _get_nested(config, f"{dotted_prefix}.provider") or "unknown"
 
-    # Local engines: identify by base_url port
+    # Local engines: identify by base_url port FIRST (never trust stored provider)
     if "127.0.0.1" in base_url or "localhost" in base_url:
         port = base_url.split(":")[-1].split("/")[0]
         # 26B flash-moe on any port
