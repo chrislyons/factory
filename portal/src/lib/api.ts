@@ -259,3 +259,19 @@ export async function toggleMcpServer(agentId: string, serverName: string, enabl
     { method: "POST", body: JSON.stringify({ enabled }) }
   );
 }
+
+export async function fetchHermesSessions(): Promise<import("./types").HermesSessionsResponse> {
+  return fetchJson("/api/config/sessions");
+}
+
+export async function fetchSessionDetail(sessionId: string): Promise<import("./types").HermesSessionDetail> {
+  return fetchJson(`/api/config/sessions/${sessionId}`);
+}
+
+export async function fetchCronJobs(): Promise<import("./types").CronJobsResponse> {
+  return fetchJson("/api/config/cron-jobs");
+}
+
+export async function fetchRLRuns(): Promise<import("./types").RLRunsResponse> {
+  return fetchJson("/api/config/rl-runs");
+}

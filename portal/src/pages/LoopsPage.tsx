@@ -1,314 +1,281 @@
 import { useMemo, useState } from "react";
 import { AppShell, SurfaceCard } from "../components/AppShell";
-import { LoopDetailPanel } from "../components/loops/LoopDetailPanel";
-import { LoopStatusPill } from "../components/loops/LoopStatusPill";
-import { CountdownTimer } from "../components/primitives/CountdownTimer";
 import { EmptyState } from "../components/primitives/EmptyState";
-import { GateTypePill } from "../components/primitives/GateTypePill";
 import { SyncClock } from "../components/primitives/SyncClock";
-import { useApprovalDecision, useLoopAbort, useLoopDetail, useLoops, useLoopStart, usePendingApprovals, useResolvedApprovals } from "../hooks/usePortalQueries";
-import { AGENTS } from "../lib/constants";
 import {
-  approvalGateLabel,
-  formatMetricValue,
-  loopApprovalGateLabel,
-  loopTypeLabel,
-  relativeTimestamp
-} from "../lib/utils";
+  useCronJobs,
+  useHermesSessions,
+  useRLRuns,
+  useSessionDetail
+} from "../hooks/usePortalQueries";
+import { relativeTimestamp, timeAgo } from "../lib/utils";
 
-function readSearchParam(name: string) {
-  return new URLSearchParams(window.location.search).get(name);
+// ── Helpers ─────────────────────────────────────────────────────────
+
+function sourceBadge(source: string): string {
+  switch (source) {
+    case "cli": return "loop-source--cli";
+    case "matrix": return "loop-source--matrix";
+    case "acp": return "loop-source--acp";
+    default: return "loop-source--default";
+  }
 }
 
-function setSearchParams(params: Record<string, string | null>) {
-  const search = new URLSearchParams(window.location.search);
-  Object.entries(params).forEach(([key, value]) => {
-    if (!value) search.delete(key);
-    else search.set(key, value);
-  });
-  const next = `${window.location.pathname}?${search.toString()}`;
-  window.history.replaceState({}, "", next);
+function cronStateBadge(state: string): string {
+  switch (state) {
+    case "scheduled": return "loop-cron-state--scheduled";
+    case "paused": return "loop-cron-state--paused";
+    case "completed": return "loop-cron-state--completed";
+    default: return "loop-cron-state--default";
+  }
 }
 
-function payloadSummary(payload: Record<string, unknown> | null | undefined) {
-  if (!payload) return "No payload";
-  const entries = Object.entries(payload).slice(0, 4);
-  return entries.map(([key, value]) => `${key}: ${typeof value === "string" ? value : JSON.stringify(value)}`).join(" · ");
+function formatTokens(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
+  return String(n);
 }
+
+function truncateModel(model: string | null): string {
+  if (!model) return "—";
+  return model.length > 28 ? model.slice(0, 25) + "…" : model;
+}
+
+// ── Sessions Panel ──────────────────────────────────────────────────
+
+function SessionsPanel({ sessions }: { sessions: ReturnType<typeof useHermesSessions> }) {
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const detail = useSessionDetail(selectedId);
+
+  const data = sessions.data;
+  const allSessions = useMemo(() => {
+    if (!data) return [];
+    return [...data.active, ...data.completed];
+  }, [data]);
+
+  return (
+    <SurfaceCard
+      title="Hermes Sessions"
+      subtitle={`${data?.total ?? 0} total · ${data?.active.length ?? 0} active`}
+      className="surface-card--compact"
+    >
+      {sessions.isLoading ? (
+        <div className="loop-loading">Loading sessions…</div>
+      ) : allSessions.length === 0 ? (
+        <EmptyState compact title="No sessions found" detail="Hermes state.db has no session records." />
+      ) : (
+        <div className="loop-sessions-layout">
+          <div className="loop-session-list">
+            {allSessions.map((s) => {
+              const isSelected = selectedId === s.id;
+              return (
+                <button
+                  key={s.id}
+                  className={isSelected ? "loop-session-row is-selected" : "loop-session-row"}
+                  type="button"
+                  onClick={() => setSelectedId(isSelected ? null : s.id)}
+                >
+                  <div className="loop-session-row__head">
+                    <span className={`loop-source-badge ${sourceBadge(s.source)}`}>{s.source}</span>
+                    <span className="loop-session-row__model">{truncateModel(s.model)}</span>
+                    {!s.ended_at && <span className="loop-live-dot" title="Active" />}
+                  </div>
+                  <div className="loop-session-row__title">{s.title || s.id.slice(0, 16)}</div>
+                  <div className="loop-session-row__meta">
+                    <span>{s.message_count} msgs</span>
+                    <span>{s.tool_call_count} tools</span>
+                    <span>{relativeTimestamp(s.started_at)}</span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          {selectedId && detail.data && !("error" in detail.data) ? (
+            <div className="loop-session-detail">
+              <h4>{detail.data.title || selectedId}</h4>
+              <div className="loop-detail-stats">
+                <span>Messages: {detail.data.message_count}</span>
+                <span>Tool calls: {detail.data.tool_call_count}</span>
+                <span>In: {formatTokens(detail.data.input_tokens)}</span>
+                <span>Out: {formatTokens(detail.data.output_tokens)}</span>
+                {detail.data.estimated_cost_usd != null && (
+                  <span>Cost: ${detail.data.estimated_cost_usd.toFixed(4)}</span>
+                )}
+              </div>
+              {detail.data.recent_messages.length > 0 && (
+                <div className="loop-tool-feed">
+                  <h5>Recent Tool Calls</h5>
+                  {detail.data.recent_messages.slice(0, 15).map((msg) => (
+                    <div key={msg.id} className="loop-tool-entry">
+                      <span className="loop-tool-entry__time">{relativeTimestamp(msg.timestamp)}</span>
+                      <span className="loop-tool-entry__tools">
+                        {msg.tool_names.length > 0 ? msg.tool_names.join(", ") : msg.role}
+                      </span>
+                      {msg.preview && <span className="loop-tool-entry__preview">{msg.preview}</span>}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : selectedId && detail.data && "error" in detail.data ? (
+            <div className="loop-session-detail">
+              <EmptyState compact title="Session not found" detail={(detail.data as { error: string }).error} />
+            </div>
+          ) : null}
+        </div>
+      )}
+
+      {data && Object.keys(data.tool_distribution).length > 0 && (
+        <div className="loop-tool-dist">
+          <h5>Tool Distribution</h5>
+          <div className="loop-tool-bars">
+            {Object.entries(data.tool_distribution).map(([name, count]) => {
+              const max = Math.max(...Object.values(data.tool_distribution));
+              const pct = max > 0 ? (count / max) * 100 : 0;
+              return (
+                <div key={name} className="loop-tool-bar">
+                  <span className="loop-tool-bar__name">{name}</span>
+                  <div className="loop-tool-bar__track">
+                    <div className="loop-tool-bar__fill" style={{ width: `${pct}%` }} />
+                  </div>
+                  <span className="loop-tool-bar__count">{count}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </SurfaceCard>
+  );
+}
+
+// ── Cron Panel ──────────────────────────────────────────────────────
+
+function CronPanel({ cron }: { cron: ReturnType<typeof useCronJobs> }) {
+  const data = cron.data;
+
+  return (
+    <SurfaceCard
+      title="Cron Jobs"
+      subtitle={`${data?.count ?? 0} scheduled`}
+      className="surface-card--compact"
+    >
+      {cron.isLoading ? (
+        <div className="loop-loading">Loading cron jobs…</div>
+      ) : !data || data.jobs.length === 0 ? (
+        <EmptyState
+          compact
+          title="No cron jobs"
+          detail="Create scheduled tasks via /cron in any Hermes chat session."
+        />
+      ) : (
+        <div className="loop-cron-list">
+          {data.jobs.map((job) => (
+            <div key={job.id} className="loop-cron-row">
+              <div className="loop-cron-row__head">
+                <span className="loop-cron-row__name">{job.name || job.id}</span>
+                <span className={`loop-cron-state ${cronStateBadge(job.state)}`}>{job.state}</span>
+              </div>
+              <div className="loop-cron-row__schedule">{job.schedule_display}</div>
+              {job.prompt && <div className="loop-cron-row__prompt">{job.prompt}</div>}
+              <div className="loop-cron-row__meta">
+                {job.skills && job.skills.length > 0 && (
+                  <span>Skills: {job.skills.join(", ")}</span>
+                )}
+                {job.next_run && <span>Next: {relativeTimestamp(job.next_run)}</span>}
+                {job.last_run && <span>Last: {relativeTimestamp(job.last_run)}</span>}
+                {job.run_count != null && <span>Runs: {job.run_count}</span>}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </SurfaceCard>
+  );
+}
+
+// ── RL/GRPO Panel ───────────────────────────────────────────────────
+
+function RLPanel({ rl }: { rl: ReturnType<typeof useRLRuns> }) {
+  const data = rl.data;
+
+  return (
+    <SurfaceCard
+      title="RL Training (GRPO)"
+      subtitle={data?.configured ? "Configured" : "Not configured"}
+      className="surface-card--compact"
+    >
+      {rl.isLoading ? (
+        <div className="loop-loading">Checking RL status…</div>
+      ) : !data ? (
+        <EmptyState compact title="Unable to check RL status" detail="API returned no data." />
+      ) : (
+        <div className="loop-rl-panel">
+          <div className="loop-rl-checklist">
+            <div className={data.has_tinker_key ? "loop-rl-check is-ok" : "loop-rl-check is-missing"}>
+              <span className="loop-rl-check__icon">{data.has_tinker_key ? "✓" : "✗"}</span>
+              <span>TINKER_API_KEY</span>
+            </div>
+            <div className={data.has_wandb_key ? "loop-rl-check is-ok" : "loop-rl-check is-missing"}>
+              <span className="loop-rl-check__icon">{data.has_wandb_key ? "✓" : "✗"}</span>
+              <span>WANDB_API_KEY</span>
+            </div>
+            <div className={data.tinker_atropos_exists ? "loop-rl-check is-ok" : "loop-rl-check is-missing"}>
+              <span className="loop-rl-check__icon">{data.tinker_atropos_exists ? "✓" : "✗"}</span>
+              <span>tinker-atropos submodule</span>
+            </div>
+          </div>
+
+          {data.configured ? (
+            data.runs.length === 0 ? (
+              <EmptyState compact title="No training runs" detail="Start a GRPO run from any Hermes session with rl_start_training()." />
+            ) : (
+              <div className="loop-rl-runs">
+                <h5>Runs ({data.run_count})</h5>
+                {data.runs.map((run) => (
+                  <div key={run.id} className="loop-rl-run-row">
+                    <span className="loop-rl-run-row__id">{run.id}</span>
+                    <span className="loop-rl-run-row__path">{run.path}</span>
+                  </div>
+                ))}
+              </div>
+            )
+          ) : (
+            <div className="loop-rl-setup-hint">
+              Set TINKER_API_KEY and WANDB_API_KEY in ~/.hermes/.env to enable GRPO training.
+            </div>
+          )}
+        </div>
+      )}
+    </SurfaceCard>
+  );
+}
+
+// ── Main Page ───────────────────────────────────────────────────────
 
 export function LoopsPage() {
-  const loops = useLoops();
-  const loopStart = useLoopStart();
-  const loopAbort = useLoopAbort();
-  const [specPath, setSpecPath] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [agentFilter, setAgentFilter] = useState("all");
-  const [typeFilter, setTypeFilter] = useState("all");
-  const [approvalFilter, setApprovalFilter] = useState("all");
+  const sessions = useHermesSessions();
+  const cron = useCronJobs();
+  const rl = useRLRuns();
 
-  const pending = usePendingApprovals();
-  const resolved = useResolvedApprovals();
-  const decision = useApprovalDecision();
-  const [showResolved, setShowResolved] = useState(false);
-
-  const pendingItems = useMemo(
-    () => [...(pending.data ?? [])].sort((left, right) => new Date(left.requested_at).getTime() - new Date(right.requested_at).getTime()),
-    [pending.data]
+  const updatedAt = Math.max(
+    sessions.dataUpdatedAt || 0,
+    cron.dataUpdatedAt || 0,
+    rl.dataUpdatedAt || 0
   );
-  const resolvedItems = useMemo(
-    () => [...(resolved.data ?? [])].slice(0, 20),
-    [resolved.data]
-  );
-
-  const selectedLoopId = readSearchParam("loop");
-
-  const filteredLoops = useMemo(() => {
-    const list = loops.data ?? [];
-    return list.filter((loop) => {
-      if (statusFilter !== "all" && loop.status !== statusFilter) return false;
-      if (agentFilter !== "all" && loop.spec.agent_id !== agentFilter) return false;
-      if (typeFilter !== "all" && loop.spec.loop_type !== typeFilter) return false;
-      if (approvalFilter !== "all" && loop.spec.approval_gate !== approvalFilter) return false;
-      return true;
-    });
-  }, [agentFilter, approvalFilter, loops.data, statusFilter, typeFilter]);
-
-  const selectedLoopSummary =
-    filteredLoops.find((loop) => loop.loop_id === selectedLoopId) ?? filteredLoops[0] ?? null;
-  const loopDetail = useLoopDetail(selectedLoopSummary?.loop_id ?? selectedLoopId);
-  const selectedLoop = loopDetail.data ?? selectedLoopSummary;
-
-  async function handleLoopStart() {
-    const nextSpecPath = specPath.trim();
-    if (!nextSpecPath) return;
-    await loopStart.mutateAsync(nextSpecPath);
-    setSpecPath("");
-  }
+  const hasError = Boolean(sessions.error || cron.error || rl.error);
 
   return (
     <AppShell
-      title="Loop Console"
-      description="Autoscope loop oversight, iteration detail, and operator controls."
+      title="Loops"
+      description="Hermes sessions, scheduled tasks, and RL training runs."
       pageKey="/pages/loops.html"
-      statusSlot={<SyncClock updatedAt={Math.max(loops.dataUpdatedAt || 0, loopDetail.dataUpdatedAt || 0, pending.dataUpdatedAt || 0, resolved.dataUpdatedAt || 0)} stale={Boolean(loops.error || loopDetail.error || pending.error || resolved.error)} />}
+      statusSlot={<SyncClock updatedAt={updatedAt} stale={hasError} />}
     >
-      {/* Approval Queue */}
-      <SurfaceCard
-        title="Pending Approvals"
-        subtitle="Live queue"
-        action={pendingItems.length > 0 ? <span className="count-badge is-alert">{pendingItems.length}</span> : null}
-      >
-        {pendingItems.length === 0 ? (
-          <EmptyState compact title="No pending approvals" detail={pending.error ? "Waiting for coordinator…" : "The approval queue is clear."} />
-        ) : (
-          <div className="approval-list">
-            {pendingItems.map((approval) => (
-              <article key={approval.id} className="approval-card">
-                <div className="approval-card__header">
-                  <div>
-                    <div className="approval-card__title">
-                      <strong>{approval.agent_name}</strong>
-                      <GateTypePill gateType={approval.gate_type} />
-                    </div>
-                    <div className="approval-card__meta">
-                      {approval.tool_name ? `${approval.tool_name} · ` : ""}
-                      {approvalGateLabel(approval.gate_type)}
-                    </div>
-                  </div>
-                  <CountdownTimer requestedAt={approval.requested_at} timeoutMs={approval.timeout_ms} />
-                </div>
-                <div className="approval-card__body">{payloadSummary(approval.payload)}</div>
-                <div className="approval-card__footer">
-                  <span>{relativeTimestamp(approval.requested_at)}</span>
-                  <div className="approval-card__actions">
-                    <button
-                      className="primary-button"
-                      type="button"
-                      disabled={decision.isPending}
-                      onClick={() => decision.mutate({ id: approval.id, decision: "approve" })}
-                    >
-                      Approve
-                    </button>
-                    <button
-                      className="danger-button"
-                      type="button"
-                      disabled={decision.isPending}
-                      onClick={() => decision.mutate({ id: approval.id, decision: "reject" })}
-                    >
-                      Reject
-                    </button>
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
-      </SurfaceCard>
-
-      <SurfaceCard
-        title="Resolved History"
-        subtitle="Recent outcomes"
-        className="surface-card--compact"
-        action={
-          <button className="secondary-button" type="button" onClick={() => setShowResolved((value) => !value)}>
-            {showResolved ? "Collapse" : "Expand"}
-          </button>
-        }
-      >
-        {showResolved ? (
-          resolvedItems.length === 0 ? (
-            <EmptyState compact title="No resolved approvals yet" detail="Coordinator history will appear here." />
-          ) : (
-            <div className="approval-history">
-              {resolvedItems.map((approval) => (
-                <div key={`${approval.id}-${approval.resolved_at ?? approval.requested_at}`} className="approval-history__row">
-                  <div>
-                    <strong>{approval.agent_name}</strong>
-                    <span>{payloadSummary(approval.payload)}</span>
-                  </div>
-                  <div>
-                    <GateTypePill gateType={approval.gate_type} />
-                    <span className="history-decision">{approval.decision}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )
-        ) : (
-          <div className="placeholder-copy">Collapsed by default so pending work keeps the visual priority.</div>
-        )}
-      </SurfaceCard>
-
-      <SurfaceCard title="Loop Controls" subtitle="Start, filter, and inspect active loops" className="surface-card--compact">
-        <div className="loop-launch-row">
-          <input
-            className="text-input loop-launch-row__input"
-            placeholder="Loop spec path…"
-            value={specPath}
-            onChange={(event) => setSpecPath(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") void handleLoopStart();
-            }}
-          />
-          <button
-            className="primary-button"
-            type="button"
-            disabled={loopStart.isPending}
-            onClick={() => void handleLoopStart()}
-          >
-            Start
-          </button>
-        </div>
-        {loopStart.error && (
-          <div className="alert-banner is-danger">Loop start failed. Coordinator loop actions are not available yet.</div>
-        )}
-        <div className="loop-filter-strip">
-          <select className="select-input loop-filter" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
-            <option value="all">All statuses</option>
-            <option value="pending">Pending</option>
-            <option value="running">Running</option>
-            <option value="paused">Paused</option>
-            <option value="completed">Completed</option>
-            <option value="aborted">Aborted</option>
-          </select>
-          <select className="select-input loop-filter" value={agentFilter} onChange={(event) => setAgentFilter(event.target.value)}>
-            <option value="all">All agents</option>
-            {AGENTS.map((agent) => (
-              <option key={agent.id} value={agent.id}>
-                {agent.label}
-              </option>
-            ))}
-          </select>
-          <select className="select-input loop-filter" value={typeFilter} onChange={(event) => setTypeFilter(event.target.value)}>
-            <option value="all">All loop types</option>
-            {["researcher", "narrative", "infra_improve", "coding", "swarm"].map((value) => (
-              <option key={value} value={value}>
-                {loopTypeLabel(value)}
-              </option>
-            ))}
-          </select>
-          <select className="select-input loop-filter" value={approvalFilter} onChange={(event) => setApprovalFilter(event.target.value)}>
-            <option value="all">All approval gates</option>
-            {["none", "propose_then_execute", "human_approval_required"].map((value) => (
-              <option key={value} value={value}>
-                {loopApprovalGateLabel(value)}
-              </option>
-            ))}
-          </select>
-        </div>
-      </SurfaceCard>
-
-      {loops.error ? (
-        <SurfaceCard title="Loop Inventory" subtitle="Waiting on `/loops`" className="surface-card--compact">
-          <EmptyState compact title="Waiting for coordinator…" detail="`GET /loops` is not returning data yet." />
-        </SurfaceCard>
-      ) : filteredLoops.length === 0 ? (
-        <SurfaceCard title="Loop Inventory" subtitle="No active loop records" className="surface-card--compact">
-          <EmptyState compact title="No loops yet" detail="`GET /loops` returned an empty array." />
-        </SurfaceCard>
-      ) : (
-        <div className="loop-console-layout">
-          <SurfaceCard title="Loop Inventory" subtitle="Full loop records">
-            <div className="loop-inventory">
-              {filteredLoops.map((loop) => {
-                const isSelected = selectedLoop?.loop_id === loop.loop_id;
-                return (
-                  <button
-                    key={loop.loop_id}
-                    className={isSelected ? "loop-row is-selected" : "loop-row"}
-                    type="button"
-                    onClick={() => setSearchParams({ loop: loop.loop_id })}
-                  >
-                    <div className="loop-row__main">
-                      <div className="loop-row__title">
-                        <strong>{loop.spec.name}</strong>
-                        <LoopStatusPill status={loop.status} />
-                      </div>
-                      <div className="loop-row__meta">
-                        <span>{loop.spec.agent_id}</span>
-                        <span>{loopTypeLabel(loop.spec.loop_type)}</span>
-                        <span>{loopApprovalGateLabel(loop.spec.approval_gate)}</span>
-                      </div>
-                    </div>
-                    <div className="loop-row__stats">
-                      <span>
-                        Iter {loop.current_iteration}/{loop.spec.budget.max_iterations}
-                      </span>
-                      <span>Best {formatMetricValue(loop.best_metric)}</span>
-                      <span>{relativeTimestamp(loop.iterations.at(-1)?.ended_at ?? null)}</span>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </SurfaceCard>
-
-          <SurfaceCard title="Selected Loop" subtitle="Iteration detail and operator control">
-            {!selectedLoop ? (
-              <EmptyState compact title="Select a loop" detail="Choose a loop from the inventory to inspect it." />
-            ) : (
-              <LoopDetailPanel
-                loop={selectedLoop}
-                actionSlot={
-                  selectedLoop.status === "completed" || selectedLoop.status === "aborted" ? null : (
-                    <button
-                      className="danger-button"
-                      type="button"
-                      disabled={loopAbort.isPending}
-                      onClick={() => loopAbort.mutate(selectedLoop.loop_id)}
-                    >
-                      Abort Loop
-                    </button>
-                  )
-                }
-              />
-            )}
-            {loopDetail.error && selectedLoop ? (
-              <div className="placeholder-copy">Loop detail is currently falling back to the `/loops` list payload.</div>
-            ) : null}
-          </SurfaceCard>
-        </div>
-      )}
+      <SessionsPanel sessions={sessions} />
+      <CronPanel cron={cron} />
+      <RLPanel rl={rl} />
     </AppShell>
   );
 }

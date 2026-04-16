@@ -11,6 +11,7 @@ import copy
 import json
 import os
 import re
+import sqlite3
 import subprocess
 import urllib.request
 import urllib.error
@@ -20,6 +21,10 @@ from typing import Any
 import yaml
 
 HERMES_HOME = Path.home() / ".hermes" / "profiles"
+HERMES_ROOT = Path.home() / ".hermes"
+STATE_DB = HERMES_ROOT / "state.db"
+CRON_JOBS_FILE = HERMES_ROOT / "cron" / "jobs.json"
+TINKER_DIR = HERMES_ROOT / "hermes-agent" / "tinker-atropos"
 
 # Agents with Hermes config files
 AGENTS = {
@@ -565,6 +570,198 @@ def get_agent_summaries() -> list[dict]:
     return summaries
 
 
+def _query_sessions(limit: int = 20) -> list[dict]:
+    """Query Hermes state.db for recent sessions."""
+    if not STATE_DB.exists():
+        return []
+    try:
+        conn = sqlite3.connect(str(STATE_DB))
+        conn.row_factory = sqlite3.Row
+        cur = conn.execute(
+            """SELECT id, source, user_id, model, started_at, ended_at,
+                      message_count, tool_call_count, input_tokens, output_tokens,
+                      title
+               FROM sessions ORDER BY started_at DESC LIMIT ?""",
+            (limit,),
+        )
+        rows = [dict(r) for r in cur.fetchall()]
+        conn.close()
+        for row in rows:
+            for key in ("started_at", "ended_at"):
+                if row.get(key):
+                    from datetime import datetime, timezone
+                    row[key] = datetime.fromtimestamp(
+                        row[key], tz=timezone.utc
+                    ).isoformat()
+        return rows
+    except Exception:
+        return []
+
+
+def _query_session_messages(session_id: str, limit: int = 30) -> list[dict]:
+    """Query recent messages for a session, focusing on tool calls."""
+    if not STATE_DB.exists():
+        return []
+    try:
+        conn = sqlite3.connect(str(STATE_DB))
+        conn.row_factory = sqlite3.Row
+        cur = conn.execute(
+            """SELECT id, role, tool_calls, tool_name, timestamp,
+                      substr(content, 1, 120) as preview
+               FROM messages
+               WHERE session_id = ? AND (tool_calls IS NOT NULL OR role = 'assistant')
+               ORDER BY timestamp DESC LIMIT ?""",
+            (session_id, limit),
+        )
+        rows = [dict(r) for r in cur.fetchall()]
+        conn.close()
+        for row in rows:
+            if row.get("tool_calls"):
+                try:
+                    parsed = json.loads(row["tool_calls"])
+                    row["tool_names"] = [
+                        t.get("function", {}).get("name", "?") for t in parsed
+                    ]
+                except Exception:
+                    row["tool_names"] = []
+            else:
+                row["tool_names"] = []
+            if row.get("timestamp"):
+                from datetime import datetime, timezone
+                row["timestamp"] = datetime.fromtimestamp(
+                    row["timestamp"], tz=timezone.utc
+                ).isoformat()
+        return rows
+    except Exception:
+        return []
+
+
+def get_hermes_sessions() -> dict:
+    """Get sessions and recent tool call activity."""
+    sessions = _query_sessions(20)
+    active = [s for s in sessions if not s.get("ended_at")]
+    completed = [s for s in sessions if s.get("ended_at")]
+    tool_distribution: dict[str, int] = {}
+    if STATE_DB.exists():
+        try:
+            conn = sqlite3.connect(str(STATE_DB))
+            cur = conn.execute(
+                """SELECT tool_calls FROM messages
+                   WHERE tool_calls IS NOT NULL ORDER BY timestamp DESC LIMIT 200"""
+            )
+            for (tc_str,) in cur.fetchall():
+                try:
+                    parsed = json.loads(tc_str)
+                    for t in parsed:
+                        name = t.get("function", {}).get("name", "?")
+                        tool_distribution[name] = tool_distribution.get(name, 0) + 1
+                except Exception:
+                    pass
+            conn.close()
+        except Exception:
+            pass
+    return {
+        "active": active,
+        "completed": completed,
+        "total": len(sessions),
+        "tool_distribution": dict(
+            sorted(tool_distribution.items(), key=lambda x: -x[1])[:15]
+        ),
+    }
+
+
+def get_session_detail(session_id: str) -> dict:
+    """Get session detail with recent tool call messages."""
+    if not STATE_DB.exists():
+        return {"error": "state.db not found"}
+    try:
+        conn = sqlite3.connect(str(STATE_DB))
+        conn.row_factory = sqlite3.Row
+        cur = conn.execute(
+            """SELECT id, source, user_id, model, started_at, ended_at,
+                      message_count, tool_call_count, input_tokens, output_tokens,
+                      title, estimated_cost_usd, cost_status
+               FROM sessions WHERE id = ?""",
+            (session_id,),
+        )
+        row = cur.fetchone()
+        conn.close()
+        if not row:
+            return {"error": f"Session {session_id} not found"}
+        session = dict(row)
+        for key in ("started_at", "ended_at"):
+            if session.get(key):
+                from datetime import datetime, timezone
+                session[key] = datetime.fromtimestamp(
+                    session[key], tz=timezone.utc
+                ).isoformat()
+        session["recent_messages"] = _query_session_messages(session_id, 30)
+        return session
+    except Exception as e:
+        return {"error": str(e)}
+
+
+def get_cron_jobs() -> dict:
+    """Read cron jobs from jobs.json."""
+    if not CRON_JOBS_FILE.exists():
+        return {"jobs": [], "count": 0}
+    try:
+        with open(CRON_JOBS_FILE) as f:
+            jobs = json.load(f)
+        if not isinstance(jobs, list):
+            jobs = []
+        for job in jobs:
+            schedule = job.get("schedule", {})
+            job["schedule_display"] = (
+                schedule.get("display")
+                or schedule.get("value")
+                or str(schedule)
+            )
+            job["state"] = (
+                "paused"
+                if not job.get("enabled", True)
+                else job.get("state", "scheduled")
+            )
+        return {"jobs": jobs, "count": len(jobs)}
+    except Exception as e:
+        return {"jobs": [], "count": 0, "error": str(e)}
+
+
+def get_rl_runs() -> dict:
+    """Check RL training configuration and list any runs."""
+    env = os.environ.copy()
+    has_tinker = bool(env.get("TINKER_API_KEY"))
+    has_wandb = bool(env.get("WANDB_API_KEY"))
+    tinker_exists = TINKER_DIR.exists()
+    configured = has_tinker and has_wandb and tinker_exists
+
+    runs = []
+    if tinker_exists:
+        runs_dir = TINKER_DIR / "runs"
+        if runs_dir.exists():
+            for run_dir in sorted(runs_dir.iterdir(), reverse=True):
+                if run_dir.is_dir():
+                    run_info = {"id": run_dir.name, "path": str(run_dir)}
+                    config_file = run_dir / "config.yaml"
+                    if config_file.exists():
+                        try:
+                            import yaml
+                            with open(config_file) as f:
+                                run_info["config"] = yaml.safe_load(f) or {}
+                        except Exception:
+                            pass
+                    runs.append(run_info)
+
+    return {
+        "configured": configured,
+        "has_tinker_key": has_tinker,
+        "has_wandb_key": has_wandb,
+        "tinker_atropos_exists": tinker_exists,
+        "runs": runs[:10],
+        "run_count": len(runs),
+    }
+
+
 def handle_request(method: str, path: str, body: bytes | None = None) -> tuple[int, dict]:
     """Route handler for /api/config/* requests.
 
@@ -585,6 +782,18 @@ def handle_request(method: str, path: str, body: bytes | None = None) -> tuple[i
     # Non-agent routes — must be checked before AGENTS validation
     if agent == "memory-budget" and method == "GET":
         return 200, check_memory_budget()
+
+    if agent == "sessions" and method == "GET":
+        if len(parts) > 3:
+            # GET /api/config/sessions/{session_id}
+            return 200, get_session_detail(parts[3])
+        return 200, get_hermes_sessions()
+
+    if agent == "cron-jobs" and method == "GET":
+        return 200, get_cron_jobs()
+
+    if agent == "rl-runs" and method == "GET":
+        return 200, get_rl_runs()
 
     if agent not in AGENTS:
         return 404, {"error": f"Unknown agent: {agent}"}

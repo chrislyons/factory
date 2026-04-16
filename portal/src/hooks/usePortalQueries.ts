@@ -15,12 +15,16 @@ import {
   fetchAnalyticsSummary,
   fetchBudgetStatus,
   fetchConfigSummaries,
+  fetchCronJobs,
   fetchLoopDetail,
   fetchLoops,
   fetchMemoryBudget,
   fetchPendingApprovals,
   fetchResolvedApprovals,
+  fetchRLRuns,
   fetchRunEvents,
+  fetchHermesSessions,
+  fetchSessionDetail,
   fetchTasks,
   requestBudgetOverride,
   saveTasks,
@@ -35,8 +39,12 @@ import type {
   AgentStatus,
   AnalyticsSummary,
   ApprovalDecisionInput,
+  CronJobsResponse,
+  HermesSessionDetail,
+  HermesSessionsResponse,
   PendingApproval,
   ResolvedApproval,
+  RLRunsResponse,
   RunEvent,
   TasksDocument
 } from "../lib/types";
@@ -333,4 +341,37 @@ export function useFactoryStats() {
     ),
     hasError: Boolean(config.error || memory.error)
   };
+}
+
+export function useHermesSessions() {
+  return useQuery<HermesSessionsResponse>({
+    queryKey: ["hermes-sessions"],
+    ...pollingOptions(fetchHermesSessions),
+    staleTime: 10_000,
+  });
+}
+
+export function useSessionDetail(sessionId: string | null) {
+  return useQuery<HermesSessionDetail>({
+    queryKey: ["session-detail", sessionId],
+    queryFn: () => fetchSessionDetail(sessionId!),
+    enabled: Boolean(sessionId),
+    staleTime: 15_000,
+  });
+}
+
+export function useCronJobs() {
+  return useQuery<CronJobsResponse>({
+    queryKey: ["cron-jobs"],
+    ...pollingOptions(fetchCronJobs),
+    staleTime: 30_000,
+  });
+}
+
+export function useRLRuns() {
+  return useQuery<RLRunsResponse>({
+    queryKey: ["rl-runs"],
+    ...pollingOptions(fetchRLRuns),
+    staleTime: 60_000,
+  });
 }

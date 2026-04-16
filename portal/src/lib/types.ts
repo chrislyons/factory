@@ -290,3 +290,83 @@ export interface AgentDetailResponse {
   agent: AgentDetailSummary;
   runs: AgentRunRecord[];
 }
+
+// --- Hermes Sessions ---
+
+export interface HermesSession {
+  id: string;
+  source: string;
+  user_id: string | null;
+  model: string | null;
+  started_at: string | null;
+  ended_at: string | null;
+  message_count: number;
+  tool_call_count: number;
+  input_tokens: number;
+  output_tokens: number;
+  title: string | null;
+}
+
+export interface SessionMessage {
+  id: number;
+  role: string;
+  tool_calls: string | null;
+  tool_name: string | null;
+  timestamp: string | null;
+  preview: string | null;
+  tool_names: string[];
+}
+
+export interface HermesSessionDetail extends HermesSession {
+  estimated_cost_usd: number | null;
+  cost_status: string | null;
+  recent_messages: SessionMessage[];
+}
+
+export interface HermesSessionsResponse {
+  active: HermesSession[];
+  completed: HermesSession[];
+  total: number;
+  tool_distribution: Record<string, number>;
+}
+
+// --- Cron Jobs ---
+
+export interface CronJob {
+  id: string;
+  name: string;
+  schedule: Record<string, unknown>;
+  schedule_display: string;
+  state: string;
+  enabled: boolean;
+  prompt?: string;
+  skill?: string | null;
+  skills?: string[] | null;
+  next_run?: string | null;
+  last_run?: string | null;
+  created_at?: string;
+  run_count?: number;
+}
+
+export interface CronJobsResponse {
+  jobs: CronJob[];
+  count: number;
+  error?: string;
+}
+
+// --- RL/GRPO Runs ---
+
+export interface RLRun {
+  id: string;
+  path: string;
+  config?: Record<string, unknown>;
+}
+
+export interface RLRunsResponse {
+  configured: boolean;
+  has_tinker_key: boolean;
+  has_wandb_key: boolean;
+  tinker_atropos_exists: boolean;
+  runs: RLRun[];
+  run_count: number;
+}
