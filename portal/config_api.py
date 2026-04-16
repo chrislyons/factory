@@ -292,7 +292,7 @@ def check_inference_health(agent: str) -> dict:
     health_url = f"{url.rstrip('/')}/models"
     try:
         req = urllib.request.Request(health_url, method="GET")
-        with urllib.request.urlopen(req, timeout=3) as resp:
+        with urllib.request.urlopen(req, timeout=8) as resp:
             return {"reachable": True, "url": health_url, "status": resp.status, "error": None}
     except urllib.error.URLError as e:
         return {"reachable": False, "url": health_url, "status": None, "error": str(e)}
@@ -391,7 +391,7 @@ def check_memory_budget() -> dict:
                 req = urllib.request.Request(
                     f"http://127.0.0.1:{port}/v1/models", method="GET"
                 )
-                with urllib.request.urlopen(req, timeout=2) as resp:
+                with urllib.request.urlopen(req, timeout=5) as resp:
                     loaded = resp.status == 200
             except Exception:
                 pass
