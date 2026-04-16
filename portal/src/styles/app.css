@@ -4111,11 +4111,6 @@ textarea {
   padding-right: 28px;
 }
 
-.config-field__select option {
-  background: var(--bg-panel);
-  color: var(--text-primary);
-}
-
 /* Info Grid */
 
 .config-info-grid {
@@ -4747,7 +4742,155 @@ textarea {
   border-top: 1px solid var(--border);
 }
 
-/* ── Config Page Responsive ──────────────────────────────────────── */
+/* Memory budget bar */
+
+.memory-bar {
+  margin: 8px 0 4px;
+  padding: 10px 12px;
+  background: var(--bg-panel-strong);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.memory-bar__track {
+  position: relative;
+  height: 40px;
+  background: color-mix(in srgb, var(--text-muted) 10%, var(--bg-panel));
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.memory-bar__fill {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.6s ease;
+}
+
+.memory-bar__fill--inference {
+  left: 0;
+  background: var(--accent);
+  opacity: 0.6;
+}
+
+.memory-bar__fill--inference.memory-bar__fill--crit {
+  background: var(--red);
+  opacity: 0.85;
+}
+
+.memory-bar__fill--available {
+  background: var(--green);
+  opacity: 0.3;
+}
+
+.memory-bar__labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 5px;
+}
+
+.memory-bar__label {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+}
+
+.memory-bar__label--crit {
+  color: var(--red);
+  font-weight: 600;
+}
+
+.memory-bar__label--tight {
+  color: var(--yellow);
+}
+
+.memory-bar__warn {
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--red);
+  font-weight: 500;
+}
+
+/* Restart error */
+
+.config-restart-error {
+  margin-top: 4px;
+  padding: 4px 8px;
+  background: color-mix(in srgb, var(--red) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--red) 20%, transparent);
+  border-radius: 4px;
+  font-size: 11px;
+  color: var(--red);
+  font-family: var(--font-mono);
+  max-width: 600px;
+  word-break: break-word;
+}
+
+/* Memory budget per-model details */
+
+.memory-budget-details {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.memory-budget-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  padding: 4px 8px;
+  background: color-mix(in srgb, var(--text-muted) 6%, var(--bg-panel));
+  border-radius: 4px;
+}
+
+.memory-budget-row__agent {
+  color: var(--text);
+  font-weight: 500;
+  min-width: 40px;
+}
+
+.memory-budget-row__port {
+  color: var(--text-muted);
+}
+
+.memory-budget-row__est {
+  color: var(--accent);
+  margin-left: auto;
+}
+
+.memory-budget-row__status {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.memory-budget-row__status--up {
+  color: var(--green);
+  background: color-mix(in srgb, var(--green) 10%, transparent);
+}
+
+.memory-budget-row__status--down {
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--text-muted) 6%, var(--bg-panel));
+}
+
+/* Expanded dropdowns — force font on native option elements */
+
+select option,
+.config-field__select option {
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  background: var(--bg-panel);
+  color: var(--text);
+}
 
 @media (max-width: 800px) {
   .config-prefs-layout {
