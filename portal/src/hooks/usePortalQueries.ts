@@ -14,8 +14,10 @@ import {
   fetchAgentStatus,
   fetchAnalyticsSummary,
   fetchBudgetStatus,
+  fetchConfigSummaries,
   fetchLoopDetail,
   fetchLoops,
+  fetchMemoryBudget,
   fetchPendingApprovals,
   fetchResolvedApprovals,
   fetchRunEvents,
@@ -295,4 +297,40 @@ export function useAgentAction(agentId: AgentId) {
 
 export function latestDataUpdatedAt(results: Array<UseQueryResult<unknown, Error>>) {
   return results.reduce((latest, result) => Math.max(latest, result.dataUpdatedAt || 0), 0);
+}
+
+export function useConfigSummaries() {
+  return useQuery({
+    queryKey: ["config-summaries"],
+    ...pollingOptions(fetchConfigSummaries)
+  });
+}
+
+export function useMemoryBudget() {
+  return useQuery({
+    queryKey: ["memory-budget"],
+    queryFn: fetchMemoryBudget,
+    refetchInterval: POLL_INTERVAL_MS,
+    staleTime: 3_000,
+    placeholderData: (previousData) => previousData
+  });
+}
+
+export function useFactoryStats() {
+  const config = useConfigSummaries();
+  const memory = useMemoryBudget();
+  const budget = useBudgetStatus();
+
+  return {
+    config,
+    memory,
+    budget,
+    isLoading: config.isLoading || memory.isLoading,
+    dataUpdatedAt: Math.max(
+      config.dataUpdatedAt || 0,
+      memory.dataUpdatedAt || 0,
+      budget.dataUpdatedAt || 0
+    ),
+    hasError: Boolean(config.error || memory.error)
+  };
 }

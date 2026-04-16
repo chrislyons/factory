@@ -1879,6 +1879,446 @@ textarea {
   text-transform: uppercase;
 }
 
+/* ── Stats Page ────────────────────────────────────────────────── */
+
+/* Overview cards row */
+.stats-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 900px) {
+  .stats-overview-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.stats-overview-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stats-overview-card__label {
+  font-size: 0.625rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.stats-overview-card__value {
+  font-family: var(--font-mono, monospace);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+.stats-overview-card__detail {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+/* Agent roster cards */
+.stats-agents-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 900px) {
+  .stats-agents-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.stats-agent-card {
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stats-agent-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.stats-agent-card__left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stats-agent-card__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.stats-agent-card__dot--up {
+  background: var(--green);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--green) 40%, transparent);
+}
+
+.stats-agent-card__dot--down {
+  background: var(--red);
+}
+
+.stats-agent-card__dot--unknown {
+  background: var(--text-muted);
+}
+
+.stats-agent-card__name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.stats-agent-card__model {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stats-agent-card__tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.stats-tool-pill {
+  font-size: 0.5625rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  color: var(--accent);
+  border: 1px solid color-mix(in srgb, var(--accent) 15%, transparent);
+}
+
+.stats-tool-pill--muted {
+  background: var(--bg-panel);
+  color: var(--text-muted);
+  border-color: var(--border);
+}
+
+/* Provider badge */
+.stats-provider-badge {
+  font-size: 0.5625rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 2px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.stats-provider-badge--sm {
+  font-size: 0.5rem;
+  padding: 1px 5px;
+}
+
+.stats-provider-badge--mlx {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--accent);
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+.stats-provider-badge--flash {
+  background: color-mix(in srgb, var(--yellow) 12%, transparent);
+  color: var(--yellow);
+  border: 1px solid color-mix(in srgb, var(--yellow) 20%, transparent);
+}
+
+.stats-provider-badge--nous {
+  background: color-mix(in srgb, var(--green) 12%, transparent);
+  color: var(--green);
+  border: 1px solid color-mix(in srgb, var(--green) 20%, transparent);
+}
+
+.stats-provider-badge--openrouter {
+  background: color-mix(in srgb, var(--blue) 12%, transparent);
+  color: var(--blue);
+  border: 1px solid color-mix(in srgb, var(--blue) 20%, transparent);
+}
+
+.stats-provider-badge--default {
+  background: var(--bg-panel);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+/* Memory section */
+.stats-memory-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.stats-memory-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stats-memory-bar__track {
+  display: flex;
+  height: 18px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+}
+
+.stats-memory-bar__seg {
+  height: 100%;
+  transition: width 0.6s ease;
+}
+
+.stats-memory-bar__seg--inference {
+  background: var(--accent);
+}
+
+.stats-memory-bar__seg--used {
+  background: var(--red);
+}
+
+.stats-memory-bar__seg--available {
+  background: var(--green);
+}
+
+.stats-memory-bar__legend {
+  display: flex;
+  gap: 16px;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  flex-wrap: wrap;
+}
+
+.stats-memory-bar__legend span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.stats-memory-bar__swatch {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+.stats-memory-bar__swatch--inference {
+  background: var(--accent);
+}
+
+.stats-memory-bar__swatch--used {
+  background: var(--red);
+}
+
+.stats-memory-bar__swatch--available {
+  background: var(--green);
+}
+
+/* Model rows */
+.stats-models-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stats-model-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-deep);
+  gap: 12px;
+}
+
+.stats-model-row--loaded {
+  border-color: color-mix(in srgb, var(--green) 25%, var(--border));
+  background: color-mix(in srgb, var(--green) 4%, var(--bg-deep));
+}
+
+.stats-model-row__left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.stats-model-row__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.stats-model-row__dot--up {
+  background: var(--green);
+  box-shadow: 0 0 4px color-mix(in srgb, var(--green) 40%, transparent);
+}
+
+.stats-model-row__dot--down {
+  background: var(--text-muted);
+}
+
+.stats-model-row__agent {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text);
+  min-width: 60px;
+}
+
+.stats-model-row__right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.stats-model-row__model {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 280px;
+}
+
+.stats-model-row__mem {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+  color: var(--green);
+  min-width: 55px;
+  text-align: right;
+}
+
+/* Two-column layout */
+.stats-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 800px) {
+  .stats-two-col {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Task status bars */
+.stats-status-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.stats-status-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stats-status-item__bar-track {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--bg-deep);
+  overflow: hidden;
+}
+
+.stats-status-item__bar-fill {
+  height: 100%;
+  border-radius: inherit;
+  transition: width 0.4s ease;
+}
+
+.stats-status-item__info {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.stats-status-item__label {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+.stats-status-item__count {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+/* Assignee list */
+.stats-assignee-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.stats-assignee-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stats-assignee-row__info {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.stats-assignee-row__name {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.stats-assignee-row__count {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+.stats-assignee-row__bar-track {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--bg-deep);
+  overflow: hidden;
+}
+
+.stats-assignee-row__bar-fill {
+  height: 100%;
+  border-radius: inherit;
+  transition: width 0.4s ease;
+}
+
 /* ── Agent Detail ─────────────────────────────────────────────────── */
 
 .agent-header-grid {
