@@ -56,11 +56,46 @@
 
 ---
 
-## 3. Portfolio Risk Management
+## 3. Portfolio Risk Management & Correlation Structure
+
+**REVISED FINDING (corrected from IG88073):** Portfolio is NOT as correlated as previously stated.
+
+**Pairwise correlation matrix (729 daily bars = 2 years):**
+
+|       | ETH   | AVAX  | LINK  | NEAR  | SOL   | FIL   | SUI   | RNDR  | WLD   |
+|-------|-------|-------|-------|-------|-------|-------|-------|-------|-------|
+| ETH   | 1.00  | 0.77  | 0.78  | 0.72  | 0.78  | 0.01  | -0.05 | 0.03  | -0.04 |
+| AVAX  | 0.77  | 1.00  | 0.83  | 0.79  | 0.76  | -0.00 | -0.03 | 0.05  | -0.02 |
+| LINK  | 0.78  | 0.83  | 1.00  | 0.78  | 0.74  | 0.01  | -0.03 | 0.05  | -0.02 |
+| NEAR  | 0.72  | 0.79  | 0.78  | 1.00  | 0.72  | 0.01  | -0.06 | 0.05  | -0.04 |
+| SOL   | 0.78  | 0.76  | 0.74  | 0.72  | 1.00  | 0.03  | -0.05 | 0.04  | -0.05 |
+| FIL   | 0.01  | -0.00 | 0.01  | 0.01  | 0.03  | 1.00  | 0.07  | -0.03 | 0.03  |
+| SUI   | -0.05 | -0.03 | -0.03 | -0.06 | -0.05 | 0.07  | 1.00  | -0.00 | 0.63  |
+| RNDR  | 0.03  | 0.05  | 0.05  | 0.05  | 0.04  | -0.03 | -0.00 | 1.00  | -0.03 |
+| WLD   | -0.04 | -0.02 | -0.02 | -0.04 | -0.05 | 0.03  | 0.63  | -0.03 | 1.00  |
+
+**Two distinct clusters identified:**
+
+1. **Core cluster (r=0.72-0.83):** ETH, AVAX, LINK, NEAR, SOL
+   - High-beta blue-chip L1/L2 alts. Move as a group.
+   - These are effectively ONE bet on crypto beta.
+
+2. **Satellite cluster (r≈0 with core):** FIL, RNDR, SUI, WLD
+   - FIL: avg r=0.014 with core → GENUINELY UNCORRELATED
+   - RNDR: avg r=0.045 with core → GENUINELY UNCORRELATED  
+   - SUI: avg r=-0.045 with core, but r=0.63 with WLD
+   - WLD: avg r=-0.036 with core, but r=0.63 with SUI
+
+**KEY INSIGHT:** The portfolio has REAL diversification. FIL and RNDR are near-zero
+correlation with the core. This means drawdowns in ETH/AVAX/LINK won't necessarily
+hit FIL/RNDR. The portfolio is structurally better than IG88073 stated.
+
+**Implications for position sizing:**
+- Core cluster (ETH/AVAX/LINK/NEAR/SOL): 5 assets acting as one → reduce allocation
+- Satellite (FIL/RNDR): genuinely uncorrelated → can take larger positions
+- SUI/WLD pair: correlated with each other (r=0.63) but uncorrelated with core
 
 **Built:** `scripts/portfolio_risk.py`
-
-Features:
 - Portfolio VaR with correlation adjustment (95% confidence)
 - Drawdown-based leverage scaling (2x at 0% DD, 1x at 25% DD, kill switch at 50%)
 - Correlation-adjusted Kelly position sizing
