@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Freqfinder Repository Commands</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+            line-height: 1.6;
+            color: #333;
+        }
+        h1 { color: #02ff9d; border-bottom: 3px solid #02ff9d; padding-bottom: 10px; }
+        h2 { color: #1a1a1a; margin-top: 30px; border-left: 4px solid #02ff9d; padding-left: 12px; }
+        h3 { color: #444; margin-top: 20px; }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        pre {
+            background: #1a1a1a;
+            color: #02ff9d;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            border-left: 4px solid #02ff9d;
+        }
+        pre code {
+            background: none;
+            color: #02ff9d;
+            padding: 0;
+        }
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px;
+            margin: 15px 0;
+        }
+        .info {
+            background: #d1ecf1;
+            border-left: 4px solid #0dcaf0;
+            padding: 12px;
+            margin: 15px 0;
+        }
+        .success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 12px;
+            margin: 15px 0;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 15px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background: #02ff9d;
+            color: #1a1a1a;
+            font-weight: 600;
+        }
+        tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <h1>Freqfinder Repository Commands</h1>
+    <p><strong>Project:</strong> Freqfinder v0.2.1 - JUCE Audio Plugin<br>
+    <strong>Repository:</strong> <code>~/dev/freqfinder</code><br>
+    <strong>Documentation PREFIX:</strong> FRQ</p>
+
+    <div class="info">
+        <strong>Quick Reference:</strong> For general Git/GitHub commands, see <code>~/dev/docs/git-commands.html</code>. This file contains Freqfinder-specific build and development commands.
+    </div>
+
+    <h2>Build Commands</h2>
+
+    <h3>Initial Setup (First Build)</h3>
+    <pre><code>cd ~/dev/freqfinder
+rm -rf build
+mkdir build && cd build
+cmake -DCMAKE_BUILD_TYPE=Release ..
+cmake --build . --config Release -j8</code></pre>
+
+    <div class="warning">
+        <strong>Note:</strong> First build takes 10-15 minutes as JUCE downloads and compiles. Subsequent builds are much faster (&lt;1 minute).
+    </div>
+
+    <h3>Clean Rebuild</h3>
+    <pre><code>cd ~/dev/freqfinder
+rm -rf build
+mkdir build && cd build
+cmake -DCMAKE_BUILD_TYPE=Release ..
+cmake --build . --config Release -j8</code></pre>
+
+    <h3>Incremental Build (after code changes)</h3>
+    <pre><code>cd ~/dev/freqfinder/build
+cmake --build . --config Release -j8</code></pre>
+
+    <h3>Debug Build</h3>
+    <pre><code>cd ~/dev/freqfinder
+rm -rf build
+mkdir build && cd build
+cmake -DCMAKE_BUILD_TYPE=Debug ..
+cmake --build . --config Debug -j8</code></pre>
+
+    <h2>Running & Testing</h2>
+
+    <h3>Launch Standalone App</h3>
+    <pre><code>open ~/dev/freqfinder/build/FreqFinder_artefacts/Release/Standalone/Freqfinder.app</code></pre>
+
+    <h3>Run from Terminal (see console output)</h3>
+    <pre><code>~/dev/freqfinder/build/FreqFinder_artefacts/Release/Standalone/Freqfinder.app/Contents/MacOS/Freqfinder</code></pre>
+
+    <h3>Check Build Outputs</h3>
+    <pre><code>ls -lh ~/dev/freqfinder/build/FreqFinder_artefacts/Release/</code></pre>
+
+    <h2>Installation</h2>
+
+    <h3>Install VST3 Plugin</h3>
+    <pre><code>cp -r ~/dev/freqfinder/build/FreqFinder_artefacts/Release/VST3/Freqfinder.vst3 \
+   ~/Library/Audio/Plug-Ins/VST3/</code></pre>
+
+    <h3>Install AU Plugin</h3>
+    <pre><code>cp -r ~/dev/freqfinder/build/FreqFinder_artefacts/Release/AU/Freqfinder.component \
+   ~/Library/Audio/Plug-Ins/Components/</code></pre>
+
+    <h3>Uninstall Plugins</h3>
+    <pre><code>rm -rf ~/Library/Audio/Plug-Ins/VST3/Freqfinder.vst3
+rm -rf ~/Library/Audio/Plug-Ins/Components/Freqfinder.component</code></pre>
+
+    <h2>Development</h2>
+
+    <h3>Generate Compile Commands (for IDEs)</h3>
+    <pre><code>cd ~/dev/freqfinder/build
+cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..</code></pre>
+
+    <h3>Check for Warnings</h3>
+    <pre><code>cd ~/dev/freqfinder/build
+cmake --build . --config Release 2>&1 | grep warning</code></pre>
+
+    <h3>Run clang-format (code formatting)</h3>
+    <pre><code>cd ~/dev/freqfinder
+find src -name "*.h" -o -name "*.cpp" | xargs clang-format -i</code></pre>
+
+    <h2>Documentation</h2>
+
+    <h3>Find Next PREFIX Number</h3>
+    <pre><code>ls -1 ~/dev/freqfinder/docs/frq/ | grep -E '^FRQ[0-9]{3}' | \
+    sed -E 's/FRQ([0-9]+).*/\1/' | sort -n | tail -1</code></pre>
+
+    <h3>Create New Documentation</h3>
+    <pre><code># Get next number (add 1 to result above)
+nano ~/dev/freqfinder/docs/frq/FRQ002\ Your\ Title\ Here.md</code></pre>
+
+    <h2>Debugging</h2>
+
+    <h3>View Crash Logs</h3>
+    <pre><code>ls -lt ~/Library/Logs/DiagnosticReports/Freqfinder*.crash | head -1</code></pre>
+
+    <h3>View System Logs</h3>
+    <pre><code>log show --predicate 'process == "Freqfinder"' --last 10m --style compact</code></pre>
+
+    <h3>Check Plugin Validation</h3>
+    <pre><code># VST3
+pluginval --strictness-level 5 --validate \
+    ~/dev/freqfinder/build/FreqFinder_artefacts/Release/VST3/Freqfinder.vst3
+
+# AU (macOS)
+auval -v aufx Freq Orph</code></pre>
+
+    <div class="info">
+        <strong>Note:</strong> <code>pluginval</code> must be installed separately: <code>brew install pluginval</code>
+    </div>
+
+    <h2>Performance Testing</h2>
+
+    <h3>Profile CPU Usage</h3>
+    <pre><code>instruments -t "Time Profiler" \
+    ~/dev/freqfinder/build/FreqFinder_artefacts/Release/Standalone/Freqfinder.app</code></pre>
+
+    <h3>Check Binary Size</h3>
+    <pre><code>du -h ~/dev/freqfinder/build/FreqFinder_artefacts/Release/Standalone/Freqfinder.app</code></pre>
+
+    <h2>Git Workflow</h2>
+
+    <h3>Common Workflow</h3>
+    <pre><code>cd ~/dev/freqfinder
+
+# Check status
+git status
+
+# Stage changes
+git add src/
+
+# Commit with descriptive message
+git commit -m "feat: Add frequency portamento with adaptive glide times
+
+- Implemented PortamentoRamp DSP utility
+- Adaptive glide: 13.33ms (low freq) to 66.7ms (high freq)
+- Exponential ramping for smooth transitions
+
+🤖 Generated with Claude Code
+Co-Authored-By: Claude <noreply@anthropic.com>"
+
+# Push to remote
+git push origin main</code></pre>
+
+    <h3>Create Feature Branch</h3>
+    <pre><code>git checkout -b feature/sidechain-input
+# ... make changes ...
+git add .
+git commit -m "feat: Add sidechain input for external analysis"
+git push -u origin feature/sidechain-input</code></pre>
+
+    <h2>Common Issues</h2>
+
+    <h3>Build Fails with "JuceHeader.h not found"</h3>
+    <div class="warning">
+        <strong>Solution:</strong> JUCE 8.x doesn't use JuceHeader.h. Use individual module headers instead:
+        <pre><code>#include &lt;juce_audio_processors/juce_audio_processors.h&gt;
+#include &lt;juce_dsp/juce_dsp.h&gt;</code></pre>
+    </div>
+
+    <h3>App Crashes on Launch</h3>
+    <div class="warning">
+        <strong>Solution:</strong> Check crash logs and run from terminal to see console output:
+        <pre><code>~/dev/freqfinder/build/FreqFinder_artefacts/Release/Standalone/Freqfinder.app/Contents/MacOS/Freqfinder</code></pre>
+    </div>
+
+    <h3>CMake Error: CMAKE_C_COMPILE_OBJECT not set</h3>
+    <div class="warning">
+        <strong>Solution:</strong> Ensure project declares both C and CXX languages:
+        <pre><code>project(FreqFinder VERSION 0.2.1 LANGUAGES C CXX)</code></pre>
+    </div>
+
+    <h2>Build Targets</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Format</th>
+                <th>Location</th>
+                <th>Extension</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Standalone</td>
+                <td><code>build/FreqFinder_artefacts/Release/Standalone/</code></td>
+                <td><code>.app</code></td>
+            </tr>
+            <tr>
+                <td>VST3</td>
+                <td><code>build/FreqFinder_artefacts/Release/VST3/</code></td>
+                <td><code>.vst3</code></td>
+            </tr>
+            <tr>
+                <td>AU</td>
+                <td><code>build/FreqFinder_artefacts/Release/AU/</code></td>
+                <td><code>.component</code></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>Quick Tests</h2>
+
+    <h3>Verify All Oscillators Work</h3>
+    <ol>
+        <li>Launch standalone app</li>
+        <li>Click frequency display to start fundamental (should hear tone)</li>
+        <li>Click "2" in Even column (should hear octave up)</li>
+        <li>Click "3" in Odd column (should hear perfect fifth)</li>
+        <li>Verify VU meters show levels for active oscillators</li>
+    </ol>
+
+    <h3>Test MIDI Input</h3>
+    <ol>
+        <li>Connect MIDI keyboard</li>
+        <li>Launch standalone app</li>
+        <li>Settings → Audio/MIDI Settings → Enable MIDI input device</li>
+        <li>Play MIDI note (frequency should change automatically)</li>
+    </ol>
+
+    <h3>Test Parameter Automation (DAW)</h3>
+    <ol>
+        <li>Load VST3 in DAW (Logic, Ableton, Reaper, etc.)</li>
+        <li>Automate "Master Volume" parameter</li>
+        <li>Play timeline - volume should change smoothly</li>
+        <li>No clicks or pops should be audible</li>
+    </ol>
+
+    <h2>File Locations</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Path</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Source code</td>
+                <td><code>~/dev/freqfinder/src/</code></td>
+            </tr>
+            <tr>
+                <td>Documentation</td>
+                <td><code>~/dev/freqfinder/docs/frq/</code></td>
+            </tr>
+            <tr>
+                <td>Build directory</td>
+                <td><code>~/dev/freqfinder/build/</code></td>
+            </tr>
+            <tr>
+                <td>CMake config</td>
+                <td><code>~/dev/freqfinder/CMakeLists.txt</code></td>
+            </tr>
+            <tr>
+                <td>Implementation notes</td>
+                <td><code>~/dev/freqfinder/docs/IMPLEMENTATION.md</code></td>
+            </tr>
+            <tr>
+                <td>Installed VST3</td>
+                <td><code>~/Library/Audio/Plug-Ins/VST3/</code></td>
+            </tr>
+            <tr>
+                <td>Installed AU</td>
+                <td><code>~/Library/Audio/Plug-Ins/Components/</code></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>Useful Links</h2>
+
+    <ul>
+        <li><a href="https://juce.com/learn/documentation">JUCE Documentation</a></li>
+        <li><a href="https://docs.juce.com/master/tutorial_new_projucer_project.html">JUCE Tutorials</a></li>
+        <li><a href="https://forum.juce.com/">JUCE Forum</a></li>
+        <li><a href="https://cmake.org/cmake/help/latest/">CMake Documentation</a></li>
+    </ul>
+
+    <hr>
+    <p style="text-align: center; color: #888; font-size: 0.9em;">
+        Last updated: 2025-11-04 | Freqfinder v0.2.1
+    </p>
+</body>
+</html>

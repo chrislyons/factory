@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2110-audio-io - Architecture Gallery</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'dark',
+            themeVariables: {
+                darkMode: true,
+                background: '#1a1a1a',
+                primaryColor: '#DC143C',
+                primaryTextColor: '#e0e0e0',
+                primaryBorderColor: '#FF6B6B',
+                lineColor: '#FFA500',
+                secondaryColor: '#1E90FF',
+                tertiaryColor: '#2E8B57'
+            },
+            flowchart: { curve: 'basis' },
+            sequence: { mirrorActors: false }
+        });
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            padding: 1rem 2rem;
+            line-height: 1.5;
+            font-size: 0.875rem;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: #fff;
+        }
+
+        h2 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #FFA500;
+            margin: 1.5rem 0 0.75rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #333;
+        }
+
+        .subtitle {
+            color: #888;
+            margin-bottom: 0.75rem;
+            font-size: 0.75rem;
+        }
+
+        .last-updated {
+            color: #666;
+            font-size: 0.625rem;
+            margin-bottom: 1rem;
+        }
+
+        .info {
+            background: #1a2a2a;
+            border-left: 3px solid #FFA500;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border-radius: 3px;
+            font-size: 0.75rem;
+        }
+
+        .info-title {
+            color: #FFA500;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-card {
+            background: #242424;
+            padding: 0.75rem;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .stat-label {
+            font-size: 0.625rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .diagram-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .diagram-card {
+            background: #242424;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .diagram-header {
+            background: #2a2a2a;
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 1px solid #333;
+        }
+
+        .diagram-header:hover {
+            background: #333;
+        }
+
+        .diagram-header::before {
+            content: '\25BC';
+            font-size: 0.625rem;
+            transition: transform 0.2s;
+            color: #888;
+        }
+
+        .diagram-header.collapsed::before {
+            transform: rotate(-90deg);
+        }
+
+        .diagram-title {
+            font-weight: 600;
+            color: #fff;
+            font-size: 0.875rem;
+        }
+
+        .diagram-type {
+            font-size: 0.625rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-weight: 600;
+            margin-left: auto;
+        }
+
+        .diagram-type.flowchart { background: #3a2a2a; color: #DC143C; }
+        .diagram-type.sequence { background: #2a3a4a; color: #1E90FF; }
+        .diagram-type.class { background: #2a3a2a; color: #2E8B57; }
+
+        .diagram-description {
+            font-size: 0.7rem;
+            color: #888;
+            margin-left: 0.5rem;
+        }
+
+        .diagram-content {
+            padding: 1rem;
+            overflow-x: auto;
+            background: #1e1e1e;
+        }
+
+        .diagram-content.hidden {
+            display: none;
+        }
+
+        .diagram-content pre {
+            background: transparent;
+            margin: 0;
+        }
+
+        .mermaid {
+            display: flex;
+            justify-content: center;
+        }
+
+        .mermaid svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        footer {
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid #333;
+            color: #666;
+            font-size: 0.625rem;
+        }
+
+        footer a {
+            color: #FFA500;
+        }
+
+        .quick-nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .quick-nav a {
+            background: #2a2a2a;
+            color: #FFA500;
+            padding: 0.4rem 0.75rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 0.7rem;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        .quick-nav a:hover {
+            background: #3a3a3a;
+        }
+
+        .quick-nav a.section-label {
+            background: transparent;
+            color: #666;
+            padding-left: 0;
+            cursor: default;
+        }
+
+        .color-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            background: #242424;
+            border-radius: 6px;
+        }
+
+        .color-item {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.65rem;
+        }
+
+        .color-swatch {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+        }
+
+        .spec-ref {
+            font-size: 0.65rem;
+            color: #666;
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid #333;
+        }
+
+        .spec-ref a {
+            color: #4fc3f7;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 0.5rem 1rem;
+            }
+            .diagram-content {
+                padding: 0.5rem;
+            }
+            .stats {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>2110-audio-io - Architecture Gallery</h1>
+        <p class="subtitle">SMPTE ST2110 Audio I/O Topology for CBC Milan-Cortina 2026</p>
+        <p class="last-updated">Last updated: 2026-01-18 | Version: 1.2.0</p>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value">4</div>
+                <div class="stat-label">Router Cards</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">272</div>
+                <div class="stat-label">Streams</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">8</div>
+                <div class="stat-label">Gateways</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">14</div>
+                <div class="stat-label">Boxes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">56</div>
+                <div class="stat-label">Cards</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">5,248</div>
+                <div class="stat-label">Audio Paths</div>
+            </div>
+        </div>
+
+        <div class="info">
+            <div class="info-title">Diagram Collection</div>
+            13 architectural diagrams covering ST2110/NMOS protocols, Calrec infrastructure, vault structure, and development tooling.
+            Click headers to expand/collapse. Diagrams render via Mermaid.js. Press <kbd>a</kbd> to expand all, <kbd>Esc</kbd> to collapse all.
+        </div>
+
+        <div class="color-legend">
+            <div class="color-item">
+                <span class="color-swatch" style="background: #DC143C;"></span>
+                <span>Router Cards</span>
+            </div>
+            <div class="color-item">
+                <span class="color-swatch" style="background: #1E90FF;"></span>
+                <span>AGW Devices</span>
+            </div>
+            <div class="color-item">
+                <span class="color-swatch" style="background: #8A2BE2;"></span>
+                <span>STB Devices</span>
+            </div>
+            <div class="color-item">
+                <span class="color-swatch" style="background: #2E8B57;"></span>
+                <span>MODBOX</span>
+            </div>
+            <div class="color-item">
+                <span class="color-swatch" style="background: #800080;"></span>
+                <span>Stageboxes</span>
+            </div>
+            <div class="color-item">
+                <span class="color-swatch" style="background: #FFA500;"></span>
+                <span>Streams</span>
+            </div>
+        </div>
+
+        <nav class="quick-nav">
+            <span class="section-label">Standards:</span>
+            <a href="#st2110">ST2110</a>
+            <a href="#nmos">NMOS</a>
+            <span class="section-label">Calrec:</span>
+            <a href="#impulse">Impulse Core</a>
+            <a href="#cards">I/O Cards</a>
+            <a href="#gateway">Gateway Ports</a>
+            <a href="#acr">ACR Topology</a>
+            <span class="section-label">Vault:</span>
+            <a href="#architecture">Architecture</a>
+            <a href="#repo">Repository</a>
+            <a href="#components">Components</a>
+            <a href="#dataflow">Data Flow</a>
+            <a href="#entry">Entry Points</a>
+            <span class="section-label">Tooling:</span>
+            <a href="#tooling">Claude Code</a>
+            <a href="#scripts">Automation</a>
+        </nav>
+
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <!-- SMPTE ST2110 / NMOS SECTION -->
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+
+        <h2>SMPTE ST2110 &amp; NMOS Standards</h2>
+
+        <div class="diagram-grid">
+            <!-- ST2110 Protocol Stack -->
+            <div class="diagram-card" id="st2110">
+                <div class="diagram-header" onclick="toggleDiagram(this)">
+                    <span class="diagram-title">SMPTE ST2110 Protocol Stack</span>
+                    <span class="diagram-description">Professional media over IP essence types</span>
+                    <span class="diagram-type flowchart">FLOWCHART</span>
+                </div>
+                <div class="diagram-content">
+                    <pre class="mermaid">
+graph TB
+    subgraph ST2110["SMPTE ST2110 Suite"]
+        direction TB
+
+        subgraph TIMING["ST 2110-10: System Timing"]
+            PTP["IEEE 1588-2008 PTP<br/>Precision Time Protocol"]
+            SMPTE2059["SMPTE 2059<br/>Media Sync"]
+        end
+
+        subgraph ESSENCE["Essence Streams"]
+            subgraph VIDEO["ST 2110-20: Video"]
+                V_UNCOMP["Uncompressed Video<br/>Based on RFC 4175"]
+            end
+
+            subgraph VIDEO_COMP["ST 2110-22: Compressed Video"]
+                JPEGXS["JPEG-XS<br/>Constant Bit Rate"]
+            end
+
+            subgraph AUDIO["ST 2110-30: Audio"]
+                AES67["AES67 Compatible<br/>Uncompressed PCM"]
+                CHANNELS["1-8 channels per stream<br/>24-bit @ 48kHz"]
+            end
+
+            subgraph ANC["ST 2110-40: Ancillary Data"]
+                CAPTIONS["Captions/Subtitles"]
+                TIMECODE["Timecode"]
+                META["Metadata"]
+            end
+        end
+
+        subgraph EXTENSIONS["Extensions"]
+            ST2110_41["ST 2110-41<br/>Fast Metadata"]
+            ST2110_43["ST 2110-43<br/>Timed Text (TTML)"]
+        end
+
+        subgraph TRANSPORT["Transport Layer"]
+            RTP["RTP/UDP/IP<br/>Real-time Transport"]
+            SDP["SDP<br/>Session Description"]
+        end
+    end
+
+    subgraph THIS_SYSTEM["This System (Audio Focus)"]
+        STREAMS["272 ST2110-30 Streams<br/>8 channels each<br/>2,176 total channels"]
+    end
+
+    PTP --> ESSENCE
+    ESSENCE --> TRANSPORT
+    AUDIO --> STREAMS
+
+    style AUDIO fill:#2E4A2E,stroke:#4CAF50
+    style STREAMS fill:#2E4A2E,stroke:#4CAF50
+                    </pre>
+                    <p class="spec-ref">
+                        Reference: <a href="https://www.smpte.org/standards/st2110" target="_blank">SMPTE ST 2110</a> |
+                        <a href="https://en.wikipedia.org/wiki/SMPTE_2110" target="_blank">Wikipedia</a>
+                    </p>
+                </div>
+            </div>
+
+            <!-- NMOS Control Plane -->
+            <div class="diagram-card" id="nmos">
+                <div class="diagram-header" onclick="toggleDiagram(this)">
+                    <span class="diagram-title">NMOS Control Plane</span>
+                    <span class="diagram-description">AMWA IS-04, IS-05, IS-08 specifications</span>
+                    <span class="diagram-type sequence">SEQUENCE</span>
+                </div>
+                <div class="diagram-content">
+                    <pre class="mermaid">
+sequenceDiagram
+    participant Node as NMOS Node<br/>(Audio Gateway)
+    participant Registry as NMOS Registry<br/>(IS-04)
+    participant Controller as Broadcast Controller<br/>(Lawo VSM)
+    participant Receiver as Receiving Device
+
+    Note over Node,Receiver: IS-04: Discovery & Registration
+
+    Node->>Node: DNS-SD Query<br/>_nmos-register._tcp
+    Node->>Registry: POST /x-nmos/registration/v1.3<br/>Register Node, Device, Senders, Receivers
+    Registry-->>Node: 201 Created
+
+    Note over Node,Receiver: IS-05: Connection Management
+
+    Controller->>Registry: GET /x-nmos/query/v1.3/senders
+    Registry-->>Controller: List of available senders
+
+    Controller->>Node: PATCH /x-nmos/connection/v1.1/single/receivers/{id}/staged
+    Note right of Controller: Set transport_file (SDP)<br/>Set master_enable: true
+    Node-->>Controller: 200 OK
+
+    Controller->>Node: POST /x-nmos/connection/v1.1/single/receivers/{id}/active
+    Node->>Receiver: Subscribe to ST2110 multicast
+    Receiver-->>Node: Audio stream active
+
+    Note over Node,Receiver: IS-08: Audio Channel Mapping
+
+    Controller->>Node: PATCH /x-nmos/channelmapping/v1.0/map/activations
+    Note right of Controller: Remap channels:<br/>Input 1-8 → Output 1-8
+    Node-->>Controller: 200 OK
+    Node->>Node: Apply channel routing
+                    </pre>
+                    <p class="spec-ref">
+                        Reference: <a href="https://specs.amwa.tv/nmos" target="_blank">AMWA NMOS Specs</a> |
+                        <a href="https://github.com/AMWA-TV/is-04" target="_blank">IS-04</a> |
+                        <a href="https://github.com/AMWA-TV/is-05" target="_blank">IS-05</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <!-- CALREC INFRASTRUCTURE SECTION -->
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+
+        <h2>Calrec Infrastructure</h2>
+
+        <div class="diagram-grid">
+            <!-- Calrec Impulse Core -->
+            <div class="diagram-card" id="impulse">
+                <div class="diagram-header" onclick="toggleDiagram(this)">
+                    <span class="diagram-title">Calrec Impulse Core Router</span>
+                    <span class="diagram-description">IP-based audio routing architecture</span>
+                    <span class="diagram-type flowchart">FLOWCHART</span>
+                </div>
+                <div class="diagram-content">
+                    <pre class="mermaid">
+graph TB
+    subgraph CONSOLE["Calrec Apollo Console"]
+        SURFACE["Control Surface<br/>Faders, Meters, Displays"]
+        DSP["DSP Engine<br/>EQ, Dynamics, Routing"]
+    end
+
+    subgraph IMPULSE["Calrec Impulse Core"]
+        direction TB
+
+        subgraph ROUTER_FABRIC["Router Fabric"]
+            MATRIX["Audio Matrix<br/>Non-blocking crosspoint"]
+        end
+
+        subgraph ROUTER_CARDS["Router Cards (AMX)"]
+            AMX101["AMX101<br/>ACR40 Primary<br/>145 streams<br/>1,160 channels"]
+            AMX102["AMX102<br/>ACR42 Primary<br/>127 streams<br/>1,016 channels"]
+            AMX103["AMX103<br/>ACR40 Secondary"]
+            AMX104["AMX104<br/>ACR42 Secondary"]
+        end
+
+        subgraph NETWORK_IO["Network I/O"]
+            ST2110_TX["ST2110 Transmitters<br/>RTP/UDP Multicast"]
+            ST2110_RX["ST2110 Receivers<br/>IGMP Join/Leave"]
+        end
+
+        subgraph SYNC["Synchronization"]
+            PTP_GM["PTP Grandmaster<br/>or Boundary Clock"]
+        end
+    end
+
+    subgraph CONTROL["Control Systems"]
+        HYDRA_CTRL["Calrec Hydra<br/>Legacy Control"]
+        NMOS_REG["NMOS Registry<br/>IS-04/IS-05"]
+        VSM["Lawo VSM<br/>Broadcast Control"]
+    end
+
+    subgraph TRANSPORT["Network Transport"]
+        SPINE["Spine Switches<br/>100GbE"]
+        LEAF["Leaf Switches<br/>25GbE"]
+    end
+
+    SURFACE <--> DSP
+    DSP <--> MATRIX
+    MATRIX <--> ROUTER_CARDS
+    ROUTER_CARDS <--> NETWORK_IO
+    PTP_GM --> NETWORK_IO
+
+    NETWORK_IO <--> LEAF
+    LEAF <--> SPINE
+
+    VSM --> NMOS_REG
+    NMOS_REG --> IMPULSE
+    HYDRA_CTRL -.-> IMPULSE
+
+    style ROUTER_CARDS fill:#4A2A2A,stroke:#DC143C
+                    </pre>
+                </div>
+            </div>
+
+            <!-- I/O Card Types -->
+            <div class="diagram-card" id="cards">
+                <div class="diagram-header" onclick="toggleDiagram(this)">
+                    <span class="diagram-title">I/O Card Types</span>
+                    <span class="diagram-description">Audio Gateway card variants and protocols</span>
+                    <span class="diagram-type class">CLASS</span>
+                </div>
+                <div class="diagram-content">
+                    <pre class="mermaid">
+classDiagram
+    direction LR
+
+    class IOCard {
+        <<abstract>>
+        +String slot: A-Z
+        +Number inputs
+        +Number outputs
+        +Array streams
+    }
+
+    class AES {
+        Type: AES3/EBU Digital
+        Channels: Variable
+        Format: 24-bit @ 48kHz
+        Connector: XLR or BNC
+        Cards: 40 AES, 42 AES
+    }
+
+    class Dante {
+        Type: Audinate Dante
+        Channels: 64 in/out
+        Format: 24-bit @ 48kHz
+        Transport: Layer 3 IP
+        Cards: 40 Dante 1, 40 Dante 2
+    }
+
+    class SDI {
+        Type: Embedded Audio
+        Channels: 64 in/out
+        Format: 16 channels per SDI
+        Standard: SMPTE 299M
+        Cards: 40 SDI, 42 SDI
+    }
+
+    class MADI {
+        Type: AES10 MADI
+        Channels: 64 in/out
+        Format: 24-bit @ 48kHz
+        Transport: Coax or Fiber
+        Cards: 40 ProTools, 40 UTL MADI 01-06
+    }
+
+    class MicLine {
+        Type: Analog I/O
+        Channels: 48 in/16 out
+        Format: +4dBu/-10dBV
+        Preamps: Remote controlled
+        Cards: Stagebox cards
+    }
+
+    class Waves {
+        Type: Waves SoundGrid
+        Channels: 64 in/out
+        Format: 24-bit @ 48/96kHz
+        Transport: Ethernet
+        Cards: 40 Waves, 42 Waves
+    }
+
+    class Studer {
+        Type: Studer D21m
+        Channels: 64 in/out
+        Format: Proprietary
+        Transport: MADI bridge
+        Cards: 40 StuderA, 40 StuderB
+    }
+
+    IOCard <|-- AES
+    IOCard <|-- Dante
+    IOCard <|-- SDI
+    IOCard <|-- MADI
+    IOCard <|-- MicLine
+    IOCard <|-- Waves
+    IOCard <|-- Studer
+                    </pre>
+                </div>
+            </div>
+
+            <!-- Gateway Port Mapping -->
+            <div class="diagram-card" id="gateway">
+                <div class="diagram-header" onclick="toggleDiagram(this)">
+                    <span class="diagram-title">Gateway Port Mapping</span>
+                    <span class="diagram-description">TORMPXAGW port-to-stream architecture</span>
+                    <span class="diagram-type flowchart">FLOWCHART</span>
+                </div>
+                <div class="diagram-content">
+                    <pre class="mermaid">
+graph LR
+    subgraph AGW["Audio Gateway (TORMPXAGW005)"]
+        direction TB
+
+        subgraph PORTS["64 Bidirectional Ports"]
+            P1["Port 01"]
+            P2["Port 02"]
+            P3["..."]
+            P64["Port 64"]
+        end
+
+        subgraph SLOTS["Physical Slots A-Z"]
+            SA["Slot A<br/>40 AES"]
+            SB["Slot B<br/>40 X-75"]
+            SC["Slot C<br/>40 RTW"]
+            SD["..."]
+            SZ["Slot Z<br/>40 StuderA"]
+        end
+    end
+
+    subgraph STREAMS_SEND["Send Streams (to Console)"]
+        SS1["Stream-AMX101-71<br/>8 channels"]
+        SS2["Stream-AMX101-72<br/>8 channels"]
+        SS3["..."]
+    end
+
+    subgraph STREAMS_RCV["Receive Streams (from Console)"]
+        SR1["Stream-AMX101-23<br/>8 channels"]
+        SR2["Stream-AMX101-24<br/>8 channels"]
+        SR3["..."]
+    end
+
+    subgraph ROUTING["Port-Stream Mapping"]
+        MAP["Port 01:<br/>Send → Stream-71<br/>Receive → Stream-23"]
+    end
+
+    P1 --> SS1
+    SR1 --> P1
+    P2 --> SS2
+    SR2 --> P2
+
+    SA --> P1
+    SA --> P2
+
+    style PORTS fill:#2A3A4A,stroke:#1E90FF
+    style SLOTS fill:#2A4A3A,stroke:#2E8B57
+    style STREAMS_SEND fill:#4A3A2A,stroke:#FFA500
+    style STREAMS_RCV fill:#4A3A2A,stroke:#FFA500
+                    </pre>
+                </div>
+            </div>
+
+            <!-- ACR Topology -->
+            <div class="diagram-card" id="acr">
+                <div class="diagram-header" onclick="toggleDiagram(this)">
+                    <span class="diagram-title">ACR40 vs ACR42 Topology</span>
+                    <span class="diagram-description">Audio Control Room equipment comparison</span>
+                    <span class="diagram-type flowchart">FLOWCHART</span>
+                </div>
+                <div class="diagram-content">
+                    <pre class="mermaid">
+graph TB
+    subgraph ACR40["ACR40 - Audio Control Room 40"]
+        direction TB
+
+        CONSOLE40["Calrec Apollo<br/>Main Console"]
+
+        subgraph ROUTERS40["Router Cards"]
+            AMX101_40["AMX101<br/>Primary<br/>145 streams"]
+            AMX103_40["AMX103<br/>Secondary"]
+        end
+
+        subgraph GATEWAYS40["Audio Gateways"]
+            AGW005["TORMPXAGW005<br/>64 ports"]
+            AGW006["TORMPXAGW006<br/>64 ports"]
+        end
+
+        subgraph EQUIPMENT40["I/O Equipment"]
+            RACK40["40 AUDIO RACK<br/>AD5780"]
+            DANTE40["40 Dante 1, 2"]
+            SDI40["40 SDI"]
+            PROTOOLS40["40 ProTools"]
+            WAVES40["40 Waves"]
+            STUDER40["40 Studer A, B"]
+        end
+    end
+
+    subgraph ACR42["ACR42 - Audio Control Room 42"]
+        direction TB
+
+        CONSOLE42["Calrec Apollo<br/>Main Console"]
+
+        subgraph ROUTERS42["Router Cards"]
+            AMX102_42["AMX102<br/>Primary<br/>127 streams"]
+            AMX104_42["AMX104<br/>Secondary"]
+        end
+
+        subgraph GATEWAYS42["Audio Gateways"]
+            AGW007["TORMPXAGW007<br/>64 ports"]
+            AGW008["TORMPXAGW008<br/>64 ports"]
+        end
+
+        subgraph EQUIPMENT42["I/O Equipment"]
+            RACK42["42 AUDIO RACK<br/>AD5780"]
+            DANTE42["42 Dante 1, 2"]
+            SDI42["42 SDI"]
+            PROTOOLS42["42 ProTools"]
+            WAVES42["42 Waves"]
+        end
+    end
+
+    subgraph SHARED["Shared Resources"]
+        AGW009["TORMPXAGW009"]
+        AGW010["TORMPXAGW010"]
+        AGW011["TORMPXAGW011"]
+        AGW012["TORMPXAGW012"]
+        STAGEBOXES["Box 01-12<br/>Portable Stageboxes"]
+    end
+
+    subgraph CONTROL["Central Control"]
+        VSM["Lawo VSM"]
+        NMOS["NMOS Registry"]
+    end
+
+    CONSOLE40 --> ROUTERS40
+    ROUTERS40 --> GATEWAYS40
+    GATEWAYS40 --> EQUIPMENT40
+
+    CONSOLE42 --> ROUTERS42
+    ROUTERS42 --> GATEWAYS42
+    GATEWAYS42 --> EQUIPMENT42
+
+    GATEWAYS40 --> SHARED
+    GATEWAYS42 --> SHARED
+    SHARED --> STAGEBOXES
+
+    VSM --> ACR40
+    VSM --> ACR42
+    NMOS --> SHARED
+
+    style ACR40 fill:#1A2A2A,stroke:#4CAF50
+    style ACR42 fill:#1A2A2A,stroke:#2196F3
+                    </pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <!-- VAULT STRUCTURE SECTION -->
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+
+        <h2>Vault Structure</h2>
+
+        <div class="diagram-grid">
+            <!-- Architecture Overview -->
+            <div class="diagram-card" id="architecture">
+                <div class="diagram-header" onclick="toggleDiagram(this)">
+                    <span class="diagram-title">System Architecture</span>
+                    <span class="diagram-description">SMPTE ST2110 layers and Calrec infrastructure</span>
+                    <span class="diagram-type flowchart">FLOWCHART</span>
+                </div>
+                <div class="diagram-content">
+                    <pre class="mermaid">
+graph TB
+    subgraph FACILITIES["Broadcast Facilities"]
+        subgraph ACR40["ACR40 - Audio Control Room 40"]
+            APOLLO40["Calrec Apollo<br/>Console"]
+        end
+        subgraph ACR42["ACR42 - Audio Control Room 42"]
+            APOLLO42["Calrec Apollo<br/>Console"]
+        end
+    end
+
+    subgraph CORE["Calrec Impulse Core"]
+        direction TB
+        ROUTER["IP-Based Audio Router<br/>272 streams x 8ch = 2,176 channels"]
+
+        subgraph CARDS_CORE["Router Cards"]
+            AMX101["AMX101<br/>ACR40 Primary<br/>145 streams"]
+            AMX102["AMX102<br/>ACR42 Primary<br/>127 streams"]
+            AMX103["AMX103<br/>ACR40 Secondary"]
+            AMX104["AMX104<br/>ACR42 Secondary"]
+        end
+    end
+
+    subgraph NETWORK["ST2110 Network Layer"]
+        IP["SMPTE ST2110<br/>Professional Media over IP"]
+        HYDRA["Calrec Hydra<br/>Emergency Fallback"]
+    end
+
+    subgraph GATEWAYS["Audio Gateways (AGW)"]
+        AGW005["TORMPXAGW005<br/>ACR40 Main"]
+        AGW006["TORMPXAGW006<br/>ACR40"]
+        AGW007["TORMPXAGW007<br/>ACR42 Main"]
+        AGW008["TORMPXAGW008<br/>ACR42"]
+        AGW011["TORMPXAGW011<br/>Shared"]
+        AGW012["TORMPXAGW012<br/>Shared"]
+    end
+
+    subgraph IO["Physical I/O Layer"]
+        subgraph RACKS["Audio Racks"]
+            RACK40["40 AUDIO RACK<br/>AD5780"]
+            RACK42["42 AUDIO RACK<br/>AD5780"]
+        end
+        subgraph STAGEBOXES["Portable Stageboxes"]
+            STB["Box 01-12<br/>48x16 analog"]
+        end
+        subgraph CARDTYPES["I/O Card Types"]
+            AES["AES Digital"]
+            DANTE["Dante Network"]
+            SDI["SDI Embedded"]
+            MADI["MADI"]
+            MIC["Mic/Line Analog"]
+        end
+    end
+
+    subgraph EXTERNAL["External Systems"]
+        VSM["Lawo VSM<br/>Broadcast Control"]
+        PROTOOLS["Pro Tools<br/>DAW"]
+        WAVES["Waves SoundGrid<br/>Processing"]
+        STUDER["Studer<br/>Legacy"]
+    end
+
+    APOLLO40 --> AMX101
+    APOLLO40 --> AMX103
+    APOLLO42 --> AMX102
+    APOLLO42 --> AMX104
+
+    CARDS_CORE --> IP
+    IP -.-> HYDRA
+
+    IP --> GATEWAYS
+
+    AGW005 --> RACK40
+    AGW005 --> CARDTYPES
+    AGW007 --> RACK42
+    AGW007 --> CARDTYPES
+    GATEWAYS --> STB
+
+    CARDTYPES --> PROTOOLS
+    CARDTYPES --> WAVES
+    CARDTYPES --> STUDER
+
+    VSM --> CORE
+                    </pre>
+                </div>
+            </div>
+
+            <!-- Repository Structure -->
+            <div class="diagram-card" id="repo">
+                <div class="diagram-header" onclick="toggleDiagram(this)">
+                    <span class="diagram-title">Repository Structure</span>
+                    <span class="diagram-description">Vault directory tree and file organization</span>
+                    <span class="diagram-type flowchart">FLOWCHART</span>
+                </div>
+                <div class="diagram-content">
+                    <pre class="mermaid">
+graph TB
+    subgraph ROOT["2110-audio-io/"]
+        INDEX["INDEX.md<br/>Navigation Hub"]
+        README["README.md<br/>Project Overview"]
+        CLAUDE["CLAUDE.md<br/>Dev Config"]
+    end
+
+    subgraph ENTRY["router-cards/"]
+        AMX101["AMX101.md<br/>ACR40 Primary"]
+        AMX102["AMX102.md<br/>ACR42 Primary"]
+        AMX103["AMX103.md<br/>ACR40 Secondary"]
+        AMX104["AMX104.md<br/>ACR42 Secondary"]
+    end
+
+    subgraph STREAMS["streams/ (272 files)"]
+        S1["Stream-AMX101-*.md<br/>ACR40 streams"]
+        S2["Stream-AMX102-*.md<br/>ACR42 streams"]
+        S3["Stream-AMX103-*.md<br/>ACR40 streams"]
+        S4["Stream-AMX104-*.md<br/>ACR42 streams"]
+    end
+
+    subgraph GATEWAYS["gateways/ (8 files)"]
+        AGW5["TORMPXAGW005.md"]
+        AGW6["TORMPXAGW006.md"]
+        AGW7["TORMPXAGW007.md"]
+        AGW8["TORMPXAGW008.md"]
+        AGW9["TORMPXAGW009-012.md"]
+    end
+
+    subgraph BOXES["boxes/ (14 files)"]
+        RACK40["40 AUDIO RACK.md"]
+        RACK42["42 AUDIO RACK.md"]
+        BOX01["Box 01-12.md<br/>Portable Stageboxes"]
+    end
+
+    subgraph CARDS["cards/ (56 files)"]
+        CARD40["40 *.md<br/>ACR40 cards"]
+        CARD42["42 *.md<br/>ACR42 cards"]
+    end
+
+    subgraph SCRIPTS["scripts/ (8 files)"]
+        PY1["rebuild_*.py<br/>Content generators"]
+        PY2["create_*.py<br/>Entity creators"]
+    end
+
+    subgraph OBSIDIAN[".obsidian/"]
+        GRAPH["graph.json<br/>Color config"]
+        WORKSPACE["workspace.json"]
+        PLUGINS["plugins/"]
+    end
+
+    subgraph DOCS["docs/"]
+        AUDIT["audit_findings.md"]
+        MCO["21io/<br/>Implementation docs"]
+    end
+
+    ROOT --> ENTRY
+    ROOT --> STREAMS
+    ROOT --> GATEWAYS
+    ROOT --> BOXES
+    ROOT --> CARDS
+    ROOT --> SCRIPTS
+    ROOT --> OBSIDIAN
+    ROOT --> DOCS
+                    </pre>
+                </div>
+            </div>
+
+            <!-- Component Map -->
+            <div class="diagram-card" id="components">
+                <div class="diagram-header" onclick="toggleDiagram(this)">
+                    <span class="diagram-title">Component Map</span>
+                    <span class="diagram-description">Entity types and relationships</span>
+                    <span class="diagram-type class">CLASS</span>
+                </div>
+                <div class="diagram-content">
+                    <pre class="mermaid">
+classDiagram
+    direction TB
+
+    class RouterCard {
+        +String type: router-card
+        +String acr: ACR40|ACR42
+        +Array~String~ tags
+        +Array~Device~ children
+        Examples: AMX101-104
+    }
+
+    class Stream {
+        +String type: stream
+        +String router: AMX###
+        +Number physical_output
+        +String acr: ACR40|ACR42
+        +Route route
+        8 channels per stream
+    }
+
+    class AudioGateway {
+        +String type: agw
+        +String hostname
+        +Array~Slot~ slots
+        +Array~Port~ ports
+        Examples: TORMPXAGW005-012
+    }
+
+    class Box {
+        +String type: box
+        +String acr: ACR40|ACR42
+        +Number boxId
+        +String model
+        +String location
+        +NetworkInfo network
+        Examples: 40 AUDIO RACK
+    }
+
+    class Card {
+        +String type: card
+        +String parent: gateway
+        +String cardType
+        +Number inputs
+        +Number outputs
+        +String slot
+        +Array~Stream~ streams
+    }
+
+    class Slot {
+        +String label: A-Z
+        +Card card
+        Physical position in AGW
+    }
+
+    class Port {
+        +Number portNum: 1-64
+        +Stream send
+        +Stream receive
+    }
+
+    class Route {
+        +String direction: IN|OUT
+        +Device device
+        +Number port
+        +String slot
+        +String cardType
+        +String channels
+    }
+
+    RouterCard "1" --> "*" Stream : produces
+    Stream "*" --> "1" AudioGateway : routes to
+    AudioGateway "1" --> "*" Slot : contains
+    AudioGateway "1" --> "*" Port : has
+    Slot "1" --> "1" Card : holds
+    Port "1" --> "2" Stream : send/receive
+    Card "1" --> "*" Stream : streams
+    AudioGateway "*" --> "*" Box : manages
+    Stream "1" --> "1" Route : defines
+                    </pre>
+                </div>
+            </div>
+
+            <!-- Data Flow -->
+            <div class="diagram-card" id="dataflow">
+                <div class="diagram-header" onclick="toggleDiagram(this)">
+                    <span class="diagram-title">Data Flow</span>
+                    <span class="diagram-description">Audio signal paths (send/receive)</span>
+                    <span class="diagram-type sequence">SEQUENCE</span>
+                </div>
+                <div class="diagram-content">
+                    <pre class="mermaid">
+sequenceDiagram
+    participant Console as Calrec Apollo Console
+    participant Core as Impulse Core Router
+    participant Router as Router Card (AMX###)
+    participant Stream as ST2110 Stream
+    participant AGW as Audio Gateway
+    participant Card as I/O Card
+    participant IO as Physical I/O
+
+    Note over Console,IO: SEND PATH (Console to External)
+
+    Console->>Core: Audio bus output
+    Core->>Router: Route decision
+    Router->>Stream: Assign to stream (8ch)
+    Stream->>AGW: ST2110 transport
+    AGW->>Card: Port mapping
+    Card->>IO: D/A conversion
+    IO-->>IO: To external device
+
+    Note over Console,IO: RECEIVE PATH (External to Console)
+
+    IO->>Card: Analog/digital input
+    Card->>AGW: A/D conversion
+    AGW->>Stream: ST2110 transport
+    Stream->>Router: Stream assignment
+    Router->>Core: Route decision
+    Core->>Console: Audio bus input
+                    </pre>
+                </div>
+            </div>
+
+            <!-- Entry Points -->
+            <div class="diagram-card" id="entry">
+                <div class="diagram-header" onclick="toggleDiagram(this)">
+                    <span class="diagram-title">Entry Points</span>
+                    <span class="diagram-description">Vault navigation methods</span>
+                    <span class="diagram-type flowchart">FLOWCHART</span>
+                </div>
+                <div class="diagram-content">
+                    <pre class="mermaid">
+graph TB
+    subgraph PRIMARY["Primary Entry Points"]
+        INDEX["INDEX.md<br/>Navigation hub<br/>Start here"]
+        README["README.md<br/>Project overview<br/>Architecture summary"]
+    end
+
+    subgraph ROUTERS["Router Card Entry"]
+        AMX101["AMX101<br/>ACR40 Primary"]
+        AMX102["AMX102<br/>ACR42 Primary"]
+        AMX103["AMX103<br/>ACR40 Secondary"]
+        AMX104["AMX104<br/>ACR42 Secondary"]
+    end
+
+    subgraph GRAPH["Obsidian Graph View"]
+        GLOBAL["Global Graph<br/>Full topology"]
+        LOCAL["Local Graph<br/>Single entity focus"]
+        FILTERED["Filtered Views<br/>[acr:ACR40], [type:stream]"]
+    end
+
+    subgraph TAGS["Tag Navigation"]
+        ACR40TAG["#ACR40<br/>ACR40 equipment"]
+        ACR42TAG["#ACR42<br/>ACR42 equipment"]
+    end
+
+    subgraph SEARCH["Search Entry"]
+        OBSEARCH["Obsidian Search<br/>Full-text query"]
+        FILTER["Property Filter<br/>type:stream, acr:ACR40"]
+    end
+
+    subgraph BOOKMARKS["Quick Access"]
+        BM["Bookmarks<br/>Saved views"]
+    end
+
+    INDEX --> ROUTERS
+    INDEX --> GRAPH
+    README --> INDEX
+
+    ROUTERS --> GLOBAL
+    GLOBAL --> FILTERED
+    FILTERED --> TAGS
+
+    SEARCH --> OBSEARCH
+    SEARCH --> FILTER
+                    </pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <!-- DEVELOPMENT TOOLING SECTION -->
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+
+        <h2>Development Tooling</h2>
+
+        <div class="diagram-grid">
+            <!-- Claude Code Configuration -->
+            <div class="diagram-card" id="tooling">
+                <div class="diagram-header" onclick="toggleDiagram(this)">
+                    <span class="diagram-title">Claude Code Configuration</span>
+                    <span class="diagram-description">MCP servers, plugins, and permissions</span>
+                    <span class="diagram-type flowchart">FLOWCHART</span>
+                </div>
+                <div class="diagram-content">
+                    <pre class="mermaid">
+graph TB
+    subgraph CLAUDE["Claude Code"]
+        direction TB
+        CLI["Claude Code CLI"]
+
+        subgraph PLUGINS["Enabled Plugins"]
+            FRONTEND["frontend-design<br/>Production UI"]
+            FEATURE["feature-dev<br/>Guided Development"]
+            RALPH["ralph-loop<br/>Iteration Loops"]
+            TSLSP["typescript-lsp<br/>TypeScript Support"]
+            CMEM["claude-mem<br/>Session Memory"]
+        end
+    end
+
+    subgraph MCP["MCP Servers (Project-Enabled)"]
+        direction TB
+
+        subgraph OBSIDIAN_MCP["Obsidian Integration"]
+            CLOBSIDIAN["clobsidian<br/>View, Edit, Screenshot"]
+            OBSMCP["obsidian-mcp<br/>API Access"]
+        end
+
+        subgraph BROWSER["Browser Automation"]
+            CLAUDEZILLA["claudezilla<br/>Firefox Control"]
+        end
+
+        subgraph MEMORY["Knowledge Systems"]
+            QDRANT["qdrant<br/>Semantic Search<br/>16K+ PREFIX docs"]
+        end
+
+        subgraph NETWORK["Network"]
+            TAILSCALE["tailscale<br/>VPN Management"]
+        end
+
+        subgraph CREATIVE["Creative"]
+            BLENDER["blender<br/>3D Modeling"]
+        end
+    end
+
+    subgraph PERMISSIONS["Pre-Approved Permissions"]
+        READ["Read vault/**"]
+        WRITE["Write vault/**"]
+        EDIT["Edit vault/**"]
+        PYTHON["Bash: python3"]
+        GIT["Bash: git"]
+        OBSTOOLS["mcp__clobsidian__*<br/>mcp__obsidian-mcp__*"]
+    end
+
+    subgraph CONFIG["Configuration Files"]
+        SETTINGS[".claude/settings.json<br/>Project permissions"]
+        LOCAL[".claude/settings.local.json<br/>MCP server enables"]
+        CLAUDEMD["CLAUDE.md<br/>Dev conventions"]
+    end
+
+    CLI --> PLUGINS
+    CLI --> MCP
+    MCP --> PERMISSIONS
+    CONFIG --> CLI
+
+    style OBSIDIAN_MCP fill:#2A4A3A,stroke:#2E8B57
+    style PERMISSIONS fill:#2A3A4A,stroke:#1E90FF
+                    </pre>
+                    <p class="spec-ref">
+                        Config: <code>.claude/settings.json</code> |
+                        MCP: <code>.claude/settings.local.json</code> |
+                        Rules: <code>CLAUDE.md</code>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Automation Scripts -->
+            <div class="diagram-card" id="scripts">
+                <div class="diagram-header" onclick="toggleDiagram(this)">
+                    <span class="diagram-title">Automation Scripts</span>
+                    <span class="diagram-description">Python generators and content rebuilders</span>
+                    <span class="diagram-type flowchart">FLOWCHART</span>
+                </div>
+                <div class="diagram-content">
+                    <pre class="mermaid">
+graph LR
+    subgraph SOURCE["Source Data"]
+        CSV["Calrec I/O CSV<br/>docs/resources/"]
+    end
+
+    subgraph SCRIPTS["Python Scripts (scripts/)"]
+        direction TB
+        REBUILD_STREAMS["rebuild_streams.py<br/>Generate 272 stream files"]
+        REBUILD_GATEWAYS["rebuild_gateways.py<br/>Generate 8 gateway files"]
+        REBUILD_CARDS["rebuild_cards.py<br/>Generate 56 card files"]
+        REBUILD_BOXES["rebuild_boxes.py<br/>Generate 14 box files"]
+        CREATE_INDEX["create_index.py<br/>Generate INDEX.md"]
+    end
+
+    subgraph OUTPUT["Generated Vault Content"]
+        STREAMS_OUT["streams/*.md"]
+        GATEWAYS_OUT["gateways/*.md"]
+        CARDS_OUT["cards/*.md"]
+        BOXES_OUT["boxes/*.md"]
+        INDEX_OUT["INDEX.md"]
+    end
+
+    subgraph VALIDATION["Validation"]
+        AUDIT["audit_findings.md<br/>Discrepancy report"]
+    end
+
+    CSV --> SCRIPTS
+    REBUILD_STREAMS --> STREAMS_OUT
+    REBUILD_GATEWAYS --> GATEWAYS_OUT
+    REBUILD_CARDS --> CARDS_OUT
+    REBUILD_BOXES --> BOXES_OUT
+    CREATE_INDEX --> INDEX_OUT
+    OUTPUT --> AUDIT
+
+    style SCRIPTS fill:#3A3A2A,stroke:#FFA500
+                    </pre>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p><strong>Source:</strong> <code>wireframes/v1.0.0/*.mermaid.md</code> | <strong>Notes:</strong> <code>wireframes/v1.0.0/*.notes.md</code></p>
+            <p>Generated for: <strong>2110-audio-io</strong> | Location: <code>~/dev/milano-cortina/2110-audio-io</code></p>
+            <p>Systems: Calrec Impulse Core, Calrec Apollo, Lawo VSM, SMPTE ST2110, AMWA NMOS</p>
+            <p>Standards: <a href="https://www.smpte.org/standards/st2110">SMPTE ST2110</a> | <a href="https://specs.amwa.tv/nmos">AMWA NMOS</a> | <a href="https://www.aes.org/publications/standards/search.cfm?docID=96">AES67</a></p>
+        </footer>
+    </div>
+
+    <script>
+        function toggleDiagram(header) {
+            header.classList.toggle('collapsed');
+            const content = header.nextElementSibling;
+            content.classList.toggle('hidden');
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.diagram-header:not(.collapsed)').forEach(h => {
+                    h.classList.add('collapsed');
+                    h.nextElementSibling.classList.add('hidden');
+                });
+            }
+            // 'a' to expand all
+            if (e.key === 'a' && !e.ctrlKey && !e.metaKey && document.activeElement.tagName !== 'INPUT') {
+                document.querySelectorAll('.diagram-header.collapsed').forEach(h => {
+                    h.classList.remove('collapsed');
+                    h.nextElementSibling.classList.remove('hidden');
+                });
+            }
+        });
+    </script>
+</body>
+</html>

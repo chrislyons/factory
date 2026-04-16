@@ -1,0 +1,225 @@
+{
+  "main": {
+    "id": "906384d58af5e325",
+    "type": "split",
+    "children": [
+      {
+        "id": "2e5686da54e54d4e",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "564b8e2d3cb582e7",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Welcome.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Welcome"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "c6d49dc9266f6be8",
+    "type": "split",
+    "children": [
+      {
+        "id": "f5bc9833dcd30197",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "1962909faa84eb57",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "2614cfcea7de1ffe",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "43e04725145a97b6",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "69c337f644bf4908",
+    "type": "split",
+    "children": [
+      {
+        "id": "3d6946962cc73e69",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "3fd040f5049119cf",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "Welcome.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for Welcome"
+            }
+          },
+          {
+            "id": "a713a100904d21c5",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "Welcome.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from Welcome"
+            }
+          },
+          {
+            "id": "8c61d96169c74075",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "a9831e9f624d095d",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "aed415b12957a466",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "Welcome.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of Welcome"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "564b8e2d3cb582e7",
+  "lastOpenFiles": [
+    "KLK000 Agent Training Plan.md",
+    "KLK.md",
+    "archive/X02 Blackout Jan8-11 Reconstruction.md",
+    "archive/X01 Comprehensive Work Analysis Report.md",
+    "archive",
+    "hermes_conversation_20260410_033444.json",
+    "timeline/medical/240600 therapy-notes.depr/archive/feeling-low.md",
+    "timeline/medical/240600 therapy-notes.depr/archive/Matt-Dave-Andy.md",
+    "timeline/medical/240600 therapy-notes.depr/archive/Markus.md",
+    "timeline/medical/240600 therapy-notes.depr/archive/Lucie.md",
+    "timeline/medical/240600 therapy-notes.depr/archive/Elena.md",
+    "timeline/medical/archive/250712 Kphase-RecoverySummary.md",
+    "timeline/medical/250402 Clinical Case Study - Chronic Nodular Disease/08_Early_Medical_History__Asthma_and_Adolescent_Antibiotic_Use.pdf",
+    "timeline/medical/250402 Clinical Case Study - Chronic Nodular Disease/07_Realigning_an_Out-of-Phase_Soul.pdf",
+    "timeline/medical/250402 Clinical Case Study - Chronic Nodular Disease/06_Early_Mucosal_Immune_Dysfunction__Tonsillectomy_Complications_and_Preceding_Infections.pdf",
+    "timeline/medical/250402 Clinical Case Study - Chronic Nodular Disease/05_Oral_Mucosal_Involvement_with_Keratinous_Exudate.pdf",
+    "timeline/medical/250402 Clinical Case Study - Chronic Nodular Disease/04_Clinical_Image_Interpretation__Sinus_Tract_Excavation_Summary.pdf",
+    "timeline/medical/250402 Clinical Case Study - Chronic Nodular Disease/03_Lifestyle_Change_as_a_Long-Term_Remission_Pathway.pdf",
+    "timeline/medical/250402 Clinical Case Study - Chronic Nodular Disease/02_Cannabinoid_Transition__Immune_Support_Plan.pdf",
+    "timeline/medical/250402 Clinical Case Study - Chronic Nodular Disease/01_CL_Patient_Summary_Report.pdf",
+    "timeline/medical/260412 Clinical Case Study - Chronic Hidradenitis Suppurativa with Systemic and Psychosocial Sequelae.md",
+    "timeline/annual_trackers/2027.md",
+    "timeline/annual_trackers/2026.md",
+    "timeline/annual_trackers/2025.md",
+    "timeline/annual_trackers/2024.md",
+    "timeline/annual_trackers/2023.md",
+    "timeline/annual_trackers/2021.md",
+    "timeline/annual_trackers/2020.md",
+    "timeline/annual_trackers/2019.md",
+    "timeline/annual_trackers/2018.md",
+    "timeline/annual_trackers/2017.md",
+    "timeline/annual_trackers/2016.md",
+    "timeline/annual_trackers/2015.md",
+    "timeline/annual_trackers/2014.md",
+    "timeline/annual_trackers/2013.md",
+    "timeline/annual_trackers/2012.md"
+  ]
+}

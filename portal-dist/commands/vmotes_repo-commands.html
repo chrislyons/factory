@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>vmotes - Command Reference</title>
+<link rel="stylesheet" href="/shared/base.css">
+<link rel="stylesheet" href="/shared/commands.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="site-header__inner">
+    <div class="brand">
+      <a class="brand__title" href="/pages/docs.html">dreamfactory</a>
+    </div>
+    <div class="header-actions"><button class="export-btn" id="export-btn" title="Copy visible results to clipboard as markdown">Export to Markdown</button></div>
+  </div>
+</header>
+
+<main>
+  <div class="hero-row">
+    <div class="hero">
+      <span class="hero-eyebrow">COMMAND REFERENCE</span>
+      <h1>vmotes</h1>
+      <p>Real-time point-cloud rendering — Three.js r178+ + TypeScript + Vite</p>
+    </div>
+    <div class="hero-meta"><div class="meta-chip"><span class="meta-chip__label">UPDATED</span><span class="meta-chip__value">2026-03-29</span></div><div class="meta-chip"><span class="meta-chip__label">REPO</span><span class="meta-chip__value">~/dev/vmotes</span></div></div>
+  </div>
+  <div class="search-wrap"><span class="search-icon">&#x2315;</span><input class="search-input" type="text" placeholder="Search commands, snippets, or notes…" id="search" autocomplete="off" spellcheck="false"><span class="search-count" id="search-count"></span><button class="search-clear" id="search-clear" title="Clear search">&times;</button></div>
+  <section class="surface-card section-card" data-section="dev"><button class="section-header" type="button" aria-expanded="true"><span class="section-arrow">&#x25BC;</span><span class="section-title">Development</span><span class="section-count">4</span></button><div class="section-body"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="vite dev server at localhost:5173 npm run dev"><td><div class="task-text">Vite dev server at localhost:5173</div></td><td><button class="value-block value-block--shell" data-copy="npm run dev" title="Copy value"><code class="value-text">npm run dev</code></button></td><td class="desc-text">Vite dev server at localhost:5173</td></tr><tr class="command-row" data-search="compile + bundle to dist/ npm run build"><td><div class="task-text">Compile + bundle to dist/</div></td><td><button class="value-block value-block--shell" data-copy="npm run build" title="Copy value"><code class="value-text">npm run build</code></button></td><td class="desc-text">Compile + bundle to dist/</td></tr><tr class="command-row" data-search="serve dist/ locally npm run preview"><td><div class="task-text">Serve dist/ locally</div></td><td><button class="value-block value-block--shell" data-copy="npm run preview" title="Copy value"><code class="value-text">npm run preview</code></button></td><td class="desc-text">Serve dist/ locally</td></tr><tr class="command-row" data-search="vite graph visualization mode npm run graph"><td><div class="task-text">Vite graph visualization mode</div></td><td><button class="value-block value-block--shell" data-copy="npm run graph" title="Copy value"><code class="value-text">npm run graph</code></button></td><td class="desc-text">Vite graph visualization mode</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="testing"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">&#x25BC;</span><span class="section-title">Testing</span><span class="section-count">3</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="typescript test suite npm run test:frontend-contracts"><td><div class="task-text">TypeScript test suite</div></td><td><button class="value-block value-block--shell" data-copy="npm run test:frontend-contracts" title="Copy value"><code class="value-text">npm run test:frontend-contracts</code></button></td><td class="desc-text">TypeScript test suite</td></tr><tr class="command-row" data-search="run all tests (frontend + sidecar) npm run test"><td><div class="task-text">Run all tests (frontend + sidecar)</div></td><td><button class="value-block value-block--shell" data-copy="npm run test" title="Copy value"><code class="value-text">npm run test</code></button></td><td class="desc-text">Run all tests (frontend + sidecar)</td></tr><tr class="command-row" data-search="python unittest suite npm run test:sidecar"><td><div class="task-text">Python unittest suite</div></td><td><button class="value-block value-block--shell" data-copy="npm run test:sidecar" title="Copy value"><code class="value-text">npm run test:sidecar</code></button></td><td class="desc-text">Python unittest suite</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="sidecar"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">&#x25BC;</span><span class="section-title">SAM Sidecar</span><span class="section-count">2</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="mock sidecar (local dev, no sam deps) npm run sidecar:mock"><td><div class="task-text">Mock sidecar (local dev, no SAM deps)</div></td><td><button class="value-block value-block--shell" data-copy="npm run sidecar:mock" title="Copy value"><code class="value-text">npm run sidecar:mock</code></button></td><td class="desc-text">Mock sidecar (local dev, no SAM deps)</td></tr><tr class="command-row" data-search="cloud sidecar with remote endpoints export vmotes_sam3_url=... && npm run sidecar"><td><div class="task-text">Cloud sidecar with remote endpoints</div></td><td><button class="value-block value-block--shell" data-copy="export VMOTES_SAM3_URL=... && npm run sidecar" title="Copy value"><code class="value-text">export VMOTES_SAM3_URL=... &amp;&amp; npm run sidecar</code></button></td><td class="desc-text">Cloud sidecar with remote endpoints</td></tr></tbody></table></div></section><section class="surface-card section-card" data-section="tools"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">&#x25BC;</span><span class="section-title">Dev Tools</span><span class="section-count">2</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="toggle dev hud (fps, tier, count, theme) press backtick key"><td><div class="task-text">Toggle dev HUD (FPS, tier, count, theme)</div></td><td><button class="value-block value-block--keys" data-copy="`" title="Copy value"><code class="value-text"><span class="inline-key">`</span> <span style="color:var(--text-muted);font-size:11px">Press backtick key</span></code></button></td><td class="desc-text">Toggle dev HUD (FPS, tier, count, theme)</td></tr><tr class="command-row" data-search="extract graph data from vault npm run graph:parse"><td><div class="task-text">Extract graph data from vault</div></td><td><button class="value-block value-block--shell" data-copy="npm run graph:parse" title="Copy value"><code class="value-text">npm run graph:parse</code></button></td><td class="desc-text">Extract graph data from vault</td></tr></tbody></table></div></section>
+</main>
+
+<footer>
+  <div class="inner">
+    <span>vmotes | npm | Three.js r178+, Vite 6.2+, Python (SAM sidecar)</span>
+    <span>vmotes_repo-commands.html</span>
+  </div>
+</footer>
+
+<script src="/shared/dust.js"></script>
+<script src="/shared/theme.js"></script>
+<script src="/shared/commands.js"></script>
+</body>
+</html>

@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSD v2 - Command Reference</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            padding: 1rem 2rem;
+            line-height: 1.5;
+            font-size: 0.75rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: #fff;
+        }
+
+        .subtitle {
+            color: #888;
+            margin-bottom: 0.75rem;
+            font-size: 0.675rem;
+        }
+
+        .last-updated {
+            color: #666;
+            font-size: 0.625rem;
+            margin-bottom: 0.75rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #242424;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            margin-bottom: 1.5rem;
+        }
+
+        thead {
+            background: #2a2a2a;
+        }
+
+        th {
+            padding: 0.75rem;
+            text-align: left;
+            font-weight: 600;
+            color: #fff;
+            border-bottom: 2px solid #333;
+            font-size: 0.75rem;
+        }
+
+        th:nth-child(1) { width: 20%; }
+        th:nth-child(2) { width: 35%; }
+        th:nth-child(3) { width: 45%; }
+
+        td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #2a2a2a;
+            font-size: 0.75rem;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background: #2a2a2a;
+        }
+
+        .command {
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Courier New', monospace;
+            background: #1a1a1a;
+            padding: 0.375rem 0.5rem;
+            border-radius: 3px;
+            font-size: 0.675rem;
+            color: #4fc3f7;
+            cursor: pointer;
+            display: inline-block;
+            transition: background 0.2s;
+            position: relative;
+            user-select: none;
+        }
+
+        .command:hover {
+            background: #222;
+        }
+
+        .command:active {
+            background: #2a4858;
+        }
+
+        .command::after {
+            content: '📋';
+            margin-left: 0.5rem;
+            opacity: 0.5;
+        }
+
+        .copied {
+            animation: flash 0.3s;
+        }
+
+        @keyframes flash {
+            0%, 100% { background: #1a1a1a; }
+            50% { background: #2a5a3a; }
+        }
+
+        .description {
+            color: #b0b0b0;
+            font-size: 0.675rem;
+        }
+
+        .job {
+            color: #fff;
+            font-weight: 500;
+            font-size: 0.75rem;
+        }
+
+        .section-header {
+            background: #2a2a2a;
+            font-weight: 600;
+            color: #fff;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .section-header:hover {
+            background: #333;
+        }
+
+        .section-header:focus {
+            outline: 2px solid #4fc3f7;
+            outline-offset: -2px;
+        }
+
+        .section-header td {
+            padding: 0.5rem 0.75rem;
+            border-bottom: 2px solid #333;
+            position: relative;
+            font-size: 0.75rem;
+        }
+
+        .section-header td::before {
+            content: '▼';
+            margin-right: 0.375rem;
+            font-size: 0.5625rem;
+            transition: transform 0.2s;
+            display: inline-block;
+        }
+
+        .section-header.collapsed td::before {
+            transform: rotate(-90deg);
+        }
+
+        .section-row {
+            transition: opacity 0.2s;
+        }
+
+        .section-row.hidden {
+            display: none;
+        }
+
+        footer {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #333;
+            color: #666;
+            font-size: 0.625rem;
+        }
+
+        .warning {
+            background: #3a2a1a;
+            border-left: 3px solid #ff9800;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+            border-radius: 3px;
+            font-size: 0.675rem;
+        }
+
+        .warning-title {
+            color: #ff9800;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            font-size: 0.75rem;
+        }
+
+        .info {
+            background: #1a2a3a;
+            border-left: 3px solid #4fc3f7;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+            border-radius: 3px;
+            font-size: 0.675rem;
+        }
+
+        .info-title {
+            color: #4fc3f7;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .tag {
+            display: inline-block;
+            background: #3a4a6a;
+            color: #4fc3f7;
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-size: 0.625rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .tag.critical {
+            background: #6a3a3a;
+            color: #ff9800;
+        }
+
+        .tag.mobile {
+            background: #3a5a4a;
+            color: #4fc3f7;
+        }
+
+        .tag.backend {
+            background: #4a3a6a;
+            color: #b39ddb;
+        }
+
+        .tag.worker {
+            background: #6a5a3a;
+            color: #ffb74d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>OSD v2 - Command Reference</h1>
+        <p class="subtitle">Quick reference for Open Source Directory v2 development</p>
+        <p class="last-updated">Last updated: 2026-01-25</p>
+
+        <div class="warning">
+            <div class="warning-title">⚠️ Critical: Worker Deployment Protocol</div>
+            Backend schema or resolver changes require immediate Worker redeployment. See Worker Deployment section below.
+        </div>
+
+        <div class="info">
+            <div class="info-title">📦 Environment & Stack</div>
+            <strong>Monorepo:</strong> pnpm workspaces | <strong>Frontend:</strong> React Native/Expo | <strong>Backend:</strong> Cloudflare Workers + D1 (SQLite)
+        </div>
+
+        <!-- Setup & Installation -->
+        <table>
+            <thead>
+                <tr>
+                    <th>Job</th>
+                    <th>Command</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="section-header" data-section="setup" tabindex="0">
+                    <td colspan="3">📦 Setup & Installation</td>
+                </tr>
+                <tr class="section-row" data-section="setup">
+                    <td class="job">Install dependencies</td>
+                    <td><code class="command">pnpm install</code></td>
+                    <td class="description">Install all workspace dependencies</td>
+                </tr>
+                <tr class="section-row" data-section="setup">
+                    <td class="job">Setup workspace</td>
+                    <td><code class="command">pnpm run setup</code></td>
+                    <td class="description">Full workspace setup (dependencies + configuration)</td>
+                </tr>
+                <tr class="section-row" data-section="setup">
+                    <td class="job">Check environment</td>
+                    <td><code class="command">node --version && pnpm --version && git --version</code></td>
+                    <td class="description">Verify Node.js (>=18), pnpm (>=8), and Git are installed</td>
+                </tr>
+
+                <!-- Development Servers -->
+                <tr class="section-header" data-section="dev" tabindex="0">
+                    <td colspan="3">🚀 Development Servers</td>
+                </tr>
+                <tr class="section-row" data-section="dev">
+                    <td class="job">Web app (Recommended)</td>
+                    <td><code class="command">pnpm --filter @osd/mobile web</code></td>
+                    <td class="description">Start web dev server (http://localhost:8081) - best for full app testing</td>
+                </tr>
+                <tr class="section-row" data-section="dev">
+                    <span class="tag mobile">MOBILE</span>
+                    <td class="job">Mobile Expo</td>
+                    <td><code class="command">pnpm run dev:mobile</code></td>
+                    <td class="description">Start Expo dev server for iOS/Android (scan QR with Expo Go app)</td>
+                </tr>
+                <tr class="section-row" data-section="dev">
+                    <span class="tag backend">BACKEND</span>
+                    <td class="job">Worker dev</td>
+                    <td><code class="command">cd apps/worker && wrangler dev</code></td>
+                    <td class="description">Start Cloudflare Worker dev server (http://localhost:8787)</td>
+                </tr>
+                <tr class="section-row" data-section="dev">
+                    <td class="job">All servers</td>
+                    <td><code class="command">pnpm run dev</code></td>
+                    <td class="description">Start web, worker, and all services in parallel</td>
+                </tr>
+
+                <!-- Building -->
+                <tr class="section-header collapsed" data-section="build" tabindex="0">
+                    <td colspan="3">🔨 Building</td>
+                </tr>
+                <tr class="section-row hidden" data-section="build">
+                    <span class="tag mobile">MOBILE</span>
+                    <td class="job">Build mobile app</td>
+                    <td><code class="command">pnpm --filter @osd/mobile build</code></td>
+                    <td class="description">Build production mobile/web bundle</td>
+                </tr>
+                <tr class="section-row hidden" data-section="build">
+                    <span class="tag backend">WORKER</span>
+                    <td class="job">Build Worker</td>
+                    <td><code class="command">cd apps/worker && wrangler build</code></td>
+                    <td class="description">Build Worker for production (generates dist/index.js)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="build">
+                    <td class="job">Build all</td>
+                    <td><code class="command">pnpm build</code></td>
+                    <td class="description">Build all packages in the monorepo</td>
+                </tr>
+                <tr class="section-row hidden" data-section="build">
+                    <td class="job">Type check</td>
+                    <td><code class="command">pnpm typecheck</code></td>
+                    <td class="description">Run TypeScript type checking across all packages</td>
+                </tr>
+
+                <!-- Worker Deployment (CRITICAL) -->
+                <tr class="section-header collapsed" data-section="worker-deploy" tabindex="0">
+                    <td colspan="3">🚢 Worker Deployment (CRITICAL)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="worker-deploy">
+                    <span class="tag critical">REQUIRED</span>
+                    <td class="job">Deploy Worker</td>
+                    <td><code class="command">cd apps/worker && wrangler deploy</code></td>
+                    <td class="description">Deploy Worker to production - MUST RUN after any schema/resolver changes</td>
+                </tr>
+                <tr class="section-row hidden" data-section="worker-deploy">
+                    <span class="tag critical">REQUIRED</span>
+                    <td class="job">Verify deployment</td>
+                    <td><code class="command">curl -I https://osd-events.chrislyons.workers.dev/graphql</code></td>
+                    <td class="description">Verify Worker deployed successfully (should return 200, not 503)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="worker-deploy">
+                    <td class="job">View deployment logs</td>
+                    <td><code class="command">wrangler tail osd-events</code></td>
+                    <td class="description">Stream real-time logs from deployed Worker</td>
+                </tr>
+                <tr class="section-row hidden" data-section="worker-deploy">
+                    <td class="job">Check Worker status</td>
+                    <td><code class="command">wrangler deployments list --name osd-events</code></td>
+                    <td class="description">View recent Worker deployment history</td>
+                </tr>
+
+                <!-- Database (D1) Commands -->
+                <tr class="section-header collapsed" data-section="database" tabindex="0">
+                    <td colspan="3">🗄️ Database (D1) - Production: osd-events | Test: osd-events-test</td>
+                </tr>
+                <tr class="section-row hidden" data-section="database">
+                    <span class="tag critical">BACKUP</span>
+                    <td class="job">Backup production to R2</td>
+                    <td><code class="command">./scripts/backup-db-to-r2.sh</code></td>
+                    <td class="description">Export production database to R2 bucket (ALWAYS run before migrations)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="database">
+                    <td class="job">Backup (TypeScript API)</td>
+                    <td><code class="command">export D1_REST_API_TOKEN="your-token" && npx tsx scripts/backup-d1-to-r2.ts pre-migration</code></td>
+                    <td class="description">Advanced backup using REST API (saves to ./backups/ with custom reason)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="database">
+                    <td class="job">List R2 backups</td>
+                    <td><code class="command">wrangler r2 object list osd-backups</code></td>
+                    <td class="description">View all available database backups in R2</td>
+                </tr>
+                <tr class="section-row hidden" data-section="database">
+                    <span class="tag critical">DESTRUCTIVE</span>
+                    <td class="job">Restore from R2 backup</td>
+                    <td><code class="command">wrangler r2 object get osd-backups/osd-db-backup-TIMESTAMP.sql --file=restore.sql && wrangler d1 execute osd-events --file=restore.sql</code></td>
+                    <td class="description">⚠️ OVERWRITES production database - test on osd-events-test first!</td>
+                </tr>
+                <tr class="section-row hidden" data-section="database">
+                    <td class="job">Query production DB</td>
+                    <td><code class="command">wrangler d1 execute osd-events --command="SELECT COUNT(*) FROM events;"</code></td>
+                    <td class="description">Run SQL query on production database (osd-events)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="database">
+                    <td class="job">Query test DB</td>
+                    <td><code class="command">wrangler d1 execute osd-events-test --command="SELECT COUNT(*) FROM events;"</code></td>
+                    <td class="description">Run SQL query on test database (osd-events-test)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="database">
+                    <td class="job">Apply migration (production)</td>
+                    <td><code class="command">wrangler d1 execute osd-events --file=migrations/0020_example.sql</code></td>
+                    <td class="description">Apply migration to PRODUCTION (always backup first!)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="database">
+                    <td class="job">Apply migration (test)</td>
+                    <td><code class="command">wrangler d1 execute osd-events-test --file=migrations/0020_example.sql</code></td>
+                    <td class="description">Apply migration to TEST database (safe for testing)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="database">
+                    <td class="job">List all tables</td>
+                    <td><code class="command">wrangler d1 execute osd-events --command="SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;"</code></td>
+                    <td class="description">View all database tables</td>
+                </tr>
+                <tr class="section-row hidden" data-section="database">
+                    <td class="job">Check table schema</td>
+                    <td><code class="command">wrangler d1 execute osd-events --command="PRAGMA table_info(events);"</code></td>
+                    <td class="description">View columns and types for a specific table</td>
+                </tr>
+                <tr class="section-row hidden" data-section="database">
+                    <td class="job">Export database (local file)</td>
+                    <td><code class="command">wrangler d1 export osd-events --remote --output=osd-events-backup.sql</code></td>
+                    <td class="description">Export production database to local SQL file</td>
+                </tr>
+                <tr class="section-row hidden" data-section="database">
+                    <td class="job">Database info</td>
+                    <td><code class="command">wrangler d1 info osd-events</code></td>
+                    <td class="description">Show database size, row counts, and storage usage</td>
+                </tr>
+
+                <!-- Admin & Moderation -->
+                <tr class="section-header collapsed" data-section="admin" tabindex="0">
+                    <td colspan="3">👑 Admin & Moderation System</td>
+                </tr>
+                <tr class="section-row hidden" data-section="admin">
+                    <td class="job">Check migration 0016</td>
+                    <td><code class="command">wrangler d1 execute osd-events --remote --command "SELECT name FROM sqlite_master WHERE type='table' AND name='moderation_queue';"</code></td>
+                    <td class="description">Verify admin system tables exist (moderation_queue, audit_log, etc.)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="admin">
+                    <td class="job">GraphQL: Queue metrics</td>
+                    <td><code class="command">curl -X POST https://osd-events.chrislyons.workers.dev/graphql -H "Content-Type: application/json" -d '{"query": "{ queueMetrics { total_pending total_approved total_rejected } }"}'</code></td>
+                    <td class="description">Test admin API: get moderation queue metrics (requires admin token)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="admin">
+                    <td class="job">GraphQL: Dashboard stats</td>
+                    <td><code class="command">curl -X POST https://osd-events.chrislyons.workers.dev/graphql -H "Content-Type: application/json" -d '{"query": "{ dashboardStats(days: 7) { total_events pending_reviews active_moderators } }"}'</code></td>
+                    <td class="description">Test admin API: get dashboard statistics</td>
+                </tr>
+                <tr class="section-row hidden" data-section="admin">
+                    <td class="job">GraphQL: Moderation queue</td>
+                    <td><code class="command">curl -X POST https://osd-events.chrislyons.workers.dev/graphql -H "Content-Type: application/json" -d '{"query": "{ moderationQueue(status: \"pending\", limit: 20) { queue_id event_id event_name status submitted_at } }"}'</code></td>
+                    <td class="description">Test admin API: get pending events in moderation queue</td>
+                </tr>
+
+                <!-- SQL: Admin & Moderation Functions -->
+                <tr class="section-header collapsed" data-section="admin-sql" tabindex="0">
+                    <td colspan="3">🔐 SQL: Admin & Moderation Functions</td>
+                </tr>
+                <tr class="section-row hidden" data-section="admin-sql">
+                    <td class="job">Create first admin</td>
+                    <td><code class="command">wrangler d1 execute osd-events --remote --command "UPDATE agents SET roles = '[\"user\", \"admin:full\"]' WHERE email = 'your@email.com';"</code></td>
+                    <td class="description">Bootstrap first admin user by email (SQL version)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="admin-sql">
+                    <td class="job">List all admin roles</td>
+                    <td><code class="command">wrangler d1 execute osd-events --remote --command "SELECT agent_id, email, roles FROM agents WHERE roles LIKE '%admin%';"</code></td>
+                    <td class="description">Find all users with admin or moderator roles</td>
+                </tr>
+                <tr class="section-row hidden" data-section="admin-sql">
+                    <td class="job">Assign moderator by ID</td>
+                    <td><code class="command">wrangler d1 execute osd-events --remote --command "INSERT INTO moderators (moderator_id, agent_id, cities, categories, max_queue_size) VALUES (hex(randomblob(16)), 'AGENT_ID', '[\"Toronto\", \"Montreal\"]', NULL, 50); UPDATE agents SET roles = json_array_insert(COALESCE(roles, '[]'), '$[0]', 'moderator') WHERE agent_id = 'AGENT_ID';"</code></td>
+                    <td class="description">Assign moderator role with city scope (replace AGENT_ID)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="admin-sql">
+                    <td class="job">View moderation queue status</td>
+                    <td><code class="command">wrangler d1 execute osd-events --remote --command "SELECT status, COUNT(*) as count FROM moderation_queue GROUP BY status;"</code></td>
+                    <td class="description">Count pending/approved/rejected events in queue</td>
+                </tr>
+                <tr class="section-row hidden" data-section="admin-sql">
+                    <td class="job">View queue age distribution</td>
+                    <td><code class="command">wrangler d1 execute osd-events --remote --command "SELECT CASE WHEN (julianday('now') - julianday(submitted_at)) < (1.0/24) THEN 'Under 1h' WHEN (julianday('now') - julianday(submitted_at)) < (4.0/24) THEN '1-4h' WHEN (julianday('now') - julianday(submitted_at)) < 1 THEN '4-24h' ELSE '24h+' END as age_bucket, COUNT(*) as count FROM moderation_queue WHERE status = 'pending' GROUP BY age_bucket;"</code></td>
+                    <td class="description">Show pending events by age (helps identify SLA breaches)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="admin-sql">
+                    <td class="job">View audit trail for event</td>
+                    <td><code class="command">wrangler d1 execute osd-events --remote --command "SELECT timestamp, action, agent_id, details FROM audit_log WHERE resource_id = 'EVENT_ID' ORDER BY timestamp DESC;"</code></td>
+                    <td class="description">View all admin actions for a specific event (replace EVENT_ID)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="admin-sql">
+                    <td class="job">Moderator performance stats</td>
+                    <td><code class="command">wrangler d1 execute osd-events --remote --command "SELECT m.agent_id, a.email, COUNT(d.decision_id) as decisions, SUM(CASE WHEN d.decision = 'approved' THEN 1 ELSE 0 END) as approved FROM moderators m LEFT JOIN agents a ON m.agent_id = a.agent_id LEFT JOIN moderation_decisions d ON m.agent_id = d.moderator_id GROUP BY m.agent_id ORDER BY decisions DESC;"</code></td>
+                    <td class="description">Show each moderator's approval/rejection counts</td>
+                </tr>
+                <tr class="section-row hidden" data-section="admin-sql">
+                    <td class="job">Check SLA breaches</td>
+                    <td><code class="command">wrangler d1 execute osd-events --remote --command "SELECT queue_id, event_id, submitted_at, sla_deadline, status FROM moderation_queue WHERE status = 'pending' AND sla_deadline < datetime('now');"</code></td>
+                    <td class="description">Find pending events that missed SLA deadline</td>
+                </tr>
+                <tr class="section-row hidden" data-section="admin-sql">
+                    <td class="job">Rule effectiveness metrics</td>
+                    <td><code class="command">wrangler d1 execute osd-events --remote --command "SELECT rule_id, COUNT(*) as executions, SUM(CASE WHEN result = 'pass' THEN 1 ELSE 0 END) as passes, SUM(CASE WHEN result = 'fail' THEN 1 ELSE 0 END) as failures, ROUND(AVG(execution_time_ms), 2) as avg_ms FROM rule_execution_log GROUP BY rule_id ORDER BY executions DESC;"</code></td>
+                    <td class="description">Show rule execution stats and effectiveness rates</td>
+                </tr>
+                <tr class="section-row hidden" data-section="admin-sql">
+                    <td class="job">Clear completed queue items</td>
+                    <td><code class="command">wrangler d1 execute osd-events --remote --command "DELETE FROM moderation_queue WHERE status != 'pending' AND reviewed_at < datetime('now', '-90 days');"</code></td>
+                    <td class="description">Archive completed (non-pending) items older than 90 days</td>
+                </tr>
+
+                <!-- Event Ingestion (OSD073) -->
+                <tr class="section-header collapsed" data-section="ingestion" tabindex="0">
+                    <td colspan="3">🔄 Event Ingestion (OSD073)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="ingestion">
+                    <span class="tag backend">WORKER</span>
+                    <td class="job">Apply ingestion migrations</td>
+                    <td><code class="command">wrangler d1 execute osd-events --remote --file=migrations/0018_add_event_ingestion_schema.sql && wrangler d1 execute osd-events --remote --file=migrations/0019_add_ingestion_moderation_rules.sql</code></td>
+                    <td class="description">Apply event ingestion schema (event_sources, venue_sources, duplicates) and moderation rules to production</td>
+                </tr>
+                <tr class="section-row hidden" data-section="ingestion">
+                    <td class="job">Check ingestion tables</td>
+                    <td><code class="command">wrangler d1 execute osd-events --remote --command "SELECT name FROM sqlite_master WHERE type='table' AND name LIKE '%source%' OR name LIKE '%duplicate%';"</code></td>
+                    <td class="description">Verify event_sources, venue_sources, and duplicate tables exist</td>
+                </tr>
+                <tr class="section-row hidden" data-section="ingestion">
+                    <td class="job">Check ingestion rules</td>
+                    <td><code class="command">wrangler d1 execute osd-events --remote --command "SELECT rule_id, rule_name, enabled FROM moderation_rules WHERE rule_name LIKE '%trusted%' OR rule_name LIKE '%duplicate%';"</code></td>
+                    <td class="description">View ingestion-related moderation rules (trusted_sources, duplicate_detection, etc.)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="ingestion">
+                    <span class="tag worker">GRAPHQL</span>
+                    <td class="job">Test ingestion mutation (Ticketmaster)</td>
+                    <td><code class="command">curl -X POST https://osd-events.chrislyons.workers.dev/graphql -H "Content-Type: application/json" -H "Authorization: Bearer ADMIN_TOKEN" -d '{"query": "mutation { ingestEventsFromSource(source: \"ticketmaster\", events: [{event_name: \"Test Event\", event_date: \"2025-12-25T18:00:00Z\", city: \"Toronto\", venue: \"Venue Name\", source_event_id: \"tm_test_001\"}]) { success ingested queued stats { autoApprovedCount queuedCount } } }"}'</code></td>
+                    <td class="description">Test Ticketmaster ingestion mutation (requires admin token)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="ingestion">
+                    <td class="job">View ingested events</td>
+                    <td><code class="command">wrangler d1 execute osd-events --remote --command "SELECT e.event_id, e.event_name, es.source_name, es.source_event_id FROM events e JOIN event_sources es ON e.event_id = es.event_id LIMIT 20;"</code></td>
+                    <td class="description">View recently ingested events and their source mappings</td>
+                </tr>
+                <tr class="section-row hidden" data-section="ingestion">
+                    <td class="job">Check dedup detection</td>
+                    <td><code class="command">wrangler d1 execute osd-events --remote --command "SELECT * FROM event_duplicates LIMIT 20;"</code></td>
+                    <td class="description">View detected event duplicates from ingestion</td>
+                </tr>
+                <tr class="section-row hidden" data-section="ingestion">
+                    <td class="job">Swap to test database</td>
+                    <td><code class="command">Edit wrangler.toml: Change d1_database_id to test DB ID (97a11ffc-2aea-4d31-bbb5-6b505651b2e0) && cd apps/worker && wrangler deploy --env test</code></td>
+                    <td class="description">Switch Worker to test database for ingestion testing (must apply migrations 0001-0019 first)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="ingestion">
+                    <td class="job">Swap back to production</td>
+                    <td><code class="command">Edit wrangler.toml: Revert d1_database_id to production DB ID && cd apps/worker && wrangler deploy</code></td>
+                    <td class="description">Restore Worker to production database</td>
+                </tr>
+                <tr class="section-row hidden" data-section="ingestion">
+                    <td class="job">View ingestion queue status</td>
+                    <td><code class="command">wrangler d1 execute osd-events --remote --command "SELECT source_name, COUNT(*) as ingested_count FROM event_sources GROUP BY source_name;"</code></td>
+                    <td class="description">Show count of events ingested per source (Ticketmaster, Toronto, Edmonton, Quebec SIT)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="ingestion">
+                    <td class="job">Venue dedup analysis</td>
+                    <td><code class="command">wrangler d1 execute osd-events --remote --command "SELECT vs.source_venue_id, vs.venue_id, v.venue_name FROM venue_sources vs JOIN venues v ON vs.venue_id = v.venue_id LIMIT 20;"</code></td>
+                    <td class="description">Check venue deduplication mappings (matched existing venues vs newly created)</td>
+                </tr>
+
+                <!-- Universal Feed Sync -->
+                <tr class="section-header collapsed" data-section="feed-sync" tabindex="0">
+                    <td colspan="3">🔄 Universal Feed Sync (Automated Cron)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="feed-sync">
+                    <span class="tag backend">CRON</span>
+                    <td class="job">List registered feeds</td>
+                    <td><code class="command">cd apps/worker && node sync-feeds.js --list</code></td>
+                    <td class="description">Show all registered feed sources with sync status, refresh schedule, and event counts</td>
+                </tr>
+                <tr class="section-row hidden" data-section="feed-sync">
+                    <td class="job">Sync due feeds</td>
+                    <td><code class="command">cd apps/worker && node sync-feeds.js</code></td>
+                    <td class="description">Sync feeds that are due (respects refresh_hours schedule)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="feed-sync">
+                    <td class="job">Force sync all feeds</td>
+                    <td><code class="command">cd apps/worker && node sync-feeds.js --all</code></td>
+                    <td class="description">Force sync ALL enabled feeds regardless of schedule</td>
+                </tr>
+                <tr class="section-row hidden" data-section="feed-sync">
+                    <td class="job">Sync specific feed</td>
+                    <td><code class="command">cd apps/worker && node sync-feeds.js --feed songkick_toronto</code></td>
+                    <td class="description">Sync a single feed by ID (e.g., songkick_toronto, songkick_montreal)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="feed-sync">
+                    <td class="job">Add new feed source</td>
+                    <td><code class="command">cd apps/worker && node sync-feeds.js --add https://example.com/events</code></td>
+                    <td class="description">Register a new URL as feed source (auto-detects Schema.org support)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="feed-sync">
+                    <td class="job">Dry run (preview)</td>
+                    <td><code class="command">cd apps/worker && node sync-feeds.js --dry-run</code></td>
+                    <td class="description">Preview extraction without database changes</td>
+                </tr>
+                <tr class="section-row hidden" data-section="feed-sync">
+                    <td class="job">Sync on test database</td>
+                    <td><code class="command">cd apps/worker && D1_DATABASE=osd-ticketmaster-test node sync-feeds.js --list</code></td>
+                    <td class="description">Run sync commands against test database instead of production</td>
+                </tr>
+                <tr class="section-row hidden" data-section="feed-sync">
+                    <td class="job">Apply feed registry migration</td>
+                    <td><code class="command">wrangler d1 execute osd-events --remote --file migrations/0024_feed_sources_registry.sql</code></td>
+                    <td class="description">Create feed_sources and feed_sync_history tables with initial Songkick sources</td>
+                </tr>
+                <tr class="section-row hidden" data-section="feed-sync">
+                    <td class="job">View feed sync history</td>
+                    <td><code class="command">wrangler d1 execute osd-events --remote --command "SELECT fs.name, fsh.status, fsh.events_created, fsh.duration_ms, fsh.completed_at FROM feed_sync_history fsh JOIN feed_sources fs ON fsh.feed_source_id = fs.id ORDER BY fsh.completed_at DESC LIMIT 20;"</code></td>
+                    <td class="description">View recent sync history with success/error status</td>
+                </tr>
+                <tr class="section-row hidden" data-section="feed-sync">
+                    <td class="job">Check cron schedule</td>
+                    <td><code class="command">grep -A2 '\\[triggers\\]' wrangler.toml</code></td>
+                    <td class="description">View configured cron schedule (default: daily 6am UTC / 1am EST)</td>
+                </tr>
+
+                <!-- Movie Ingestion -->
+                <tr class="section-header collapsed" data-section="movie-ingest" tabindex="0">
+                    <td colspan="3">🎬 Movie Ingestion (Gracenote)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="movie-ingest">
+                    <span class="tag backend">CRON</span>
+                    <td class="job">Ingest movies (single city)</td>
+                    <td><code class="command">cd apps/worker && node ingest-movies.js --city toronto</code></td>
+                    <td class="description">Ingest movie showtimes for a single city from Gracenote</td>
+                </tr>
+                <tr class="section-row hidden" data-section="movie-ingest">
+                    <td class="job">Ingest movies (all cities)</td>
+                    <td><code class="command">cd apps/worker && node ingest-movies.js --city all</code></td>
+                    <td class="description">Ingest movie showtimes for all supported cities</td>
+                </tr>
+                <tr class="section-row hidden" data-section="movie-ingest">
+                    <td class="job">Dry run (preview)</td>
+                    <td><code class="command">cd apps/worker && node ingest-movies.js --city toronto --dry-run</code></td>
+                    <td class="description">Preview movie extraction without database changes</td>
+                </tr>
+                <tr class="section-row hidden" data-section="movie-ingest">
+                    <td class="job">View movie events</td>
+                    <td><code class="command">wrangler d1 execute osd-events --remote --command "SELECT event_id, event_name, city FROM events WHERE tags LIKE '%movie%' LIMIT 20;"</code></td>
+                    <td class="description">View recently ingested movie events</td>
+                </tr>
+                <tr class="section-row hidden" data-section="movie-ingest">
+                    <td class="job">Apply movie schema migration</td>
+                    <td><code class="command">wrangler d1 execute osd-events --remote --file migrations/0023_add_movie_fields.sql</code></td>
+                    <td class="description">Add movie-specific fields (runtime, rating, genres) to events table</td>
+                </tr>
+
+                <!-- Deduplication & Audit -->
+                <tr class="section-header collapsed" data-section="dedup-audit" tabindex="0">
+                    <td colspan="3">🔍 Deduplication & Audit</td>
+                </tr>
+                <tr class="section-row hidden" data-section="dedup-audit">
+                    <td class="job">Audit duplicates</td>
+                    <td><code class="command">cd apps/worker && node audit-duplicates.js</code></td>
+                    <td class="description">Run duplicate audit across all events and generate report</td>
+                </tr>
+                <tr class="section-row hidden" data-section="dedup-audit">
+                    <td class="job">Soft delete duplicates</td>
+                    <td><code class="command">cd apps/worker && node deduplication-soft-delete.js --dry-run</code></td>
+                    <td class="description">Preview duplicate removal (use without --dry-run to apply)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="dedup-audit">
+                    <td class="job">View skipped duplicates</td>
+                    <td><code class="command">wrangler d1 execute osd-events --remote --command "SELECT source_name, match_type, COUNT(*) as count FROM skipped_duplicates GROUP BY source_name, match_type;"</code></td>
+                    <td class="description">Show deduplication statistics by source and match type</td>
+                </tr>
+                <tr class="section-row hidden" data-section="dedup-audit">
+                    <td class="job">View recent skip decisions</td>
+                    <td><code class="command">wrangler d1 execute osd-events --remote --command "SELECT event_name, source_name, match_type, confidence_score, created_at FROM skipped_duplicates ORDER BY created_at DESC LIMIT 20;"</code></td>
+                    <td class="description">View most recent duplicate skip decisions with confidence scores</td>
+                </tr>
+
+                <!-- SQL: Database Maintenance -->
+                <tr class="section-header collapsed" data-section="db-maint" tabindex="0">
+                    <td colspan="3">⚙️ SQL: Database Maintenance</td>
+                </tr>
+                <tr class="section-row hidden" data-section="db-maint">
+                    <td class="job">Vacuum & optimize</td>
+                    <td><code class="command">wrangler d1 execute osd-events --remote --command "VACUUM; ANALYZE;"</code></td>
+                    <td class="description">Defragment database and update statistics (improves query performance)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="db-maint">
+                    <td class="job">Check database integrity</td>
+                    <td><code class="command">wrangler d1 execute osd-events --remote --command "PRAGMA integrity_check;"</code></td>
+                    <td class="description">Verify database file is not corrupted</td>
+                </tr>
+                <tr class="section-row hidden" data-section="db-maint">
+                    <td class="job">List all indexes</td>
+                    <td><code class="command">wrangler d1 execute osd-events --remote --command "SELECT name, tbl_name, sql FROM sqlite_master WHERE type='index' AND tbl_name NOT LIKE 'sqlite_%';"</code></td>
+                    <td class="description">View all table indexes and their definitions</td>
+                </tr>
+                <tr class="section-row hidden" data-section="db-maint">
+                    <td class="job">Show database size info</td>
+                    <td><code class="command">wrangler d1 execute osd-events --remote --command "SELECT name, SUM(pgsize) as size_bytes FROM (SELECT name, pgsize FROM pragma_page_count, pragma_page_size, sqlite_master WHERE type='table') GROUP BY name ORDER BY size_bytes DESC;"</code></td>
+                    <td class="description">View storage used by each table (largest first)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="db-maint">
+                    <td class="job">Row count per table</td>
+                    <td><code class="command">wrangler d1 execute osd-events --remote --command "SELECT name, (SELECT COUNT(*) FROM sqlite_master m WHERE m.type='table' AND m.name=t.name) as rows FROM (SELECT DISTINCT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%') t;"</code></td>
+                    <td class="description">Count total rows in each table</td>
+                </tr>
+                <tr class="section-row hidden" data-section="db-maint">
+                    <td class="job">Archive old audit logs</td>
+                    <td><code class="command">wrangler d1 execute osd-events --remote --command "DELETE FROM audit_log WHERE timestamp < datetime('now', '-1 year');"</code></td>
+                    <td class="description">Remove audit logs older than 1 year (compliance: keep >1 year)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="db-maint">
+                    <td class="job">Clean stale rate limits</td>
+                    <td><code class="command">wrangler d1 execute osd-events --remote --command "DELETE FROM rate_limit_tracking WHERE window_end < datetime('now', '-1 hour');"</code></td>
+                    <td class="description">Remove expired rate limit windows (cleanup old entries)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="db-maint">
+                    <td class="job">Check foreign key constraints</td>
+                    <td><code class="command">wrangler d1 execute osd-events --remote --command "PRAGMA foreign_keys=ON; PRAGMA foreign_key_list(moderation_queue);"</code></td>
+                    <td class="description">Verify foreign key relationships for a table</td>
+                </tr>
+                <tr class="section-row hidden" data-section="db-maint">
+                    <td class="job">View slow query candidates</td>
+                    <td><code class="command">wrangler d1 execute osd-events --remote --command "SELECT rule_id, COUNT(*) as executions, AVG(execution_time_ms) as avg_ms, MAX(execution_time_ms) as max_ms FROM rule_execution_log GROUP BY rule_id HAVING avg_ms > 100 ORDER BY avg_ms DESC;"</code></td>
+                    <td class="description">Find rules with slow execution times (>100ms average)</td>
+                </tr>
+
+                <!-- Git & Branching -->
+                <tr class="section-header collapsed" data-section="git" tabindex="0">
+                    <td colspan="3">🔀 Git & Branching</td>
+                </tr>
+                <tr class="section-row hidden" data-section="git">
+                    <td class="job">Check status</td>
+                    <td><code class="command">git status -sb</code></td>
+                    <td class="description">Show short status with branch name before every commit</td>
+                </tr>
+                <tr class="section-row hidden" data-section="git">
+                    <td class="job">Create feature branch</td>
+                    <td><code class="command">git checkout -b feat/descriptive-name</code></td>
+                    <td class="description">Create and switch to new feature branch from main</td>
+                </tr>
+                <tr class="section-row hidden" data-section="git">
+                    <td class="job">Sync with main</td>
+                    <td><code class="command">git fetch origin && git rebase origin/main</code></td>
+                    <td class="description">Update feature branch with latest main commits</td>
+                </tr>
+                <tr class="section-row hidden" data-section="git">
+                    <td class="job">Push branch</td>
+                    <td><code class="command">git push -u origin feat/descriptive-name</code></td>
+                    <td class="description">Push feature branch to remote and set tracking</td>
+                </tr>
+                <tr class="section-row hidden" data-section="git">
+                    <td class="job">View commit history</td>
+                    <td><code class="command">git log --oneline -10</code></td>
+                    <td class="description">Show recent 10 commits with short format</td>
+                </tr>
+                <tr class="section-row hidden" data-section="git">
+                    <td class="job">Create PR via CLI</td>
+                    <td><code class="command">gh pr create --title "short summary" --body "details"</code></td>
+                    <td class="description">Create pull request from current branch to main</td>
+                </tr>
+
+                <!-- Code Quality -->
+                <tr class="section-header collapsed" data-section="quality" tabindex="0">
+                    <td colspan="3">✨ Code Quality</td>
+                </tr>
+                <tr class="section-row hidden" data-section="quality">
+                    <td class="job">Format code</td>
+                    <td><code class="command">pnpm format</code></td>
+                    <td class="description">Auto-format all code with Prettier</td>
+                </tr>
+                <tr class="section-row hidden" data-section="quality">
+                    <td class="job">Check formatting</td>
+                    <td><code class="command">pnpm format:check</code></td>
+                    <td class="description">Verify code formatting without modifying</td>
+                </tr>
+                <tr class="section-row hidden" data-section="quality">
+                    <td class="job">Lint code</td>
+                    <td><code class="command">pnpm lint</code></td>
+                    <td class="description">Check linting rules across all packages</td>
+                </tr>
+                <tr class="section-row hidden" data-section="quality">
+                    <td class="job">Fix linting issues</td>
+                    <td><code class="command">pnpm lint:fix</code></td>
+                    <td class="description">Auto-fix linting issues where possible</td>
+                </tr>
+
+                <!-- Cleanup -->
+                <tr class="section-header collapsed" data-section="cleanup" tabindex="0">
+                    <td colspan="3">🧹 Cleanup & Maintenance</td>
+                </tr>
+                <tr class="section-row hidden" data-section="cleanup">
+                    <td class="job">Full clean</td>
+                    <td><code class="command">pnpm run clean && pnpm install</code></td>
+                    <td class="description">Remove node_modules, dist, cache and reinstall (use when dependencies corrupt)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="cleanup">
+                    <td class="job">Clean build artifacts</td>
+                    <td><code class="command">pnpm -r exec rm -rf dist build .cache</code></td>
+                    <td class="description">Remove build artifacts from all packages (preserves node_modules)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="cleanup">
+                    <td class="job">Prune pnpm store</td>
+                    <td><code class="command">pnpm store prune</code></td>
+                    <td class="description">Clean up unused packages from pnpm global store</td>
+                </tr>
+                <tr class="section-row hidden" data-section="cleanup">
+                    <td class="job">Clear Apollo cache</td>
+                    <td><code class="command">localStorage.clear(); apolloClient.cache.reset();</code></td>
+                    <td class="description">Reset Apollo GraphQL cache in browser console (test only)</td>
+                </tr>
+
+                <!-- Troubleshooting -->
+                <tr class="section-header collapsed" data-section="troubleshoot" tabindex="0">
+                    <td colspan="3">🔧 Troubleshooting</td>
+                </tr>
+                <tr class="section-row hidden" data-section="troubleshoot">
+                    <td class="job">Worker not deploying</td>
+                    <td><code class="command">cd apps/worker && wrangler publish --dry-run</code></td>
+                    <td class="description">Validate Worker before deployment (shows errors without deploying)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="troubleshoot">
+                    <td class="job">TypeScript errors after schema change</td>
+                    <td><code class="command">pnpm run codegen</code></td>
+                    <td class="description">Regenerate TypeScript types from GraphQL schema</td>
+                </tr>
+                <tr class="section-row hidden" data-section="troubleshoot">
+                    <td class="job">Code changes not visible</td>
+                    <td><code class="command">rm -rf apps/mobile/dist apps/mobile/.cache && pnpm --filter @osd/mobile build</code></td>
+                    <td class="description">Clear build caches and rebuild (fixes stale code issues)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="troubleshoot">
+                    <td class="job">App won't connect to Worker</td>
+                    <td><code class="command">curl -I https://osd-events.chrislyons.workers.dev/graphql</code></td>
+                    <td class="description">Test if Worker is responding (should return 200, check CORS headers)</td>
+                </tr>
+
+                <!-- Documentation -->
+                <tr class="section-header collapsed" data-section="docs" tabindex="0">
+                    <td colspan="3">📚 Documentation</td>
+                </tr>
+                <tr class="section-row hidden" data-section="docs">
+                    <td class="job">Find OSD docs</td>
+                    <td><code class="command">ls -1 docs/osd/ | grep -E '^OSD[0-9]{3,4}\s+' | sort</code></td>
+                    <td class="description">List all OSD documentation files</td>
+                </tr>
+                <tr class="section-row hidden" data-section="docs">
+                    <td class="job">Next doc number</td>
+                    <td><code class="command">last=$(ls -1 docs/osd/ | grep -E '^OSD[0-9]+' | sed -E 's/OSD([0-9]+).*/\1/' | sort -n | tail -1); next=$((last + 1)); echo "OSD${next}"</code></td>
+                    <td class="description">Find next sequential OSD document number</td>
+                </tr>
+                <tr class="section-row hidden" data-section="docs">
+                    <td class="job">View CLAUDE.md</td>
+                    <td><code class="command">cat CLAUDE.md | less</code></td>
+                    <td class="description">Read repo configuration and conventions</td>
+                </tr>
+                <tr class="section-row hidden" data-section="docs">
+                    <td class="job">View recent docs</td>
+                    <td><code class="command">ls -lt docs/osd/OSD*.md | head -10</code></td>
+                    <td class="description">Show 10 most recently modified OSD documents</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <footer>
+            <p><strong>Quick Links:</strong> <code>CLAUDE.md</code> (repo config) | <code>docs/osd/</code> (documentation) | <code>.claude/</code> (tools)</p>
+            <p>Generated for: <strong>osd-v2</strong> | Location: <code>~/dev/osd-v2</code></p>
+            <p style="margin-top: 1rem;">⌨️ <strong>Keyboard Navigation:</strong> ↑↓ navigate | →/← expand/collapse | Space/Enter toggle | Cmd+Click collapse others | A expand all | Esc collapse all</p>
+        </footer>
+    </div>
+
+    <script>
+        // Click-to-copy functionality
+        document.querySelectorAll('.command').forEach(cmd => {
+            cmd.addEventListener('click', async function(e) {
+                e.stopPropagation();
+                const text = this.textContent.replace('📋', '').trim();
+                try {
+                    await navigator.clipboard.writeText(text);
+                    this.classList.add('copied');
+                    setTimeout(() => this.classList.remove('copied'), 300);
+                } catch (err) {
+                    const textarea = document.createElement('textarea');
+                    textarea.value = text;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                    this.classList.add('copied');
+                    setTimeout(() => this.classList.remove('copied'), 300);
+                }
+            });
+        });
+
+        // Section toggle functionality
+        const sectionHeaders = document.querySelectorAll('.section-header');
+
+        function toggleSection(header, collapseOthers = false) {
+            const section = header.dataset.section;
+            const isCollapsed = header.classList.contains('collapsed');
+
+            if (collapseOthers) {
+                sectionHeaders.forEach(h => {
+                    if (h !== header) {
+                        h.classList.add('collapsed');
+                        document.querySelectorAll(`.section-row[data-section="${h.dataset.section}"]`)
+                            .forEach(row => row.classList.add('hidden'));
+                    }
+                });
+            }
+
+            header.classList.toggle('collapsed');
+            const rows = document.querySelectorAll(`.section-row[data-section="${section}"]`);
+            rows.forEach(row => row.classList.toggle('hidden'));
+        }
+
+        function expandAll() {
+            sectionHeaders.forEach(h => {
+                h.classList.remove('collapsed');
+                document.querySelectorAll(`.section-row[data-section="${h.dataset.section}"]`)
+                    .forEach(row => row.classList.remove('hidden'));
+            });
+        }
+
+        function collapseAll() {
+            sectionHeaders.forEach(h => {
+                h.classList.add('collapsed');
+                document.querySelectorAll(`.section-row[data-section="${h.dataset.section}"]`)
+                    .forEach(row => row.classList.add('hidden'));
+            });
+        }
+
+        sectionHeaders.forEach(header => {
+            header.addEventListener('click', (e) => {
+                toggleSection(header, e.metaKey || e.ctrlKey);
+            });
+            header.addEventListener('keydown', (e) => {
+                if (e.key === ' ' || e.key === 'Enter') {
+                    e.preventDefault();
+                    toggleSection(header, e.metaKey || e.ctrlKey);
+                }
+            });
+        });
+
+        // Keyboard navigation
+        let currentHeaderIndex = -1;
+        const headerArray = Array.from(sectionHeaders);
+
+        function focusHeader(index) {
+            if (index >= 0 && index < headerArray.length) {
+                currentHeaderIndex = index;
+                headerArray[index].focus();
+                headerArray[index].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+            const focusedHeader = document.activeElement;
+            if (focusedHeader && focusedHeader.classList.contains('section-header')) {
+                currentHeaderIndex = headerArray.indexOf(focusedHeader);
+            }
+
+            switch(e.key) {
+                case 'ArrowDown':
+                    e.preventDefault();
+                    if (currentHeaderIndex < headerArray.length - 1) {
+                        focusHeader(currentHeaderIndex + 1);
+                    } else if (currentHeaderIndex === -1 && headerArray.length > 0) {
+                        focusHeader(0);
+                    }
+                    break;
+
+                case 'ArrowUp':
+                    e.preventDefault();
+                    if (currentHeaderIndex > 0) {
+                        focusHeader(currentHeaderIndex - 1);
+                    } else if (currentHeaderIndex === -1 && headerArray.length > 0) {
+                        focusHeader(headerArray.length - 1);
+                    }
+                    break;
+
+                case 'ArrowRight':
+                    if (document.activeElement && document.activeElement.classList.contains('section-header')) {
+                        e.preventDefault();
+                        if (document.activeElement.classList.contains('collapsed')) {
+                            toggleSection(document.activeElement);
+                        }
+                    }
+                    break;
+
+                case 'ArrowLeft':
+                    if (document.activeElement && document.activeElement.classList.contains('section-header')) {
+                        e.preventDefault();
+                        if (!document.activeElement.classList.contains('collapsed')) {
+                            toggleSection(document.activeElement);
+                        }
+                    }
+                    break;
+
+                case ' ':
+                case 'Enter':
+                    if (document.activeElement && document.activeElement.classList.contains('section-header')) {
+                        e.preventDefault();
+                        toggleSection(document.activeElement, e.metaKey || e.ctrlKey);
+                    }
+                    break;
+
+                case 'a':
+                    if (!e.ctrlKey && !e.metaKey) {
+                        e.preventDefault();
+                        expandAll();
+                    }
+                    break;
+
+                case 'Escape':
+                    e.preventDefault();
+                    collapseAll();
+                    break;
+            }
+        });
+
+        // Focus first section on page load
+        if (headerArray.length > 0) {
+            headerArray[0].focus();
+            currentHeaderIndex = 0;
+        }
+    </script>
+</body>
+</html>

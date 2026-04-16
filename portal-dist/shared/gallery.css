@@ -1,0 +1,229 @@
+/* gallery.css — gallery-only styles */
+
+.gallery-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.nav-group {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--bg-panel);
+}
+
+.nav-group__label {
+  color: var(--text-muted);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.nav-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--accent-border);
+  background: var(--accent-soft);
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 11px;
+  transition: background var(--transition), border-color var(--transition), color var(--transition), box-shadow var(--transition);
+}
+
+.nav-chip:hover,
+.nav-chip:focus-visible {
+  outline: none;
+  color: var(--text);
+  box-shadow: inset 0 0 0 1px var(--accent-border), 0 0 18px rgba(88, 166, 255, 0.12);
+}
+
+.section-block {
+  display: grid;
+  gap: 10px;
+}
+
+.section-heading {
+  padding: 0 4px;
+}
+
+.section-heading span {
+  font-family: var(--font-display);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+}
+
+.diagram-stack {
+  display: grid;
+  gap: 14px;
+}
+
+.diagram-card {
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.diagram-card.is-focused {
+  border-color: var(--accent-border);
+  box-shadow: var(--section-card-focus-shadow);
+}
+
+.diagram-header {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-panel-strong);
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+  border-radius: calc(var(--radius) - 1px) calc(var(--radius) - 1px) 0 0;
+  transition: background var(--transition), border-radius var(--transition), box-shadow var(--transition);
+}
+
+.diagram-header:hover {
+  background: var(--bg-panel-hover);
+}
+
+.diagram-header:focus,
+.diagram-header:focus-visible {
+  outline: none;
+  background: var(--section-header-focus-bg);
+}
+
+.diagram-header.collapsed {
+  border-radius: calc(var(--radius) - 1px);
+  border-bottom-color: transparent;
+}
+
+.diagram-arrow {
+  color: var(--text-muted);
+  font-size: 10px;
+  transition: transform var(--transition), color var(--transition);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.diagram-header.collapsed .diagram-arrow {
+  transform: rotate(-90deg);
+}
+
+.diagram-header__copy {
+  display: grid;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+.diagram-title {
+  font-family: var(--font-display);
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--text);
+}
+
+.diagram-header:focus .diagram-title,
+.diagram-header:focus-visible .diagram-title {
+  text-shadow: var(--section-title-focus-shadow);
+}
+
+.diagram-description {
+  color: var(--text-dim);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.diagram-kind {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--accent-border);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 10px;
+  line-height: 1.2;
+  flex-shrink: 0;
+}
+
+.diagram-content {
+  display: block;
+  padding: 0 0 16px;
+}
+
+.diagram-content.collapsed {
+  display: none;
+}
+
+.diagram-canvas {
+  margin: 14px 16px 16px;
+  padding: clamp(16px, 2vw, 22px);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--bg-deep);
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.diagram-canvas svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+.diagram-canvas svg text,
+.diagram-canvas svg tspan,
+.diagram-canvas .nodeLabel,
+.diagram-canvas .label {
+  font-family: "Geist Mono UltraLight", ui-monospace, monospace !important;
+  font-weight: 200 !important;
+}
+
+.diagram-loading,
+.diagram-error {
+  color: var(--text-dim);
+  font-size: 11px;
+  white-space: pre-wrap;
+}
+
+@media (max-width: 640px) {
+  .gallery-nav {
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .nav-group {
+    width: 100%;
+  }
+
+  .diagram-header {
+    padding: 12px 14px;
+  }
+
+  .diagram-canvas {
+    margin: 8px;
+    padding: 10px;
+    overflow-x: auto;
+  }
+
+  .diagram-canvas svg {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .nav-chip {
+    font-size: 10px;
+    padding: 5px 8px;
+  }
+}

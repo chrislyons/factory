@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>chainly - Command Reference</title>
+<link rel="stylesheet" href="/shared/base.css">
+<link rel="stylesheet" href="/shared/commands.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="site-header__inner">
+    <div class="brand">
+      <a class="brand__title" href="/pages/docs.html">dreamfactory</a>
+    </div>
+    <div class="header-actions"><button class="export-btn" id="export-btn" title="Copy visible results to clipboard as markdown">Export to Markdown</button></div>
+  </div>
+</header>
+
+<main>
+  <div class="hero-row">
+    <div class="hero">
+      <span class="hero-eyebrow">COMMAND REFERENCE</span>
+      <h1>chainly</h1>
+      <p>Canadian crypto tax reporting — Tauri + Rust + React + SQLCipher</p>
+    </div>
+    <div class="hero-meta"><div class="meta-chip"><span class="meta-chip__label">UPDATED</span><span class="meta-chip__value">2026-03-29</span></div><div class="meta-chip"><span class="meta-chip__label">REPO</span><span class="meta-chip__value">~/dev/chainly</span></div></div>
+  </div>
+  <div class="search-wrap"><span class="search-icon">&#x2315;</span><input class="search-input" type="text" placeholder="Search commands, snippets, or notes…" id="search" autocomplete="off" spellcheck="false"><span class="search-count" id="search-count"></span><button class="search-clear" id="search-clear" title="Clear search">&times;</button></div>
+
+  <section class="surface-card section-card" data-section="development"><button class="section-header" type="button" aria-expanded="true"><span class="section-arrow">&#x25BC;</span><span class="section-title">Development</span><span class="section-count">3</span></button><div class="section-body"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody>
+    <tr class="command-row" data-search="install node.js + rust dependencies pnpm install install node.js + rust dependencies"><td><div class="task-text">Install dependencies</div></td><td><button class="value-block value-block--shell" data-copy="pnpm install" title="Copy value"><code class="value-text">pnpm install</code></button></td><td class="desc-text">Install Node.js + Rust dependencies</td></tr>
+    <tr class="command-row" data-search="full app dev mode with hot reload pnpm tauri dev full app dev mode with hot reload"><td><div class="task-text">Full app dev mode</div></td><td><button class="value-block value-block--shell" data-copy="pnpm tauri dev" title="Copy value"><code class="value-text">pnpm tauri dev</code></button></td><td class="desc-text">Full app dev mode with hot reload</td></tr>
+    <tr class="command-row" data-search="dev with mcp server enabled pnpm tauri dev --features mcp-server dev with mcp server enabled"><td><div class="task-text">Dev with MCP server</div></td><td><button class="value-block value-block--shell" data-copy="pnpm tauri dev --features mcp-server" title="Copy value"><code class="value-text">pnpm tauri dev --features mcp-server</code></button></td><td class="desc-text">Dev with MCP server enabled</td></tr>
+  </tbody></table></div></section>
+
+  <section class="surface-card section-card" data-section="building"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">&#x25BC;</span><span class="section-title">Building</span><span class="section-count">1</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody>
+    <tr class="command-row" data-search="typescript + vite + tauri release build pnpm build typescript + vite + tauri release build"><td><div class="task-text">Release build</div></td><td><button class="value-block value-block--shell" data-copy="pnpm build" title="Copy value"><code class="value-text">pnpm build</code></button></td><td class="desc-text">TypeScript + Vite + Tauri release build</td></tr>
+  </tbody></table></div></section>
+
+  <section class="surface-card section-card" data-section="mcp"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">&#x25BC;</span><span class="section-title">MCP Integration</span><span class="section-count">2</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody>
+    <tr class="command-row" data-search="start headless mcp server printf '%s\n' start headless mcp server"><td><div class="task-text">Start headless MCP server</div></td><td><button class="value-block value-block--shell" data-copy="printf '%s\n' &quot;$CHAINLY_PASSWORD&quot; | cargo run --manifest-path src-tauri/Cargo.toml -- serve --password-stdin" title="Copy value"><code class="value-text">printf '%s\n' "$CHAINLY_PASSWORD" | cargo run --manifest-path src-tauri/Cargo.toml -- serve --password-stdin</code></button></td><td class="desc-text">Start headless MCP server</td></tr>
+    <tr class="command-row" data-search="register with claude code claude mcp add register with claude code"><td><div class="task-text">Register with Claude Code</div></td><td><button class="value-block value-block--shell" data-copy="claude mcp add --transport http chainly http://127.0.0.1:7337/mcp --header &quot;Authorization: Bearer <token>&quot;" title="Copy value"><code class="value-text">claude mcp add --transport http chainly http://127.0.0.1:7337/mcp --header "Authorization: Bearer &lt;token&gt;"</code></button></td><td class="desc-text">Register with Claude Code</td></tr>
+  </tbody></table></div></section>
+
+  <section class="surface-card section-card" data-section="tax"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">&#x25BC;</span><span class="section-title">Tax Exports</span><span class="section-count">3</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody>
+    <tr class="command-row" data-search="generate cra schedule 3 pdf settings export schedule 3 generate cra schedule 3 pdf"><td><div class="task-text">Generate CRA Schedule 3 PDF</div></td><td><button class="value-block value-block--shell" data-copy="Settings → Export → Schedule 3" title="Copy value"><code class="value-text">Settings → Export → Schedule 3</code></button></td><td class="desc-text">Generate CRA Schedule 3 PDF</td></tr>
+    <tr class="command-row" data-search="generate foreign property declaration settings export t1135 worksheet generate foreign property declaration"><td><div class="task-text">Generate T1135 Worksheet</div></td><td><button class="value-block value-block--shell" data-copy="Settings → Export → T1135 Worksheet" title="Copy value"><code class="value-text">Settings → Export → T1135 Worksheet</code></button></td><td class="desc-text">Generate foreign property declaration</td></tr>
+    <tr class="command-row" data-search="download per-lot adjusted cost basis settings export acb ledger (csv) download per-lot adjusted cost basis"><td><div class="task-text">Download ACB Ledger (CSV)</div></td><td><button class="value-block value-block--shell" data-copy="Settings → Export → ACB Ledger (CSV)" title="Copy value"><code class="value-text">Settings → Export → ACB Ledger (CSV)</code></button></td><td class="desc-text">Download per-lot adjusted cost basis</td></tr>
+  </tbody></table></div></section>
+
+  <section class="surface-card section-card" data-section="docs"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">&#x25BC;</span><span class="section-title">Documentation</span><span class="section-count">1</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody>
+    <tr class="command-row" data-search="show latest docs ls -1 docs/cha/cha*.md | sort -v | tail -6 show latest docs"><td><div class="task-text">Show latest docs</div></td><td><button class="value-block value-block--shell" data-copy="ls -1 docs/cha/CHA*.md | sort -V | tail -6" title="Copy value"><code class="value-text">ls -1 docs/cha/CHA*.md | sort -V | tail -6</code></button></td><td class="desc-text">Show latest docs</td></tr>
+  </tbody></table></div></section>
+</main>
+
+<footer>
+  <div class="inner">
+    <span>chainly | pnpm + cargo | Rust (Tauri 2) + React 18 + SQLCipher</span>
+    <span>chainly_repo-commands.html</span>
+  </div>
+</footer>
+
+<script src="/shared/dust.js"></script>
+<script src="/shared/theme.js"></script>
+<script src="/shared/commands.js"></script>
+</body>
+</html>

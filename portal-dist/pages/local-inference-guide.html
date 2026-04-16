@@ -1,0 +1,1432 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Local Inference Guide — Claude Code + OpenCode</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: #1a1a1a;
+        color: #e0e0e0;
+        padding: 1rem 2rem;
+        line-height: 1.6;
+        font-size: 0.875rem;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+        padding: 0.4rem 0.75rem;
+        background: linear-gradient(135deg, #1e2a38 0%, #1a2230 100%);
+        border-radius: 6px;
+        border: 1px solid #2a4a6c;
+      }
+
+      .header-left {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      header h1 {
+        font-size: 0.95rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #4a9eda 0%, #2a6eaa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        white-space: nowrap;
+      }
+
+      .header-subtitle {
+        color: #666;
+        font-size: 0.65rem;
+        padding-left: 0.5rem;
+        border-left: 1px solid #333;
+      }
+
+      .version-badge {
+        display: inline-block;
+        background: #4a9eda;
+        color: #1a1a1a;
+        padding: 0.05rem 0.3rem;
+        border-radius: 3px;
+        font-size: 0.55rem;
+        font-weight: 700;
+      }
+
+      nav {
+        display: flex;
+        gap: 0.25rem;
+        margin-bottom: 0.75rem;
+        flex-wrap: wrap;
+      }
+
+      nav a {
+        color: #4a9eda;
+        text-decoration: none;
+        font-size: 0.7rem;
+        padding: 0.2rem 0.5rem;
+        border: 1px solid #2a4a6c;
+        border-radius: 3px;
+        transition: all 0.15s;
+        background: #1e2a38;
+      }
+
+      nav a:hover {
+        background: #2a4a6c;
+        border-color: #4a9eda;
+        color: #fff;
+      }
+
+      .section-header {
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: #4a9eda;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin: 1.25rem 0 0.5rem;
+        padding-bottom: 0.3rem;
+        border-bottom: 1px solid #2a4a6c;
+      }
+
+      .guide-grid {
+        display: grid;
+        gap: 0.75rem;
+      }
+
+      .guide-card {
+        background: #1e2230;
+        border-radius: 6px;
+        overflow: hidden;
+        border: 1px solid #2a3a4a;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+      }
+
+      .guide-header {
+        background: #1a2a38;
+        padding: 0.6rem 1rem;
+        cursor: pointer;
+        user-select: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border-bottom: 1px solid #2a3a4a;
+        transition: background 0.15s;
+      }
+
+      .guide-header:hover,
+      .guide-header:focus {
+        background: #1e3248;
+        outline: 2px solid #4a9eda;
+        outline-offset: -2px;
+      }
+
+      .guide-header::before {
+        content: "\25BC";
+        font-size: 0.55rem;
+        transition: transform 0.2s;
+        color: #4a9eda;
+        flex-shrink: 0;
+      }
+
+      .guide-header.collapsed::before {
+        transform: rotate(-90deg);
+      }
+
+      .guide-title {
+        font-weight: 600;
+        color: #fff;
+        font-size: 0.875rem;
+      }
+
+      .guide-desc {
+        color: #666;
+        font-size: 0.65rem;
+        margin-left: 0.25rem;
+      }
+
+      .guide-type {
+        font-size: 0.6rem;
+        padding: 0.15rem 0.4rem;
+        border-radius: 3px;
+        font-weight: 600;
+        margin-left: auto;
+        flex-shrink: 0;
+        background: #1a3a5c;
+        color: #4a9eda;
+        border: 1px solid #2a5a8c;
+      }
+
+      .guide-body {
+        padding: 1.5rem;
+        overflow-x: auto;
+        background: #1a1a2a;
+      }
+
+      .guide-body.collapsed {
+        display: none;
+      }
+
+      .code-block {
+        background: #0a0a0a;
+        border: 1px solid #333;
+        border-radius: 4px;
+        padding: 1rem;
+        margin: 0.75rem 0;
+        overflow-x: auto;
+        font-family: "SF Mono", Monaco, monospace;
+        font-size: 0.8rem;
+        line-height: 1.4;
+        color: #a0a0a0;
+      }
+
+      .code-block code {
+        color: #e0e0e0;
+      }
+
+      .step {
+        margin: 1rem 0;
+        padding-left: 1rem;
+        border-left: 2px solid #4a9eda;
+      }
+
+      .step-num {
+        display: inline-block;
+        background: #4a9eda;
+        color: #1a1a1a;
+        padding: 0.1rem 0.4rem;
+        border-radius: 3px;
+        font-weight: 700;
+        margin-right: 0.5rem;
+        font-size: 0.7rem;
+      }
+
+      .step-title {
+        font-weight: 600;
+        color: #fff;
+        display: inline;
+      }
+
+      .step-desc {
+        display: block;
+        color: #aaa;
+        font-size: 0.8rem;
+        margin-top: 0.3rem;
+      }
+
+      .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1rem 0;
+        font-size: 0.8rem;
+      }
+
+      .table th {
+        background: #1a2a38;
+        color: #4a9eda;
+        padding: 0.5rem;
+        text-align: left;
+        border: 1px solid #2a3a4a;
+      }
+
+      .table td {
+        padding: 0.5rem;
+        border: 1px solid #2a3a4a;
+        background: #0a0a0a;
+      }
+
+      .table tr:hover td {
+        background: #1a1a2a;
+      }
+
+      .note {
+        background: #1a2a3a;
+        border-left: 3px solid #dada4a;
+        padding: 0.75rem;
+        margin: 1rem 0;
+        border-radius: 3px;
+        font-size: 0.8rem;
+      }
+
+      .warning {
+        background: #3a1a1a;
+        border-left: 3px solid #da4a4a;
+        padding: 0.75rem;
+        margin: 1rem 0;
+        border-radius: 3px;
+        font-size: 0.8rem;
+      }
+
+      .success {
+        background: #1a3a2a;
+        border-left: 3px solid #4ada9e;
+        padding: 0.75rem;
+        margin: 1rem 0;
+        border-radius: 3px;
+        font-size: 0.8rem;
+      }
+
+      .command-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #0a0a0a;
+        border-radius: 6px;
+        overflow: hidden;
+        margin: 1rem 0;
+        font-size: 0.8rem;
+      }
+
+      .command-table thead {
+        background: #1a2a38;
+      }
+
+      .command-table th {
+        padding: 0.6rem;
+        text-align: left;
+        font-weight: 600;
+        color: #4a9eda;
+        border-bottom: 2px solid #2a3a4a;
+      }
+
+      .command-table th:nth-child(1) { width: 18%; }
+      .command-table th:nth-child(2) { width: 38%; }
+      .command-table th:nth-child(3) { width: 44%; }
+
+      .command-table td {
+        padding: 0.6rem;
+        border-bottom: 1px solid #1a2a3a;
+        color: #c0c0c0;
+      }
+
+      .command-table tr:hover {
+        background: #1a1a2a;
+      }
+
+      .command-cell {
+        font-family: "SF Mono", Monaco, monospace;
+        background: #0a0a0a;
+        padding: 0.4rem 0.6rem;
+        border-radius: 3px;
+        color: #4ada9e;
+        cursor: pointer;
+        display: inline-block;
+        font-size: 0.75rem;
+        transition: all 0.2s;
+      }
+
+      .command-cell:hover {
+        background: #1a1a2a;
+        color: #5ada9e;
+      }
+
+      .command-cell:active {
+        background: #2a3a4a;
+      }
+
+      .section-header-table {
+        background: #1a2a38;
+        font-weight: 600;
+        color: #fff;
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .section-header-table:hover,
+      .section-header-table:focus {
+        background: #1e3248;
+        outline: 2px solid #4a9eda;
+        outline-offset: -2px;
+      }
+
+      .section-header-table td {
+        padding: 0.6rem;
+        border-bottom: 2px solid #2a3a4a;
+        color: #fff;
+      }
+
+      .section-header-table td::before {
+        content: '▼';
+        margin-right: 0.375rem;
+        font-size: 0.6rem;
+        transition: transform 0.2s;
+        display: inline-block;
+      }
+
+      .section-header-table.collapsed td::before {
+        transform: rotate(-90deg);
+      }
+
+      .section-row {
+        transition: opacity 0.2s;
+      }
+
+      .section-row.hidden,
+      .section-header-table.hidden {
+        display: none;
+      }
+
+      footer {
+        margin-top: 2rem;
+        padding-top: 0.75rem;
+        border-top: 1px solid #2a3a4a;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: #444;
+        font-size: 0.65rem;
+      }
+
+      footer a {
+        color: #4a9eda;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <div class="header-left">
+          <h1>Local Inference Guide</h1>
+          <span class="header-subtitle">Claude Code · OpenCode · MLX-LM (primary) · Ollama (fallback)</span>
+          <span class="version-badge">v1.4</span>
+        </div>
+      </header>
+
+      <nav>
+        <a href="#tool-clarification">Tool Clarification</a>
+        <a href="#claude-code-litellm">Claude Code + LiteLLM</a>
+        <a href="#opencode-setup">OpenCode Setup</a>
+        <a href="#extended-tooling">Extended Tooling</a>
+        <a href="#model-management">Model Management</a>
+        <a href="#decision-matrix">Decision Matrix</a>
+      </nav>
+
+      <div style="margin-bottom: 1rem; padding: 0.75rem; background: #1a2a38; border-left: 3px solid #4a9eda; border-radius: 3px; font-size: 0.75rem;">
+        <p><strong>⌨️ Keyboard Navigation:</strong> ↑↓ navigate sections | →/← expand/collapse | Space/Enter toggle | Cmd+Click collapse others | <strong>A</strong> expand all | <strong>Esc</strong> collapse all</p>
+      </div>
+
+      <div class="section-header">Foundation</div>
+
+      <!-- Tool Clarification Card -->
+      <div class="guide-grid">
+        <div class="guide-card" id="tool-clarification">
+          <div class="guide-header" onclick="toggleGuide(this)">
+            <span class="guide-title">Tool Stack Clarification</span>
+            <span class="guide-desc">What each tool does and how they relate</span>
+            <span class="guide-type">REFERENCE</span>
+          </div>
+          <div class="guide-body">
+            <p><strong>You're NOT conflating these—they're a layered stack:</strong></p>
+
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Tool</th>
+                  <th>Purpose</th>
+                  <th>Layer</th>
+                  <th>Notes</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>llama.cpp</strong></td>
+                  <td>Low-level inference engine for LLMs</td>
+                  <td>Engine</td>
+                  <td>Compiled C++ with Metal, CUDA, CPU support</td>
+                </tr>
+                <tr style="background: #1a2a38; border-left: 3px solid #4a9eda;">
+                  <td><strong>MLX-LM</strong></td>
+                  <td>Unified inference framework optimized for Apple Silicon</td>
+                  <td>Engine</td>
+                  <td><strong>PRIMARY for M-series Macs:</strong> Native MLX support, superior performance on Metal, unified model library</td>
+                </tr>
+                <tr>
+                  <td><strong>Ollama</strong></td>
+                  <td>User-friendly model server that wraps llama.cpp</td>
+                  <td>Server</td>
+                  <td><strong>FALLBACK:</strong> For GGUF models, useful when MLX versions unavailable</td>
+                </tr>
+                <tr>
+                  <td><strong>LiteLLM</strong></td>
+                  <td>Python library that routes API calls to any provider</td>
+                  <td>Router/SDK</td>
+                  <td>Can talk to Ollama locally, OpenRouter cloud, Anthropic API, etc.</td>
+                </tr>
+                <tr>
+                  <td><strong>Claude Code</strong></td>
+                  <td>CLI tool for software engineering</td>
+                  <td>User Interface</td>
+                  <td>Uses LiteLLM to pick a model (local or cloud)</td>
+                </tr>
+                <tr>
+                  <td><strong>OpenCode</strong></td>
+                  <td>Co-primary coding tool with shared memory</td>
+                  <td>User Interface</td>
+                  <td>Reads <code>opencode.json</code> config, also uses LiteLLM</td>
+                </tr>
+                <tr>
+                  <td><strong>OpenRouter</strong></td>
+                  <td>Cloud API gateway (fallback when local unavailable)</td>
+                  <td>Cloud</td>
+                  <td>Provides MiniMax, Qwen, OLMo 32B when Ollama down</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="note">
+              <strong>The Stack:</strong> LiteLLM (router) → MLX-LM (primary, M-series) → Ollama (fallback, GGUF) → OpenRouter (cloud) → actual inference
+            </div>
+          </div>
+        </div>
+
+        <div class="section-header">Getting Started</div>
+
+        <!-- Claude Code + LiteLLM Card -->
+        <div class="guide-card" id="claude-code-litellm">
+          <div class="guide-header" onclick="toggleGuide(this)">
+            <span class="guide-title">Start Claude Code with MLX-LM (Three-Layer Stack)</span>
+            <span class="guide-desc">mlx_lm server → LiteLLM proxy → Claude Code, fully local</span>
+            <span class="guide-type">HOWTO</span>
+          </div>
+          <div class="guide-body">
+            <div style="padding: 0.75rem; background: #1a2a38; border-left: 3px solid #4a9eda; margin-bottom: 1rem; border-radius: 3px; font-size: 0.8rem;">
+              <strong>Architecture:</strong><br/>
+              <code>mlx_lm.server :8080</code> (OpenAI-compatible) → <code>litellm --proxy :4000</code> (Anthropic↔OpenAI translator) → <code>claude code</code> (ANTHROPIC_BASE_URL=localhost:4000)<br/><br/>
+              <strong>TL;DR — just run:</strong> <code>launch-open-claude</code> (MLX) or <code>launch-ollama-code</code> (Ollama/GGUF)
+            </div>
+
+            <div class="step">
+              <span class="step-num">1</span>
+              <span class="step-title">Install dependencies</span>
+              <span class="step-desc">MLX-LM for inference, LiteLLM as the API translator</span>
+            </div>
+
+            <div class="code-block"><code>pip install mlx-lm<br/>pip install 'litellm[proxy]'</code></div>
+
+            <div class="step">
+              <span class="step-num">2</span>
+              <span class="step-title">Start mlx_lm server</span>
+              <span class="step-desc">Launches an OpenAI-compatible inference server on port 8080</span>
+            </div>
+
+            <div class="code-block"><code># Pick a model (all cached at ~/.cache/huggingface/hub/):<br/>mlx_lm.server --model ~/.cache/huggingface/hub/Qwen3.5-4B-MLX-8bit --port 8080<br/><br/># Verify it's running:<br/>curl http://localhost:8080/v1/models</code></div>
+
+            <div class="step">
+              <span class="step-num">3</span>
+              <span class="step-title">Start LiteLLM proxy</span>
+              <span class="step-desc">Translates Anthropic Messages API → OpenAI Chat Completions, forwards to :8080</span>
+            </div>
+
+            <div class="code-block"><code>litellm --config ~/.claude/litellm.yaml --port 4000<br/><br/># litellm.yaml routes all model names to localhost:8080/v1<br/># (mlx-qwen4b, claude-3-5-haiku-20241022, etc. → same local model)</code></div>
+
+            <div class="step">
+              <span class="step-num">4</span>
+              <span class="step-title">Launch Claude Code</span>
+              <span class="step-desc">Point Claude Code at LiteLLM instead of Anthropic</span>
+            </div>
+
+            <div class="code-block"><code>export ANTHROPIC_BASE_URL=http://localhost:4000<br/>export ANTHROPIC_API_KEY=local<br/>claude code --model claude-3-5-haiku-20241022</code></div>
+
+            <div class="success">
+              ✅ Claude Code thinks it's talking to Anthropic. LiteLLM intercepts and routes to your local MLX model. Zero cloud, zero API key, zero quota burn.
+            </div>
+
+            <div class="note">
+              <strong>Use the launcher scripts instead:</strong><br/>
+              <code>launch-open-claude [project-path]</code> — MLX-LM stack (model prompt, health checks, cleanup on exit)<br/>
+              <code>launch-ollama-code [project-path]</code> — Ollama/GGUF stack (auto-registers GGUFs, same flow)<br/>
+              Both live in <code>~/dev/scripts/</code>.
+            </div>
+          </div>
+        </div>
+
+        <!-- OpenCode Setup Card -->
+        <div class="guide-card" id="opencode-setup">
+          <div class="guide-header" onclick="toggleGuide(this)">
+            <span class="guide-title">Start OpenCode</span>
+            <span class="guide-desc">Co-primary coding tool with shared memory — run <code>launch-open-code</code></span>
+            <span class="guide-type">HOWTO</span>
+          </div>
+          <div class="guide-body">
+            <div class="step">
+              <span class="step-num">1</span>
+              <span class="step-title">Install OpenCode (if not already)</span>
+              <span class="step-desc">Co-primary tool sharing memory with Claude Code</span>
+            </div>
+
+            <div class="code-block"><code># Check if installed:<br/>which opencode<br/><br/># If not, install from https://github.com/open-code-engine/opencode<br/># (or use Homebrew/package manager)</code></div>
+
+            <div class="step">
+              <span class="step-num">2</span>
+              <span class="step-title">Initialize OpenCode config</span>
+              <span class="step-desc">Create <code>opencode.json</code> in your project root</span>
+            </div>
+
+            <div class="code-block"><code>{<br/>  "defaultModel": "mlx-qwen4b",<br/>  "fallbackChain": ["mlx-qwen4b", "mlx-qwen9b", "mlx-qwen2b", "openrouter"],<br/>  "providers": {<br/>    "mlx": {<br/>      "basePath": "~/.cache/huggingface/hub",<br/>      "models": [<br/>        "Qwen3.5-4B-MLX-8bit",<br/>        "Qwen3.5-9B-6bit",<br/>        "Qwen3.5-2B-MLX-8bit",<br/>        "Qwen3.5-0.8B-MLX-8bit",<br/>        "LFM2.5-1.2B-Instruct-MLX-6bit",<br/>        "LFM2.5-1.2B-Thinking-6bit",<br/>        "LFM2.5-Audio-1.5B-8bit",<br/>        "Nanbeige4.1-3B-8bit"<br/>      ]<br/>    },<br/>    "openrouter": {<br/>      "apiKey": "${OPENROUTER_API_KEY}",<br/>      "models": ["allenai/olmo-3.1-32b-instruct", "qwen/qwen-32b"]<br/>    }<br/>  },<br/>  "memory": {<br/>    "path": ".opencode/memory",<br/>    "localOnly": false<br/>  }<br/>}</code></div>
+
+            <div class="step">
+              <span class="step-num">3</span>
+              <span class="step-title">Start OpenCode</span>
+              <span class="step-desc">Reads <code>opencode.json</code> automatically</span>
+            </div>
+
+            <div class="code-block"><code>cd ~/dev/olmo<br/>opencode</code></div>
+
+            <div class="note">
+              OpenCode shares the same memory directory as Claude Code via symlink at <code>.opencode/memory</code> → <code>~/.claude/projects/&lt;slug&gt;/memory</code>
+            </div>
+
+            <div class="success">
+              ✅ OpenCode running with MLX-LM (OLMo 7B), shared memory with Claude Code, fallback chain: MLX → Ollama → OpenRouter
+            </div>
+          </div>
+        </div>
+
+        <div class="section-header">Advanced</div>
+
+        <!-- Extended Tooling Card -->
+        <div class="guide-card" id="extended-tooling">
+          <div class="guide-header" onclick="toggleGuide(this)">
+            <span class="guide-title">Extended Tooling in OpenCode</span>
+            <span class="guide-desc">Configure MCP servers, Qdrant, Graphiti locally</span>
+            <span class="guide-type">HOWTO</span>
+          </div>
+          <div class="guide-body">
+            <div class="step">
+              <span class="step-num">1</span>
+              <span class="step-title">Check available MCP servers</span>
+              <span class="step-desc">List configured MCP endpoints in <code>opencode.json</code></span>
+            </div>
+
+            <div class="code-block"><code>"mcp": {<br/>  "servers": {<br/>    "qdrant-mcp": {<br/>      "command": "docker run -p 41450:6333 qdrant/qdrant",<br/>      "description": "Vector database for semantic search"<br/>    },<br/>    "graphiti": {<br/>      "command": "docker run -p 41440:8444 graphiti-api",<br/>      "description": "Temporal knowledge graph"<br/>    },<br/>    "blender": {<br/>      "command": "docker run -p 8000:8000 blender-api",<br/>      "description": "3D rendering"<br/>    }<br/>  }<br/>}</code></div>
+
+            <div class="step">
+              <span class="step-num">2</span>
+              <span class="step-title">Start MCP servers (optional)</span>
+              <span class="step-desc">Only needed if using specific tools like Qdrant search</span>
+            </div>
+
+            <div class="code-block"><code># Start Qdrant vector DB:<br/>docker run -p 41450:6333 -v qdrant_storage:/qdrant/storage qdrant/qdrant<br/><br/># Start Graphiti knowledge graph:<br/>docker run -p 41440:8444 -v graphiti_db:/data graphiti-api<br/><br/># Now OpenCode tools can access these</code></div>
+
+            <div class="step">
+              <span class="step-num">3</span>
+              <span class="step-title">Verify tools are available</span>
+              <span class="step-desc">Check OpenCode session logs</span>
+            </div>
+
+            <div class="code-block"><code>opencode --list-tools<br/># or in session: /tools</code></div>
+
+            <div class="note">
+              <strong>MCP = Model Context Protocol.</strong> Each tool (Qdrant, Graphiti, Blender, Tailscale, etc.) runs as a separate server that OpenCode talks to.
+            </div>
+
+            <div class="warning">
+              <strong>Token Efficiency:</strong> Running all MCP servers locally is memory-intensive. Start only what you need (Ollama + Qdrant for semantic search is minimal).
+            </div>
+          </div>
+        </div>
+
+        <!-- Model Management Card -->
+        <div class="guide-card" id="model-management">
+          <div class="guide-header" onclick="toggleGuide(this)">
+            <span class="guide-title">Model Management</span>
+            <span class="guide-desc">MLX and Ollama model management</span>
+            <span class="guide-type">REFERENCE</span>
+          </div>
+          <div class="guide-body">
+            <div style="padding: 0.75rem; background: #1a2a38; border-left: 3px solid #4a9eda; margin-bottom: 1rem; border-radius: 3px;">
+              <strong>MLX-LM (PRIMARY)</strong> — Models cached at <code>~/.cache/huggingface/hub/</code><br/>
+              <strong>All four Qwen3.5 models are VLMs</strong> — they accept <code>image_url</code> content parts in chat completions (vision tower enabled 2026-03-04, see OLM050). Note: Qwen3.5-4B and 9B are Think models — always budget <code>max_tokens≥5000</code> for thinking traces.
+            </div>
+
+            <div class="step">
+              <span class="step-num">1</span>
+              <span class="step-title">List cached MLX models</span>
+              <span class="step-desc">Models are in HuggingFace format</span>
+            </div>
+
+            <div class="code-block"><code>ls -lh ~/.cache/huggingface/hub/  # Browse all cached models<br/><br/># Or check available MLX models:<br/>mlx_lm.generate --help | grep -A 20 "model"</code></div>
+
+            <div class="step">
+              <span class="step-num">2</span>
+              <span class="step-title">Download an MLX model</span>
+              <span class="step-desc">Auto-downloaded on first generate, or pull manually</span>
+            </div>
+
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Model</th>
+                  <th>Size</th>
+                  <th>Command</th>
+                  <th>Use Case</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="background: #1a2a38;">
+                  <td><strong>Qwen3.5-4B</strong> ⭐</td>
+                  <td>4.8GB</td>
+                  <td><code>mlx_lm.generate --model ~/.cache/huggingface/hub/Qwen3.5-4B-MLX-8bit --interactive</code></td>
+                  <td><strong>DAY-TO-DAY</strong> — Think model, primary reasoning. Use <code>max_tokens≥5000</code></td>
+                </tr>
+                <tr>
+                  <td>Qwen3.5-0.8B</td>
+                  <td>980MB</td>
+                  <td><code>mlx_lm.generate --model ~/.cache/huggingface/hub/Qwen3.5-0.8B-MLX-8bit --interactive</code></td>
+                  <td>Conservative · routing / classification only</td>
+                </tr>
+                <tr style="background: #1a2a38;">
+                  <td>Qwen3.5-2B</td>
+                  <td>2.5GB</td>
+                  <td><code>mlx_lm.generate --model ~/.cache/huggingface/hub/Qwen3.5-2B-MLX-8bit --interactive</code></td>
+                  <td>Light · delegate sessions</td>
+                </tr>
+                <tr>
+                  <td>Qwen3.5-9B</td>
+                  <td>7.7GB</td>
+                  <td><code>mlx_lm.generate --model ~/.cache/huggingface/hub/Qwen3.5-9B-6bit --interactive</code></td>
+                  <td>Extreme · heavy reasoning · 8GB headroom only</td>
+                </tr>
+                <tr style="background: #1a2a38;">
+                  <td>LFM2.5-1.2B Instruct</td>
+                  <td>912MB</td>
+                  <td><code>mlx_lm.generate --model ~/.cache/huggingface/hub/LFM2.5-1.2B-Instruct-MLX-6bit --interactive</code></td>
+                  <td>Fast instruction following</td>
+                </tr>
+                <tr>
+                  <td>Nanbeige4.1-3B</td>
+                  <td>3.9GB</td>
+                  <td><code>mlx_lm.generate --model ~/.cache/huggingface/hub/Nanbeige4.1-3B-8bit --interactive</code></td>
+                  <td>Agentic tool-calling specialist</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="step">
+              <span class="step-num">3</span>
+              <span class="step-title">Run a model interactively (MLX)</span>
+              <span class="step-desc">Quick test via MLX</span>
+            </div>
+
+            <div class="code-block"><code>mlx_lm.generate --model ~/.cache/huggingface/hub/Qwen3.5-4B-MLX-8bit --interactive<br/># Type prompts, Ctrl+D to exit</code></div>
+
+            <div class="step">
+              <span class="step-num">4</span>
+              <span class="step-title">Switch MLX models in Claude Code</span>
+              <span class="step-desc">Update <code>CLAUDE_CODE_MODEL</code> or edit <code>litellm.yaml</code></span>
+            </div>
+
+            <div class="code-block"><code>export CLAUDE_CODE_MODEL=mlx-qwen4b  # Switch to Qwen<br/>claude code<br/><br/># Or update litellm.yaml model_name</code></div>
+
+            <div class="step">
+              <span class="step-num">5</span>
+              <span class="step-title">Remove unused MLX models</span>
+              <span class="step-desc">Free up disk space</span>
+            </div>
+
+            <div class="code-block"><code>rm -rf ~/.cache/huggingface/hub/Qwen3.5-0.8B-MLX-8bit  # example</code></div>
+
+            <div style="padding: 0.75rem; background: #1a2a38; border-left: 3px solid #666; margin-top: 1rem; margin-bottom: 1rem; border-radius: 3px;">
+              <strong>Ollama (FALLBACK)</strong> — Still available for GGUF models
+            </div>
+
+            <div class="step">
+              <span class="step-num">6</span>
+              <span class="step-title">List Ollama models (if using)</span>
+              <span class="step-desc">GGUF format models</span>
+            </div>
+
+            <div class="code-block"><code>ollama list</code></div>
+
+            <div class="step">
+              <span class="step-num">7</span>
+              <span class="step-title">Pull Ollama models (optional fallback)</span>
+              <span class="step-desc">Only needed if MLX version unavailable</span>
+            </div>
+
+            <div class="code-block"><code># GGUFs live at ~/.ollama/gguf/ — auto-registered by launch-ollama-code<br/># All 8 models already registered: gguf-qwen08b, gguf-qwen2b, gguf-qwen4b,<br/># gguf-lfm-instruct, gguf-lfm-thinking, gguf-lfm-audio, gguf-nanbeige, gguf-gemma<br/>ollama list  # verify registration</code></div>
+
+            <div class="note">
+              <strong>Disk Usage:</strong> Qwen3.5-4B ≈ 4.8GB, 0.8B ≈ 980MB, 9B ≈ 7.7GB. Recommended: keep 4B + one small model active. All 8 MLX models = ~22GB total. MLX native format is faster than GGUF on Apple Silicon.
+            </div>
+          </div>
+        </div>
+
+        <!-- Decision Matrix Card -->
+        <div class="guide-card" id="decision-matrix">
+          <div class="guide-header" onclick="toggleGuide(this)">
+            <span class="guide-title">Decision Matrix</span>
+            <span class="guide-desc">When to use MLX-LM vs. Ollama vs. Claude Code vs. OpenCode</span>
+            <span class="guide-type">REFERENCE</span>
+          </div>
+          <div class="guide-body">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Scenario</th>
+                  <th>Use</th>
+                  <th>Why</th>
+                  <th>Setup</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="background: #1a2a38; border-left: 3px solid #4a9eda;">
+                  <td><strong>Main coding work</strong><br/>(features, fixes, multi-file)</td>
+                  <td><strong>Claude Code</strong><br/>+ MLX-LM<br/><code>claude code</code></td>
+                  <td><strong>PRIMARY:</strong> Native Apple Silicon inference via MLX, zero API cost, best M-series perf</td>
+                  <td>✅ Run <code>launch-open-claude</code> — picks model interactively</td>
+                </tr>
+                <tr>
+                  <td><strong>Need extended tools</strong><br/>(Qdrant search, Graphiti)</td>
+                  <td><strong>OpenCode</strong><br/>+ MLX-LM<br/><code>opencode</code></td>
+                  <td>Better MCP integration, shared memory, flexible config, MLX primary</td>
+                  <td>✅ Config MLX in <code>opencode.json</code></td>
+                </tr>
+                <tr>
+                  <td><strong>MLX unavailable</strong><br/>(legacy GGUF models, fallback)</td>
+                  <td><strong>Ollama</strong><br/><code>ollama serve</code></td>
+                  <td>Secondary option, works via LiteLLM fallback chain</td>
+                  <td>✅ Only if MLX fails</td>
+                </tr>
+                <tr>
+                  <td><strong>Quick inference test</strong><br/>(no Claude Code needed)</td>
+                  <td>MLX direct<br/><code>mlx_lm.generate</code></td>
+                  <td>Native, instant, no extra overhead</td>
+                  <td>✅ 1 command</td>
+                </tr>
+                <tr>
+                  <td><strong>API quota burning</strong><br/>(Anthropic/OpenRouter down)</td>
+                  <td>Claude Code +<br/>MLX fallback</td>
+                  <td>Use local OLMo 7B via MLX, zero cost, all tools work</td>
+                  <td>✅ Set <code>CLAUDE_CODE_FALLBACK=true</code></td>
+                </tr>
+                <tr>
+                  <td><strong>Offline work</strong><br/>(no internet)</td>
+                  <td>Claude Code +<br/>MLX + local tools</td>
+                  <td>Completely self-contained (models pre-cached)</td>
+                  <td>⚠ Pre-download models</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="note">
+              <strong>New Default workflow (M-series Macs):</strong>
+              <ol>
+                <li>Install MLX-LM: <code>pip install mlx-lm</code></li>
+                <li>Download a model: <code>mlx_lm.generate --model mlx-community/Qwen3.5-4B-MLX-8bit</code></li>
+                <li>Set <code>CLAUDE_CODE_MODEL=mlx-qwen4b</code></li>
+                <li>Start coding: <code>claude code</code></li>
+                <li><strong>Optional:</strong> Keep Ollama around for legacy GGUF models via fallback chain</li>
+              </ol>
+            </div>
+
+            <div class="warning">
+              <strong>Architecture (clear separation):</strong>
+              <ul>
+                <li><strong>MLX-LM</strong> = Optimized inference engine for Apple Silicon (PRIMARY)</li>
+                <li><strong>Ollama</strong> = Server wrapper around llama.cpp for GGUF (SECONDARY/FALLBACK)</li>
+                <li><strong>LiteLLM</strong> = Python router that coordinates both</li>
+                <li><strong>Claude Code</strong> = CLI for coding, uses LiteLLM to select engine</li>
+                <li><strong>OpenCode</strong> = Alt CLI with better MCP support, also uses LiteLLM</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-header">Troubleshooting</div>
+
+        <!-- Quick Fixes Card -->
+        <div class="guide-card" id="troubleshooting">
+          <div class="guide-header" onclick="toggleGuide(this)">
+            <span class="guide-title">Common Issues & Fixes</span>
+            <span class="guide-desc">Quick solutions for startup and runtime problems</span>
+            <span class="guide-type">REFERENCE</span>
+          </div>
+          <div class="guide-body">
+            <div class="step">
+              <span class="step-num">❌</span>
+              <span class="step-title">MLX-LM model not found / "No module named 'mlx'"</span>
+            </div>
+            <div class="code-block"><code># Fix: Install MLX-LM<br/>pip install mlx-lm<br/><br/># Verify installation:<br/>python -c "import mlx; print(mlx.__version__)"<br/><br/># Download model manually:<br/>mlx_lm.generate --model mlx-community/Qwen3.5-4B-MLX-8bit --max-tokens 10</code></div>
+
+            <div class="step">
+              <span class="step-num">❌</span>
+              <span class="step-title">"Connection refused" to MLX (LiteLLM routing issue)</span>
+            </div>
+            <div class="code-block"><code># Fix: Verify LiteLLM config points to MLX<br/>cat ~/.claude/litellm.yaml | grep mlx<br/># Should see your selected model in the config<br/><br/># Check CLAUDE_CODE_MODEL env var:<br/>echo $CLAUDE_CODE_MODEL<br/># Should be: mlx-qwen4b (or your MLX model name)</code></div>
+
+            <div class="step">
+              <span class="step-num">❌</span>
+              <span class="step-title">Ollama fallback not working</span>
+            </div>
+            <div class="code-block"><code># Fix: Ensure Ollama is running if MLX fails<br/>ollama serve  # Start in separate terminal<br/><br/># Verify Ollama models are pulled:<br/>ollama list<br/><br/># Test fallback chain:<br/>curl http://localhost:11434/api/tags  # Should show models</code></div>
+
+            <div class="step">
+              <span class="step-num">❌</span>
+              <span class="step-title">Token quota still burning even with MLX</span>
+            </div>
+            <div class="code-block"><code># Fix: Verify Claude Code is using MLX, not cloud API<br/>echo $LITELLM_CONFIG_PATH  # Should point to ~/.claude/litellm.yaml<br/>echo $CLAUDE_CODE_MODEL    # Should be "mlx-qwen4b" (not anthropic-xxx)<br/><br/># Check logs:<br/>claude code --debug</code></div>
+
+            <div class="step">
+              <span class="step-num">❌</span>
+              <span class="step-title">OOM (Out of Memory) / System freezing</span>
+            </div>
+            <div class="code-block"><code># Fix: MLX 7B models use ~14GB on M-series. If freezing:<br/><br/># Switch to smaller model:<br/>export CLAUDE_CODE_MODEL=mlx-qwen4b  # Qwen 4B, lighter<br/># OR switch to 0.8B model:<br/>export CLAUDE_CODE_MODEL=mlx-qwen08b<br/><br/># Or use OpenRouter cloud (frees local memory):<br/>export CLAUDE_CODE_FALLBACK=true</code></div>
+
+            <div class="step">
+              <span class="step-num">❌</span>
+              <span class="step-title">MLX model download is stuck</span>
+            </div>
+            <div class="code-block"><code># Fix: Resume download (HuggingFace auto-resumes)<br/>mlx_lm.generate --model mlx-community/Qwen3.5-4B-MLX-8bit --max-tokens 10<br/><br/># Or manually check cache:<br/>du -sh ~/.cache/huggingface/hub/<br/><br/># If corrupted, delete and retry:<br/>rm -rf ~/.cache/huggingface/hub/models--mlx-community--Qwen3.5-4B-MLX-8bit</code></div>
+
+            <div class="success">
+              ✅ Check MLX status with: <code>python -c "import mlx_lm; print('MLX ready')"</code> and verify config: <code>cat ~/.claude/litellm.yaml | grep model</code>
+            </div>
+          </div>
+        </div>
+
+        <!-- Remediation Card -->
+        <div class="guide-card" id="remediation">
+          <div class="guide-header" onclick="toggleGuide(this)">
+            <span class="guide-title">Remediation</span>
+            <span class="guide-desc">Targeted fixes for specific error messages across the local inference stack</span>
+            <span class="guide-type">REFERENCE</span>
+          </div>
+          <div class="guide-body">
+            <div class="step">
+              <span class="step-num">1</span>
+              <span class="step-title">"No cookie auth credentials found" (OpenRouter 401)</span>
+            </div>
+            <div class="code-block"><code># OpenCode can't reach OpenRouter — API key not injected.<br/># Fix: Always launch via the wrapper script:<br/>launch-open-code        # injects OPENROUTER_API_KEY from age secrets<br/><br/># Or source the env manually:<br/>source opencode-env.sh<br/><br/># Verify the key is set:<br/>echo $OPENROUTER_API_KEY | head -c 10<br/># Should print first 10 chars (e.g. "sk-or-v1-x")</code></div>
+
+            <div class="step">
+              <span class="step-num">2</span>
+              <span class="step-title">"Model not found" in Ollama</span>
+            </div>
+            <div class="code-block"><code># GGUF model not registered with Ollama.<br/># Fix: launch-ollama-code auto-registers on first run.<br/># Or register manually:<br/>echo "FROM ~/.ollama/gguf/MODEL.gguf" | ollama create MODEL_NAME<br/><br/># Example:<br/>echo "FROM ~/.ollama/gguf/qwen3.5-4b-q8.gguf" | ollama create gguf-qwen4b<br/><br/># Verify:<br/>ollama list | grep MODEL_NAME</code></div>
+
+            <div class="step">
+              <span class="step-num">3</span>
+              <span class="step-title">mlx_lm server won't start / OOM</span>
+            </div>
+            <div class="code-block"><code># Model too large for available memory.<br/># Fix: Use a smaller model — mlx-qwen08b is only 980MB:<br/>export CLAUDE_CODE_MODEL=mlx-qwen08b<br/><br/># Close memory-heavy apps (browsers, Docker, etc.)<br/><br/># Test the server directly to isolate the issue:<br/>mlx_lm.server --model ~/.cache/huggingface/hub/Qwen3.5-0.8B-MLX-8bit --port 8080<br/><br/># Check available memory:<br/>vm_stat | head -5</code></div>
+
+            <div class="step">
+              <span class="step-num">4</span>
+              <span class="step-title">LiteLLM 404 / "Responses API" error</span>
+            </div>
+            <div class="code-block"><code># LiteLLM routing through wrong endpoint.<br/># Fix: Set the env var that forces chat completions URL:<br/>export LITELLM_USE_CHAT_COMPLETIONS_URL_FOR_ANTHROPIC_MESSAGES=true<br/><br/># The launch scripts (launch-ollama-code, launch-open-code) set<br/># this automatically. If running manually, add it to your shell profile.</code></div>
+
+            <div class="step">
+              <span class="step-num">5</span>
+              <span class="step-title">opencode.json not found</span>
+            </div>
+            <div class="code-block"><code># OpenCode doesn't see the local-mlx config.<br/># Fix: Copy or symlink the config to your project directory:<br/>cp ~/dev/olmo/opencode.json ./opencode.json<br/><br/># Or symlink (shares updates automatically):<br/>ln -s ~/dev/olmo/opencode.json ./opencode.json</code></div>
+
+            <div class="step">
+              <span class="step-num">6</span>
+              <span class="step-title">age decryption fails</span>
+            </div>
+            <div class="code-block"><code># Wrong or missing identity file.<br/># Fix: Ensure the identity key exists:<br/>ls -la ~/.config/ig88/age-identity.key<br/><br/># If recently rotated, check BKX104 for current identity paths.<br/># Cloudkicker uses: ~/.ssh/id_cloudkicker_navy<br/># Blackbox uses:    ~/.ssh/id_blackbox_navy</code></div>
+
+            <div class="step">
+              <span class="step-num">7</span>
+              <span class="step-title">CLAUDE_CODE_MODEL not recognized</span>
+            </div>
+            <div class="code-block"><code># Typo in model name. Valid names are:<br/><br/># MLX models:<br/>#   mlx-qwen08b, mlx-qwen2b, mlx-qwen4b, mlx-qwen9b<br/>#   mlx-lfm-instruct, mlx-lfm-thinking, mlx-lfm-audio<br/>#   mlx-nanbeige<br/><br/># GGUF models (Ollama):<br/>#   gguf-qwen08b, gguf-qwen2b, gguf-qwen4b<br/>#   gguf-lfm-instruct, gguf-lfm-thinking, gguf-lfm-audio<br/>#   gguf-nanbeige, gguf-gemma<br/><br/># Verify current setting:<br/>echo $CLAUDE_CODE_MODEL</code></div>
+
+            <div class="success">
+              ✅ Most issues are caused by missing env vars. Use the launch scripts (<code>launch-open-code</code>, <code>launch-ollama-code</code>) to ensure correct injection.
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end guide-grid -->
+
+      <div class="section-header">Quick Command Reference</div>
+      <div class="guide-grid">
+        <div class="guide-card">
+          <div class="guide-body">
+            <table class="command-table">
+              <thead>
+                <tr>
+                  <th>Task</th>
+                  <th>Command</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+
+                <!-- MLX-LM (PRIMARY) -->
+                <tr class="section-header-table" data-section="mlx" onclick="toggleSection(this)" style="background: #1a2a38; border-left: 3px solid #4a9eda;">
+                  <td colspan="3"><strong>🌟 MLX-LM Management (PRIMARY for M-series)</strong></td>
+                </tr>
+                <tr class="section-row" data-section="mlx">
+                  <td>Install MLX-LM</td>
+                  <td><code class="command-cell" onclick="copyCommand(this)">pip install mlx-lm</code></td>
+                  <td>Install MLX inference framework for Apple Silicon</td>
+                </tr>
+                <tr class="section-row" data-section="mlx">
+                  <td>Download model</td>
+                  <td><code class="command-cell" onclick="copyCommand(this)">mlx_lm.generate --model ~/.cache/huggingface/hub/Qwen3.5-4B-MLX-8bit --max-tokens 10</code></td>
+                  <td>Smoke-test Qwen3.5-4B (all models pre-cached)</td>
+                </tr>
+                <tr class="section-row" data-section="mlx">
+                  <td>List cached models</td>
+                  <td><code class="command-cell" onclick="copyCommand(this)">ls -lh ~/.cache/huggingface/hub/</code></td>
+                  <td>Show all downloaded MLX models</td>
+                </tr>
+                <tr class="section-row" data-section="mlx">
+                  <td>Run interactive</td>
+                  <td><code class="command-cell" onclick="copyCommand(this)">mlx_lm.generate --model ~/.cache/huggingface/hub/Qwen3.5-4B-MLX-8bit --interactive</code></td>
+                  <td>Chat directly with model (no tools)</td>
+                </tr>
+                <tr class="section-row" data-section="mlx">
+                  <td>Remove model</td>
+                  <td><code class="command-cell" onclick="copyCommand(this)">rm -rf ~/.cache/huggingface/hub/Qwen3.5-0.8B-MLX-8bit</code></td>
+                  <td>Delete model to free disk space</td>
+                </tr>
+                <tr class="section-row" data-section="mlx">
+                  <td>Verify setup</td>
+                  <td><code class="command-cell" onclick="copyCommand(this)">python -c "import mlx_lm; print('MLX ready')"</code></td>
+                  <td>Check MLX-LM is properly installed</td>
+                </tr>
+                <tr class="section-row" data-section="mlx">
+                  <td>Model sizes</td>
+                  <td><code class="command-cell" onclick="copyCommand(this)">du -sh ~/.cache/huggingface/hub/*/</code></td>
+                  <td>Show disk usage per cached model</td>
+                </tr>
+
+                <!-- Your Cached Models (Cloudkicker M2) -->
+                <tr class="section-header-table" data-section="mlx" style="background: #1a2a38; border-left: 3px solid #26d946;">
+                  <td colspan="3"><strong>📦 Your Cached Models (Cloudkicker M2 16GB)</strong></td>
+                </tr>
+                <tr class="section-row" data-section="mlx">
+                  <td><strong>CONSERVATIVE</strong><br/>Qwen3.5-0.8B</td>
+                  <td><code class="command-cell" onclick="copyCommand(this)">mlx_lm.generate --model ~/.cache/huggingface/hub/Qwen3.5-0.8B-MLX-8bit --interactive</code></td>
+                  <td>980MB · Intent routing only · 15GB free for dev</td>
+                </tr>
+                <tr class="section-row" data-section="mlx" style="background: #1a2a38;">
+                  <td><strong>DAY-TO-DAY</strong><br/>Qwen3.5-4B</td>
+                  <td><code class="command-cell" onclick="copyCommand(this)">mlx_lm.generate --model ~/.cache/huggingface/hub/Qwen3.5-4B-MLX-8bit --interactive</code></td>
+                  <td>4.8GB · Primary reasoning · 11GB free for dev</td>
+                </tr>
+                <tr class="section-row" data-section="mlx">
+                  <td><strong>EXTREME</strong><br/>Qwen3.5-9B</td>
+                  <td><code class="command-cell" onclick="copyCommand(this)">mlx_lm.generate --model ~/.cache/huggingface/hub/Qwen3.5-9B-6bit --interactive</code></td>
+                  <td>7.7GB · Heavy reasoning · 8GB headroom</td>
+                </tr>
+                <tr class="section-row" data-section="mlx">
+                  <td>Qwen3.5-2B</td>
+                  <td><code class="command-cell" onclick="copyCommand(this)">mlx_lm.generate --model ~/.cache/huggingface/hub/Qwen3.5-2B-MLX-8bit --interactive</code></td>
+                  <td>2.5GB · Secondary agent · Delegate sessions</td>
+                </tr>
+                <tr class="section-row" data-section="mlx">
+                  <td>LFM2.5-1.2B Instruct</td>
+                  <td><code class="command-cell" onclick="copyCommand(this)">mlx_lm.generate --model ~/.cache/huggingface/hub/LFM2.5-1.2B-Instruct-MLX-6bit --interactive</code></td>
+                  <td>912MB · Instruction following · Fast routing</td>
+                </tr>
+                <tr class="section-row" data-section="mlx">
+                  <td>LFM2.5-1.2B Thinking</td>
+                  <td><code class="command-cell" onclick="copyCommand(this)">mlx_lm.generate --model ~/.cache/huggingface/hub/LFM2.5-1.2B-Thinking-6bit --interactive</code></td>
+                  <td>912MB · Reasoning with COT · Sub-1GB thinking</td>
+                </tr>
+                <tr class="section-row" data-section="mlx">
+                  <td>LFM2.5-1.5B Audio</td>
+                  <td><code class="command-cell" onclick="copyCommand(this)">mlx_lm.generate --model ~/.cache/huggingface/hub/LFM2.5-Audio-1.5B-8bit --interactive</code></td>
+                  <td>2.0GB · Speech-to-speech · Real-time audio</td>
+                </tr>
+                <tr class="section-row" data-section="mlx">
+                  <td>Nanbeige4.1-3B</td>
+                  <td><code class="command-cell" onclick="copyCommand(this)">mlx_lm.generate --model ~/.cache/huggingface/hub/Nanbeige4.1-3B-8bit --interactive</code></td>
+                  <td>3.9GB · Agentic tool-calling specialist · 600+ turn stability</td>
+                </tr>
+
+                <!-- Ollama (SECONDARY) -->
+                <tr class="section-header-table" data-section="ollama" onclick="toggleSection(this)">
+                  <td colspan="3">Ollama Management (Fallback for GGUF)</td>
+                </tr>
+                <tr class="section-row" data-section="ollama">
+                  <td>Start server</td>
+                  <td><code class="command-cell" onclick="copyCommand(this)">ollama serve</code></td>
+                  <td>Launch Ollama on localhost:11434 (run in separate terminal)</td>
+                </tr>
+                <tr class="section-row" data-section="ollama">
+                  <td>List models</td>
+                  <td><code class="command-cell" onclick="copyCommand(this)">ollama list</code></td>
+                  <td>Show registered GGUF models (gguf-qwen4b, gguf-gemma, etc.)</td>
+                </tr>
+                <tr class="section-row" data-section="ollama">
+                  <td>List models</td>
+                  <td><code class="command-cell" onclick="copyCommand(this)">ollama list</code></td>
+                  <td>Show all downloaded models and sizes</td>
+                </tr>
+                <tr class="section-row" data-section="ollama">
+                  <td>Run interactive</td>
+                  <td><code class="command-cell" onclick="copyCommand(this)">ollama run gguf-qwen4b</code></td>
+                  <td>Chat directly with Qwen3.5-4B GGUF (no tools)</td>
+                </tr>
+                <tr class="section-row" data-section="ollama">
+                  <td>Remove model</td>
+                  <td><code class="command-cell" onclick="copyCommand(this)">ollama rm gguf-qwen08b</code></td>
+                  <td>Unregister model from Ollama (GGUF file stays in ~/.ollama/gguf/)</td>
+                </tr>
+                <tr class="section-row" data-section="ollama">
+                  <td>Health check</td>
+                  <td><code class="command-cell" onclick="copyCommand(this)">curl http://localhost:11434/api/tags</code></td>
+                  <td>Verify Ollama is running and list available models</td>
+                </tr>
+
+                <!-- Claude Code -->
+                <tr class="section-header-table" data-section="claude" onclick="toggleSection(this)" style="background: #1a2a38; border-left: 3px solid #4a9eda;">
+                  <td colspan="3"><strong>Claude Code + LiteLLM (MLX primary)</strong></td>
+                </tr>
+                <tr class="section-row" data-section="claude">
+                  <td>Create config</td>
+                  <td><code class="command-cell" onclick="copyCommand(this)">cat > ~/.claude/litellm.yaml << 'EOF'</code></td>
+                  <td>Set up LiteLLM with MLX + Ollama fallback</td>
+                </tr>
+                <tr class="section-row" data-section="claude">
+                  <td>Export vars</td>
+                  <td><code class="command-cell" onclick="copyCommand(this)">export LITELLM_CONFIG_PATH=~/.claude/litellm.yaml</code></td>
+                  <td>Point Claude Code to LiteLLM config</td>
+                </tr>
+                <tr class="section-row" data-section="claude">
+                  <td>Set model (MLX)</td>
+                  <td><code class="command-cell" onclick="copyCommand(this)">export CLAUDE_CODE_MODEL=mlx-qwen4b</code></td>
+                  <td>Use Qwen3.5-4B via MLX (Apple Silicon native, day-to-day)</td>
+                </tr>
+                <tr class="section-row" data-section="claude">
+                  <td>Set model (Fallback)</td>
+                  <td><code class="command-cell" onclick="copyCommand(this)">export CLAUDE_CODE_MODEL=gguf-qwen4b</code></td>
+                  <td>Use Qwen via Ollama GGUF (if MLX unavailable)</td>
+                </tr>
+                <tr class="section-row" data-section="claude">
+                  <td>Enable fallback</td>
+                  <td><code class="command-cell" onclick="copyCommand(this)">export CLAUDE_CODE_FALLBACK=true</code></td>
+                  <td>Fallback to OpenRouter if Ollama unavailable</td>
+                </tr>
+                <tr class="section-row" data-section="claude">
+                  <td>Start (MLX)</td>
+                  <td><code class="command-cell" onclick="copyCommand(this)">launch-open-claude ~/dev/olmo</code></td>
+                  <td>mlx_lm + LiteLLM + Claude Code — interactive model picker</td>
+                </tr>
+                <tr class="section-row" data-section="claude">
+                  <td>Start (Ollama)</td>
+                  <td><code class="command-cell" onclick="copyCommand(this)">launch-ollama-code ~/dev/olmo</code></td>
+                  <td>Ollama GGUF + LiteLLM + Claude Code — interactive model picker</td>
+                </tr>
+                <tr class="section-row" data-section="claude">
+                  <td>Debug mode</td>
+                  <td><code class="command-cell" onclick="copyCommand(this)">claude --debug</code></td>
+                  <td>Show verbose logs (useful for troubleshooting)</td>
+                </tr>
+
+                <!-- OpenCode -->
+                <tr class="section-header-table" data-section="opencode" onclick="toggleSection(this)">
+                  <td colspan="3">OpenCode Setup</td>
+                </tr>
+                <tr class="section-row" data-section="opencode">
+                  <td>Create config</td>
+                  <td><code class="command-cell" onclick="copyCommand(this)">cat > opencode.json << 'EOF'</code></td>
+                  <td>Write OpenCode provider configuration</td>
+                </tr>
+                <tr class="section-row" data-section="opencode">
+                  <td>Start (launcher)</td>
+                  <td><code class="command-cell" onclick="copyCommand(this)">launch-open-code ~/dev/olmo</code></td>
+                  <td>mlx_lm + OpenCode — interactive model picker, unsets cloud keys</td>
+                </tr>
+                <tr class="section-row" data-section="opencode">
+                  <td>Start (manual)</td>
+                  <td><code class="command-cell" onclick="copyCommand(this)">cd ~/dev/olmo && opencode</code></td>
+                  <td>Launch OpenCode directly (uses opencode.json provider config)</td>
+                </tr>
+                <tr class="section-row" data-section="opencode">
+                  <td>List tools</td>
+                  <td><code class="command-cell" onclick="copyCommand(this)">opencode --list-tools</code></td>
+                  <td>Show available MCP tools and servers</td>
+                </tr>
+                <tr class="section-row" data-section="opencode">
+                  <td>Check memory</td>
+                  <td><code class="command-cell" onclick="copyCommand(this)">ls -la .opencode/memory/</code></td>
+                  <td>Verify shared memory symlink exists</td>
+                </tr>
+
+                <!-- Model Management -->
+                <tr class="section-header-table" data-section="models" onclick="toggleSection(this)">
+                  <td colspan="3">Model Management</td>
+                </tr>
+                <tr class="section-row" data-section="models">
+                  <td>List GGUFs</td>
+                  <td><code class="command-cell" onclick="copyCommand(this)">ls ~/.ollama/gguf/</code></td>
+                  <td>8 GGUFs present: qwen 0.8/2/4B, LFM instruct/think/audio, nanbeige, gemma</td>
+                </tr>
+                <tr class="section-row" data-section="models">
+                  <td>Re-register GGUF</td>
+                  <td><code class="command-cell" onclick="copyCommand(this)">echo "FROM ~/.ollama/gguf/Qwen3.5-4B-Q8_0.gguf" | ollama create gguf-qwen4b -f -</code></td>
+                  <td>Manually register a GGUF if ollama list shows it missing</td>
+                </tr>
+                <tr class="section-row" data-section="models">
+                  <td>Pull OLMo 32B</td>
+                  <td><code class="command-cell" onclick="copyCommand(this)">ollama pull olmo:32b</code></td>
+                  <td>Download OLMo 32B (19GB, requires GPU)</td>
+                </tr>
+                <tr class="section-row" data-section="models">
+                  <td>Disk usage</td>
+                  <td><code class="command-cell" onclick="copyCommand(this)">du -sh ~/.ollama/models/</code></td>
+                  <td>Check total Ollama storage used</td>
+                </tr>
+                <tr class="section-row" data-section="models">
+                  <td>Free space</td>
+                  <td><code class="command-cell" onclick="copyCommand(this)">df -h ~</code></td>
+                  <td>Check available disk space in home directory</td>
+                </tr>
+
+                <!-- Troubleshooting -->
+                <tr class="section-header-table" data-section="debug" onclick="toggleSection(this)">
+                  <td colspan="3">Troubleshooting</td>
+                </tr>
+                <tr class="section-row" data-section="debug">
+                  <td>Is Ollama running?</td>
+                  <td><code class="command-cell" onclick="copyCommand(this)">ps aux | grep ollama</code></td>
+                  <td>Check if Ollama process is active</td>
+                </tr>
+                <tr class="section-row" data-section="debug">
+                  <td>Port in use?</td>
+                  <td><code class="command-cell" onclick="copyCommand(this)">lsof -i :11434</code></td>
+                  <td>See what's using Ollama port</td>
+                </tr>
+                <tr class="section-row" data-section="debug">
+                  <td>Kill Ollama</td>
+                  <td><code class="command-cell" onclick="copyCommand(this)">pkill ollama</code></td>
+                  <td>Force stop Ollama server (if stuck)</td>
+                </tr>
+                <tr class="section-row" data-section="debug">
+                  <td>Memory usage</td>
+                  <td><code class="command-cell" onclick="copyCommand(this)">top -l 1 | grep -E "^Mem|OLMo"</code></td>
+                  <td>Check RAM usage and running model</td>
+                </tr>
+                <tr class="section-row" data-section="debug">
+                  <td>Config check</td>
+                  <td><code class="command-cell" onclick="copyCommand(this)">cat ~/.claude/litellm.yaml</code></td>
+                  <td>Verify LiteLLM configuration</td>
+                </tr>
+                <tr class="section-row" data-section="debug">
+                  <td>Verify fallback</td>
+                  <td><code class="command-cell" onclick="copyCommand(this)">echo $CLAUDE_CODE_FALLBACK</code></td>
+                  <td>Check if fallback chain enabled</td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        <span>Local Inference Guide · 2026-03-03 · <a href="https://ollama.ai">Ollama</a> · <a href="https://github.com/allenai/OLMo">OLMo</a></span>
+        <span>Self-sufficient when APIs are down · No quota burn · Local-first development</span>
+      </footer>
+    </div>
+
+    <script>
+      let currentFocusIndex = 0;
+      const sectionHeaders = [];
+
+      function initNavigation() {
+        document.querySelectorAll('.guide-header, .section-header-table').forEach((header, idx) => {
+          header.setAttribute('data-nav-index', idx);
+          header.setAttribute('tabindex', '0');
+          sectionHeaders.push(header);
+        });
+      }
+
+      function toggleGuide(header) {
+        header.classList.toggle("collapsed");
+        const body = header.nextElementSibling;
+        body.classList.toggle("collapsed");
+      }
+
+      function toggleSection(header) {
+        header.classList.toggle("collapsed");
+        const section = header.getAttribute("data-section");
+        if (section) {
+          const rows = document.querySelectorAll(`tr[data-section="${section}"]`);
+          rows.forEach((row, idx) => {
+            if (idx > 0) {
+              row.classList.toggle("hidden");
+            }
+          });
+        }
+      }
+
+      function expandAll() {
+        sectionHeaders.forEach(header => {
+          header.classList.remove("collapsed");
+          const body = header.nextElementSibling;
+          if (body) {
+            body.classList.remove("collapsed");
+          }
+          const section = header.getAttribute("data-section");
+          if (section) {
+            const rows = document.querySelectorAll(`tr[data-section="${section}"]`);
+            rows.forEach(row => row.classList.remove("hidden"));
+          }
+        });
+      }
+
+      function collapseAll() {
+        sectionHeaders.forEach(header => {
+          header.classList.add("collapsed");
+          const body = header.nextElementSibling;
+          if (body) {
+            body.classList.add("collapsed");
+          }
+          const section = header.getAttribute("data-section");
+          if (section) {
+            const rows = document.querySelectorAll(`tr[data-section="${section}"]`);
+            rows.forEach((row, idx) => {
+              if (idx > 0) {
+                row.classList.add("hidden");
+              }
+            });
+          }
+        });
+      }
+
+      function focusSection(index) {
+        if (index >= 0 && index < sectionHeaders.length) {
+          currentFocusIndex = index;
+          sectionHeaders[index].focus();
+          sectionHeaders[index].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+
+      function copyCommand(element) {
+        const text = element.textContent.trim();
+        navigator.clipboard.writeText(text).then(() => {
+          const original = element.textContent;
+          element.textContent = "✓ Copied";
+          element.style.background = "#1a3a2a";
+          element.style.color = "#4ada9e";
+          setTimeout(() => {
+            element.textContent = original;
+            element.style.background = "";
+            element.style.color = "";
+          }, 1500);
+        }).catch(err => {
+          console.error("Failed to copy:", err);
+        });
+      }
+
+      // Keyboard navigation
+      document.addEventListener('keydown', (e) => {
+        const activeElement = document.activeElement;
+
+        switch (e.key.toLowerCase()) {
+          case 'arrowup':
+            e.preventDefault();
+            focusSection(currentFocusIndex - 1);
+            break;
+          case 'arrowdown':
+            e.preventDefault();
+            focusSection(currentFocusIndex + 1);
+            break;
+          case 'arrowright':
+            e.preventDefault();
+            if (sectionHeaders[currentFocusIndex]) {
+              sectionHeaders[currentFocusIndex].classList.remove("collapsed");
+              const body = sectionHeaders[currentFocusIndex].nextElementSibling;
+              if (body) body.classList.remove("collapsed");
+              const section = sectionHeaders[currentFocusIndex].getAttribute("data-section");
+              if (section) {
+                const rows = document.querySelectorAll(`tr[data-section="${section}"]`);
+                rows.forEach(row => row.classList.remove("hidden"));
+              }
+            }
+            break;
+          case 'arrowleft':
+            e.preventDefault();
+            if (sectionHeaders[currentFocusIndex]) {
+              sectionHeaders[currentFocusIndex].classList.add("collapsed");
+              const body = sectionHeaders[currentFocusIndex].nextElementSibling;
+              if (body) body.classList.add("collapsed");
+              const section = sectionHeaders[currentFocusIndex].getAttribute("data-section");
+              if (section) {
+                const rows = document.querySelectorAll(`tr[data-section="${section}"]`);
+                rows.forEach((row, idx) => {
+                  if (idx > 0) row.classList.add("hidden");
+                });
+              }
+            }
+            break;
+          case ' ':
+          case 'enter':
+            e.preventDefault();
+            if (sectionHeaders[currentFocusIndex]) {
+              if (sectionHeaders[currentFocusIndex].classList.contains('guide-header')) {
+                toggleGuide(sectionHeaders[currentFocusIndex]);
+              } else if (sectionHeaders[currentFocusIndex].classList.contains('section-header-table')) {
+                toggleSection(sectionHeaders[currentFocusIndex]);
+              }
+            }
+            break;
+          case 'a':
+            if (e.ctrlKey || e.metaKey) break;
+            e.preventDefault();
+            expandAll();
+            break;
+          case 'escape':
+            e.preventDefault();
+            collapseAll();
+            break;
+        }
+      });
+
+      // Cmd+Click collapse siblings
+      document.addEventListener('click', (e) => {
+        if ((e.metaKey || e.ctrlKey) && (e.target.classList.contains('guide-header') || e.target.classList.contains('section-header-table'))) {
+          e.preventDefault();
+          const headers = e.target.classList.contains('guide-header') ?
+            Array.from(document.querySelectorAll('.guide-header')) :
+            Array.from(document.querySelectorAll('.section-header-table'));
+
+          headers.forEach(h => {
+            if (h !== e.target) {
+              h.classList.add("collapsed");
+              const body = h.nextElementSibling;
+              if (body) body.classList.add("collapsed");
+            }
+          });
+        }
+      });
+
+      // Update focus index on click
+      document.addEventListener('click', (e) => {
+        const header = e.target.closest('.guide-header, .section-header-table');
+        if (header) {
+          const idx = Array.from(sectionHeaders).indexOf(header);
+          if (idx >= 0) currentFocusIndex = idx;
+        }
+      });
+
+      initNavigation();
+    </script>
+  </body>
+</html>

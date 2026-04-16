@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>strudel - Command Reference</title>
+<link rel="stylesheet" href="/shared/base.css">
+<link rel="stylesheet" href="/shared/commands.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="site-header__inner">
+    <div class="brand">
+      <a class="brand__title" href="/pages/docs.html">dreamfactory</a>
+    </div>
+    <div class="header-actions"><button class="export-btn" id="export-btn" title="Copy visible results to clipboard as markdown">Export to Markdown</button></div>
+  </div>
+</header>
+
+<main>
+  <div class="hero-row">
+    <div class="hero">
+      <span class="hero-eyebrow">COMMAND REFERENCE</span>
+      <h1>strudel</h1>
+      <p>Algorithmic music composition — MCP + SuperCollider + NATS</p>
+    </div>
+    <div class="hero-meta"><div class="meta-chip"><span class="meta-chip__label">UPDATED</span><span class="meta-chip__value">2026-03-29</span></div><div class="meta-chip"><span class="meta-chip__label">REPO</span><span class="meta-chip__value">~/dev/strudel</span></div></div>
+  </div>
+  <div class="search-wrap"><span class="search-icon">&#x2315;</span><input class="search-input" type="text" placeholder="Search commands, snippets, or notes…" id="search" autocomplete="off" spellcheck="false"><span class="search-count" id="search-count"></span><button class="search-clear" id="search-clear" title="Clear search">&times;</button></div>
+
+  <section class="surface-card section-card" data-section="setup"><button class="section-header" type="button" aria-expanded="true"><span class="section-arrow">&#x25BC;</span><span class="section-title">Setup</span><span class="section-count">2</span></button><div class="section-body"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody>
+    <tr class="command-row" data-search="full monorepo setup pnpm install && pnpm build full monorepo setup"><td><div class="task-text">Full monorepo setup</div></td><td><button class="value-block value-block--shell" data-copy="pnpm install &amp;&amp; pnpm build" title="Copy value"><code class="value-text">pnpm install &amp;&amp; pnpm build</code></button></td><td class="desc-text">Full monorepo setup</td></tr>
+    <tr class="command-row" data-search="launch supercollider ide open /applications/supercollider.app launch supercollider ide"><td><div class="task-text">Launch SuperCollider IDE</div></td><td><button class="value-block value-block--shell" data-copy="open /Applications/SuperCollider.app" title="Copy value"><code class="value-text">open /Applications/SuperCollider.app</code></button></td><td class="desc-text">Launch SuperCollider IDE</td></tr>
+  </tbody></table></div></section>
+
+  <section class="surface-card section-card" data-section="development"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">&#x25BC;</span><span class="section-title">Development</span><span class="section-count">3</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody>
+    <tr class="command-row" data-search="watch + reload strudel mcp pnpm dev:strudel watch + reload strudel mcp"><td><div class="task-text">Watch Strudel MCP</div></td><td><button class="value-block value-block--shell" data-copy="pnpm dev:strudel" title="Copy value"><code class="value-text">pnpm dev:strudel</code></button></td><td class="desc-text">Watch + reload Strudel MCP</td></tr>
+    <tr class="command-row" data-search="watch + reload supercollider mcp pnpm dev:sc watch + reload supercollider mcp"><td><div class="task-text">Watch SuperCollider MCP</div></td><td><button class="value-block value-block--shell" data-copy="pnpm dev:sc" title="Copy value"><code class="value-text">pnpm dev:sc</code></button></td><td class="desc-text">Watch + reload SuperCollider MCP</td></tr>
+    <tr class="command-row" data-search="start beat-konducta http server + agent loop pnpm dev:bk start beat-konducta http server + agent loop"><td><div class="task-text">Start beat-konducta</div></td><td><button class="value-block value-block--shell" data-copy="pnpm dev:bk" title="Copy value"><code class="value-text">pnpm dev:bk</code></button></td><td class="desc-text">Start beat-konducta HTTP server + agent loop</td></tr>
+  </tbody></table></div></section>
+
+  <section class="surface-card section-card" data-section="testing"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">&#x25BC;</span><span class="section-title">Testing</span><span class="section-count">3</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody>
+    <tr class="command-row" data-search="all tests (129 total across 3 packages) pnpm test all tests (129 total across 3 packages)"><td><div class="task-text">All tests (129 total)</div></td><td><button class="value-block value-block--shell" data-copy="pnpm test" title="Copy value"><code class="value-text">pnpm test</code></button></td><td class="desc-text">All tests (129 total across 3 packages)</td></tr>
+    <tr class="command-row" data-search="strudel mcp tests (56) pnpm --filter @strudel-mcp/strudel test strudel mcp tests (56)"><td><div class="task-text">Strudel MCP tests (56)</div></td><td><button class="value-block value-block--shell" data-copy="pnpm --filter @strudel-mcp/strudel test" title="Copy value"><code class="value-text">pnpm --filter @strudel-mcp/strudel test</code></button></td><td class="desc-text">Strudel MCP tests (56)</td></tr>
+    <tr class="command-row" data-search="supercollider mcp tests (73) pnpm --filter @strudel-mcp/supercollider test supercollider mcp tests (73)"><td><div class="task-text">SuperCollider MCP tests (73)</div></td><td><button class="value-block value-block--shell" data-copy="pnpm --filter @strudel-mcp/supercollider test" title="Copy value"><code class="value-text">pnpm --filter @strudel-mcp/supercollider test</code></button></td><td class="desc-text">SuperCollider MCP tests (73)</td></tr>
+  </tbody></table></div></section>
+
+  <section class="surface-card section-card" data-section="config"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">&#x25BC;</span><span class="section-title">MCP Configuration</span><span class="section-count">3</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody>
+    <tr class="command-row" data-search="check mcp server registrations cat .mcp.json | jq '.mcpservers' check mcp server registrations"><td><div class="task-text">Check MCP registrations</div></td><td><button class="value-block value-block--shell" data-copy="cat .mcp.json | jq '.mcpServers'" title="Copy value"><code class="value-text">cat .mcp.json | jq '.mcpServers'</code></button></td><td class="desc-text">Check MCP server registrations</td></tr>
+    <tr class="command-row" data-search="check beat-konducta nats connection curl http://127.0.0.1:3000/status 2>/dev/null | jq .nats check beat-konducta nats connection"><td><div class="task-text">Check NATS connection</div></td><td><button class="value-block value-block--shell" data-copy="curl http://127.0.0.1:3000/status 2>/dev/null | jq .nats" title="Copy value"><code class="value-text">curl http://127.0.0.1:3000/status 2>/dev/null | jq .nats</code></button></td><td class="desc-text">Check beat-konducta NATS connection</td></tr>
+    <tr class="command-row" data-search="review str docs index ls -1 docs/str/str*.md | sort -v review str docs index"><td><div class="task-text">Review STR docs index</div></td><td><button class="value-block value-block--shell" data-copy="ls -1 docs/str/STR*.md | sort -V" title="Copy value"><code class="value-text">ls -1 docs/str/STR*.md | sort -V</code></button></td><td class="desc-text">Review STR docs index</td></tr>
+  </tbody></table></div></section>
+</main>
+
+<footer>
+  <div class="inner">
+    <span>strudel | pnpm monorepo | TypeScript + SuperCollider + NATS | 129 tests</span>
+    <span>strudel_repo-commands.html</span>
+  </div>
+</footer>
+
+<script src="/shared/dust.js"></script>
+<script src="/shared/theme.js"></script>
+<script src="/shared/commands.js"></script>
+</body>
+</html>

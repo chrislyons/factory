@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>memex-mcp</title>
+<link rel="stylesheet" href="/shared/base.css">
+<link rel="stylesheet" href="/shared/gallery.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="site-header__inner">
+    <div class="brand">
+      <a class="brand__title" href="/pages/docs.html">dreamfactory</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="hero-row">
+    <div class="hero">
+      <span class="hero-eyebrow">ARCHITECTURE GALLERY</span>
+      <h1>memex-mcp</h1>
+      <p>Personal email archive MCP server — Python + FastMCP + SQLite FTS5</p>
+    </div>
+    <div class="hero-meta"><div class="meta-chip"><span class="meta-chip__label">UPDATED</span><span class="meta-chip__value">2026-03-29</span></div><div class="meta-chip"><span class="meta-chip__label">VERSION</span><span class="meta-chip__value">1.0</span></div></div>
+  </div>
+  <section class="gallery-nav"><div class="nav-group"><span class="nav-group__label">System:</span><a class="nav-chip" href="#data-flow" data-target="data-flow">Data Flow</a><a class="nav-chip" href="#schema" data-target="schema">Database Schema</a><a class="nav-chip" href="#parsing" data-target="parsing">Message Parsing</a><a class="nav-chip" href="#search" data-target="search">Search Path</a></div></section>
+  <section class="callout-grid"><article class="surface-card callout callout--info"><h2>Diagram Collection</h2><p>4 diagrams covering data flow, database schema, message parsing pipeline, and search query path.</p><p>Click headers to expand/collapse. Diagrams render via Mermaid.js. Press a to expand all, Esc to collapse all.</p></article></section>
+  <section class="section-block" data-section="memex-data"><div class="section-heading"><span>Data Architecture</span></div><div class="diagram-stack"><article class="surface-card diagram-card" id="data-flow" data-diagram-id="data-flow"><button class="diagram-header" type="button" aria-expanded="true"><span class="diagram-arrow">&#9660;</span><span class="diagram-header__copy"><span class="diagram-title">Data Flow &amp; MCP Tools</span><p class="diagram-description">Ingest pipeline from mbox files through FTS5 indexing to MCP tool exposure</p></span><span class="diagram-kind">FLOWCHART</span></button><div class="diagram-content"><div class="diagram-canvas"><div class="diagram-loading">Rendering diagram...</div></div><script type="application/json" class="mermaid-source">"graph TB\nSRC[\"Email source\\nmbox files\"]\nING[\"Ingest script\\nbatch parser\"]\nFTS[\"FTS5 indexing\"]\nDB[\"SQLite archive.db\"]\nSRV[\"ArchiveServer\"]\nsubgraph TOOLS[\"MCP Tools\"]\nS1[\"search_email\"]\nS2[\"get_thread\"]\nS3[\"get_message\"]\nS4[\"list_correspondents\"]\nS5[\"search_by_correspondent\"]\nS6[\"get_archive_stats\"]\nend\nAGT[\"Claude agent\"]\nSRC --> ING\nING --> FTS\nFTS --> DB\nDB --> SRV\nSRV --> S1\nSRV --> S2\nSRV --> S3\nSRV --> S4\nSRV --> S5\nSRV --> S6\nS1 --> AGT\nS2 --> AGT\nstyle SRC fill:#cce5ff\nstyle DB fill:#d4edda\nstyle SRV fill:#fff3cd\nstyle AGT fill:#e7e7ff"</script></div></article><article class="surface-card diagram-card" id="schema" data-diagram-id="schema"><button class="diagram-header" type="button" aria-expanded="true"><span class="diagram-arrow">&#9660;</span><span class="diagram-header__copy"><span class="diagram-title">SQLite Schema</span><p class="diagram-description">Messages table, FTS5 virtual table, and metadata</p></span><span class="diagram-kind">ER DIAGRAM</span></button><div class="diagram-content"><div class="diagram-canvas"><div class="diagram-loading">Rendering diagram...</div></div><script type="application/json" class="mermaid-source">"erDiagram\nmessages {\nstring message_id PK\nstring thread_id\nstring from_addr\nstring to_addrs\nstring cc_addrs\nstring subject\nstring body_text\nstring quoted_text\nstring labels\nstring date_utc\nstring source_batch\nboolean has_attachments\n}\nmessages_fts {\nstring subject\nstring body_text\n}\nmeta {\nint schema_version\n}\nmessages ||--|| messages_fts : \"indexed by\""</script></div></article></div></section><section class="section-block" data-section="memex-pipeline"><div class="section-heading"><span>Processing Pipeline</span></div><div class="diagram-stack"><article class="surface-card diagram-card" id="parsing" data-diagram-id="parsing"><button class="diagram-header" type="button" aria-expanded="true"><span class="diagram-arrow">&#9660;</span><span class="diagram-header__copy"><span class="diagram-title">Message Parsing Pipeline</span><p class="diagram-description">MIME parsing, address normalization, HTML stripping, and quote splitting</p></span><span class="diagram-kind">FLOWCHART</span></button><div class="diagram-content"><div class="diagram-canvas"><div class="diagram-loading">Rendering diagram...</div></div><script type="application/json" class="mermaid-source">"graph TB\nRAW[\"Raw MIME message\"]\nHDR[\"Parse headers\\nfrom, to, cc, date\"]\nNORM[\"Normalize addresses\"]\nBODY[\"Extract body parts\\nmultipart handling\"]\nHTML[\"HTML -> plaintext\"]\nQUOTE[\"Split quoted reply\\ndetect reply markers\"]\nREC[\"MessageRecord\"]\nINS[\"SQLite INSERT\"]\nRAW --> HDR\nHDR --> NORM\nNORM --> BODY\nBODY --> HTML\nHTML --> QUOTE\nQUOTE --> REC\nREC --> INS\nstyle RAW fill:#cce5ff\nstyle REC fill:#d4edda\nstyle INS fill:#fff3cd"</script></div></article><article class="surface-card diagram-card" id="search" data-diagram-id="search"><button class="diagram-header" type="button" aria-expanded="true"><span class="diagram-arrow">&#9660;</span><span class="diagram-header__copy"><span class="diagram-title">Search &amp; Filter Query Path</span><p class="diagram-description">From MCP tool call through validation, SQL building, and FTS execution</p></span><span class="diagram-kind">SEQUENCE</span></button><div class="diagram-content"><div class="diagram-canvas"><div class="diagram-loading">Rendering diagram...</div></div><script type="application/json" class="mermaid-source">"sequenceDiagram\nparticipant A as MCP Tool Call\nparticipant V as Validator\nparticipant B as SQL Builder\nparticipant F as FTS Engine\nparticipant R as Response\nA->>V: search_email(query, filters)\nV->>V: Normalize dates & addresses\nV->>B: Build WHERE clauses\nB->>F: Execute FTS JOIN\nF->>F: json_each for to/cc\nF-->>R: Paginated results (max 250)\nR-->>A: Serialized response"</script></div></article></div></section>
+</main>
+
+<footer>
+  <div class="footer-notes"><p><strong>memex-mcp Architecture</strong> | Generated 2026-03-29</p><p>Stack: Python 3.10+, FastMCP, SQLite FTS5</p></div>
+</footer>
+
+<script src="/shared/dust.js"></script>
+<script src="/shared/theme.js"></script>
+<script type="module" src="/shared/gallery.js"></script>
+</body>
+</html>

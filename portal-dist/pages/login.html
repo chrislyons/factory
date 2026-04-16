@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta name="theme-color" content="#352619" />
+  <title>Factory — Login</title>
+  <style>
+    @font-face {
+      font-family: "Geist Pixel Square";
+      src: url("/fonts/GeistPixel-Square.woff2") format("woff2");
+      font-display: swap;
+      font-weight: 400;
+    }
+    @font-face {
+      font-family: "Geist Mono UltraLight";
+      src: url("/fonts/GeistMono-UltraLight.woff2") format("woff2");
+      font-display: swap;
+      font-weight: 200;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #352619;
+      --bg-panel: #2a1e12;
+      --border: rgba(255,255,255,0.08);
+      --border-strong: rgba(255,255,255,0.13);
+      --text: #FFFDF9;
+      --text-dim: #c4a882;
+      --text-muted: #8b7355;
+      --accent: #FFB800;
+      --accent-soft: rgba(255, 184, 0, 0.10);
+      --accent-border: rgba(255, 184, 0, 0.36);
+      --red: #f87171;
+      --font-display: "Geist Pixel Square", monospace;
+      --font-mono: "Geist Mono UltraLight", ui-monospace, monospace;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 360px;
+      padding: 32px 28px;
+      background: var(--bg-panel);
+      border: 1px solid var(--border-strong);
+      border-radius: 12px;
+    }
+
+    .login-brand {
+      font-family: var(--font-display);
+      font-size: 16px;
+      letter-spacing: -0.03em;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .login-brand-sub {
+      font-family: var(--font-display);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 24px;
+    }
+
+    .login-field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin-bottom: 16px;
+    }
+
+    .login-label {
+      font-size: 11px;
+      color: var(--text-dim);
+      letter-spacing: 0.04em;
+    }
+
+    .login-input {
+      width: 100%;
+      padding: 9px 12px;
+      background: var(--bg);
+      border: 1px solid var(--border-strong);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      outline: none;
+      transition: border-color 160ms ease;
+    }
+
+    .login-input:focus {
+      border-color: var(--accent-border);
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 10px;
+      margin-top: 8px;
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      color: #1a1207;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 160ms ease;
+    }
+
+    .login-btn:hover {
+      opacity: 0.88;
+    }
+
+    .login-error {
+      margin-top: 12px;
+      padding: 8px 12px;
+      background: rgba(248, 113, 113, 0.1);
+      border: 1px solid rgba(248, 113, 113, 0.3);
+      border-radius: 8px;
+      color: var(--red);
+      font-size: 12px;
+      display: none;
+    }
+
+    .login-error.is-visible {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <form class="login-card" method="POST" action="/auth/login">
+    <div class="login-brand">dreamfactory</div>
+    <div class="login-brand-sub">PORTAL</div>
+
+    <div class="login-field">
+      <label class="login-label" for="username">Username</label>
+      <input class="login-input" type="text" id="username" name="username" autocomplete="username" autofocus required />
+    </div>
+
+    <div class="login-field">
+      <label class="login-label" for="password">Password</label>
+      <input class="login-input" type="password" id="password" name="password" autocomplete="current-password" required />
+    </div>
+
+    <input type="hidden" id="redirect" name="redirect" value="/" />
+    <button class="login-btn" type="submit">Sign in</button>
+
+    <div class="login-error" id="error-msg">Invalid username or password.</div>
+  </form>
+
+  <script src="login.js"></script>
+</body>
+</html>

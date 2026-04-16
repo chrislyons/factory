@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>vmotes - Command Reference</title>
+    <!-- Local fonts: Satoshi from shared-fonts (offline, no CDN) -->
+    <style>
+        @font-face {
+            font-family: 'Satoshi';
+            src: url('../../shared-fonts/fontshare/body-text/satoshi/Satoshi-Regular.woff2') format('woff2');
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Satoshi';
+            src: url('../../shared-fonts/fontshare/body-text/satoshi/Satoshi-Medium.woff2') format('woff2');
+            font-weight: 500;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Satoshi';
+            src: url('../../shared-fonts/fontshare/body-text/satoshi/Satoshi-Bold.woff2') format('woff2');
+            font-weight: 600;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Satoshi', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            padding: 1rem 2rem;
+            line-height: 1.5;
+            font-size: 0.75rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: #fff;
+        }
+
+        .subtitle {
+            color: #888;
+            margin-bottom: 0.75rem;
+            font-size: 0.675rem;
+        }
+
+        .last-updated {
+            color: #666;
+            font-size: 0.625rem;
+            margin-bottom: 0.75rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #242424;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        thead {
+            background: #2a2a2a;
+        }
+
+        th {
+            padding: 0.75rem;
+            text-align: left;
+            font-weight: 600;
+            color: #fff;
+            border-bottom: 2px solid #333;
+            font-size: 0.75rem;
+        }
+
+        th:nth-child(1) { width: 20%; }
+        th:nth-child(2) { width: 35%; }
+        th:nth-child(3) { width: 45%; }
+
+        td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #2a2a2a;
+            font-size: 0.75rem;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background: #2a2a2a;
+        }
+
+        .command {
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Courier New', monospace;
+            background: #1a1a1a;
+            padding: 0.375rem 0.5rem;
+            border-radius: 3px;
+            font-size: 0.675rem;
+            color: #4fc3f7;
+            cursor: pointer;
+            display: inline-block;
+            transition: background 0.2s;
+            position: relative;
+            user-select: none;
+        }
+
+        .command:hover {
+            background: #222;
+        }
+
+        .command:active {
+            background: #2a4858;
+        }
+
+        .command::after {
+            content: '\1F4CB';
+            margin-left: 0.5rem;
+            opacity: 0.5;
+        }
+
+        .copied {
+            animation: flash 0.3s;
+        }
+
+        @keyframes flash {
+            0%, 100% { background: #1a1a1a; }
+            50% { background: #2a5a3a; }
+        }
+
+        .description {
+            color: #b0b0b0;
+            font-size: 0.675rem;
+        }
+
+        .job {
+            color: #fff;
+            font-weight: 500;
+            font-size: 0.75rem;
+        }
+
+        .section-header {
+            background: #2a2a2a;
+            font-weight: 600;
+            color: #fff;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .section-header:hover {
+            background: #333;
+        }
+
+        .section-header:focus {
+            outline: 2px solid #4fc3f7;
+            outline-offset: -2px;
+        }
+
+        .section-header td {
+            padding: 0.5rem 0.75rem;
+            border-bottom: 2px solid #333;
+            position: relative;
+            font-size: 0.75rem;
+        }
+
+        .section-header td::before {
+            content: '\25BC';
+            margin-right: 0.375rem;
+            font-size: 0.5625rem;
+            transition: transform 0.2s;
+            display: inline-block;
+        }
+
+        .section-header.collapsed td::before {
+            transform: rotate(-90deg);
+        }
+
+        .section-row {
+            transition: opacity 0.2s;
+        }
+
+        .section-row.hidden {
+            display: none;
+        }
+
+        footer {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #333;
+            color: #666;
+            font-size: 0.625rem;
+        }
+
+        .warning {
+            background: #3a2a1a;
+            border-left: 3px solid #ff9800;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+            border-radius: 3px;
+            font-size: 0.675rem;
+        }
+
+        .warning-title {
+            color: #ff9800;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            font-size: 0.75rem;
+        }
+
+        .info {
+            background: #1a2a3a;
+            border-left: 3px solid #4fc3f7;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+            border-radius: 3px;
+            font-size: 0.675rem;
+        }
+
+        .info-title {
+            color: #4fc3f7;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .success {
+            background: #1a3a2a;
+            border-left: 3px solid #4caf50;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+            border-radius: 3px;
+            font-size: 0.675rem;
+        }
+
+        .success-title {
+            color: #4caf50;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .key {
+            display: inline-block;
+            background: #3a3a3a;
+            color: #fff;
+            padding: 0.15rem 0.4rem;
+            border-radius: 3px;
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 0.625rem;
+            border: 1px solid #555;
+            margin: 0 0.1rem;
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 0.5rem 0.75rem;
+            }
+
+            h1 {
+                font-size: 1.25rem;
+            }
+
+            .subtitle {
+                font-size: 0.6rem;
+            }
+
+            table {
+                display: block;
+            }
+
+            thead {
+                display: none;
+            }
+
+            tbody {
+                display: block;
+            }
+
+            tr {
+                display: block;
+                margin-bottom: 0.5rem;
+            }
+
+            tr.section-header {
+                margin-bottom: 0;
+            }
+
+            tr.section-row {
+                display: flex;
+                flex-wrap: wrap;
+                padding: 0.5rem;
+                gap: 0.25rem;
+            }
+
+            tr.section-row td {
+                display: block;
+                padding: 0.25rem 0;
+                border: none;
+            }
+
+            tr.section-row td.job {
+                width: 100%;
+                font-size: 0.7rem;
+            }
+
+            tr.section-row td:nth-child(2) {
+                width: 100%;
+            }
+
+            tr.section-row td.description {
+                width: 100%;
+                font-size: 0.625rem;
+                color: #888;
+            }
+
+            .command {
+                font-size: 0.6rem;
+                word-break: break-all;
+                white-space: normal;
+            }
+
+            .command::after {
+                display: none;
+            }
+
+            .key {
+                font-size: 0.55rem;
+                padding: 0.1rem 0.3rem;
+            }
+
+            .warning, .info, .success {
+                padding: 0.5rem;
+                font-size: 0.625rem;
+            }
+
+            .warning-title, .info-title, .success-title {
+                font-size: 0.7rem;
+            }
+
+            footer {
+                font-size: 0.55rem;
+            }
+
+            footer p {
+                margin-bottom: 0.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 0.5rem;
+            }
+
+            h1 {
+                font-size: 1.1rem;
+            }
+
+            .section-header td {
+                font-size: 0.7rem;
+            }
+
+            tr.section-row td.job {
+                font-size: 0.65rem;
+            }
+
+            .command {
+                font-size: 0.55rem;
+                padding: 0.25rem 0.375rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>vmotes - Command Reference</h1>
+        <p class="subtitle">Deterministic 3D particle cloud synthesis with OSC/WebSocket control</p>
+        <p class="last-updated">Last updated: March 18, 2026</p>
+
+        <div class="warning">
+            <div class="warning-title">Local Use Only</div>
+            This page is for local development reference. Click any command to copy it to clipboard.
+        </div>
+
+        <div class="info">
+            <div class="info-title">Keyboard Shortcuts (in browser)</div>
+            Backtick (<span class="key">`</span>) — Toggle dev HUD &nbsp;|&nbsp; <span class="key">V</span> — Toggle video input mode
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Job</th>
+                    <th>Command</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- 1. Development (open by default) -->
+                <tr class="section-header" data-section="development" tabindex="0">
+                    <td colspan="3">Development</td>
+                </tr>
+                <tr class="section-row" data-section="development">
+                    <td class="job">Start dev server</td>
+                    <td><span class="command">pnpm dev</span></td>
+                    <td class="description">Starts Vite + auto-launches OSC relay server</td>
+                </tr>
+                <tr class="section-row" data-section="development">
+                    <td class="job">Start dev (no relay)</td>
+                    <td><span class="command">pnpm exec vite</span></td>
+                    <td class="description">Vite only, no OSC/WS relay</td>
+                </tr>
+                <tr class="section-row" data-section="development">
+                    <td class="job">Build production</td>
+                    <td><span class="command">pnpm build</span></td>
+                    <td class="description">Production build to dist/</td>
+                </tr>
+                <tr class="section-row" data-section="development">
+                    <td class="job">Preview build</td>
+                    <td><span class="command">pnpm preview</span></td>
+                    <td class="description">Preview production build locally</td>
+                </tr>
+                <tr class="section-row" data-section="development">
+                    <td class="job">Type check</td>
+                    <td><span class="command">npx tsc --noEmit</span></td>
+                    <td class="description">Verify zero TypeScript errors</td>
+                </tr>
+
+                <!-- 2. OSC Relay Server (collapsed) -->
+                <tr class="section-header collapsed" data-section="osc-relay" tabindex="0">
+                    <td colspan="3">OSC Relay Server</td>
+                </tr>
+                <tr class="section-row hidden" data-section="osc-relay">
+                    <td class="job">Start relay standalone</td>
+                    <td><span class="command">node server/relay.mjs</span></td>
+                    <td class="description">OSC UDP:9000 + WebSocket:9001</td>
+                </tr>
+                <tr class="section-row hidden" data-section="osc-relay">
+                    <td class="job">Start relay (custom ports)</td>
+                    <td><span class="command">VMOTES_OSC_PORT=9999 VMOTES_WS_PORT=9998 node server/relay.mjs</span></td>
+                    <td class="description">Custom ports</td>
+                </tr>
+                <tr class="section-row hidden" data-section="osc-relay">
+                    <td class="job">Install relay deps</td>
+                    <td><span class="command">cd server && npm install</span></td>
+                    <td class="description">Install relay server dependencies</td>
+                </tr>
+
+                <!-- 3. OSC Control - Tier 1 Parameters (collapsed) -->
+                <tr class="section-header collapsed" data-section="osc-tier1" tabindex="0">
+                    <td colspan="3">OSC Control — Tier 1 Parameters</td>
+                </tr>
+                <tr class="section-row hidden" data-section="osc-tier1">
+                    <td class="job">Set density</td>
+                    <td><span class="command">oscsend localhost 9000 /vmotes/density f 0.8</span></td>
+                    <td class="description">Particle concentration (0.01-1.0)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="osc-tier1">
+                    <td class="job">Set scale</td>
+                    <td><span class="command">oscsend localhost 9000 /vmotes/scale f 2.0</span></td>
+                    <td class="description">Vessel size (0.1-5.0)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="osc-tier1">
+                    <td class="job">Set luminosity</td>
+                    <td><span class="command">oscsend localhost 9000 /vmotes/luminosity f 2.5</span></td>
+                    <td class="description">Brightness (0.0-3.0, no rebuild)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="osc-tier1">
+                    <td class="job">Set fill</td>
+                    <td><span class="command">oscsend localhost 9000 /vmotes/fill f 0.6</span></td>
+                    <td class="description">Volumetric fill (0.0-1.0)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="osc-tier1">
+                    <td class="job">Set force</td>
+                    <td><span class="command">oscsend localhost 9000 /vmotes/force f 0.5</span></td>
+                    <td class="description">Centripetal gravity (0.0-1.0)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="osc-tier1">
+                    <td class="job">Set seed</td>
+                    <td><span class="command">oscsend localhost 9000 /vmotes/seed i 12345</span></td>
+                    <td class="description">PRNG seed (uint32)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="osc-tier1">
+                    <td class="job">Set theme</td>
+                    <td><span class="command">oscsend localhost 9000 /vmotes/theme s hologram</span></td>
+                    <td class="description">Theme (hologram/photorealistic/monochrome)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="osc-tier1">
+                    <td class="job">Set shape</td>
+                    <td><span class="command">oscsend localhost 9000 /vmotes/shape s "Torus Knot"</span></td>
+                    <td class="description">Vessel preset</td>
+                </tr>
+                <tr class="section-row hidden" data-section="osc-tier1">
+                    <td class="job">Enable quantize H</td>
+                    <td><span class="command">oscsend localhost 9000 /vmotes/quantizeH i 1</span></td>
+                    <td class="description">Horizontal lattice snap</td>
+                </tr>
+
+                <!-- 4. OSC Control - Tier 2 Expressive (collapsed) -->
+                <tr class="section-header collapsed" data-section="osc-tier2" tabindex="0">
+                    <td colspan="3">OSC Control — Tier 2 Expressive</td>
+                </tr>
+                <tr class="section-row hidden" data-section="osc-tier2">
+                    <td class="job">Scatter</td>
+                    <td><span class="command">oscsend localhost 9000 /vmotes/scatter f 0.5</span></td>
+                    <td class="description">Per-vmote random displacement (0-1)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="osc-tier2">
+                    <td class="job">Spin</td>
+                    <td><span class="command">oscsend localhost 9000 /vmotes/spin f 0.8</span></td>
+                    <td class="description">Cloud Y-axis rotation rad/s (-2 to 2)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="osc-tier2">
+                    <td class="job">Tilt</td>
+                    <td><span class="command">oscsend localhost 9000 /vmotes/tilt f 0.3</span></td>
+                    <td class="description">Cloud X-axis tilt (-1 to 1)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="osc-tier2">
+                    <td class="job">Orbit</td>
+                    <td><span class="command">oscsend localhost 9000 /vmotes/orbit f 0.4</span></td>
+                    <td class="description">Per-vmote orbital animation (0-1)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="osc-tier2">
+                    <td class="job">Pulse</td>
+                    <td><span class="command">oscsend localhost 9000 /vmotes/pulse f 0.6</span></td>
+                    <td class="description">Rhythmic scale breathing (0-1)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="osc-tier2">
+                    <td class="job">Hue shift</td>
+                    <td><span class="command">oscsend localhost 9000 /vmotes/hue f 0.3</span></td>
+                    <td class="description">HSL hue shift (-1 to 1)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="osc-tier2">
+                    <td class="job">Saturation</td>
+                    <td><span class="command">oscsend localhost 9000 /vmotes/sat f 1.5</span></td>
+                    <td class="description">Saturation multiplier (0-2)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="osc-tier2">
+                    <td class="job">Emit</td>
+                    <td><span class="command">oscsend localhost 9000 /vmotes/emit f 0.5</span></td>
+                    <td class="description">Particle visibility fraction (0-1)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="osc-tier2">
+                    <td class="job">Camera distance</td>
+                    <td><span class="command">oscsend localhost 9000 /vmotes/cam_dist f 8.0</span></td>
+                    <td class="description">Camera distance (1-20)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="osc-tier2">
+                    <td class="job">Camera height</td>
+                    <td><span class="command">oscsend localhost 9000 /vmotes/cam_height f 3.0</span></td>
+                    <td class="description">Camera Y position (-5 to 10)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="osc-tier2">
+                    <td class="job">Camera spin</td>
+                    <td><span class="command">oscsend localhost 9000 /vmotes/cam_spin f 0.2</span></td>
+                    <td class="description">Camera auto-orbit (-2 to 2)</td>
+                </tr>
+
+                <!-- 5. OSC Control - FFT & Envelopes (collapsed) -->
+                <tr class="section-header collapsed" data-section="osc-fft" tabindex="0">
+                    <td colspan="3">OSC Control — FFT &amp; Envelopes</td>
+                </tr>
+                <tr class="section-row hidden" data-section="osc-fft">
+                    <td class="job">FFT kick band</td>
+                    <td><span class="command">oscsend localhost 9000 /vmotes/fft/kick f 0.9</span></td>
+                    <td class="description">Kick energy (0-1, maps to density+scale)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="osc-fft">
+                    <td class="job">FFT hi band</td>
+                    <td><span class="command">oscsend localhost 9000 /vmotes/fft/hi f 0.7</span></td>
+                    <td class="description">Hi-hat energy (0-1, maps to scatter)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="osc-fft">
+                    <td class="job">FFT mid band</td>
+                    <td><span class="command">oscsend localhost 9000 /vmotes/fft/mid f 0.5</span></td>
+                    <td class="description">Mid energy (0-1, maps to luminosity)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="osc-fft">
+                    <td class="job">FFT air band</td>
+                    <td><span class="command">oscsend localhost 9000 /vmotes/fft/air f 0.3</span></td>
+                    <td class="description">Air energy (0-1, maps to orbit)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="osc-fft">
+                    <td class="job">FFT sub band</td>
+                    <td><span class="command">oscsend localhost 9000 /vmotes/fft/sub f 0.8</span></td>
+                    <td class="description">Sub-bass energy (0-1, maps to scale+force)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="osc-fft">
+                    <td class="job">Envelope trigger</td>
+                    <td><span class="command">oscsend localhost 9000 /vmotes/envelope/trigger s density f 0.9 f 0.05 f 0.2 f 0.6 f 0.5</span></td>
+                    <td class="description">ADSR envelope (param, target, A, D, S, R)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="osc-fft">
+                    <td class="job">Envelope release</td>
+                    <td><span class="command">oscsend localhost 9000 /vmotes/envelope/release s density</span></td>
+                    <td class="description">Release envelope for param</td>
+                </tr>
+
+                <!-- 6. Strudel Integration (collapsed) -->
+                <tr class="section-header collapsed" data-section="strudel" tabindex="0">
+                    <td colspan="3">Strudel Integration</td>
+                </tr>
+                <tr class="section-row hidden" data-section="strudel">
+                    <td class="job">Strudel pattern (direct)</td>
+                    <td><span class="command">oscsend localhost 9000 /dirt/play s density f 0.8 s lum f 2.0 s spin f 0.5</span></td>
+                    <td class="description">Strudel /dirt/play with visual params</td>
+                </tr>
+                <tr class="section-row hidden" data-section="strudel">
+                    <td class="job">Connect Strudel headless</td>
+                    <td><span class="command">strudel_play_headless('s("bd").density(0.8).lum(2)', 120, '127.0.0.1', 9000)</span></td>
+                    <td class="description">Start Strudel headless scheduler targeting vmotes relay</td>
+                </tr>
+                <tr class="section-row hidden" data-section="strudel">
+                    <td class="job">Stop Strudel headless</td>
+                    <td><span class="command">strudel_stop_headless()</span></td>
+                    <td class="description">Stop headless scheduler</td>
+                </tr>
+
+                <!-- 7. Keyboard Shortcuts (collapsed) -->
+                <tr class="section-header collapsed" data-section="keyboard" tabindex="0">
+                    <td colspan="3">Keyboard Shortcuts</td>
+                </tr>
+                <tr class="section-row hidden" data-section="keyboard">
+                    <td class="job">Toggle HUD</td>
+                    <td><span class="key">`</span> (backtick)</td>
+                    <td class="description">Show/hide dev HUD (FPS, tier, count, seed)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="keyboard">
+                    <td class="job">Toggle video input</td>
+                    <td><span class="key">V</span></td>
+                    <td class="description">Toggle segmentation input mode</td>
+                </tr>
+                <tr class="section-row hidden" data-section="keyboard">
+                    <td class="job">Graph mode</td>
+                    <td><span class="key">G</span></td>
+                    <td class="description">Graph mode (not yet implemented)</td>
+                </tr>
+
+                <!-- 8. Git & Quality (collapsed) -->
+                <tr class="section-header collapsed" data-section="git-quality" tabindex="0">
+                    <td colspan="3">Git &amp; Quality</td>
+                </tr>
+                <tr class="section-row hidden" data-section="git-quality">
+                    <td class="job">Check status</td>
+                    <td><span class="command">git status</span></td>
+                    <td class="description">View current branch and changes</td>
+                </tr>
+                <tr class="section-row hidden" data-section="git-quality">
+                    <td class="job">Type check</td>
+                    <td><span class="command">npx tsc --noEmit</span></td>
+                    <td class="description">Verify zero TypeScript errors</td>
+                </tr>
+                <tr class="section-row hidden" data-section="git-quality">
+                    <td class="job">View recent commits</td>
+                    <td><span class="command">git log --oneline -10</span></td>
+                    <td class="description">Last 10 commits</td>
+                </tr>
+                <tr class="section-row hidden" data-section="git-quality">
+                    <td class="job">View diff</td>
+                    <td><span class="command">git diff</span></td>
+                    <td class="description">Unstaged changes</td>
+                </tr>
+
+                <!-- 9. Documentation (collapsed) -->
+                <tr class="section-header collapsed" data-section="documentation" tabindex="0">
+                    <td colspan="3">Documentation</td>
+                </tr>
+                <tr class="section-row hidden" data-section="documentation">
+                    <td class="job">View VMS docs</td>
+                    <td><span class="command">ls -1 docs/vms/VMS*.md | sort -V</span></td>
+                    <td class="description">List all VMS documentation</td>
+                </tr>
+                <tr class="section-row hidden" data-section="documentation">
+                    <td class="job">View latest docs</td>
+                    <td><span class="command">ls -1 docs/vms/VMS*.md | sort -V | tail -6</span></td>
+                    <td class="description">Show 6 most recent docs</td>
+                </tr>
+                <tr class="section-row hidden" data-section="documentation">
+                    <td class="job">View index</td>
+                    <td><span class="command">cat docs/vms/INDEX.md</span></td>
+                    <td class="description">Documentation index</td>
+                </tr>
+                <tr class="section-row hidden" data-section="documentation">
+                    <td class="job">View vocabulary spec</td>
+                    <td><span class="command">cat "docs/vms/VMS004 Visual Parameter Vocabulary Specification.md"</span></td>
+                    <td class="description">Visual parameter vocabulary</td>
+                </tr>
+
+                <!-- 10. Diagnostics (collapsed) -->
+                <tr class="section-header collapsed" data-section="diagnostics" tabindex="0">
+                    <td colspan="3">Diagnostics</td>
+                </tr>
+                <tr class="section-row hidden" data-section="diagnostics">
+                    <td class="job">Check ports</td>
+                    <td><span class="command">lsof -i :9000 -i :9001 -i :5173</span></td>
+                    <td class="description">Check if relay and Vite ports are in use</td>
+                </tr>
+                <tr class="section-row hidden" data-section="diagnostics">
+                    <td class="job">Test WS connection</td>
+                    <td><span class="command">websocat ws://localhost:9001</span></td>
+                    <td class="description">Connect to relay WebSocket (requires websocat)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="diagnostics">
+                    <td class="job">Check Node version</td>
+                    <td><span class="command">node --version</span></td>
+                    <td class="description">Verify Node.js 18+</td>
+                </tr>
+                <tr class="section-row hidden" data-section="diagnostics">
+                    <td class="job">Check pnpm version</td>
+                    <td><span class="command">pnpm --version</span></td>
+                    <td class="description">Verify pnpm installed</td>
+                </tr>
+                <tr class="section-row hidden" data-section="diagnostics">
+                    <td class="job">View project structure</td>
+                    <td><span class="command">tree src -L 2 -d</span></td>
+                    <td class="description">Show source directory layout</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <footer>
+            <p><strong>Note:</strong> This is a local reference page. Commands are safe to run in your development environment.</p>
+            <p>Generated for: <strong>vmotes</strong> | Location: <code>~/dev/vmotes</code></p>
+            <p style="margin-top: 1rem;">&#9000; <strong>Keyboard:</strong> <strong>&uarr;&darr;</strong> navigate | <strong>&rarr;/&larr;</strong> expand/collapse | <strong>Space/Enter</strong> toggle | <strong>Cmd+Click</strong> collapse others | <strong>A</strong> expand all | <strong>Esc</strong> collapse all</p>
+        </footer>
+    </div>
+
+    <script>
+        // Click-to-copy functionality
+        document.querySelectorAll('.command').forEach(cmd => {
+            cmd.addEventListener('click', async function(e) {
+                e.stopPropagation();
+                const text = this.textContent.replace('\u{1F4CB}', '').trim();
+                try {
+                    await navigator.clipboard.writeText(text);
+                    this.classList.add('copied');
+                    setTimeout(() => this.classList.remove('copied'), 300);
+                } catch (err) {
+                    const textarea = document.createElement('textarea');
+                    textarea.value = text;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                    this.classList.add('copied');
+                    setTimeout(() => this.classList.remove('copied'), 300);
+                }
+            });
+        });
+
+        // Section toggle functionality
+        const sectionHeaders = document.querySelectorAll('.section-header');
+
+        function toggleSection(header, collapseOthers = false) {
+            const section = header.dataset.section;
+
+            if (collapseOthers) {
+                sectionHeaders.forEach(h => {
+                    if (h !== header) {
+                        h.classList.add('collapsed');
+                        document.querySelectorAll(`.section-row[data-section="${h.dataset.section}"]`)
+                            .forEach(row => row.classList.add('hidden'));
+                    }
+                });
+            }
+
+            header.classList.toggle('collapsed');
+            const rows = document.querySelectorAll(`.section-row[data-section="${section}"]`);
+            rows.forEach(row => row.classList.toggle('hidden'));
+        }
+
+        function expandAll() {
+            sectionHeaders.forEach(h => {
+                h.classList.remove('collapsed');
+                document.querySelectorAll(`.section-row[data-section="${h.dataset.section}"]`)
+                    .forEach(row => row.classList.remove('hidden'));
+            });
+        }
+
+        function collapseAll() {
+            sectionHeaders.forEach(h => {
+                h.classList.add('collapsed');
+                document.querySelectorAll(`.section-row[data-section="${h.dataset.section}"]`)
+                    .forEach(row => row.classList.add('hidden'));
+            });
+        }
+
+        sectionHeaders.forEach(header => {
+            header.addEventListener('click', (e) => {
+                toggleSection(header, e.metaKey || e.ctrlKey);
+            });
+            header.addEventListener('keydown', (e) => {
+                if (e.key === ' ' || e.key === 'Enter') {
+                    e.preventDefault();
+                    toggleSection(header, e.metaKey || e.ctrlKey);
+                }
+            });
+        });
+
+        // Keyboard navigation
+        let currentHeaderIndex = -1;
+        const headerArray = Array.from(sectionHeaders);
+
+        function focusHeader(index) {
+            if (index >= 0 && index < headerArray.length) {
+                currentHeaderIndex = index;
+                headerArray[index].focus();
+                headerArray[index].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+            const focusedHeader = document.activeElement;
+            if (focusedHeader && focusedHeader.classList.contains('section-header')) {
+                currentHeaderIndex = headerArray.indexOf(focusedHeader);
+            }
+
+            switch(e.key) {
+                case 'a':
+                    if (!e.ctrlKey && !e.metaKey) {
+                        e.preventDefault();
+                        expandAll();
+                    }
+                    break;
+
+                case 'Escape':
+                    e.preventDefault();
+                    collapseAll();
+                    break;
+
+                case 'ArrowDown':
+                    e.preventDefault();
+                    if (currentHeaderIndex < headerArray.length - 1) {
+                        focusHeader(currentHeaderIndex + 1);
+                    } else if (currentHeaderIndex === -1 && headerArray.length > 0) {
+                        focusHeader(0);
+                    }
+                    break;
+
+                case 'ArrowUp':
+                    e.preventDefault();
+                    if (currentHeaderIndex > 0) {
+                        focusHeader(currentHeaderIndex - 1);
+                    } else if (currentHeaderIndex === -1 && headerArray.length > 0) {
+                        focusHeader(headerArray.length - 1);
+                    }
+                    break;
+
+                case 'ArrowRight':
+                    if (document.activeElement && document.activeElement.classList.contains('section-header')) {
+                        e.preventDefault();
+                        if (document.activeElement.classList.contains('collapsed')) {
+                            toggleSection(document.activeElement);
+                        }
+                    }
+                    break;
+
+                case 'ArrowLeft':
+                    if (document.activeElement && document.activeElement.classList.contains('section-header')) {
+                        e.preventDefault();
+                        if (!document.activeElement.classList.contains('collapsed')) {
+                            toggleSection(document.activeElement);
+                        }
+                    }
+                    break;
+            }
+        });
+
+        // Focus first section on page load
+        if (headerArray.length > 0) {
+            headerArray[0].focus();
+            currentHeaderIndex = 0;
+        }
+    </script>
+</body>
+</html>

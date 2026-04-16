@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>claudezilla-docs</title>
+<link rel="stylesheet" href="/shared/base.css">
+<link rel="stylesheet" href="/shared/gallery.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="site-header__inner">
+    <div class="brand">
+      <a class="brand__title" href="/pages/docs.html">dreamfactory</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="hero-row">
+    <div class="hero">
+      <span class="hero-eyebrow">ARCHITECTURE GALLERY</span>
+      <h1>claudezilla-docs</h1>
+      <p>Documentation site for Claudezilla Firefox MCP extension — Astro + Starlight</p>
+    </div>
+    <div class="hero-meta"><div class="meta-chip"><span class="meta-chip__label">UPDATED</span><span class="meta-chip__value">2026-03-29</span></div><div class="meta-chip"><span class="meta-chip__label">VERSION</span><span class="meta-chip__value">1.0</span></div></div>
+  </div>
+  <section class="gallery-nav"><div class="nav-group"><span class="nav-group__label">System:</span><a class="nav-chip" href="#architecture" data-target="architecture">Extension Architecture</a><a class="nav-chip" href="#protocol" data-target="protocol">Wire Protocol</a><a class="nav-chip" href="#tools" data-target="tools">Tool Categories</a><a class="nav-chip" href="#multiagent" data-target="multiagent">Multi-Agent</a></div></section>
+  <section class="callout-grid"><article class="surface-card callout callout--info"><h2>Diagram Collection</h2><p>4 diagrams covering extension architecture, native messaging protocol, tool categories, and multi-agent tab ownership.</p><p>Click headers to expand/collapse. Diagrams render via Mermaid.js. Press a to expand all, Esc to collapse all.</p></article></section>
+  <section class="section-block" data-section="claudezilla-architecture"><div class="section-heading"><span>Architecture</span></div><div class="diagram-stack"><article class="surface-card diagram-card" id="architecture" data-diagram-id="architecture"><button class="diagram-header" type="button" aria-expanded="true"><span class="diagram-arrow">&#9660;</span><span class="diagram-header__copy"><span class="diagram-title">Extension + Host + MCP Architecture</span><p class="diagram-description">End-to-end message flow from Claude agent through MCP to Firefox tabs</p></span><span class="diagram-kind">FLOWCHART</span></button><div class="diagram-content"><div class="diagram-canvas"><div class="diagram-loading">Rendering diagram...</div></div><script type="application/json" class="mermaid-source">"graph LR\nCA[\"Claude agent\\nMCP client\"]\nMCP[\"MCP server\"]\nSOCK[\"Unix socket\\nIPC\"]\nHOST[\"Native host\\nindex.js + protocol.js\"]\nEXT[\"Firefox extension\"]\nFF[\"Firefox browser\"]\nTABS[\"Tab pool\\nmax 12\"]\nCA --> MCP\nMCP --> SOCK\nSOCK --> HOST\nHOST --> EXT\nEXT --> FF\nFF --> TABS\nstyle CA fill:#cce5ff\nstyle MCP fill:#d4edda\nstyle HOST fill:#fff3cd\nstyle EXT fill:#e7e7ff"</script></div></article><article class="surface-card diagram-card" id="protocol" data-diagram-id="protocol"><button class="diagram-header" type="button" aria-expanded="true"><span class="diagram-arrow">&#9660;</span><span class="diagram-header__copy"><span class="diagram-title">Native Messaging Wire Protocol</span><p class="diagram-description">4-byte length-prefixed message encoding and decoding pipeline</p></span><span class="diagram-kind">FLOWCHART</span></button><div class="diagram-content"><div class="diagram-canvas"><div class="diagram-loading">Rendering diagram...</div></div><script type="application/json" class="mermaid-source">"graph TB\nCOMP[\"Message composition\"]\nUTF[\"UTF-8 encode\"]\nLEN[\"4-byte length prefix\"]\nWR[\"Write to stdout\"]\nRD[\"Read from stdin\"]\nDEC[\"4-byte decode\"]\nUDEC[\"UTF-8 decode\"]\nPARSE[\"JSON parse\"]\nVAL[\"Validate command\"]\nEXEC[\"Execute handler\"]\nSER[\"Serialize response\"]\nCOMP --> UTF\nUTF --> LEN\nLEN --> WR\nWR -.->|stdin| RD\nRD --> DEC\nDEC --> UDEC\nUDEC --> PARSE\nPARSE --> VAL\nVAL --> EXEC\nEXEC --> SER\nstyle COMP fill:#cce5ff\nstyle EXEC fill:#d4edda\nstyle SER fill:#fff3cd"</script></div></article></div></section><section class="section-block" data-section="claudezilla-tools"><div class="section-heading"><span>Tools &amp; Multi-Agent</span></div><div class="diagram-stack"><article class="surface-card diagram-card" id="tools" data-diagram-id="tools"><button class="diagram-header" type="button" aria-expanded="true"><span class="diagram-arrow">&#9660;</span><span class="diagram-header__copy"><span class="diagram-title">MCP Tool Categories</span><p class="diagram-description">Browser control, introspection, screenshots, focus loops, dev tools, and page search</p></span><span class="diagram-kind">CLASS DIAGRAM</span></button><div class="diagram-content"><div class="diagram-canvas"><div class="diagram-loading">Rendering diagram...</div></div><script type="application/json" class="mermaid-source">"classDiagram\nclass BrowserControl {\ncreate_window()\nnavigate()\nget_tabs()\nclose_tab()\nclose_window()\n}\nclass Introspection {\nget_page_state()\nget_element_by_selector()\nget_form_data()\n}\nclass Screenshots {\ntake_screenshot()\n}\nclass FocusLoops {\nenter_focus_mode()\nexit_focus_mode()\ntrack_context()\n}\nclass DevTools {\nconsole_capture()\nnetwork_monitor()\n}\nclass PageSearch {\nfind_on_page()\n}"</script></div></article><article class="surface-card diagram-card" id="multiagent" data-diagram-id="multiagent"><button class="diagram-header" type="button" aria-expanded="true"><span class="diagram-arrow">&#9660;</span><span class="diagram-header__copy"><span class="diagram-title">Multi-Agent Tab Ownership</span><p class="diagram-description">Tab pool lifecycle from creation through ownership to coordinator-arbitrated release</p></span><span class="diagram-kind">STATE DIAGRAM</span></button><div class="diagram-content"><div class="diagram-canvas"><div class="diagram-loading">Rendering diagram...</div></div><script type="application/json" class="mermaid-source">"stateDiagram-v2\n[*] --> Available: tab pool (0-12)\nAvailable --> Owned: agent creates tab\nOwned --> InUse: agent navigates\nInUse --> Owned: navigation complete\nOwned --> Released: agent closes tab\nReleased --> Available: pool slot freed\nAvailable --> PoolFull: 12 tabs reached\nPoolFull --> MercyRequest: agent needs space\nMercyRequest --> Released: coordinator arbitrates"</script></div></article></div></section>
+</main>
+
+<footer>
+  <div class="footer-notes"><p><strong>claudezilla-docs Architecture</strong> | Generated 2026-03-29</p><p>Stack: Astro 5.6+, Starlight, Cloudflare Pages</p></div>
+</footer>
+
+<script src="/shared/dust.js"></script>
+<script src="/shared/theme.js"></script>
+<script type="module" src="/shared/gallery.js"></script>
+</body>
+</html>

@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ListMaker - Architecture Gallery</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'dark',
+            themeVariables: {
+                darkMode: true,
+                background: '#1a1a1a',
+                primaryColor: '#6366f1',
+                primaryTextColor: '#e0e0e0',
+                primaryBorderColor: '#818cf8',
+                lineColor: '#38bdf8',
+                secondaryColor: '#8b5cf6',
+                tertiaryColor: '#f97316'
+            },
+            flowchart: { curve: 'basis' },
+            sequence: { mirrorActors: false }
+        });
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            padding: 1rem 2rem;
+            line-height: 1.5;
+            font-size: 0.875rem;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: #fff;
+        }
+
+        h2 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #818cf8;
+            margin: 1.5rem 0 0.75rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #333;
+        }
+
+        .subtitle {
+            color: #a0a0a0;
+            margin-bottom: 0.75rem;
+            font-size: 0.8125rem;
+        }
+
+        .last-updated {
+            color: #999;
+            font-size: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .info {
+            background: #1a1a2e;
+            border-left: 3px solid #818cf8;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border-radius: 3px;
+            font-size: 0.75rem;
+        }
+
+        .info-title {
+            color: #818cf8;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-card {
+            background: #242424;
+            padding: 0.75rem;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: #a0a0a0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .diagram-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .diagram-card {
+            background: #242424;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .diagram-header {
+            background: #2a2a2a;
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 1px solid #333;
+        }
+
+        .diagram-header:hover {
+            background: #333;
+        }
+
+        .diagram-header::before {
+            content: '\25BC';
+            font-size: 0.7rem;
+            transition: transform 0.2s;
+            color: #a0a0a0;
+        }
+
+        .diagram-header.collapsed::before {
+            transform: rotate(-90deg);
+        }
+
+        .diagram-title {
+            font-weight: 600;
+            color: #fff;
+            font-size: 0.875rem;
+        }
+
+        .diagram-type {
+            font-size: 0.7rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 3px;
+            font-weight: 600;
+            margin-left: auto;
+        }
+
+        .diagram-type.flowchart { background: #2a2a4a; color: #818cf8; }
+        .diagram-type.sequence { background: #2a3a4a; color: #38bdf8; }
+        .diagram-type.er { background: #3a2a3a; color: #c084fc; }
+        .diagram-type.class { background: #3a3a2a; color: #fbbf24; }
+
+        .diagram-description {
+            font-size: 0.75rem;
+            color: #a0a0a0;
+            margin-left: 0.5rem;
+        }
+
+        .diagram-content {
+            padding: 1rem;
+            overflow-x: auto;
+            background: #1e1e1e;
+        }
+
+        .diagram-content.hidden {
+            display: none;
+        }
+
+        .diagram-content pre {
+            background: transparent;
+            margin: 0;
+        }
+
+        .mermaid {
+            display: flex;
+            justify-content: center;
+        }
+
+        .mermaid svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        footer {
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid #333;
+            color: #999;
+            font-size: 0.75rem;
+        }
+
+        footer a {
+            color: #818cf8;
+        }
+
+        .quick-nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .quick-nav a {
+            background: #2a2a2a;
+            color: #818cf8;
+            padding: 0.4rem 0.75rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 0.75rem;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        .quick-nav a:hover {
+            background: #3a3a3a;
+        }
+
+        .quick-nav a.section-label {
+            background: transparent;
+            color: #999;
+            padding-left: 0;
+            cursor: default;
+        }
+
+        .color-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            background: #242424;
+            border-radius: 6px;
+        }
+
+        .color-item {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.75rem;
+        }
+
+        .color-swatch {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+        }
+
+        kbd {
+            background: #333;
+            padding: 0.15rem 0.4rem;
+            border-radius: 3px;
+            font-size: 0.75rem;
+            border: 1px solid #555;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 0.5rem 1rem;
+            }
+            .diagram-content {
+                padding: 0.5rem;
+            }
+            .stats {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ListMaker - Architecture Gallery</h1>
+        <p class="subtitle">Modern SaaS Productivity Tool - React SPA + Cloudflare Workers</p>
+        <p class="last-updated">Last updated: 2026-01-18 | Version: 2.0</p>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value">8</div>
+                <div class="stat-label">Diagrams</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">12+</div>
+                <div class="stat-label">Views</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">15+</div>
+                <div class="stat-label">API Endpoints</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">7</div>
+                <div class="stat-label">Services</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">4</div>
+                <div class="stat-label">Custom Hooks</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">20+</div>
+                <div class="stat-label">Components</div>
+            </div>
+        </div>
+
+        <div class="info">
+            <div class="info-title">Diagram Collection</div>
+            8 architectural diagrams covering system architecture, component hierarchy, data flow, database schema, authentication, deployment, entry points, and repository structure.
+            Click headers to expand/collapse. Diagrams render via Mermaid.js. Press <kbd>a</kbd> to expand all, <kbd>Esc</kbd> to collapse all.
+        </div>
+
+        <div class="color-legend">
+            <div class="color-item">
+                <span class="color-swatch" style="background: #e1f5ff;"></span>
+                <span>Client/Browser</span>
+            </div>
+            <div class="color-item">
+                <span class="color-swatch" style="background: #fff3cd;"></span>
+                <span>React Router/Views</span>
+            </div>
+            <div class="color-item">
+                <span class="color-swatch" style="background: #d4edda;"></span>
+                <span>Local Storage</span>
+            </div>
+            <div class="color-item">
+                <span class="color-swatch" style="background: #cce5ff;"></span>
+                <span>Cloud/R2</span>
+            </div>
+            <div class="color-item">
+                <span class="color-swatch" style="background: #f8d7da;"></span>
+                <span>Encryption</span>
+            </div>
+            <div class="color-item">
+                <span class="color-swatch" style="background: #d1ecf1;"></span>
+                <span>API Endpoints</span>
+            </div>
+        </div>
+
+        <nav class="quick-nav">
+            <span class="section-label">System:</span>
+            <a href="#architecture">Architecture</a>
+            <a href="#deployment">Deployment</a>
+            <span class="section-label">Frontend:</span>
+            <a href="#components">Components</a>
+            <a href="#entry">Entry Points</a>
+            <span class="section-label">Backend:</span>
+            <a href="#dataflow">Data Flow</a>
+            <a href="#database">Database</a>
+            <a href="#auth">Auth</a>
+            <span class="section-label">Codebase:</span>
+            <a href="#repo">Repository</a>
+        </nav>
+
+        <!-- ================================================================== -->
+        <!-- SYSTEM OVERVIEW SECTION -->
+        <!-- ================================================================== -->
+
+        <h2>System Overview</h2>
+
+        <div class="diagram-grid">
+            <!-- Architecture Overview -->
+            <div class="diagram-card" id="architecture">
+                <div class="diagram-header" onclick="toggleDiagram(this)">
+                    <span class="diagram-title">System Architecture</span>
+                    <span class="diagram-description">Multi-tier SaaS architecture with local-first storage</span>
+                    <span class="diagram-type flowchart">FLOWCHART</span>
+                </div>
+                <div class="diagram-content">
+                    <pre class="mermaid">
+graph TB
+    subgraph CLIENTS["Client Layer - Browser"]
+        Browser["Web Browser<br/>Chrome, Firefox, Safari"]
+        WebAPIs["Browser APIs<br/>localStorage, Web Crypto<br/>Fetch, History"]
+    end
+
+    subgraph PRESENTATION["Presentation Layer - React SPA"]
+        Router["React Router v7<br/>Client-side routing"]
+        Views["Views<br/>Home, List, Create<br/>Shared, Settings, Auth"]
+        Components["UI Components<br/>Layout, Lists, Modals<br/>Common, Auth"]
+    end
+
+    subgraph STATE["State Management"]
+        ReactState["React State<br/>useState, useReducer"]
+        Contexts["Context Providers<br/>ThemeContext, AuthContext"]
+        Hooks["Custom Hooks<br/>useCloudSync, useSearch<br/>useKeyboardNav"]
+    end
+
+    subgraph SERVICES["Service Layer"]
+        Storage["StorageService<br/>CRUD, localStorage"]
+        Cloud["CloudStorageService<br/>R2 API, Polling"]
+        Encryption["EncryptionService<br/>AES-256-GCM"]
+        Search["SearchEngine<br/>Fuzzy matching"]
+        Export["ExportService<br/>CSV, JSON, PNG"]
+    end
+
+    subgraph PERSIST["Data Persistence"]
+        Local["localStorage<br/>Primary Storage"]
+        CloudStore["Cloudflare R2<br/>Encrypted Blobs"]
+    end
+
+    subgraph BACKEND["Backend - Cloudflare Pages Functions"]
+        ListAPI["List Operations<br/>create, get, update, poll"]
+        AuthAPI["Authentication<br/>login, register, me"]
+        SubAPI["Subscriptions<br/>Stripe Integration"]
+    end
+
+    subgraph EXTERNAL["External Services"]
+        R2["Cloudflare R2"]
+        D1["Cloudflare D1"]
+        Stripe["Stripe API"]
+    end
+
+    Browser --> Router
+    Router --> Views
+    Views --> Components
+    Views --> ReactState
+    Views --> Contexts
+    Views --> Hooks
+
+    Hooks --> Storage
+    Hooks --> Cloud
+    Views --> Search
+    Views --> Export
+
+    Storage --> Local
+    Storage --> Encryption
+    Cloud --> Encryption
+    Cloud --> ListAPI
+
+    Contexts --> AuthAPI
+    Views --> SubAPI
+
+    ListAPI --> R2
+    AuthAPI --> D1
+    SubAPI --> Stripe
+
+    style Browser fill:#e1f5ff
+    style Router fill:#fff3cd
+    style Storage fill:#d4edda
+    style Cloud fill:#cce5ff
+    style Encryption fill:#f8d7da
+    style Local fill:#d4edda
+    style CloudStore fill:#cce5ff
+                    </pre>
+                </div>
+            </div>
+
+            <!-- Deployment Infrastructure -->
+            <div class="diagram-card" id="deployment">
+                <div class="diagram-header" onclick="toggleDiagram(this)">
+                    <span class="diagram-title">Deployment Infrastructure</span>
+                    <span class="diagram-description">Cloudflare Pages + Workers CI/CD pipeline</span>
+                    <span class="diagram-type flowchart">FLOWCHART</span>
+                </div>
+                <div class="diagram-content">
+                    <pre class="mermaid">
+flowchart TB
+    subgraph DEV["Development Environment"]
+        DevMachine["Developer Machine"]
+        ViteDev["Vite Dev Server<br/>Port 5173, HMR"]
+        WranglerDev["Wrangler CLI<br/>Local Functions"]
+        LocalD1["Local D1<br/>SQLite file"]
+    end
+
+    subgraph GIT["Version Control"]
+        GitHub["GitHub Repository<br/>chrislyons/listmaker"]
+        MainBranch["main branch<br/>Production"]
+        FeatureBranch["feature/* branches<br/>Preview deploys"]
+    end
+
+    subgraph CICD["CI/CD Pipeline"]
+        Actions["GitHub Actions"]
+        TypeCheck["TypeScript Check"]
+        Lint["ESLint"]
+        Test["Vitest"]
+        Build["Vite Build"]
+    end
+
+    subgraph CF_PAGES["Cloudflare Pages"]
+        ProdDeploy["Production<br/>listmaker.pages.dev"]
+        PreviewDeploy["Preview<br/>*.listmaker.pages.dev"]
+        Functions["Pages Functions<br/>Serverless API"]
+    end
+
+    subgraph CF_SERVICES["Cloudflare Services"]
+        CDN["Global CDN<br/>300+ PoPs"]
+        R2["R2 Storage<br/>Encrypted lists"]
+        D1["D1 Database<br/>Users, Subscriptions"]
+        DNS["DNS + SSL"]
+    end
+
+    subgraph ARTIFACTS["Build Artifacts"]
+        Dist["dist/<br/>index.html<br/>assets/*.js<br/>assets/*.css"]
+    end
+
+    DevMachine --> ViteDev
+    ViteDev --> WranglerDev
+    WranglerDev --> LocalD1
+
+    DevMachine --> GitHub
+    GitHub --> MainBranch
+    GitHub --> FeatureBranch
+
+    MainBranch --> Actions
+    FeatureBranch --> Actions
+
+    Actions --> TypeCheck
+    Actions --> Lint
+    Actions --> Test
+    TypeCheck --> Build
+    Lint --> Build
+    Test --> Build
+
+    Build --> Dist
+    Dist --> ProdDeploy
+    Dist --> PreviewDeploy
+
+    ProdDeploy --> Functions
+    ProdDeploy --> CDN
+    Functions --> R2
+    Functions --> D1
+    CDN --> DNS
+
+    style DevMachine fill:#e1f5ff
+    style ViteDev fill:#fff3cd
+    style ProdDeploy fill:#d4edda
+    style PreviewDeploy fill:#cce5ff
+    style R2 fill:#f8d7da
+    style D1 fill:#f8d7da
+    style Actions fill:#e7e7ff
+                    </pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================================== -->
+        <!-- FRONTEND SECTION -->
+        <!-- ================================================================== -->
+
+        <h2>Frontend Architecture</h2>
+
+        <div class="diagram-grid">
+            <!-- Component Map -->
+            <div class="diagram-card" id="components">
+                <div class="diagram-header" onclick="toggleDiagram(this)">
+                    <span class="diagram-title">Component Map</span>
+                    <span class="diagram-description">React component hierarchy and service dependencies</span>
+                    <span class="diagram-type class">CLASS DIAGRAM</span>
+                </div>
+                <div class="diagram-content">
+                    <pre class="mermaid">
+classDiagram
+    class App {
+        +searchQuery: string
+        +theme: Theme
+        +handleNavigation()
+        +handleSearch()
+    }
+
+    class HomeView {
+        +lists: ListMetadata[]
+        +projects: Project[]
+        +onSelectList()
+        +onCreateNew()
+    }
+
+    class ListView {
+        +listId: string
+        +list: ListData
+        +useCloudSync()
+        +handleSave()
+        +handleExport()
+    }
+
+    class SharedListView {
+        +listId: string
+        +encryptionKey: string
+        +decryptAndLoad()
+    }
+
+    class ListViewer {
+        +list: ListData
+        +editingCell: CellRef
+        +handleCellEdit()
+        +handleAddRow()
+    }
+
+    class StorageService {
+        -instance: StorageService
+        +getInstance()
+        +saveList()
+        +getList()
+        +deleteList()
+    }
+
+    class CloudStorageService {
+        +createList()
+        +getList()
+        +updateList()
+        +pollForChanges()
+    }
+
+    class EncryptionService {
+        +encrypt()
+        +decrypt()
+        +generateKey()
+    }
+
+    class useCloudSync {
+        +version: number
+        +isSyncing: boolean
+        +sync()
+        +poll()
+    }
+
+    class useSearch {
+        +query: string
+        +results: SearchResult[]
+        +nextResult()
+    }
+
+    App --> HomeView
+    App --> ListView
+    App --> SharedListView
+    HomeView --> ListViewer
+    ListView --> ListViewer
+    ListView --> StorageService
+    ListView --> useCloudSync
+    SharedListView --> CloudStorageService
+    SharedListView --> EncryptionService
+    useCloudSync --> CloudStorageService
+    useCloudSync --> StorageService
+    ListViewer --> useSearch
+                    </pre>
+                </div>
+            </div>
+
+            <!-- Entry Points -->
+            <div class="diagram-card" id="entry">
+                <div class="diagram-header" onclick="toggleDiagram(this)">
+                    <span class="diagram-title">Entry Points</span>
+                    <span class="diagram-description">Routes, keyboard shortcuts, API endpoints</span>
+                    <span class="diagram-type flowchart">FLOWCHART</span>
+                </div>
+                <div class="diagram-content">
+                    <pre class="mermaid">
+flowchart TB
+    subgraph ROUTES["Browser Routes"]
+        Root["/ - Home"]
+        LocalList["/local/:id - List Editor"]
+        SharedList["/list/:id - Shared View"]
+        Create["/create - New List"]
+        Settings["/settings"]
+        Login["/login"]
+        Register["/register"]
+        Subscription["/subscription"]
+    end
+
+    subgraph VIEWS["Route Handlers"]
+        HomeView["HomeView<br/>Gallery, Search"]
+        ListView["ListView<br/>Edit, Sync"]
+        SharedListView["SharedListView<br/>Decrypt, View"]
+        CreateListView["CreateListView<br/>Templates, Import"]
+        SettingsView["SettingsView"]
+        AuthViews["Login/Register"]
+    end
+
+    subgraph KEYS["Keyboard Shortcuts"]
+        GlobalKeys["Global: \\ theme, / search, Esc close"]
+        ListKeys["List: Arrows nav, Enter edit, Tab next"]
+    end
+
+    subgraph API["API Endpoints"]
+        ListOps["POST /api/lists/create<br/>GET /api/lists/:id<br/>POST /api/lists/:id<br/>GET /api/lists/poll/:id"]
+        AuthOps["POST /api/auth/login<br/>POST /api/auth/register<br/>GET /api/auth/me"]
+        SubOps["POST /api/subscription/*"]
+    end
+
+    subgraph BROWSER_API["Browser APIs"]
+        LocalStorageAPI["localStorage"]
+        WebCryptoAPI["Web Crypto API"]
+        FetchAPI["Fetch API"]
+        ClipboardAPI["Clipboard API"]
+    end
+
+    Root --> HomeView
+    LocalList --> ListView
+    SharedList --> SharedListView
+    Create --> CreateListView
+    Settings --> SettingsView
+    Login --> AuthViews
+    Register --> AuthViews
+
+    ListView --> ListOps
+    SharedListView --> ListOps
+    AuthViews --> AuthOps
+    SettingsView --> SubOps
+
+    HomeView --> LocalStorageAPI
+    ListView --> WebCryptoAPI
+    SharedListView --> FetchAPI
+
+    style Root fill:#d4edda
+    style LocalList fill:#d4edda
+    style SharedList fill:#cce5ff
+    style ListOps fill:#d1ecf1
+    style LocalStorageAPI fill:#fff3cd
+    style WebCryptoAPI fill:#f8d7da
+                    </pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================================== -->
+        <!-- BACKEND SECTION -->
+        <!-- ================================================================== -->
+
+        <h2>Backend Architecture</h2>
+
+        <div class="diagram-grid">
+            <!-- Data Flow -->
+            <div class="diagram-card" id="dataflow">
+                <div class="diagram-header" onclick="toggleDiagram(this)">
+                    <span class="diagram-title">Data Flow</span>
+                    <span class="diagram-description">Local-first CRUD, cloud sync, and sharing flows</span>
+                    <span class="diagram-type sequence">SEQUENCE</span>
+                </div>
+                <div class="diagram-content">
+                    <pre class="mermaid">
+sequenceDiagram
+    participant User
+    participant View
+    participant Hook
+    participant Service
+    participant LocalStorage
+    participant API
+    participant R2
+
+    Note over User,R2: CREATE LIST FLOW
+
+    User->>View: Click "Create List"
+    View->>Service: CryptoService.generateUUID()
+    Service-->>View: listId
+    View->>Service: StorageService.saveList(list)
+    Service->>LocalStorage: setItem(listmaker_list:uuid)
+    LocalStorage-->>Service: success
+    View->>User: Navigate to /local/:id
+
+    Note over User,R2: EDIT LIST FLOW (Local-First)
+
+    User->>View: Edit cell value
+    View->>View: Update React state
+    View->>Service: StorageService.saveList(list)
+    Service->>LocalStorage: setItem
+
+    alt Cloud Sync Enabled
+        View->>Hook: useCloudSync detects change
+        Hook->>Service: EncryptionService.encrypt()
+        Service->>API: POST /api/lists/:id
+        API->>R2: PUT encrypted blob
+        R2-->>API: success
+        API-->>Service: {version, timestamp}
+    end
+
+    Note over User,R2: SHARE LIST FLOW
+
+    User->>View: Click "Share"
+    View->>Service: EncryptionService.generateKey()
+    View->>Service: EncryptionService.encrypt(list, key)
+    View->>API: POST /api/lists/create
+    API->>R2: PUT encrypted blob
+    API-->>View: {listId}
+    View->>View: Build URL: /list/:id#key=...
+    View-->>User: Copy share URL
+
+    Note over User,R2: VIEW SHARED LIST FLOW
+
+    User->>View: Open share URL
+    View->>View: Extract key from URL fragment
+    View->>API: GET /api/lists/:id
+    API->>R2: GET encrypted blob
+    API-->>View: encrypted data
+    View->>Service: EncryptionService.decrypt()
+    View-->>User: Show list content
+                    </pre>
+                </div>
+            </div>
+
+            <!-- Database Schema -->
+            <div class="diagram-card" id="database">
+                <div class="diagram-header" onclick="toggleDiagram(this)">
+                    <span class="diagram-title">Database Schema</span>
+                    <span class="diagram-description">localStorage and D1 data models</span>
+                    <span class="diagram-type er">ER DIAGRAM</span>
+                </div>
+                <div class="diagram-content">
+                    <pre class="mermaid">
+erDiagram
+    ListData {
+        ListMetadata metadata
+        ColumnDefinition[] columns
+        Section[] sections
+    }
+
+    ListMetadata {
+        string id PK "UUID v4"
+        string name "Display name"
+        string projectId FK "Parent project"
+        boolean isPasswordProtected
+        boolean isShared "Cloud synced"
+        number version "Optimistic lock"
+        string createdAt "ISO 8601"
+        string updatedAt "ISO 8601"
+    }
+
+    Section {
+        string id PK "Section UUID"
+        string name "Section header"
+        number order "Sort order"
+        boolean collapsed "UI state"
+    }
+
+    RowData {
+        string id PK "Row UUID"
+        string sectionId FK "Parent section"
+        object data "Column values"
+        number order "Sort within section"
+    }
+
+    Project {
+        string id PK "Project UUID"
+        string name "Project name"
+        string color "Hex color"
+        boolean isPasswordProtected
+    }
+
+    User {
+        string id PK "User UUID"
+        string email UK "Unique email"
+        string passwordHash "bcrypt hash"
+        string name "Display name"
+    }
+
+    Subscription {
+        string id PK "Subscription UUID"
+        string userId FK "User reference"
+        string stripeCustomerId "Stripe ID"
+        string status "active|canceled"
+        string plan "free|creator|pro"
+    }
+
+    ListData ||--|| ListMetadata : contains
+    ListData ||--o{ Section : has
+    Section ||--o{ RowData : contains
+    ListMetadata }o--|| Project : belongs_to
+    User ||--o| Subscription : has
+                    </pre>
+                </div>
+            </div>
+
+            <!-- Authentication & Authorization -->
+            <div class="diagram-card" id="auth">
+                <div class="diagram-header" onclick="toggleDiagram(this)">
+                    <span class="diagram-title">Authentication & Authorization</span>
+                    <span class="diagram-description">JWT auth, password protection, encrypted sharing</span>
+                    <span class="diagram-type sequence">SEQUENCE</span>
+                </div>
+                <div class="diagram-content">
+                    <pre class="mermaid">
+sequenceDiagram
+    participant User
+    participant Browser
+    participant AuthContext
+    participant API
+    participant D1
+
+    Note over User,D1: USER LOGIN FLOW
+
+    User->>Browser: Submit login form
+    Browser->>API: POST /api/auth/login
+    API->>D1: SELECT user WHERE email
+    D1-->>API: user row
+    API->>API: Verify password (bcrypt)
+
+    alt Password Valid
+        API->>API: Generate JWT token
+        API-->>Browser: {token, user}
+        Browser->>AuthContext: login(token, user)
+        AuthContext->>Browser: localStorage.setItem(token)
+        Browser-->>User: Redirect to home
+    else Password Invalid
+        API-->>Browser: 401 Invalid credentials
+    end
+
+    Note over User,D1: SESSION VALIDATION
+
+    Browser->>AuthContext: Check for stored token
+    AuthContext->>Browser: localStorage.getItem(token)
+    alt Token Exists
+        Browser->>API: GET /api/auth/me
+        API->>API: Verify JWT signature
+        alt Token Valid
+            API->>D1: SELECT user WHERE id
+            API-->>Browser: {user}
+        else Token Expired
+            API-->>Browser: 401 Unauthorized
+            Browser->>AuthContext: logout()
+        end
+    end
+
+    Note over User,D1: ENCRYPTED SHARING FLOW
+
+    User->>Browser: Click "Share" on list
+    Browser->>Browser: EncryptionService.generateKey()
+    Note right of Browser: AES-256-GCM via Web Crypto
+    Browser->>Browser: EncryptionService.encrypt(list)
+    Browser->>API: POST /api/lists/create
+    API-->>Browser: {listId}
+    Browser->>Browser: Build URL with key in fragment
+    Note right of Browser: /list/{id}#key={base64}
+    Browser-->>User: Copy share URL
+                    </pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================================== -->
+        <!-- CODEBASE SECTION -->
+        <!-- ================================================================== -->
+
+        <h2>Codebase Structure</h2>
+
+        <div class="diagram-grid">
+            <!-- Repository Structure -->
+            <div class="diagram-card" id="repo">
+                <div class="diagram-header" onclick="toggleDiagram(this)">
+                    <span class="diagram-title">Repository Structure</span>
+                    <span class="diagram-description">Source organization: React frontend + Cloudflare Functions</span>
+                    <span class="diagram-type flowchart">FLOWCHART</span>
+                </div>
+                <div class="diagram-content">
+                    <pre class="mermaid">
+graph TB
+    subgraph ROOT["Root Configuration"]
+        Package["package.json"]
+        Wrangler["wrangler.toml"]
+        TsConfig["tsconfig.json"]
+        ViteConfig["vite.config.ts"]
+        Tailwind["tailwind.config.js"]
+    end
+
+    subgraph SRC["src/"]
+        Main["main.tsx<br/>Entry Point"]
+        App["App.tsx<br/>Router & Layout"]
+
+        subgraph VIEWS["views/"]
+            HomeV["HomeView.tsx"]
+            ListV["ListView.tsx"]
+            SharedV["SharedListView.tsx"]
+            CreateV["CreateListView.tsx"]
+            AuthV["Login/Register"]
+        end
+
+        subgraph COMPONENTS["components/"]
+            Layout["layout/<br/>Header, Footer, SearchBar"]
+            Lists["lists/<br/>ListViewer, RowItem, Section"]
+            Modals["modals/<br/>Share, Edit, Create"]
+            Common["common/<br/>Button, Input, Modal"]
+        end
+
+        subgraph HOOKS["hooks/"]
+            CloudSync["useCloudSync.ts"]
+            Search["useSearch.ts"]
+            KeyNav["useKeyboardNav.ts"]
+        end
+
+        subgraph UTILS["utils/"]
+            StorageU["storage.utils.ts"]
+            CloudU["cloudStorage.utils.ts"]
+            EncryptU["encryption.utils.ts"]
+            SearchU["search.utils.ts"]
+            ExportU["export.utils.ts"]
+        end
+
+        subgraph TYPES["types/"]
+            ListT["list.types.ts"]
+            ProjectT["project.types.ts"]
+            AuthT["auth.types.ts"]
+        end
+    end
+
+    subgraph FUNCTIONS["functions/"]
+        subgraph API["api/"]
+            ListsAPI["lists/<br/>create, [id], poll"]
+            AuthAPI["auth/<br/>login, register, me"]
+            SubAPI["subscription/<br/>checkout, portal"]
+            WebhooksAPI["webhooks/<br/>stripe"]
+        end
+
+        FuncUtils["utils/<br/>db, auth, stripe"]
+    end
+
+    subgraph TESTS["tests/"]
+        Unit["unit/<br/>storage, search, export"]
+        Integration["integration/"]
+    end
+
+    subgraph DOCS["docs/lst/"]
+        Index["INDEX.md"]
+        LstFiles["LST### docs"]
+    end
+
+    ROOT --> SRC
+    ROOT --> FUNCTIONS
+    ROOT --> TESTS
+    ROOT --> DOCS
+
+    SRC --> Main
+    SRC --> App
+    SRC --> VIEWS
+    SRC --> COMPONENTS
+    SRC --> HOOKS
+    SRC --> UTILS
+    SRC --> TYPES
+
+    FUNCTIONS --> API
+    FUNCTIONS --> FuncUtils
+
+    style Main fill:#ffcccc
+    style App fill:#ffcccc
+    style StorageU fill:#ccffcc
+    style CloudU fill:#ccccff
+    style EncryptU fill:#ffccff
+                    </pre>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p><strong>Source:</strong> <code>wireframes/v2/*.mermaid.md</code> | <strong>Notes:</strong> <code>wireframes/v2/*.notes.md</code></p>
+            <p>Generated for: <strong>listmaker</strong> | Location: <code>~/dev/listmaker</code></p>
+            <p>Stack: React 18, TypeScript, Vite, Tailwind CSS | Cloudflare Pages + Workers, D1, R2 | Stripe</p>
+            <p>Docs: <a href="https://github.com/chrislyons/listmaker">GitHub</a> | PREFIX: <a href="docs/lst/INDEX.md">LST</a></p>
+        </footer>
+    </div>
+
+    <script>
+        function toggleDiagram(header) {
+            header.classList.toggle('collapsed');
+            const content = header.nextElementSibling;
+            content.classList.toggle('hidden');
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.diagram-header:not(.collapsed)').forEach(h => {
+                    h.classList.add('collapsed');
+                    h.nextElementSibling.classList.add('hidden');
+                });
+            }
+            // 'a' to expand all
+            if (e.key === 'a' && !e.ctrlKey && !e.metaKey && document.activeElement.tagName !== 'INPUT') {
+                document.querySelectorAll('.diagram-header.collapsed').forEach(h => {
+                    h.classList.remove('collapsed');
+                    h.nextElementSibling.classList.remove('hidden');
+                });
+            }
+        });
+    </script>
+</body>
+</html>

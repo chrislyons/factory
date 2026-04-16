@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ksi-lisims Command Reference</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: #f8f9fa;
+        }
+        h1 { color: #2c3e50; margin-bottom: 0.5rem; font-size: 2rem; }
+        h2 {
+            color: #34495e;
+            margin: 2rem 0 1rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e74c3c;
+            font-size: 1.5rem;
+        }
+        h3 { color: #555; margin: 1.5rem 0 0.75rem 0; font-size: 1.1rem; }
+        .repo-info {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .repo-info p { margin: 0.25rem 0; }
+        .command-card {
+            background: white;
+            padding: 1rem;
+            margin: 0.75rem 0;
+            border-radius: 6px;
+            border-left: 4px solid #e74c3c;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .command-card:hover { box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .command {
+            font-family: 'Monaco', 'Courier New', monospace;
+            background: #2c3e50;
+            color: #e74c3c;
+            padding: 0.75rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            margin: 0.5rem 0;
+        }
+        .description { color: #555; margin: 0.5rem 0; }
+        .note {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 0.75rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+        .warning {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 0.75rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+        .success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 0.75rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+        code {
+            background: #e9ecef;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        .tag {
+            display: inline-block;
+            background: #e74c3c;
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-size: 0.75rem;
+            margin-right: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <h1>ksi-lisims Command Reference</h1>
+
+    <div class="repo-info">
+        <p><strong>Project:</strong> ksi-lisims - Research repository</p>
+        <p><strong>Type:</strong> Academic research with IEEE citation style</p>
+        <p><strong>Prefix:</strong> KSI### (e.g., KSI001 Topic Title.md)</p>
+        <p><strong>Template:</strong> Based on undone (historical research pattern)</p>
+    </div>
+
+    <div class="note">
+        <strong>Convention:</strong> This is a research repository. Most commands focus on documentation management, research workflows, and quality assurance rather than code compilation.
+    </div>
+
+    <h2>📚 Documentation Management</h2>
+
+    <h3>Finding Document Numbers</h3>
+
+    <div class="command-card">
+        <div class="command">ls -1 docs/ksi/ | grep -E '^KSI[0-9]{3,4}\s+' | sort</div>
+        <div class="description">List all KSI-prefixed documentation files</div>
+    </div>
+
+    <div class="command-card">
+        <div class="command">ls -1 canon/v1/ | grep -E '^KSI[0-9]{3,4}' | sort</div>
+        <div class="description">List canonical version 1 documents</div>
+    </div>
+
+    <div class="command-card">
+        <div class="command">last=$(ls -1 docs/ksi/ | grep -E '^KSI[0-9]+' | sed -E 's/KSI([0-9]+).*/\1/' | sort -n | tail -1); next=$((last + 1)); echo "Next: KSI${next} Your Title Here.md"</div>
+        <div class="description">Find the next available KSI document number</div>
+    </div>
+
+    <div class="note">
+        <strong>CRITICAL:</strong> Always include a descriptive title after the number. Example: <code>KSI003 Environmental Policy Framework.md</code> NOT <code>KSI003.md</code>
+    </div>
+
+    <h3>Viewing Documents</h3>
+
+    <div class="command-card">
+        <div class="command">cat docs/ksi/KSI001*.md | head -50</div>
+        <div class="description">Preview first 50 lines of KSI001 document</div>
+    </div>
+
+    <div class="command-card">
+        <div class="command">grep -n "^## " docs/ksi/KSI001*.md</div>
+        <div class="description">Show section structure with line numbers</div>
+    </div>
+
+    <div class="command-card">
+        <div class="command">wc -w docs/ksi/KSI*.md</div>
+        <div class="description">Get word counts for all KSI documents</div>
+    </div>
+
+    <h2>🔍 Research & Citations</h2>
+
+    <h3>Citation Management</h3>
+
+    <div class="command-card">
+        <div class="command">grep -E '\[[0-9]+\]' docs/ksi/KSI001*.md | wc -l</div>
+        <div class="description">Count inline citations in a document</div>
+    </div>
+
+    <div class="command-card">
+        <div class="command">grep -A 1 "^## References" docs/ksi/KSI001*.md</div>
+        <div class="description">Extract References section from a document</div>
+    </div>
+
+    <div class="command-card">
+        <div class="command">grep -n "http" docs/ksi/KSI001*.md</div>
+        <div class="description">Find all URLs in a document (for citation verification)</div>
+    </div>
+
+    <div class="success">
+        <strong>Best Practice:</strong> Use the <code>citation-verifier</code> skill to automatically verify all IEEE citations match sources.
+    </div>
+
+    <h3>Search Content</h3>
+
+    <div class="command-card">
+        <div class="command">grep -i "environmental law" docs/ksi/*.md canon/v1/*.md</div>
+        <div class="description">Search for a term across all research documents</div>
+    </div>
+
+    <div class="command-card">
+        <div class="command">grep -i "analytic note" docs/ksi/KSI001*.md</div>
+        <div class="description">Find all "Analytic note:" sections (thesis connections)</div>
+    </div>
+
+    <h2>✍️ Writing Workflow</h2>
+
+    <h3>Word Count Tracking</h3>
+
+    <div class="command-card">
+        <div class="command">wc -w docs/ksi/KSI*.md | tail -1</div>
+        <div class="description">Total word count for all working documents</div>
+    </div>
+
+    <div class="command-card">
+        <div class="command">wc -w canon/v1/KSI*.md | tail -1</div>
+        <div class="description">Total word count for canonical documents</div>
+    </div>
+
+    <div class="command-card">
+        <div class="command">for f in docs/ksi/KSI*.md; do echo "$f: $(wc -w < "$f") words"; done</div>
+        <div class="description">Word count for each document individually</div>
+    </div>
+
+    <h3>Quality Checks</h3>
+
+    <div class="command-card">
+        <div class="command">grep -i "inevitable\|destiny\|meant to\|had to" docs/ksi/KSI001*.md</div>
+        <div class="description">Check for teleological language (retrospective bias)</div>
+    </div>
+
+    <div class="command-card">
+        <div class="command">grep "^## " docs/ksi/KSI001*.md</div>
+        <div class="description">Review section structure (cursory reading path)</div>
+    </div>
+
+    <div class="command-card">
+        <div class="command">diff docs/ksi/KSI001*.md canon/v1/KSI001*.md</div>
+        <div class="description">Compare working version to canonical version</div>
+    </div>
+
+    <h2>🛠️ Research Skills & Agents</h2>
+
+    <h3>Available Skills (8 total)</h3>
+
+    <div class="command-card">
+        <span class="tag">SKILL</span>
+        <div class="description">
+            <strong>citation-verifier</strong> — Verify IEEE citations match sources<br>
+            <strong>thesis-connector</strong> — Generate "Analytic note:" sections<br>
+            <strong>dual-reader-check</strong> — Test cursory + detailed reading paths<br>
+            <strong>argument-structure-analyzer</strong> — Map causal claims, identify gaps<br>
+            <strong>counter-evidence-finder</strong> — Find contradictory evidence<br>
+            <strong>evidence-augmenter</strong> — Find additional supporting sources<br>
+            <strong>causal-chain-builder</strong> — Make causal mechanisms explicit<br>
+            <strong>teleology-detector</strong> — Eliminate retrospective bias
+        </div>
+    </div>
+
+    <div class="success">
+        <strong>Skills auto-load</strong> when opening <code>canon/**/*.md</code> or <code>docs/ksi/**/*.md</code> files. See <code>.claude/skills.json</code> for configuration.
+    </div>
+
+    <h3>Available Agents (9 total)</h3>
+
+    <div class="command-card">
+        <span class="tag">AGENT</span>
+        <div class="description">
+            <strong>historical-researcher</strong> — Deep-dive research on topics<br>
+            <strong>verification-auditor</strong> — Comprehensive quality audit<br>
+            <strong>academic-critic</strong> — Adversarial review, challenge arguments<br>
+            <strong>environmental-critic</strong> — Environmental law/policy critique<br>
+            <strong>futurist-critic</strong> — Future-oriented analysis<br>
+            <strong>social-justice-critic</strong> — Social justice/equity analysis<br>
+            <strong>interdisciplinary-editor</strong> — Cross-disciplinary editing<br>
+            <strong>publication-author</strong> — Publication preparation<br>
+            <strong>historical-editor</strong> — Revision and enhancement
+        </div>
+    </div>
+
+    <div class="note">
+        <strong>Agents are autonomous.</strong> Invoke by name when you need deep research, comprehensive review, or specialized editing. See <code>.claude/agents/</code> for documentation.
+    </div>
+
+    <h2>📊 Project Status</h2>
+
+    <h3>Tracking Progress</h3>
+
+    <div class="command-card">
+        <div class="command">cat PROJECT_ROADMAP.md</div>
+        <div class="description">View research plan, chapter outline, and standards</div>
+    </div>
+
+    <div class="command-card">
+        <div class="command">cat COMPLETION_SUMMARY.md</div>
+        <div class="description">View current status report</div>
+    </div>
+
+    <div class="command-card">
+        <div class="command">cat .claude/implementation_progress.md</div>
+        <div class="description">View session history and research progress</div>
+    </div>
+
+    <div class="command-card">
+        <div class="command">ls -l canon/v1/</div>
+        <div class="description">List all canonical (completed) documents</div>
+    </div>
+
+    <h2>🗄️ Archive Management</h2>
+
+    <div class="command-card">
+        <div class="command">ls -1 docs/ksi/archive/</div>
+        <div class="description">List archived documents</div>
+    </div>
+
+    <div class="command-card">
+        <div class="command">~/dev/scripts/archive-old-docs.sh</div>
+        <div class="description">Move documentation older than 180 days to archive/</div>
+    </div>
+
+    <div class="command-card">
+        <div class="command">~/dev/scripts/find-root-clutter.sh</div>
+        <div class="description">Check for misplaced documentation in repo root</div>
+    </div>
+
+    <h2>🔄 Version Control (Git)</h2>
+
+    <h3>Common Git Commands</h3>
+
+    <div class="command-card">
+        <div class="command">git status</div>
+        <div class="description">Check current repository status</div>
+    </div>
+
+    <div class="command-card">
+        <div class="command">git add docs/ksi/KSI003*.md</div>
+        <div class="description">Stage a specific document for commit</div>
+    </div>
+
+    <div class="command-card">
+        <div class="command">git commit -m "docs: add KSI003 Environmental Policy Framework"</div>
+        <div class="description">Commit changes with descriptive message</div>
+    </div>
+
+    <div class="command-card">
+        <div class="command">git log --oneline -- docs/ksi/KSI001*.md</div>
+        <div class="description">View commit history for a specific document</div>
+    </div>
+
+    <div class="note">
+        <strong>For complete Git commands,</strong> see <code>~/chrislyons/dev/docs/git-commands.html</code>
+    </div>
+
+    <h2>🔧 Configuration & Utilities</h2>
+
+    <h3>Configuration Files</h3>
+
+    <div class="command-card">
+        <div class="command">cat CLAUDE.md</div>
+        <div class="description">View repository conventions and research standards</div>
+    </div>
+
+    <div class="command-card">
+        <div class="command">cat .claude/skills.json</div>
+        <div class="description">View skill loading configuration</div>
+    </div>
+
+    <div class="command-card">
+        <div class="command">cat .claude/settings.local.json</div>
+        <div class="description">View permissions and local settings</div>
+    </div>
+
+    <h3>Validation Scripts</h3>
+
+    <div class="command-card">
+        <div class="command">~/dev/scripts/check-prefix-collisions.sh --verbose</div>
+        <div class="description">Check for PREFIX naming collisions</div>
+    </div>
+
+    <div class="command-card">
+        <div class="command">~/dev/scripts/validate-config-hierarchy.sh</div>
+        <div class="description">Validate configuration inheritance</div>
+    </div>
+
+    <h2>📝 Common Research Workflows</h2>
+
+    <h3>Starting a New Chapter</h3>
+
+    <div class="command-card">
+        <div class="description">
+            1. Find next number: <code>ls -1 docs/ksi/ | grep KSI | sort</code><br>
+            2. Create file: <code>docs/ksi/KSI00X Title.md</code><br>
+            3. Use template from CLAUDE.md<br>
+            4. Research with <code>historical-researcher</code> agent<br>
+            5. Write with dual-reader design in mind<br>
+            6. Verify citations with <code>citation-verifier</code> skill<br>
+            7. Check quality with <code>dual-reader-check</code> skill
+        </div>
+    </div>
+
+    <h3>Completing a Chapter</h3>
+
+    <div class="command-card">
+        <div class="description">
+            1. Run <code>verification-auditor</code> agent for comprehensive review<br>
+            2. Use <code>academic-critic</code> agent for adversarial review<br>
+            3. Verify all citations: <code>citation-verifier</code> skill<br>
+            4. Test readability: <code>dual-reader-check</code> skill<br>
+            5. Move to canon: <code>mv docs/ksi/KSI00X*.md canon/v1/</code><br>
+            6. Update <code>COMPLETION_SUMMARY.md</code><br>
+            7. Document in <code>.claude/implementation_progress.md</code>
+        </div>
+    </div>
+
+    <h2>📚 Additional Resources</h2>
+
+    <div class="command-card">
+        <div class="description">
+            <strong>Git Commands:</strong> <code>~/chrislyons/dev/docs/git-commands.html</code><br>
+            <strong>Workspace Config:</strong> <code>~/chrislyons/dev/CLAUDE.md</code><br>
+            <strong>Repo Config:</strong> <code>CLAUDE.md</code> in repo root<br>
+            <strong>Skills Documentation:</strong> <code>.claude/README.md</code><br>
+            <strong>Template Repo:</strong> See <code>undone</code> for complete research pattern example
+        </div>
+    </div>
+
+    <hr style="margin: 2rem 0; border: none; border-top: 2px solid #ddd;">
+
+    <p style="text-align: center; color: #888; font-size: 0.9rem;">
+        Last Updated: 2025-11-11 | ksi-lisims v1.0
+    </p>
+</body>
+</html>

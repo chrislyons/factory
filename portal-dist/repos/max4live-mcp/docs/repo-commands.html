@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Max4Live MCP - Command Reference</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            padding: 1rem 2rem;
+            line-height: 1.5;
+            font-size: 0.75rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: #fff;
+        }
+
+        .subtitle {
+            color: #888;
+            margin-bottom: 0.75rem;
+            font-size: 0.675rem;
+        }
+
+        .last-updated {
+            color: #666;
+            font-size: 0.625rem;
+            margin-bottom: 0.75rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #242424;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        thead {
+            background: #2a2a2a;
+        }
+
+        th {
+            padding: 0.75rem;
+            text-align: left;
+            font-weight: 600;
+            color: #fff;
+            border-bottom: 2px solid #333;
+            font-size: 0.75rem;
+        }
+
+        th:nth-child(1) { width: 20%; }
+        th:nth-child(2) { width: 35%; }
+        th:nth-child(3) { width: 45%; }
+
+        td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #2a2a2a;
+            font-size: 0.75rem;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background: #2a2a2a;
+        }
+
+        .command {
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Courier New', monospace;
+            background: #1a1a1a;
+            padding: 0.375rem 0.5rem;
+            border-radius: 3px;
+            font-size: 0.675rem;
+            color: #4fc3f7;
+            cursor: pointer;
+            display: inline-block;
+            transition: background 0.2s;
+            position: relative;
+            user-select: none;
+        }
+
+        .command:hover {
+            background: #222;
+        }
+
+        .command:active {
+            background: #2a4858;
+        }
+
+        .command::after {
+            content: '\1F4CB';
+            margin-left: 0.5rem;
+            opacity: 0.5;
+        }
+
+        .copied {
+            animation: flash 0.3s;
+        }
+
+        @keyframes flash {
+            0%, 100% { background: #1a1a1a; }
+            50% { background: #2a5a3a; }
+        }
+
+        .description {
+            color: #b0b0b0;
+            font-size: 0.675rem;
+        }
+
+        .job {
+            color: #fff;
+            font-weight: 500;
+            font-size: 0.75rem;
+        }
+
+        .section-header {
+            background: #2a2a2a;
+            font-weight: 600;
+            color: #fff;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .section-header:hover {
+            background: #333;
+        }
+
+        .section-header:focus {
+            outline: 2px solid #4fc3f7;
+            outline-offset: -2px;
+        }
+
+        .section-header td {
+            padding: 0.5rem 0.75rem;
+            border-bottom: 2px solid #333;
+            position: relative;
+            font-size: 0.75rem;
+        }
+
+        .section-header td::before {
+            content: '\25BC';
+            margin-right: 0.375rem;
+            font-size: 0.5625rem;
+            transition: transform 0.2s;
+            display: inline-block;
+        }
+
+        .section-header.collapsed td::before {
+            transform: rotate(-90deg);
+        }
+
+        .section-row {
+            transition: opacity 0.2s;
+        }
+
+        .section-row.hidden {
+            display: none;
+        }
+
+        footer {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #333;
+            color: #666;
+            font-size: 0.625rem;
+        }
+
+        .warning {
+            background: #3a2a1a;
+            border-left: 3px solid #ff9800;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+            border-radius: 3px;
+            font-size: 0.675rem;
+        }
+
+        .warning-title {
+            color: #ff9800;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            font-size: 0.75rem;
+        }
+
+        .info {
+            background: #1a2a3a;
+            border-left: 3px solid #4fc3f7;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+            border-radius: 3px;
+            font-size: 0.675rem;
+        }
+
+        .info-title {
+            color: #4fc3f7;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .success {
+            background: #1a3a2a;
+            border-left: 3px solid #4caf50;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+            border-radius: 3px;
+            font-size: 0.675rem;
+        }
+
+        .success-title {
+            color: #4caf50;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .key {
+            display: inline-block;
+            background: #3a3a3a;
+            color: #fff;
+            padding: 0.15rem 0.4rem;
+            border-radius: 3px;
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 0.625rem;
+            border: 1px solid #555;
+            margin: 0 0.1rem;
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 0.5rem 0.75rem;
+            }
+
+            h1 {
+                font-size: 1.25rem;
+            }
+
+            .subtitle {
+                font-size: 0.6rem;
+            }
+
+            table {
+                display: block;
+            }
+
+            thead {
+                display: none;
+            }
+
+            tbody {
+                display: block;
+            }
+
+            tr {
+                display: block;
+                margin-bottom: 0.5rem;
+            }
+
+            tr.section-header {
+                margin-bottom: 0;
+            }
+
+            tr.section-row {
+                display: flex;
+                flex-wrap: wrap;
+                padding: 0.5rem;
+                gap: 0.25rem;
+            }
+
+            tr.section-row td {
+                display: block;
+                padding: 0.25rem 0;
+                border: none;
+            }
+
+            tr.section-row td.job {
+                width: 100%;
+                font-size: 0.7rem;
+            }
+
+            tr.section-row td:nth-child(2) {
+                width: 100%;
+            }
+
+            tr.section-row td.description {
+                width: 100%;
+                font-size: 0.625rem;
+                color: #888;
+            }
+
+            .command {
+                font-size: 0.6rem;
+                word-break: break-all;
+                white-space: normal;
+            }
+
+            .command::after {
+                display: none;
+            }
+
+            .key {
+                font-size: 0.55rem;
+                padding: 0.1rem 0.3rem;
+            }
+
+            .warning, .info, .success {
+                padding: 0.5rem;
+                font-size: 0.625rem;
+            }
+
+            .warning-title, .info-title, .success-title {
+                font-size: 0.7rem;
+            }
+
+            footer {
+                font-size: 0.55rem;
+            }
+
+            footer p {
+                margin-bottom: 0.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 0.5rem;
+            }
+
+            h1 {
+                font-size: 1.1rem;
+            }
+
+            .section-header td {
+                font-size: 0.7rem;
+            }
+
+            tr.section-row td.job {
+                font-size: 0.65rem;
+            }
+
+            .command {
+                font-size: 0.55rem;
+                padding: 0.25rem 0.375rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Max4Live MCP - Command Reference</h1>
+        <p class="subtitle">Quick reference for Max4Live MCP server development</p>
+        <p class="last-updated">Last updated: 2026-02-01</p>
+
+        <div class="info">
+            <div class="info-title">Tech Stack</div>
+            Node.js + TypeScript | MCP Protocol | Max/MSP + Ableton Live API | OSC (Open Sound Control)
+        </div>
+
+        <div class="warning">
+            <div class="warning-title">OSC Ports</div>
+            Check for conflicts with other audio apps before starting the dev server. Live API connection must be enabled in Ableton Live preferences.
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Job</th>
+                    <th>Command</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Development -->
+                <tr class="section-header" data-section="dev" tabindex="0">
+                    <td colspan="3">Development</td>
+                </tr>
+                <tr class="section-row" data-section="dev">
+                    <td class="job">Dev server</td>
+                    <td><span class="command">npm run dev</span></td>
+                    <td class="description">Start dev server with tsx (hot reload)</td>
+                </tr>
+                <tr class="section-row" data-section="dev">
+                    <td class="job">Build</td>
+                    <td><span class="command">npm run build</span></td>
+                    <td class="description">Compile TypeScript to dist/</td>
+                </tr>
+                <tr class="section-row" data-section="dev">
+                    <td class="job">Start</td>
+                    <td><span class="command">npm run start</span></td>
+                    <td class="description">Run compiled server from dist/index.js</td>
+                </tr>
+                <tr class="section-row" data-section="dev">
+                    <td class="job">Watch</td>
+                    <td><span class="command">npm run watch</span></td>
+                    <td class="description">Watch mode &mdash; recompile on file changes</td>
+                </tr>
+                <tr class="section-row" data-section="dev">
+                    <td class="job">Type check</td>
+                    <td><span class="command">npm run type-check</span></td>
+                    <td class="description">Run TypeScript type checker without emitting</td>
+                </tr>
+                <tr class="section-row" data-section="dev">
+                    <td class="job">Clean</td>
+                    <td><span class="command">npm run clean</span></td>
+                    <td class="description">Remove dist/ build output</td>
+                </tr>
+                <tr class="section-row" data-section="dev">
+                    <td class="job">Install deps</td>
+                    <td><span class="command">npm install</span></td>
+                    <td class="description">Install all dependencies from package.json</td>
+                </tr>
+
+                <!-- Testing -->
+                <tr class="section-header collapsed" data-section="test" tabindex="0">
+                    <td colspan="3">Testing</td>
+                </tr>
+                <tr class="section-row hidden" data-section="test">
+                    <td class="job">Run tests</td>
+                    <td><span class="command">npm run test</span></td>
+                    <td class="description">Run test suite once with Vitest</td>
+                </tr>
+                <tr class="section-row hidden" data-section="test">
+                    <td class="job">Watch tests</td>
+                    <td><span class="command">npm run test:watch</span></td>
+                    <td class="description">Run Vitest in watch mode (re-run on changes)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="test">
+                    <td class="job">Coverage</td>
+                    <td><span class="command">npm run test:coverage</span></td>
+                    <td class="description">Run tests with v8 coverage report</td>
+                </tr>
+
+                <!-- Git -->
+                <tr class="section-header collapsed" data-section="git" tabindex="0">
+                    <td colspan="3">Git</td>
+                </tr>
+                <tr class="section-row hidden" data-section="git">
+                    <td class="job">Status</td>
+                    <td><span class="command">git status</span></td>
+                    <td class="description">Show working tree status</td>
+                </tr>
+                <tr class="section-row hidden" data-section="git">
+                    <td class="job">Diff</td>
+                    <td><span class="command">git diff</span></td>
+                    <td class="description">Show unstaged changes</td>
+                </tr>
+                <tr class="section-row hidden" data-section="git">
+                    <td class="job">Diff staged</td>
+                    <td><span class="command">git diff --staged</span></td>
+                    <td class="description">Show staged changes</td>
+                </tr>
+                <tr class="section-row hidden" data-section="git">
+                    <td class="job">Log</td>
+                    <td><span class="command">git log --oneline -20</span></td>
+                    <td class="description">Show last 20 commits (compact)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="git">
+                    <td class="job">Fetch</td>
+                    <td><span class="command">git fetch --all</span></td>
+                    <td class="description">Fetch all remotes</td>
+                </tr>
+                <tr class="section-row hidden" data-section="git">
+                    <td class="job">Pull</td>
+                    <td><span class="command">git pull --rebase</span></td>
+                    <td class="description">Pull with rebase to keep history linear</td>
+                </tr>
+
+                <!-- Documentation -->
+                <tr class="section-header collapsed" data-section="docs" tabindex="0">
+                    <td colspan="3">Documentation</td>
+                </tr>
+                <tr class="section-row hidden" data-section="docs">
+                    <td class="job">List docs</td>
+                    <td><span class="command">ls -1 docs/m4l/M4L*.md</span></td>
+                    <td class="description">List all M4L PREFIX documentation files</td>
+                </tr>
+                <tr class="section-row hidden" data-section="docs">
+                    <td class="job">Latest docs</td>
+                    <td><span class="command">ls -1 docs/m4l/M4L*.md | sort -V | tail -6</span></td>
+                    <td class="description">Show 6 most recent PREFIX docs</td>
+                </tr>
+                <tr class="section-row hidden" data-section="docs">
+                    <td class="job">Search docs</td>
+                    <td><span class="command">grep -rl "keyword" docs/m4l/</span></td>
+                    <td class="description">Search docs for a keyword (replace "keyword")</td>
+                </tr>
+                <tr class="section-row hidden" data-section="docs">
+                    <td class="job">View README</td>
+                    <td><span class="command">cat README.md</span></td>
+                    <td class="description">Display project README</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <footer>
+            <p><strong>Note:</strong> This is a local reference page. Commands are safe to run in your development environment.</p>
+            <p>Generated for: <strong>Max4Live MCP</strong> | Location: <code>~/dev/max4live-mcp</code></p>
+            <p style="margin-top: 1rem;">&#9000; <strong>Keyboard:</strong> <strong>&uarr;&darr;</strong> navigate | <strong>&rarr;/&larr;</strong> expand/collapse | <strong>Space/Enter</strong> toggle | <strong>Cmd+Click</strong> collapse others | <strong>A</strong> expand all | <strong>Esc</strong> collapse all</p>
+        </footer>
+    </div>
+
+    <script>
+        // Click-to-copy functionality
+        document.querySelectorAll('.command').forEach(cmd => {
+            cmd.addEventListener('click', async function(e) {
+                e.stopPropagation();
+                const text = this.textContent.replace('\u{1F4CB}', '').trim();
+                try {
+                    await navigator.clipboard.writeText(text);
+                    this.classList.add('copied');
+                    setTimeout(() => this.classList.remove('copied'), 300);
+                } catch (err) {
+                    const textarea = document.createElement('textarea');
+                    textarea.value = text;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                    this.classList.add('copied');
+                    setTimeout(() => this.classList.remove('copied'), 300);
+                }
+            });
+        });
+
+        // Section toggle functionality
+        const sectionHeaders = document.querySelectorAll('.section-header');
+
+        function toggleSection(header, collapseOthers = false) {
+            const section = header.dataset.section;
+
+            if (collapseOthers) {
+                sectionHeaders.forEach(h => {
+                    if (h !== header) {
+                        h.classList.add('collapsed');
+                        document.querySelectorAll(`.section-row[data-section="${h.dataset.section}"]`)
+                            .forEach(row => row.classList.add('hidden'));
+                    }
+                });
+            }
+
+            header.classList.toggle('collapsed');
+            const rows = document.querySelectorAll(`.section-row[data-section="${section}"]`);
+            rows.forEach(row => row.classList.toggle('hidden'));
+        }
+
+        function expandAll() {
+            sectionHeaders.forEach(h => {
+                h.classList.remove('collapsed');
+                document.querySelectorAll(`.section-row[data-section="${h.dataset.section}"]`)
+                    .forEach(row => row.classList.remove('hidden'));
+            });
+        }
+
+        function collapseAll() {
+            sectionHeaders.forEach(h => {
+                h.classList.add('collapsed');
+                document.querySelectorAll(`.section-row[data-section="${h.dataset.section}"]`)
+                    .forEach(row => row.classList.add('hidden'));
+            });
+        }
+
+        sectionHeaders.forEach(header => {
+            header.addEventListener('click', (e) => {
+                toggleSection(header, e.metaKey || e.ctrlKey);
+            });
+            header.addEventListener('keydown', (e) => {
+                if (e.key === ' ' || e.key === 'Enter') {
+                    e.preventDefault();
+                    toggleSection(header, e.metaKey || e.ctrlKey);
+                }
+            });
+        });
+
+        // Keyboard navigation
+        let currentHeaderIndex = -1;
+        const headerArray = Array.from(sectionHeaders);
+
+        function focusHeader(index) {
+            if (index >= 0 && index < headerArray.length) {
+                currentHeaderIndex = index;
+                headerArray[index].focus();
+                headerArray[index].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+            const focusedHeader = document.activeElement;
+            if (focusedHeader && focusedHeader.classList.contains('section-header')) {
+                currentHeaderIndex = headerArray.indexOf(focusedHeader);
+            }
+
+            switch(e.key) {
+                case 'a':
+                    if (!e.ctrlKey && !e.metaKey) {
+                        e.preventDefault();
+                        expandAll();
+                    }
+                    break;
+
+                case 'Escape':
+                    e.preventDefault();
+                    collapseAll();
+                    break;
+
+                case 'ArrowDown':
+                    e.preventDefault();
+                    if (currentHeaderIndex < headerArray.length - 1) {
+                        focusHeader(currentHeaderIndex + 1);
+                    } else if (currentHeaderIndex === -1 && headerArray.length > 0) {
+                        focusHeader(0);
+                    }
+                    break;
+
+                case 'ArrowUp':
+                    e.preventDefault();
+                    if (currentHeaderIndex > 0) {
+                        focusHeader(currentHeaderIndex - 1);
+                    } else if (currentHeaderIndex === -1 && headerArray.length > 0) {
+                        focusHeader(headerArray.length - 1);
+                    }
+                    break;
+
+                case 'ArrowRight':
+                    if (document.activeElement && document.activeElement.classList.contains('section-header')) {
+                        e.preventDefault();
+                        if (document.activeElement.classList.contains('collapsed')) {
+                            toggleSection(document.activeElement);
+                        }
+                    }
+                    break;
+
+                case 'ArrowLeft':
+                    if (document.activeElement && document.activeElement.classList.contains('section-header')) {
+                        e.preventDefault();
+                        if (!document.activeElement.classList.contains('collapsed')) {
+                            toggleSection(document.activeElement);
+                        }
+                    }
+                    break;
+            }
+        });
+
+        // Focus first section on page load
+        if (headerArray.length > 0) {
+            headerArray[0].focus();
+            currentHeaderIndex = 0;
+        }
+    </script>
+</body>
+</html>

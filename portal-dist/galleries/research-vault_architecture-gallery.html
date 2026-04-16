@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>research-vault</title>
+<link rel="stylesheet" href="/shared/base.css">
+<link rel="stylesheet" href="/shared/gallery.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="site-header__inner">
+    <div class="brand">
+      <a class="brand__title" href="/pages/docs.html">dreamfactory</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="hero-row">
+    <div class="hero">
+      <span class="hero-eyebrow">ARCHITECTURE GALLERY</span>
+      <h1>research-vault</h1>
+      <p>Obsidian research vault &mdash; X.com intake, Qdrant search, Graphiti knowledge graph</p>
+    </div>
+    <div class="hero-meta"><div class="meta-chip"><span class="meta-chip__label">UPDATED</span><span class="meta-chip__value">2026-03-29</span></div><div class="meta-chip"><span class="meta-chip__label">VERSION</span><span class="meta-chip__value">5.5</span></div></div>
+  </div>
+  <section class="gallery-nav"><div class="nav-group"><span class="nav-group__label">System:</span><a class="nav-chip" href="#intake" data-target="intake">Intake Pipeline</a><a class="nav-chip" href="#structure" data-target="structure">Vault Structure</a><a class="nav-chip" href="#memory" data-target="memory">Memory Integration</a><a class="nav-chip" href="#schema" data-target="schema">Document Schema</a></div></section>
+  <section class="callout-grid"><article class="surface-card callout callout--info"><h2>Diagram Collection</h2><p>4 architectural diagrams covering intake pipeline, content organization, memory system integration, and document metadata schema.</p><p>Click headers to expand/collapse. Diagrams render via Mermaid.js. Press a to expand all, Esc to collapse all.</p></article></section>
+  <section class="section-block" data-section="pipeline"><div class="section-heading"><span>Pipeline</span></div><div class="diagram-stack"><article class="surface-card diagram-card" id="intake" data-diagram-id="intake"><button class="diagram-header" type="button" aria-expanded="true"><span class="diagram-arrow">&#9660;</span><span class="diagram-header__copy"><span class="diagram-title">Research Intake Pipeline</span><p class="diagram-description">Automated workflow from tweet capture to synthesis triggering</p></span><span class="diagram-kind">FLOWCHART</span></button><div class="diagram-content"><div class="diagram-canvas"><div class="diagram-loading">Rendering diagram&hellip;</div></div><script type="application/json" class="mermaid-source">"graph TB\nTW[\"X.com Tweet/Thread\"]\nIB[\"INBOX.md\\nqueue\"]\nDD[\"Dedup Check\"]\nFT[\"Fetch Tweet\"]\nTX[\"Create TX Doc\\nfrontmatter + content\"]\nQD[\"Qdrant Storage\\nsemantic indexing\"]\nGR[\"Graphiti Episode\\nknowledge graph\"]\nIX[\"docs/tx/INDEX.md\\ncatalog\"]\nTH[\"Synthesis Threshold\\n10+ new docs\"]\nSY[\"Synthesis Proposal\"]\nTW --> IB\nIB --> DD\nDD --> FT\nFT --> TX\nTX --> QD\nTX --> GR\nTX --> IX\nIX --> TH\nTH --> SY\nstyle TW fill:#cce5ff\nstyle TX fill:#d4edda\nstyle QD fill:#e7e7ff\nstyle GR fill:#e7e7ff\nstyle SY fill:#fff3cd"</script></div></article></div></section><section class="section-block" data-section="organization"><div class="section-heading"><span>Organization</span></div><div class="diagram-stack"><article class="surface-card diagram-card" id="structure" data-diagram-id="structure"><button class="diagram-header" type="button" aria-expanded="true"><span class="diagram-arrow">&#9660;</span><span class="diagram-header__copy"><span class="diagram-title">Vault Content Organization</span><p class="diagram-description">Directory hierarchy and synthesis layers</p></span><span class="diagram-kind">FLOWCHART</span></button><div class="diagram-content"><div class="diagram-canvas"><div class="diagram-loading">Rendering diagram&hellip;</div></div><script type="application/json" class="mermaid-source">"graph TB\nROOT[\"research-vault/\"]\nTX[\"docs/tx/\\n73 raw captures\"]\nTOP[\"docs/topics/\\n11 synthesis docs\"]\nPPL[\"docs/people/\\n4 author profiles\"]\nPAT[\"docs/patterns/\\nrecurring observations\"]\nDEC[\"docs/decisions/\\ninformed choices\"]\nRES[\"docs/res/\\nresearch documents\"]\nROOT --> TX\nROOT --> TOP\nROOT --> PPL\nROOT --> PAT\nROOT --> DEC\nROOT --> RES\nTX -->|synthesize| TOP\nTX -->|extract| PPL\nTOP -->|discover| PAT\nPAT -->|inform| DEC\nstyle TX fill:#cce5ff\nstyle TOP fill:#d4edda\nstyle PPL fill:#e7e7ff\nstyle DEC fill:#fff3cd"</script></div></article></div></section><section class="section-block" data-section="memory"><div class="section-heading"><span>Memory</span></div><div class="diagram-stack"><article class="surface-card diagram-card" id="memory" data-diagram-id="memory"><button class="diagram-header" type="button" aria-expanded="true"><span class="diagram-arrow">&#9660;</span><span class="diagram-header__copy"><span class="diagram-title">Memory System Integration</span><p class="diagram-description">How Qdrant and Graphiti systems consume research vault content</p></span><span class="diagram-kind">FLOWCHART</span></button><div class="diagram-content"><div class="diagram-canvas"><div class="diagram-loading">Rendering diagram&hellip;</div></div><script type="application/json" class="mermaid-source">"graph LR\nTX[\"TX Document\\nMarkdown + YAML\"]\nQM[\"Qdrant MCP\\nresearch-vault collection\"]\nGM[\"Graphiti MCP\\ngroup_id: research\"]\nCC[\"Claude Code\\nsearch queries\"]\nTX --> QM\nTX --> GM\nQM --> CC\nGM --> CC\nstyle TX fill:#d4edda\nstyle QM fill:#cce5ff\nstyle GM fill:#e7e7ff\nstyle CC fill:#fff3cd"</script></div></article><article class="surface-card diagram-card" id="schema" data-diagram-id="schema"><button class="diagram-header" type="button" aria-expanded="true"><span class="diagram-arrow">&#9660;</span><span class="diagram-header__copy"><span class="diagram-title">TX Document Schema</span><p class="diagram-description">Data model for research document metadata</p></span><span class="diagram-kind">CLASS DIAGRAM</span></button><div class="diagram-content"><div class="diagram-canvas"><div class="diagram-loading">Rendering diagram&hellip;</div></div><script type="application/json" class="mermaid-source">"classDiagram\nclass TXDocument {\n+String title\n+String author\n+URI tweet_url\n+Date tweet_date\n+Category category\n+Status status\n+Confidence confidence\n+String[] tags\n+Wikilink[] related\n}\nclass Category {\n<<enumeration>>\nresearch\ndecision\nlesson\nperson\npattern\nreference\n}\nclass Status {\n<<enumeration>>\ndraft\npublished\n}\nTXDocument --> Category\nTXDocument --> Status"</script></div></article></div></section>
+</main>
+
+<footer>
+  <div class="footer-notes"><p>research-vault Architecture | Generated 2026-03-29 | Phase 5.5 Social Intelligence Enriched | 73 TX documents</p></div>
+</footer>
+
+<script src="/shared/dust.js"></script>
+<script src="/shared/theme.js"></script>
+<script type="module" src="/shared/gallery.js"></script>
+</body>
+</html>

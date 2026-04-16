@@ -154,6 +154,41 @@ def read_config(agent: str) -> dict:
     return raw or {}
 
 
+def _derive_provider(config: dict) -> str:
+    """Derive the actual inference provider from config.
+
+    Checks base_url for local engine:port mapping first,
+    then falls back to model path, then stored provider.
+    """
+    base_url = _get_nested(config, "model.base_url") or ""
+    model_path = _get_nested(config, "model.default") or ""
+    stored = _get_nested(config, "model.provider") or "unknown"
+
+    # Local engines: identify by base_url port
+    if "127.0.0.1" in base_url or "localhost" in base_url:
+        port = base_url.split(":")[-1].split("/")[0]
+        # 26B flash-moe on any port
+        if "26b" in model_path.lower() or "flash-moe" in model_path.lower():
+            return f"flash-moe:{port}"
+        return f"mlx-vlm:{port}"
+
+    # Cloud providers by host
+    if "nousresearch" in base_url:
+        return "nous"
+    if "openrouter" in base_url:
+        return "openrouter"
+    if "anthropic" in base_url:
+        return "anthropic"
+    if "openai" in base_url:
+        return "openai"
+
+    # Legacy "custom" — can't determine from config alone
+    if stored == "custom":
+        return stored
+
+    return stored
+
+
 def read_config_safe(agent: str) -> dict:
     """Read config with secrets redacted for API responses."""
     raw = read_config(agent)
@@ -293,7 +328,7 @@ def get_agent_summaries() -> list[dict]:
                 "id": agent_id,
                 "label": info["label"],
                 "model": _get_nested(config, "model.default") or "—",
-                "provider": _get_nested(config, "model.provider") or "—",
+                "provider": _derive_provider(config),
                 "base_url": _get_nested(config, "model.base_url") or "—",
                 "display": {
                     "compact": _get_nested(config, "display.compact"),

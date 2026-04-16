@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>git-av Architecture Gallery v0.3.0</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+    <style>
+        /* Input Sans */
+        @font-face {
+            font-family: 'InputSans-Regular';
+            src: url('/fonts/InputSans-Regular.ttf') format('truetype');
+            font-weight: 400;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'InputSans-Medium';
+            src: url('/fonts/InputSans-Medium.ttf') format('truetype');
+            font-weight: 500;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'InputSans-Bold';
+            src: url('/fonts/InputSans-Bold.ttf') format('truetype');
+            font-weight: 700;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'InputSans-Light';
+            src: url('/fonts/InputSans-Light.ttf') format('truetype');
+            font-weight: 300;
+            font-display: swap;
+        }
+        /* Input Mono */
+        @font-face {
+            font-family: 'InputMono-Regular';
+            src: url('/fonts/InputMono-Regular.ttf') format('truetype');
+            font-weight: 400;
+            font-display: swap;
+        }
+
+        :root {
+            --bg-primary: #1a1a2e;
+            --bg-secondary: #16213e;
+            --bg-card: #0f3460;
+            --accent: #38a169;
+            --accent-secondary: #2b6cb0;
+            --text-primary: #eaeaea;
+            --text-secondary: #a0a0a0;
+            --border: #2a2a4a;
+            --success: #4ade80;
+            --warning: #fbbf24;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'InputSans-Regular', 'Input Sans', system-ui, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            padding: 1rem 2rem;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            background: var(--bg-secondary);
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .version-badge {
+            background: var(--accent);
+            color: white;
+            padding: 0.15rem 0.4rem;
+            border-radius: 3px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-left: 1rem;
+        }
+
+        /* Quick Nav + Legend Row */
+        .nav-legend-row {
+            display: flex;
+            gap: 0.35rem;
+            margin: 0.75rem 0 1rem 0;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .quick-nav {
+            display: flex;
+            gap: 0.3rem;
+            padding: 0.25rem 0.5rem;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            align-items: center;
+        }
+
+        .quick-nav a {
+            color: var(--text-primary);
+            text-decoration: none;
+            padding: 0.2rem 0.5rem;
+            background: var(--bg-card);
+            border-radius: 3px;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .quick-nav a:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        /* Diagram Cards */
+        .diagram-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            margin-bottom: 1.25rem;
+            overflow: hidden;
+            transition: border-color 0.2s;
+            scroll-margin-top: 1.5rem;
+            scroll-margin-bottom: 1.5rem;
+        }
+
+        .diagram-card:hover {
+            border-color: var(--accent-secondary);
+        }
+
+        .diagram-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.8rem 1.5rem;
+            background: var(--bg-card);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .diagram-header h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex: 1;
+        }
+
+        .diagram-badge {
+            font-size: 0.9rem;
+            padding: 0.3rem 0.6rem;
+            background: var(--accent-secondary);
+            border-radius: 6px;
+            color: white;
+        }
+
+        .diagram-toggle {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            transition: transform 0.3s;
+            font-size: 1.5rem;
+        }
+
+        .diagram-card.collapsed .diagram-toggle {
+            transform: rotate(-90deg);
+        }
+
+        .diagram-content {
+            padding: 1.5rem;
+            overflow-x: auto;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+        }
+
+        .diagram-card.collapsed .diagram-content {
+            max-height: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+            overflow: hidden;
+        }
+
+        .diagram-description {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.95rem;
+            font-family: 'InputSans-Light', 'Input Sans', system-ui, sans-serif;
+            font-weight: 300;
+        }
+
+        .mermaid {
+            background: var(--bg-primary);
+            border-radius: 12px;
+            padding: 1.5rem;
+            min-height: 200px;
+            overflow-x: auto;
+            overflow-y: visible;
+        }
+
+        .mermaid svg {
+            min-width: 900px;
+            display: block;
+            margin: 0 auto;
+        }
+
+        /* Color Legend */
+        .legend {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 0.3rem 0.5rem;
+        }
+
+        .legend h3 {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        .legend-grid {
+            display: flex;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .legend-color {
+            width: 9px;
+            height: 9px;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        .color-core { background: #38a169; }
+        .color-vcs { background: #3182ce; }
+        .color-fs { background: #dd6b20; }
+        .color-cli { background: #805ad5; }
+        .color-c2pa { background: #e53e3e; }
+        .color-storage { background: #667eea; }
+        .color-hooks { background: #d69e2e; }
+
+        /* Mermaid edge label styling */
+        .mermaid .edgeLabel foreignObject {
+            overflow: visible;
+        }
+        .mermaid .edgeLabel div {
+            padding: 4px 10px;
+            background: #3d3060 !important;
+            border-radius: 3px;
+        }
+        .mermaid .edgeLabel rect,
+        .mermaid .labelBkg {
+            fill: #3d3060 !important;
+            rx: 3px;
+            ry: 3px;
+        }
+
+        /* Mermaid line and border thickness */
+        .mermaid .flowchart-link,
+        .mermaid .edgePath path,
+        .mermaid .transition path {
+            stroke-width: 2px !important;
+        }
+        .mermaid .node rect,
+        .mermaid .node circle,
+        .mermaid .node polygon,
+        .mermaid .cluster rect {
+            stroke-width: 2px !important;
+        }
+
+        /* Mermaid node text */
+        .mermaid .cluster-label {
+            white-space: nowrap;
+            padding: 8px 12px;
+        }
+        .mermaid .cluster-label .nodeLabel {
+            white-space: nowrap;
+            padding: 4px 8px;
+        }
+        .mermaid .nodeLabel {
+            white-space: nowrap;
+        }
+        .mermaid .label foreignObject {
+            overflow: visible;
+        }
+        .mermaid .cluster rect {
+            rx: 8px;
+            ry: 8px;
+        }
+        .mermaid .cluster .label {
+            margin-bottom: 12px;
+        }
+        .mermaid .cluster foreignObject {
+            overflow: visible;
+        }
+
+        /* Keyboard Hints */
+        .keyboard-hints {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .keyboard-hints div {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .keyboard-hints kbd {
+            background: var(--bg-primary);
+            padding: 0.15rem 0.4rem;
+            border-radius: 3px;
+            border: 1px solid var(--border);
+            font-family: monospace;
+            font-size: 0.7rem;
+            min-width: 1.2rem;
+            text-align: center;
+        }
+
+        /* Selected diagram card for keyboard nav */
+        .diagram-card.selected {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            border-top: 1px solid var(--border);
+            margin-top: 2rem;
+        }
+
+        footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .nav-legend-row {
+                flex-direction: column;
+                gap: 0.35rem;
+                align-items: flex-start;
+            }
+            .mermaid svg {
+                min-width: auto;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 0.5rem; }
+            header { padding: 0.4rem 0.6rem; }
+            header h1 { font-size: 1rem; }
+            .version-badge {
+                font-size: 0.6rem;
+                padding: 0.1rem 0.3rem;
+                margin-left: 0.5rem;
+            }
+            .quick-nav {
+                width: 100%;
+                flex-wrap: wrap;
+            }
+            .quick-nav a {
+                font-size: 0.7rem;
+                padding: 0.15rem 0.4rem;
+            }
+            .legend {
+                width: 100%;
+                flex-wrap: wrap;
+            }
+            .legend h3 { font-size: 0.65rem; }
+            .legend-item { font-size: 0.65rem; }
+            .diagram-header {
+                padding: 0.6rem 1rem;
+                gap: 0.5rem;
+            }
+            .diagram-header h2 { font-size: 1rem; }
+            .diagram-badge {
+                font-size: 0.7rem;
+                padding: 0.2rem 0.4rem;
+            }
+            .diagram-toggle {
+                width: 28px;
+                height: 28px;
+                font-size: 1.2rem;
+            }
+            .diagram-content { padding: 1rem; }
+            .diagram-description { font-size: 0.85rem; }
+            .mermaid {
+                padding: 1rem;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            .mermaid svg {
+                min-width: auto;
+                max-width: none;
+            }
+            .keyboard-hints { display: none; }
+            footer {
+                padding: 1rem;
+                font-size: 0.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>git-av Architecture</h1>
+            <span class="version-badge">v0.3.0</span>
+        </header>
+
+        <div class="nav-legend-row">
+            <nav class="quick-nav">
+                <a href="#repo-structure">Structure</a>
+                <a href="#architecture-overview">Architecture</a>
+                <a href="#component-map">Components</a>
+                <a href="#data-flow">Data Flow</a>
+                <a href="#entry-points">Entry Points</a>
+                <a href="#database-schema">Database</a>
+            </nav>
+            <div class="legend">
+                <h3>Legend:</h3>
+                <div class="legend-grid">
+                    <div class="legend-item">
+                        <div class="legend-color color-core"></div>
+                        <span>Core</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color color-vcs"></div>
+                        <span>VCS</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color color-fs"></div>
+                        <span>Filesystem</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color color-cli"></div>
+                        <span>CLI</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color color-c2pa"></div>
+                        <span>C2PA</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color color-storage"></div>
+                        <span>Storage</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color color-hooks"></div>
+                        <span>Git Hooks</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Repo Structure -->
+        <div class="diagram-card" id="repo-structure">
+            <div class="diagram-header" onclick="toggleDiagram(this)">
+                <div class="diagram-toggle">&#9660;</div>
+                <h2>Repository Structure</h2>
+                <span class="diagram-badge">Directory Tree</span>
+            </div>
+            <div class="diagram-content">
+                <p class="diagram-description">
+                    Full project layout showing 10 source modules (~5,000 LOC), 47 tests across 3 suites, 7 GAV documentation files, and runtime artifacts. Color-coded by domain: core (green), VCS (blue), filesystem (orange), CLI (purple), C2PA (red).
+                </p>
+                <div class="mermaid">
+graph TB
+    Root["git-av/<br/>Version control for AV post-production"]
+
+    subgraph Config["Configuration"]
+        CLAUDE["CLAUDE.md<br/>Dev conventions & phase tracking"]
+        README["README.md<br/>User documentation & quick start"]
+        PYPROJECT["pyproject.toml<br/>Package config, deps, CLI entry"]
+        GITIGNORE[".gitignore<br/>Vault, ledger, cache exclusions"]
+    end
+
+    subgraph Source["src/gav/ - Source Code (~5,000 LOC)"]
+        direction TB
+
+        subgraph Core["core/ - Foundation"]
+            Identity["identity.py<br/>Trust Ladder hashing<br/>(inode/meta/sparse/full)"]
+            Vault["vault.py<br/>Content-addressable blob storage"]
+            Ledger["ledger.py<br/>SQLite persistence (v3 schema)<br/>blobs, versions, branches, C2PA"]
+            Engine["engine.py<br/>Snapshot/revert orchestration"]
+            ConfigMod["config.py<br/>Project configuration"]
+        end
+
+        subgraph VCS["vcs/ - Version Control"]
+            Branch["branch.py<br/>BranchManager<br/>Symlink swizzle checkout"]
+        end
+
+        subgraph FS["fs/ - Filesystem"]
+            Symlink["symlink.py<br/>SymlinkManager<br/>Atomic symlink updates"]
+        end
+
+        subgraph CLI["cli/ - Command Interface"]
+            MainCLI["main.py<br/>Click entry point<br/>7 command groups"]
+
+            subgraph Commands["commands/"]
+                CmdInit["init.py"]
+                CmdSnap["snapshot.py<br/>+ C2PA auto-manifest"]
+                CmdRevert["revert.py"]
+                CmdStatus["status.py"]
+                CmdBranch["branch.py<br/>+ checkout"]
+                CmdC2PA["c2pa.py<br/>generate/verify/<br/>inspect/audit/status"]
+            end
+        end
+
+        subgraph C2PA["c2pa/ - Content Provenance"]
+            C2PAMgr["manager.py<br/>C2PAManager<br/>Manifest gen/verify/audit"]
+        end
+
+        subgraph Adapters["adapters/ - NLE Integration"]
+            Future["(Phase 5: OTIO)"]
+        end
+    end
+
+    subgraph Tests["tests/ - Test Suite (47+ tests)"]
+        UnitTests["unit/<br/>test_ledger_migration.py<br/>test_ledger_c2pa.py<br/>test_symlink_manager.py<br/>test_branch_manager.py<br/>test_c2pa_manager.py"]
+        IntTests["integration/<br/>test_e2e_workflow.py<br/>test_symlink_swizzling.py<br/>test_c2pa_workflow.py"]
+        PerfTests["perf/<br/>test_performance.py<br/>(14 benchmarks)"]
+    end
+
+    subgraph Docs["docs/gav/ - Documentation"]
+        GAV000["GAV000 Beginnings"]
+        GAV001["GAV001 Implementation Progress"]
+        GAV002["GAV002 Phase 2 Sprint Plan"]
+        GAV003["GAV003 Phase 2 Complete"]
+        GAV004["GAV004 C2PA Provenance Guide"]
+        GAV005["GAV005 CLI Reference"]
+        GAV006["GAV006 Developer Guide"]
+    end
+
+    subgraph Hooks[".git-hooks-template/"]
+        PreCommit["pre-commit<br/>C2PA auto-manifest"]
+        PostCommit["post-commit<br/>Git metadata injection"]
+    end
+
+    subgraph Runtime[".gav_vault/ (gitignored)"]
+        Blobs["Content blobs<br/>(hash-named files)"]
+        Manifests["Sidecar manifests<br/>({hash}.c2pa.json)"]
+    end
+
+    subgraph LedgerDB[".gav_ledger.db (gitignored)"]
+        Schema["SQLite v3 schema<br/>7 tables"]
+    end
+
+    Root --> Config
+    Root --> Source
+    Root --> Tests
+    Root --> Docs
+    Root --> Hooks
+    Root --> Runtime
+    Root --> LedgerDB
+
+    MainCLI --> Commands
+
+    classDef config fill:#2d3748,stroke:#4a5568,color:#e2e8f0
+    classDef core fill:#1a3a2a,stroke:#38a169,color:#c6f6d5
+    classDef vcs fill:#1a2a3a,stroke:#3182ce,color:#bee3f8
+    classDef fs fill:#3a2a1a,stroke:#dd6b20,color:#feebc8
+    classDef cli fill:#2a1a3a,stroke:#805ad5,color:#e9d8fd
+    classDef c2pa fill:#3a1a1a,stroke:#e53e3e,color:#fed7d7
+    classDef test fill:#1a2a2a,stroke:#38b2ac,color:#b2f5ea
+    classDef docs fill:#2a2a1a,stroke:#d69e2e,color:#fefcbf
+    classDef runtime fill:#1a1a2a,stroke:#667eea,color:#c3dafe
+
+    class CLAUDE,README,PYPROJECT,GITIGNORE config
+    class Identity,Vault,Ledger,Engine,ConfigMod core
+    class Branch vcs
+    class Symlink fs
+    class MainCLI,CmdInit,CmdSnap,CmdRevert,CmdStatus,CmdBranch,CmdC2PA cli
+    class C2PAMgr c2pa
+    class Future c2pa
+    class UnitTests,IntTests,PerfTests test
+    class GAV000,GAV001,GAV002,GAV003,GAV004,GAV005,GAV006 docs
+    class PreCommit,PostCommit config
+    class Blobs,Manifests,Schema runtime
+                </div>
+            </div>
+        </div>
+
+        <!-- Architecture Overview -->
+        <div class="diagram-card" id="architecture-overview">
+            <div class="diagram-header" onclick="toggleDiagram(this)">
+                <div class="diagram-toggle">&#9660;</div>
+                <h2>Architecture Overview</h2>
+                <span class="diagram-badge">System Layers</span>
+            </div>
+            <div class="diagram-content">
+                <p class="diagram-description">
+                    High-level system design from CLI through core engine to storage, VCS, and C2PA provenance layers. The Trust Ladder provides progressive hashing (inode &rarr; metadata &rarr; sparse &rarr; full) for large media files. Symlink Swizzle enables sub-second branch checkout.
+                </p>
+                <div class="mermaid">
+graph TB
+    subgraph User["User Workspace"]
+        CLI["gav CLI<br/>Click + Rich terminal UI<br/>7 command groups"]
+        WorkspaceFiles["Workspace Files<br/>audio.wav, video.mp4<br/>(symlinks to vault blobs)"]
+    end
+
+    subgraph Engine["Core Engine Layer"]
+        GAVEngine["GAVEngine<br/>Orchestrates snapshot/revert<br/>Coordinates all subsystems"]
+
+        subgraph Identity["Trust Ladder Hashing"]
+            Rung1["Rung 1: Inode<br/>Instant change detection"]
+            Rung2["Rung 2: Metadata<br/>Size + mtime fingerprint"]
+            Rung3["Rung 3: Sparse Hash<br/>64KB head + tail<br/>(BLAKE2b)"]
+            Rung4["Rung 4: Full Hash<br/>Complete content ID<br/>(BLAKE2b/BLAKE3)"]
+        end
+    end
+
+    subgraph Storage["Storage Layer"]
+        subgraph Vault[".gav_vault/ - Content-Addressable Storage"]
+            Blob1["abc123...<br/>(binary blob)"]
+            Blob2["def456...<br/>(binary blob)"]
+            Manifest1["abc123.c2pa.json<br/>(sidecar manifest)"]
+            Manifest2["def456.c2pa.json<br/>(sidecar manifest)"]
+        end
+
+        subgraph Database[".gav_ledger.db - SQLite v3"]
+            BlobsTable["blobs<br/>Content registry"]
+            VersionsTable["versions<br/>File history per branch"]
+            BranchesTable["branches<br/>Branch registry"]
+            HeadTable["head_pointer<br/>Current branch (singleton)"]
+            C2PAManifests["c2pa_manifests<br/>Provenance manifests"]
+            C2PAActions["c2pa_actions<br/>Action history"]
+            C2PAIngredients["c2pa_ingredients<br/>Content relationships"]
+        end
+    end
+
+    subgraph VCS["Version Control"]
+        BranchMgr["BranchManager<br/>Create, delete, list branches"]
+        SymlinkSwizzle["Symlink Swizzle<br/>Atomic branch checkout<br/>< 1 second for 100 files"]
+        SymlinkMgr["SymlinkManager<br/>Atomic os.rename() updates<br/>Batch operations"]
+    end
+
+    subgraph Provenance["C2PA Provenance Layer"]
+        C2PAMgr["C2PAManager<br/>Manifest generation<br/>Verification & audit"]
+        AITracking["AI Content Tracking<br/>trainedAlgorithmicMedia<br/>EU AI Act compliance"]
+
+        subgraph Assertions["Custom Assertions"]
+            VaultID["com.git-av.vault-identity<br/>Hash, vault path, trust rung"]
+            GitMeta["com.git-av.git-metadata<br/>Commit SHA, branch, author"]
+        end
+    end
+
+    subgraph GitIntegration["Git Integration"]
+        PreCommit["pre-commit hook<br/>Auto-manifest generation"]
+        PostCommit["post-commit hook<br/>Git metadata injection"]
+    end
+
+    CLI -->|"gav snapshot"| GAVEngine
+    CLI -->|"gav checkout"| BranchMgr
+    CLI -->|"gav c2pa audit"| C2PAMgr
+    WorkspaceFiles -.->|"symlinks"| Vault
+
+    GAVEngine --> Identity
+    Rung1 --> Rung2
+    Rung2 --> Rung3
+    Rung3 --> Rung4
+    GAVEngine -->|"store blob"| Vault
+    GAVEngine -->|"log version"| Database
+    GAVEngine -->|"create symlink"| SymlinkMgr
+
+    BranchMgr --> SymlinkSwizzle
+    SymlinkSwizzle --> SymlinkMgr
+    SymlinkSwizzle -->|"update HEAD"| HeadTable
+    SymlinkMgr -->|"atomic swap"| WorkspaceFiles
+
+    GAVEngine -->|"auto-generate"| C2PAMgr
+    C2PAMgr --> Assertions
+    C2PAMgr -->|"write sidecar"| Manifest1
+    C2PAMgr -->|"register"| C2PAManifests
+    C2PAMgr --> AITracking
+
+    PreCommit -->|"scan symlinks"| C2PAMgr
+    PostCommit -->|"inject metadata"| GitMeta
+
+    VersionsTable -->|"FK"| BlobsTable
+    VersionsTable -->|"FK"| BranchesTable
+    C2PAManifests -->|"FK"| BlobsTable
+    C2PAActions -->|"FK"| BlobsTable
+
+    classDef user fill:#2d3748,stroke:#a0aec0,color:#e2e8f0,stroke-width:2px
+    classDef engine fill:#1a3a2a,stroke:#38a169,color:#c6f6d5,stroke-width:2px
+    classDef storage fill:#1a1a2e,stroke:#667eea,color:#c3dafe,stroke-width:2px
+    classDef vcs fill:#1a2a3a,stroke:#3182ce,color:#bee3f8,stroke-width:2px
+    classDef c2pa fill:#3a1a1a,stroke:#e53e3e,color:#fed7d7,stroke-width:2px
+    classDef git fill:#2a2a1a,stroke:#d69e2e,color:#fefcbf,stroke-width:2px
+    classDef hash fill:#1a3a2a,stroke:#48bb78,color:#c6f6d5
+
+    class CLI,WorkspaceFiles user
+    class GAVEngine engine
+    class Rung1,Rung2,Rung3,Rung4 hash
+    class Blob1,Blob2,Manifest1,Manifest2 storage
+    class BlobsTable,VersionsTable,BranchesTable,HeadTable,C2PAManifests,C2PAActions,C2PAIngredients storage
+    class BranchMgr,SymlinkSwizzle,SymlinkMgr vcs
+    class C2PAMgr,AITracking,VaultID,GitMeta c2pa
+    class PreCommit,PostCommit git
+                </div>
+            </div>
+        </div>
+
+        <!-- Component Map -->
+        <div class="diagram-card" id="component-map">
+            <div class="diagram-header" onclick="toggleDiagram(this)">
+                <div class="diagram-toggle">&#9660;</div>
+                <h2>Component Map</h2>
+                <span class="diagram-badge">Class Relationships</span>
+            </div>
+            <div class="diagram-content">
+                <p class="diagram-description">
+                    Class diagram showing all major components with method signatures and dependency arrows. GAVEngine orchestrates core modules; BranchManager delegates symlink operations to SymlinkManager; CLI commands are Click-based with Rich formatting. All managers accept dependencies via constructor (dependency injection).
+                </p>
+                <div class="mermaid">
+classDiagram
+    class GAVConfig {
+        +Path project_root
+        +Path vault_dir
+        +Path ledger_file
+        +str hash_algorithm
+        +int sparse_size
+        +ensure_directories()
+        +is_gav_project() bool
+        +to_dict() dict
+    }
+
+    class GAVIdentity {
+        +Path path
+        +Path real_path
+        +str hash_algorithm
+        +int size
+        +float mtime
+        +int inode
+        +get_inode() int
+        +get_metadata_fingerprint() str
+        +get_sparse_hash() str
+        +get_full_hash() str
+        +verify_against_hash(expected, level) bool
+    }
+
+    class GAVVault {
+        +Path vault_dir
+        +get_blob_path(hash) Path
+        +store_blob(path, hash) bool
+        +list_blobs() List
+        +get_vault_size() int
+    }
+
+    class GAVLedger {
+        +str db_path
+        +Connection conn
+        +Cursor cursor
+        -_init_db()
+        -_migrate_v2_branch_support()
+        -_migrate_v3_c2pa_support()
+        +register_blob(hash, path) bool
+        +log_version(path, hash, desc, branch_id) int
+        +get_history(path, branch_id) List
+        +create_branch(name) int
+        +get_branch_id(name) int
+        +get_branch_state(branch_id) dict
+        +checkout_branch(branch_id)
+        +register_manifest(hash, path, manifest_hash)
+        +log_action(hash, type, agent, source)
+        +get_blobs_without_manifests() List
+    }
+
+    class GAVEngine {
+        +GAVConfig config
+        +GAVLedger ledger
+        +GAVVault vault
+        +snapshot(path, desc, branch_id) str
+        +revert(path, target_hash)
+        +get_history(path, branch_id) list
+        +get_current_branch() str
+        +verify_file(path, trust_level) bool
+        +status() dict
+    }
+
+    class BranchManager {
+        +GAVConfig config
+        +GAVLedger ledger
+        +SymlinkManager symlink_mgr
+        +create_branch(name) int
+        +delete_branch(name, force)
+        +list_branches() List
+        +get_current_branch() str
+        +checkout_branch(name, verify) dict
+        +compare_branches(a, b) dict
+    }
+
+    class SymlinkManager {
+        +Path vault_dir
+        +update_symlink(path, hash) bool
+        +batch_update_symlinks(mappings, verify) Tuple
+        +is_vault_symlink(path) bool
+        +get_target_hash(path) str
+        +repair_broken_symlink(path, hash) bool
+        +find_vault_symlinks(dir) List
+        +verify_symlinks(mappings) Tuple
+    }
+
+    class C2PAManager {
+        +GAVConfig config
+        +GAVLedger ledger
+        +Path vault_dir
+        +is_c2patool_available() bool
+        +get_manifest_path(hash) Path
+        +generate_manifest(hash, action, agent, source) Path
+        +sign_manifest(hash, cert) bool
+        +verify_manifest(hash) dict
+        +inspect(hash) dict
+        +get_git_context() dict
+        +generate_audit_report(format) dict
+    }
+
+    class CLIMain {
+        &lt;&lt;Click Group&gt;&gt;
+        +cli() group
+        +main() entry
+    }
+
+    class SnapshotCommand {
+        &lt;&lt;Click Command&gt;&gt;
+        +snapshot(file, message, c2pa, source_type, software)
+    }
+
+    class CheckoutCommand {
+        &lt;&lt;Click Command&gt;&gt;
+        +checkout(name)
+    }
+
+    class C2PACommand {
+        &lt;&lt;Click Group&gt;&gt;
+        +generate(hash, message, action)
+        +verify(hash)
+        +inspect(hash, json)
+        +audit(format)
+        +status()
+    }
+
+    GAVEngine --> GAVConfig : uses
+    GAVEngine --> GAVIdentity : creates per file
+    GAVEngine --> GAVVault : stores blobs
+    GAVEngine --> GAVLedger : logs versions
+
+    BranchManager --> GAVConfig : uses
+    BranchManager --> GAVLedger : queries branches
+    BranchManager --> SymlinkManager : delegates swizzle
+
+    C2PAManager --> GAVConfig : uses
+    C2PAManager --> GAVLedger : registers manifests
+
+    CLIMain --> GAVConfig : initializes
+    SnapshotCommand --> GAVEngine : snapshot()
+    SnapshotCommand --> C2PAManager : auto-manifest
+    CheckoutCommand --> BranchManager : checkout_branch()
+    C2PACommand --> C2PAManager : all operations
+
+    SnapshotCommand ..|> CLIMain : registered command
+    CheckoutCommand ..|> CLIMain : registered command
+    C2PACommand ..|> CLIMain : registered command
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Flow -->
+        <div class="diagram-card" id="data-flow">
+            <div class="diagram-header" onclick="toggleDiagram(this)">
+                <div class="diagram-toggle">&#9660;</div>
+                <h2>Data Flow</h2>
+                <span class="diagram-badge">Operation Sequences</span>
+            </div>
+            <div class="diagram-content">
+                <p class="diagram-description">
+                    Sequence diagrams for the three core operations: Snapshot (hash &rarr; store &rarr; symlink &rarr; record &rarr; manifest), Checkout (state lookup &rarr; diff &rarr; batch symlink swizzle &rarr; HEAD update), and Revert (history lookup &rarr; atomic symlink replace). Includes C2PA auto-manifest generation with optional git context injection.
+                </p>
+                <div class="mermaid">
+sequenceDiagram
+    participant U as User
+    participant CLI as gav CLI
+    participant E as GAVEngine
+    participant ID as GAVIdentity
+    participant V as GAVVault
+    participant L as GAVLedger
+    participant SM as SymlinkManager
+    participant C2PA as C2PAManager
+    participant FS as Filesystem
+
+    Note over U,FS: Snapshot Flow: gav snapshot audio.wav -m "Recording"
+
+    U->>CLI: gav snapshot audio.wav -m "Recording"
+    CLI->>E: snapshot(path, description)
+    activate E
+
+    E->>ID: GAVIdentity(path, "blake2b")
+    activate ID
+    ID->>FS: Read file content
+    FS-->>ID: Raw bytes
+    ID->>ID: Compute BLAKE2b full hash
+    ID-->>E: "abc123def456..."
+    deactivate ID
+
+    E->>V: store_blob(path, hash)
+    activate V
+    alt New blob
+        V->>FS: Copy file to .gav_vault/abc123...
+        V-->>E: is_new=True
+    else Duplicate
+        V-->>E: is_new=False (deduplicated)
+    end
+    deactivate V
+
+    E->>FS: unlink(audio.wav)
+    E->>FS: symlink(audio.wav -> .gav_vault/abc123...)
+
+    E->>L: register_blob(hash, path)
+    E->>L: log_version(path, hash, desc, branch_id)
+    L->>L: INSERT into blobs + versions
+
+    deactivate E
+
+    Note over CLI,C2PA: C2PA Auto-Manifest Generation
+
+    CLI->>C2PA: generate_manifest(hash, action, source_type)
+    activate C2PA
+    C2PA->>C2PA: Build JSON manifest structure
+    C2PA->>C2PA: Add c2pa.actions assertion
+    C2PA->>C2PA: Add com.git-av.vault-identity assertion
+
+    opt Git repository detected
+        C2PA->>FS: git rev-parse HEAD
+        FS-->>C2PA: commit SHA
+        C2PA->>C2PA: Add com.git-av.git-metadata assertion
+    end
+
+    C2PA->>FS: Write abc123.c2pa.json
+    C2PA->>L: register_manifest(hash, path, manifest_hash)
+    C2PA->>L: log_action(hash, "c2pa.created", agent, source)
+    C2PA-->>CLI: manifest_path
+    deactivate C2PA
+
+    CLI-->>U: Snapshot created + C2PA manifest
+
+    Note over U,FS: Checkout Flow: gav checkout feature (Symlink Swizzle)
+
+    U->>CLI: gav checkout feature
+    CLI->>L: get_branch_id("feature")
+    L-->>CLI: branch_id=2
+
+    CLI->>L: get_branch_state(branch_id=2)
+    L-->>CLI: target state: audio.wav->def456, mix.wav->ghi789
+
+    CLI->>L: get_branch_state(current_branch_id)
+    L-->>CLI: current state: audio.wav->abc123, mix.wav->ghi789
+
+    Note over CLI,SM: Diff: audio.wav changed, mix.wav same
+
+    CLI->>SM: batch_update_symlinks(changed_files)
+    activate SM
+
+    loop For each changed file
+        SM->>FS: Create temp symlink .gav_tmp_audio.wav
+        SM->>FS: os.rename(temp -> audio.wav)
+        Note over SM,FS: Atomic POSIX rename
+    end
+
+    SM-->>CLI: successful=["audio.wav"], failed=[]
+    deactivate SM
+
+    CLI->>L: checkout_branch(branch_id=2)
+    L->>L: UPDATE head_pointer
+
+    CLI-->>U: Switched to branch 'feature' (1 file updated)
+
+    Note over U,FS: Revert Flow: gav revert audio.wav 2
+
+    U->>CLI: gav revert audio.wav 2
+    CLI->>L: get_history("audio.wav", branch_id)
+    L-->>CLI: versions list
+
+    CLI->>E: revert(path, target_hash)
+    activate E
+    E->>V: get_blob_path(target_hash)
+    V-->>E: .gav_vault/abc123...
+    E->>FS: unlink(audio.wav)
+    E->>FS: symlink(audio.wav -> .gav_vault/abc123...)
+    E-->>CLI: Restored
+    deactivate E
+
+    CLI-->>U: Reverted to version 2
+                </div>
+            </div>
+        </div>
+
+        <!-- Entry Points -->
+        <div class="diagram-card" id="entry-points">
+            <div class="diagram-header" onclick="toggleDiagram(this)">
+                <div class="diagram-toggle">&#9660;</div>
+                <h2>Entry Points</h2>
+                <span class="diagram-badge">CLI + API + Hooks</span>
+            </div>
+            <div class="diagram-content">
+                <p class="diagram-description">
+                    All ways to interact with git-av: Terminal CLI (7 command groups via Click), Python programmatic API (GAVEngine, BranchManager, C2PAManager, GAVLedger), Git hooks (pre-commit auto-manifest, post-commit metadata injection), and environment configuration (env vars + TOML).
+                </p>
+                <div class="mermaid">
+graph TB
+    subgraph UserAccess["User Access Points"]
+        Terminal["Terminal<br/>Direct CLI usage<br/>gav snapshot, gav checkout, etc."]
+        PipInstall["pip install -e .<br/>Registers 'gav' entry point<br/>via pyproject.toml"]
+        PythonImport["Python Import<br/>from gav.core.engine import GAVEngine<br/>Programmatic usage"]
+    end
+
+    subgraph CLIEntry["CLI Entry Points (gav command)"]
+        MainEntry["gav.cli.main:cli<br/>Click group entry point"]
+
+        subgraph ProjectMgmt["Project Management"]
+            Init["gav init<br/>Initialize project<br/>Creates .gav_vault/, .gav_ledger.db"]
+            Status["gav status [-v]<br/>Show project status<br/>Branch, vault size, blob count"]
+        end
+
+        subgraph VersionControl["Version Control"]
+            Snapshot["gav snapshot FILE -m MSG<br/>Options: --c2pa/--no-c2pa<br/>--source-type --software"]
+            Revert["gav revert FILE [VERSION]<br/>Options: --list<br/>By version number or hash prefix"]
+        end
+
+        subgraph Branching["Branch Management"]
+            BranchList["gav branch<br/>List all branches<br/>Shows current with *"]
+            BranchCreate["gav branch NAME<br/>Create new branch"]
+            BranchDelete["gav branch -d NAME<br/>Options: --force"]
+            Checkout["gav checkout NAME<br/>Symlink swizzle<br/>Instant branch switch"]
+        end
+
+        subgraph C2PACommands["C2PA Provenance"]
+            C2PAGenerate["gav c2pa generate HASH<br/>Options: -m, --action<br/>--software, --source-type<br/>--ingredient"]
+            C2PAVerify["gav c2pa verify HASH<br/>JSON + signature validation"]
+            C2PAInspect["gav c2pa inspect HASH<br/>Options: --json<br/>Full provenance report"]
+            C2PAAudit["gav c2pa audit<br/>Options: --format json|summary<br/>Vault-wide compliance"]
+            C2PAStatus["gav c2pa status<br/>c2patool availability<br/>Manifest coverage"]
+        end
+    end
+
+    subgraph GitHooks["Git Hook Entry Points"]
+        PreCommitHook["pre-commit<br/>Scans staged vault symlinks<br/>Auto-generates C2PA manifests"]
+        PostCommitHook["post-commit<br/>Injects git metadata<br/>commit SHA, branch, author"]
+    end
+
+    subgraph ProgrammaticAPI["Programmatic API"]
+        EngineAPI["GAVEngine<br/>snapshot(path, desc)<br/>revert(path, hash)<br/>status() -> dict"]
+        BranchAPI["BranchManager<br/>create_branch(name)<br/>checkout_branch(name)<br/>compare_branches(a, b)"]
+        C2PAAPI["C2PAManager<br/>generate_manifest(hash)<br/>verify_manifest(hash)<br/>generate_audit_report()"]
+        LedgerAPI["GAVLedger<br/>Context manager support<br/>Direct SQL if needed"]
+    end
+
+    subgraph EnvConfig["Environment Configuration"]
+        EnvHash["GAV_HASH_ALGORITHM<br/>blake2b (default) | blake3"]
+        EnvSparse["GAV_SPARSE_SIZE<br/>65536 (default, 64KB)"]
+        TOMLConfig[".gav/config.toml<br/>hash_algorithm, sparse_size<br/>c2pa.auto_generate"]
+    end
+
+    Terminal --> PipInstall
+    PipInstall --> MainEntry
+    PythonImport --> ProgrammaticAPI
+
+    MainEntry --> ProjectMgmt
+    MainEntry --> VersionControl
+    MainEntry --> Branching
+    MainEntry --> C2PACommands
+
+    PreCommitHook -->|"gav c2pa generate"| C2PAGenerate
+    PostCommitHook -->|"Updates manifests"| C2PAAPI
+
+    EnvConfig -.->|"Loaded at startup"| MainEntry
+
+    classDef user fill:#2d3748,stroke:#a0aec0,color:#e2e8f0,stroke-width:2px
+    classDef cli fill:#2a1a3a,stroke:#805ad5,color:#e9d8fd,stroke-width:2px
+    classDef mgmt fill:#1a3a2a,stroke:#38a169,color:#c6f6d5
+    classDef vc fill:#1a2a3a,stroke:#3182ce,color:#bee3f8
+    classDef branch fill:#3a2a1a,stroke:#dd6b20,color:#feebc8
+    classDef c2pa fill:#3a1a1a,stroke:#e53e3e,color:#fed7d7
+    classDef hook fill:#2a2a1a,stroke:#d69e2e,color:#fefcbf
+    classDef api fill:#1a1a2e,stroke:#667eea,color:#c3dafe
+    classDef config fill:#2d3748,stroke:#718096,color:#e2e8f0
+
+    class Terminal,PipInstall,PythonImport user
+    class MainEntry cli
+    class Init,Status mgmt
+    class Snapshot,Revert vc
+    class BranchList,BranchCreate,BranchDelete,Checkout branch
+    class C2PAGenerate,C2PAVerify,C2PAInspect,C2PAAudit,C2PAStatus c2pa
+    class PreCommitHook,PostCommitHook hook
+    class EngineAPI,BranchAPI,C2PAAPI,LedgerAPI api
+    class EnvHash,EnvSparse,TOMLConfig config
+                </div>
+            </div>
+        </div>
+
+        <!-- Database Schema -->
+        <div class="diagram-card" id="database-schema">
+            <div class="diagram-header" onclick="toggleDiagram(this)">
+                <div class="diagram-toggle">&#9660;</div>
+                <h2>Database Schema</h2>
+                <span class="diagram-badge">SQLite v3 - 7 Tables</span>
+            </div>
+            <div class="diagram-content">
+                <p class="diagram-description">
+                    SQLite ledger schema evolved across 3 progressive migrations: v1 (blobs + versions), v2 (branches + head_pointer + versions.branch_id), v3 (c2pa_manifests + c2pa_actions + c2pa_ingredients). All migrations are idempotent and run automatically on startup.
+                </p>
+                <div class="mermaid">
+erDiagram
+    blobs {
+        TEXT hash PK "BLAKE2b content hash"
+        TEXT original_path "First-seen file path"
+        TEXT created_at "ISO 8601 timestamp"
+    }
+
+    versions {
+        INTEGER id PK "AUTOINCREMENT"
+        TEXT file_path "Workspace file path"
+        TEXT blob_hash FK "References blobs.hash"
+        TEXT description "User-provided message"
+        TEXT created_at "ISO 8601 timestamp"
+        INTEGER branch_id FK "References branches.id (v2)"
+    }
+
+    branches {
+        INTEGER id PK "AUTOINCREMENT"
+        TEXT name UK "Unique branch name"
+        TEXT created_at "ISO 8601 timestamp"
+    }
+
+    head_pointer {
+        INTEGER singleton PK "CHECK singleton = 1"
+        INTEGER current_branch_id FK "References branches.id"
+    }
+
+    c2pa_manifests {
+        TEXT blob_hash PK "References blobs.hash"
+        TEXT manifest_path "Sidecar .c2pa.json path"
+        TEXT manifest_hash "Hash of manifest content"
+        INTEGER signature_valid "Boolean 0 or 1"
+        TEXT signed_at "ISO 8601 timestamp"
+    }
+
+    c2pa_actions {
+        INTEGER id PK "AUTOINCREMENT"
+        TEXT blob_hash FK "References blobs.hash"
+        TEXT action_type "c2pa.created, c2pa.edited"
+        TEXT software_agent "Tool or application"
+        TEXT digital_source_type "AI source classification"
+        TEXT parameters "JSON-encoded params"
+        TEXT timestamp "ISO 8601 timestamp"
+    }
+
+    c2pa_ingredients {
+        TEXT parent_hash PK "References blobs.hash"
+        TEXT ingredient_hash PK "References blobs.hash"
+        TEXT relationship "parentOf, componentOf"
+    }
+
+    blobs ||--o{ versions : "content identity"
+    blobs ||--o| c2pa_manifests : "provenance sidecar"
+    blobs ||--o{ c2pa_actions : "action history"
+    blobs ||--o{ c2pa_ingredients : "parent content"
+    blobs ||--o{ c2pa_ingredients : "ingredient content"
+    branches ||--o{ versions : "branch context"
+    branches ||--o| head_pointer : "current branch"
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>
+                git-av Architecture v0.3.0 | Generated 2026-02-01 |
+                <a href="./v0.3.0/">View Wireframe Sources</a>
+            </p>
+        </footer>
+    </div>
+
+    <div class="keyboard-hints">
+        <div><kbd>&#8593;</kbd><kbd>&#8595;</kbd> Navigate</div>
+        <div><kbd>&#8592;</kbd> Collapse</div>
+        <div><kbd>&#8594;</kbd> Expand</div>
+        <div><kbd>Esc</kbd> Collapse all</div>
+        <div><kbd>A</kbd> Expand all</div>
+    </div>
+
+    <script>
+        // Initialize Mermaid with dark theme
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'dark',
+            themeVariables: {
+                fontFamily: '"InputMono-Regular", "SF Mono", "Fira Code", monospace',
+                primaryColor: '#0f3460',
+                primaryTextColor: '#eaeaea',
+                primaryBorderColor: '#2a2a4a',
+                lineColor: '#38a169',
+                secondaryColor: '#16213e',
+                tertiaryColor: '#1a1a2e',
+                background: '#1a1a2e',
+                mainBkg: '#0f3460',
+                nodeBorder: '#2a2a4a',
+                clusterBkg: '#16213e',
+                clusterBorder: '#2a2a4a',
+                titleColor: '#eaeaea',
+                edgeLabelBackground: '#3d3060',
+                lineWidth: 2
+            },
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'monotoneY',
+                nodeSpacing: 80,
+                rankSpacing: 100,
+                padding: 30
+            },
+            sequence: {
+                useMaxWidth: true,
+                showSequenceNumbers: false,
+                actorMargin: 50,
+                noteMargin: 10,
+                messageMargin: 35
+            },
+            er: {
+                useMaxWidth: true,
+                fontSize: 14
+            }
+        });
+
+        // Keyboard navigation state
+        let selectedIndex = -1;
+        const cards = document.querySelectorAll('.diagram-card');
+
+        function selectCard(index) {
+            cards.forEach(c => c.classList.remove('selected'));
+            if (index >= 0 && index < cards.length) {
+                selectedIndex = index;
+                cards[index].classList.add('selected');
+                cards[index].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        function toggleDiagram(header) {
+            const card = header.closest('.diagram-card');
+            card.classList.toggle('collapsed');
+            const index = Array.from(cards).indexOf(card);
+            selectCard(index);
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                cards.forEach(card => card.classList.add('collapsed'));
+                cards.forEach(c => c.classList.remove('selected'));
+                selectedIndex = -1;
+            } else if (e.key.toLowerCase() === 'a' && !e.ctrlKey && !e.metaKey) {
+                cards.forEach(card => card.classList.remove('collapsed'));
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                selectCard(selectedIndex < cards.length - 1 ? selectedIndex + 1 : 0);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                selectCard(selectedIndex > 0 ? selectedIndex - 1 : cards.length - 1);
+            } else if (e.key === 'ArrowRight' && selectedIndex >= 0) {
+                e.preventDefault();
+                cards[selectedIndex].classList.remove('collapsed');
+            } else if (e.key === 'ArrowLeft' && selectedIndex >= 0) {
+                e.preventDefault();
+                cards[selectedIndex].classList.add('collapsed');
+            }
+        });
+
+        // Smooth scroll for quick nav
+        document.querySelectorAll('.quick-nav a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = document.querySelector(link.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    target.classList.remove('collapsed');
+                    const index = Array.from(cards).indexOf(target);
+                    selectCard(index);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

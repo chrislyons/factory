@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSD-v2 - Architecture Gallery</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+    <style>
+        /* Input Sans */
+        @font-face {
+            font-family: 'InputSans-Regular';
+            src: url('/fonts/InputSans-Regular.ttf') format('truetype');
+            font-weight: 400;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'InputSans-Medium';
+            src: url('/fonts/InputSans-Medium.ttf') format('truetype');
+            font-weight: 500;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'InputSans-Bold';
+            src: url('/fonts/InputSans-Bold.ttf') format('truetype');
+            font-weight: 700;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'InputSans-Light';
+            src: url('/fonts/InputSans-Light.ttf') format('truetype');
+            font-weight: 300;
+            font-display: swap;
+        }
+        /* Input Mono */
+        @font-face {
+            font-family: 'InputMono-Regular';
+            src: url('/fonts/InputMono-Regular.ttf') format('truetype');
+            font-weight: 400;
+            font-display: swap;
+        }
+
+        :root {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #242424;
+            --bg-card: #2a2a2a;
+            --accent: #66BB6A;
+            --accent-secondary: #2E7D32;
+            --text-primary: #e0e0e0;
+            --text-secondary: #888;
+            --border: #333;
+            --success: #4ade80;
+            --warning: #fbbf24;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'InputSans-Regular', 'Input Sans', system-ui, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            padding: 1rem 2rem;
+        }
+
+        /* Header - Compact single row */
+        header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            background: var(--bg-secondary);
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            white-space: nowrap;
+            margin: 0;
+        }
+
+        .header-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.65rem;
+            padding-left: 0.3rem;
+            border-left: 1px solid #444;
+        }
+
+        .version-badge {
+            background: var(--accent);
+            color: var(--bg-primary);
+            padding: 0.15rem 0.4rem;
+            border-radius: 3px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-left: 1rem;
+            white-space: nowrap;
+        }
+
+        h2 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin: 1.5rem 0 0.75rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: flex;
+            gap: 0.2rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .stat-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            padding: 0.1rem 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.15rem;
+            transition: border-color 0.2s;
+        }
+
+        .stat-card:hover {
+            border-color: var(--accent);
+        }
+
+        .stat-value {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .stat-label {
+            font-size: 0.55rem;
+            color: var(--text-secondary);
+        }
+
+        /* Quick Nav + Legend Row */
+        .nav-legend-row {
+            display: flex;
+            gap: 0.35rem;
+            margin: 0.75rem 0 1rem 0;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .quick-nav {
+            display: flex;
+            gap: 0.3rem;
+            padding: 0.25rem 0.5rem;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .quick-nav a {
+            color: var(--text-primary);
+            text-decoration: none;
+            padding: 0.2rem 0.5rem;
+            background: var(--bg-card);
+            border-radius: 3px;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .quick-nav a:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: var(--bg-primary);
+        }
+
+        .quick-nav .section-label {
+            color: var(--text-secondary);
+            font-size: 0.7rem;
+            padding: 0 0.15rem;
+        }
+
+        /* Color Legend */
+        .legend {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 0.3rem 0.5rem;
+        }
+
+        .legend h3 {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        .legend-grid {
+            display: flex;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .legend-color {
+            width: 9px;
+            height: 9px;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        /* Diagram Cards */
+        .diagram-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            margin-bottom: 1.25rem;
+            overflow: hidden;
+            transition: border-color 0.2s;
+            scroll-margin-top: 1.5rem;
+            scroll-margin-bottom: 1.5rem;
+        }
+
+        .diagram-card:hover {
+            border-color: var(--accent-secondary);
+        }
+
+        .diagram-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.8rem 1.5rem;
+            background: var(--bg-card);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .diagram-header:hover {
+            background: var(--border);
+        }
+
+        .diagram-header h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex: 1;
+        }
+
+        .diagram-badge {
+            font-size: 0.9rem;
+            padding: 0.3rem 0.6rem;
+            background: var(--accent-secondary);
+            border-radius: 6px;
+            color: white;
+        }
+
+        .diagram-toggle {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            transition: transform 0.3s;
+            font-size: 1.5rem;
+        }
+
+        .diagram-card.collapsed .diagram-toggle {
+            transform: rotate(-90deg);
+        }
+
+        .diagram-description {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.95rem;
+            font-family: 'InputSans-Light', 'Input Sans', system-ui, sans-serif;
+            font-weight: 300;
+        }
+
+        .diagram-content {
+            padding: 1.5rem;
+            overflow-x: auto;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+        }
+
+        .diagram-card.collapsed .diagram-content {
+            max-height: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+            overflow: hidden;
+        }
+
+        .mermaid {
+            background: var(--bg-primary);
+            border-radius: 12px;
+            padding: 1.5rem;
+            min-height: 200px;
+            overflow-x: auto;
+            overflow-y: visible;
+        }
+
+        .mermaid svg {
+            min-width: 900px;
+            display: block;
+            margin: 0 auto;
+        }
+
+        /* Mermaid edge label styling */
+        .mermaid .edgeLabel foreignObject {
+            overflow: visible;
+        }
+        .mermaid .edgeLabel div {
+            padding: 4px 10px;
+            background: #1a3a2a !important;
+            border-radius: 3px;
+        }
+        .mermaid .edgeLabel rect,
+        .mermaid .labelBkg {
+            fill: #1a3a2a !important;
+            rx: 3px;
+            ry: 3px;
+        }
+
+        /* Mermaid line and border thickness */
+        .mermaid .flowchart-link,
+        .mermaid .edgePath path,
+        .mermaid .transition path {
+            stroke-width: 2px !important;
+        }
+        .mermaid .node rect,
+        .mermaid .node circle,
+        .mermaid .node polygon,
+        .mermaid .cluster rect,
+        .mermaid .statediagram-state rect {
+            stroke-width: 2px !important;
+        }
+
+        /* Mermaid node text */
+        .mermaid .cluster-label {
+            white-space: nowrap;
+            padding: 8px 12px;
+        }
+        .mermaid .cluster-label .nodeLabel {
+            white-space: nowrap;
+            padding: 4px 8px;
+        }
+        .mermaid .nodeLabel {
+            white-space: nowrap;
+        }
+        .mermaid .label foreignObject {
+            overflow: visible;
+        }
+        .mermaid .cluster rect {
+            rx: 8px;
+            ry: 8px;
+        }
+        .mermaid .cluster .label {
+            margin-bottom: 12px;
+        }
+        .mermaid .cluster foreignObject {
+            overflow: visible;
+        }
+
+        /* Keyboard Hints */
+        .keyboard-hints {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .keyboard-hints div {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .keyboard-hints kbd {
+            background: var(--bg-primary);
+            padding: 0.15rem 0.4rem;
+            border-radius: 3px;
+            border: 1px solid var(--border);
+            font-family: monospace;
+            font-size: 0.7rem;
+            min-width: 1.2rem;
+            text-align: center;
+        }
+
+        /* Selected diagram card for keyboard nav */
+        .diagram-card.selected {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            border-top: 1px solid var(--border);
+            margin-top: 2rem;
+        }
+
+        footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        footer code {
+            font-family: 'InputMono-Regular', monospace;
+            font-size: 0.75rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .nav-legend-row {
+                flex-direction: column;
+                gap: 0.35rem;
+                align-items: flex-start;
+            }
+            .mermaid svg {
+                min-width: auto;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 0.5rem; }
+            header { padding: 0.4rem 0.6rem; }
+            header h1 { font-size: 1rem; }
+            .version-badge {
+                font-size: 0.6rem;
+                padding: 0.1rem 0.3rem;
+                margin-left: 0.5rem;
+            }
+            .quick-nav {
+                width: 100%;
+                flex-wrap: wrap;
+            }
+            .quick-nav a {
+                font-size: 0.7rem;
+                padding: 0.15rem 0.4rem;
+            }
+            .legend {
+                width: 100%;
+                flex-wrap: wrap;
+            }
+            .legend h3 { font-size: 0.65rem; }
+            .legend-item { font-size: 0.65rem; }
+            .diagram-header {
+                padding: 0.6rem 1rem;
+                gap: 0.5rem;
+            }
+            .diagram-header h3 { font-size: 1rem; }
+            .diagram-badge {
+                font-size: 0.7rem;
+                padding: 0.2rem 0.4rem;
+            }
+            .diagram-toggle {
+                width: 28px;
+                height: 28px;
+                font-size: 1.2rem;
+            }
+            .diagram-content { padding: 1rem; }
+            .diagram-description { font-size: 0.85rem; }
+            .mermaid {
+                padding: 1rem;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            .mermaid svg {
+                min-width: auto;
+                max-width: none;
+            }
+            .keyboard-hints { display: none; }
+            footer {
+                padding: 1rem;
+                font-size: 0.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>OSD-v2 Architecture</h1>
+            <span class="header-subtitle">Canadian Event Discovery Platform &mdash; Web App + Cloudflare Workers</span>
+            <span class="version-badge">v0.5.3</span>
+        </header>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-value">8</span>
+                <span class="stat-label">Diagrams</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value">25</span>
+                <span class="stat-label">Migrations</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value">22</span>
+                <span class="stat-label">DB Tables</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value">5</span>
+                <span class="stat-label">Data Sources</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value">~100</span>
+                <span class="stat-label">GraphQL Ops</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value">110+</span>
+                <span class="stat-label">OSD Docs</span>
+            </div>
+        </div>
+
+        <div class="nav-legend-row">
+            <nav class="quick-nav">
+                <span class="section-label">System:</span>
+                <a href="#architecture">Architecture</a>
+                <a href="#deployment">Deployment</a>
+                <span class="section-label">Frontend:</span>
+                <a href="#components">Components</a>
+                <a href="#entry">Entry Points</a>
+                <span class="section-label">Backend:</span>
+                <a href="#dataflow">Data Flow</a>
+                <a href="#database">Database</a>
+                <a href="#auth">Auth/RBAC</a>
+                <span class="section-label">Codebase:</span>
+                <a href="#repo">Repository</a>
+            </nav>
+            <div class="legend">
+                <h3>Legend:</h3>
+                <div class="legend-grid">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #e3f2fd;"></div>
+                        <span>Client/User</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #fff8e1;"></div>
+                        <span>Cloudflare Edge</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #e8f5e9;"></div>
+                        <span>Data Layer</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #fce4ec;"></div>
+                        <span>External Services</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #f3e5f5;"></div>
+                        <span>Ingestion Pipeline</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #ffebee;"></div>
+                        <span>Admin/Auth</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================================== -->
+        <!-- SYSTEM OVERVIEW SECTION -->
+        <!-- ================================================================== -->
+
+        <h2>System Overview</h2>
+
+        <!-- Architecture Overview -->
+        <div class="diagram-card" id="architecture">
+            <div class="diagram-header" onclick="toggleDiagram(this)">
+                <div class="diagram-toggle">&#x25BC;</div>
+                <h3>System Architecture</h3>
+                <span class="diagram-badge">Flowchart</span>
+            </div>
+            <div class="diagram-content">
+                <p class="diagram-description">Three-tier web architecture on Cloudflare edge</p>
+                <div class="mermaid">
+graph TB
+    subgraph CLIENTS["Client Layer"]
+        direction LR
+        DESKTOP["Desktop Browser<br/>osdevents.ca"]
+        MOBILE_WEB["Mobile Browser<br/>Responsive PWA"]
+    end
+
+    subgraph EDGE["Cloudflare Edge"]
+        direction TB
+        PAGES["Cloudflare Pages<br/>Static React App"]
+        WORKER["Cloudflare Worker<br/>GraphQL API"]
+        R2["Cloudflare R2<br/>Image Storage"]
+    end
+
+    subgraph DATA["Data Layer"]
+        direction TB
+        D1_PROD["D1: osd-events<br/>Production Database"]
+        D1_TEST["D1: osd-ticketmaster-test<br/>Dev/Staging"]
+        R2_BACKUP["R2: osd-backups<br/>Database Backups"]
+    end
+
+    subgraph EXTERNAL["External Services"]
+        direction TB
+        EVENTS_API["Event Sources:<br/>Ticketmaster, Ask A Punk,<br/>Songkick, Gracenote, Quebec SIT"]
+        PAYMENTS["Payments: Stripe"]
+        EMAIL["Email: Resend"]
+        GEO["Geocoding: Nominatim"]
+    end
+
+    DESKTOP --> PAGES
+    MOBILE_WEB --> PAGES
+
+    PAGES -->|"Static Assets"| CLIENTS
+    PAGES -->|"GraphQL"| WORKER
+
+    WORKER -->|"D1 Binding"| D1_PROD
+    WORKER -->|"R2 Binding"| R2
+    WORKER --> PAYMENTS
+    WORKER --> EMAIL
+
+    subgraph INGEST["Ingestion Pipeline"]
+        direction TB
+        SCRIPTS["ingest-ticketmaster.js<br/>ingest-askapunk.js<br/>ingest-movies.js<br/>sync-feeds.js"]
+    end
+
+    EVENTS_API --> SCRIPTS
+    SCRIPTS -->|"D1 Direct + Dedup"| WORKER
+
+    D1_PROD -->|"Daily Backup"| R2_BACKUP
+
+    WORKER --> GEO
+                </div>
+            </div>
+        </div>
+
+        <!-- Deployment Infrastructure -->
+        <div class="diagram-card" id="deployment">
+            <div class="diagram-header" onclick="toggleDiagram(this)">
+                <div class="diagram-toggle">&#x25BC;</div>
+                <h3>Deployment Infrastructure</h3>
+                <span class="diagram-badge">Flowchart</span>
+            </div>
+            <div class="diagram-content">
+                <p class="diagram-description">Cloudflare Pages + Workers CI/CD</p>
+                <div class="mermaid">
+flowchart TB
+    subgraph DEV["Development"]
+        direction TB
+        LOCAL["Local Dev<br/>pnpm dev"]
+        WRANGLER_DEV["wrangler dev<br/>Local Worker"]
+        D1_LOCAL["D1 Local<br/>.wrangler/state"]
+    end
+
+    subgraph GIT["Git Workflow"]
+        direction TB
+        COMMIT["git commit"]
+        PUSH["git push origin"]
+        BRANCH{Branch?}
+        MAIN["main branch"]
+        FEATURE["feature/* branch"]
+    end
+
+    subgraph CI["Cloudflare CI/CD"]
+        direction TB
+
+        subgraph PAGES_BUILD["Pages Build"]
+            P_INSTALL["pnpm install"]
+            P_BUILD["pnpm --filter @osd/mobile<br/>web:build"]
+            P_OUTPUT["dist/ output"]
+        end
+
+        subgraph DEPLOY_PROD["Production Deploy"]
+            PAGES_PROD["Cloudflare Pages<br/>osdevents.ca"]
+        end
+
+        subgraph DEPLOY_PREVIEW["Preview Deploy"]
+            PAGES_PREVIEW["Cloudflare Pages<br/>*.osd-events.pages.dev"]
+        end
+    end
+
+    subgraph WORKER_DEPLOY["Worker Deploy"]
+        direction TB
+        W_MANUAL["wrangler deploy<br/>(manual)"]
+        W_BUILD["Bundle TypeScript"]
+        W_UPLOAD["Upload to CF Edge"]
+        W_PROD["osd-events.workers.dev"]
+    end
+
+    subgraph INFRA["Infrastructure"]
+        direction TB
+
+        subgraph CF_PAGES["Cloudflare Pages"]
+            CDN["Global CDN"]
+            STATIC["Static Assets"]
+            SSL["SSL/TLS"]
+        end
+
+        subgraph CF_WORKER["Cloudflare Worker"]
+            EDGE["Edge Compute"]
+            GQL["GraphQL Yoga"]
+            BINDINGS["D1 + R2 Bindings"]
+        end
+
+        subgraph CF_DATA["Cloudflare Data"]
+            D1_PROD["D1: osd-events<br/>Production"]
+            D1_TEST["D1: osd-ticketmaster-test<br/>Staging"]
+            R2_IMAGES["R2: osd-images<br/>Posters"]
+            R2_BACKUP["R2: osd-backups<br/>DB Backups"]
+        end
+    end
+
+    subgraph DNS["DNS"]
+        DOMAIN["osdevents.ca"]
+        CF_DNS["Cloudflare DNS"]
+    end
+
+    LOCAL --> COMMIT
+    WRANGLER_DEV --> D1_LOCAL
+
+    COMMIT --> PUSH
+    PUSH --> BRANCH
+
+    BRANCH -->|main| MAIN
+    BRANCH -->|feature/*| FEATURE
+
+    MAIN --> PAGES_BUILD
+    FEATURE --> PAGES_BUILD
+
+    PAGES_BUILD --> P_INSTALL
+    P_INSTALL --> P_BUILD
+    P_BUILD --> P_OUTPUT
+
+    MAIN --> DEPLOY_PROD
+    FEATURE --> DEPLOY_PREVIEW
+
+    P_OUTPUT --> PAGES_PROD
+    P_OUTPUT --> PAGES_PREVIEW
+
+    W_MANUAL --> W_BUILD
+    W_BUILD --> W_UPLOAD
+    W_UPLOAD --> W_PROD
+
+    PAGES_PROD --> CDN
+    PAGES_PREVIEW --> CDN
+
+    W_PROD --> EDGE
+    EDGE --> GQL
+    GQL --> BINDINGS
+
+    BINDINGS --> D1_PROD
+    BINDINGS --> D1_TEST
+    BINDINGS --> R2_IMAGES
+    BINDINGS --> R2_BACKUP
+
+    DOMAIN --> CF_DNS
+    CF_DNS --> PAGES_PROD
+    CF_DNS --> W_PROD
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================================== -->
+        <!-- FRONTEND SECTION -->
+        <!-- ================================================================== -->
+
+        <h2>Frontend Architecture</h2>
+
+        <!-- Component Map -->
+        <div class="diagram-card" id="components">
+            <div class="diagram-header" onclick="toggleDiagram(this)">
+                <div class="diagram-toggle">&#x25BC;</div>
+                <h3>Component Map</h3>
+                <span class="diagram-badge">Flowchart</span>
+            </div>
+            <div class="diagram-content">
+                <p class="diagram-description">React + Expo for Web component hierarchy</p>
+                <div class="mermaid">
+graph TB
+    subgraph PAGES["Page Components (app/)"]
+        direction TB
+        HOME["Home.tsx - Main container"]
+        VIEWS["Grid.tsx | MapBase.tsx | Listings.tsx"]
+        SUB["Submissions.tsx - Event form"]
+    end
+
+    subgraph COMPONENTS["src/components/"]
+        direction TB
+        LAYOUT["Layout: Lens, CityIndex, CityIndexModal"]
+        CARDS["Cards: EventCard, UltraCompact, MapListRow"]
+        AUTH["Auth: LoginModal, UserMenu, UsernameSetup"]
+        FORUM["Forum: ForumTable, MiniforumPanel, PostItem"]
+        GRIDV2["GridV2: Desktop, Mobile, Toolbar"]
+    end
+
+    subgraph ADMIN["Admin Components"]
+        direction TB
+        QUEUE["QueueTable + QueueFilters"]
+        MODALS["EventDetailModal, ActionModal"]
+        RBAC["PermissionGate"]
+    end
+
+    subgraph SCREENS["Screen Components"]
+        direction TB
+        CONTENT["About, Support, Settings, Changelog"]
+        MOD_DASH["ModerationDashboard"]
+    end
+
+    HOME --> VIEWS
+    HOME --> LAYOUT
+    HOME --> AUTH
+    VIEWS --> CARDS
+    VIEWS --> FORUM
+    VIEWS --> GRIDV2
+    MOD_DASH --> ADMIN
+                </div>
+            </div>
+        </div>
+
+        <!-- Entry Points -->
+        <div class="diagram-card" id="entry">
+            <div class="diagram-header" onclick="toggleDiagram(this)">
+                <div class="diagram-toggle">&#x25BC;</div>
+                <h3>Entry Points</h3>
+                <span class="diagram-badge">Flowchart</span>
+            </div>
+            <div class="diagram-content">
+                <p class="diagram-description">All ways to interact with the system</p>
+                <div class="mermaid">
+graph TB
+    subgraph USER["User Entry Points"]
+        direction TB
+        WEB["osdevents.ca | Preview deploys | localhost:8081"]
+    end
+
+    subgraph API["API Endpoints"]
+        direction TB
+        GQL["POST /graphql"]
+        STRIPE_EP["/create-checkout | /stripe-webhook"]
+    end
+
+    subgraph CLI["CLI Scripts"]
+        direction TB
+        INGEST["ingest-ticketmaster-*.js<br/>ingest-askapunk.js<br/>sync-feeds.js"]
+        WRANGLER["wrangler deploy | d1 execute"]
+    end
+
+    subgraph GQL_OPS["GraphQL Operations"]
+        direction TB
+        QUERIES["Queries (57):<br/>events, venues, me,<br/>moderationQueue, posts"]
+        MUTATIONS["Mutations (42):<br/>auth, events, venues,<br/>moderation, forum"]
+    end
+
+    subgraph DEV["Developer Tools"]
+        direction TB
+        DEV_CMD["pnpm dev | build<br/>wrangler dev | pages dev"]
+    end
+
+    WEB --> GQL
+    GQL --> GQL_OPS
+    INGEST --> GQL
+    DEV_CMD --> WEB
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================================== -->
+        <!-- BACKEND SECTION -->
+        <!-- ================================================================== -->
+
+        <h2>Backend Architecture</h2>
+
+        <!-- Data Flow -->
+        <div class="diagram-card" id="dataflow">
+            <div class="diagram-header" onclick="toggleDiagram(this)">
+                <div class="diagram-toggle">&#x25BC;</div>
+                <h3>Data Flow</h3>
+                <span class="diagram-badge">Sequence</span>
+            </div>
+            <div class="diagram-content">
+                <p class="diagram-description">GraphQL request/response and ingestion cycles</p>
+                <div class="mermaid">
+sequenceDiagram
+    participant U as User
+    participant R as React App
+    participant AC as Apollo Client
+    participant W as CF Worker
+    participant D as D1 Database
+
+    Note over U,D: Query Flow (Grid View)
+
+    U->>R: Navigate to Grid tab
+    R->>AC: useQuery(GET_EVENTS)
+    AC->>W: POST /graphql
+    W->>D: SELECT events JOIN venues
+    D-->>W: Row results
+    W-->>AC: GraphQL response
+    AC-->>R: Return data
+    R-->>U: Render Grid
+
+    Note over U,D: Mutation Flow (Authenticated or Anonymous)
+
+    U->>R: Submit event form
+    R->>AC: useMutation(ADD_EVENT)
+    AC->>W: POST /graphql (JWT optional)
+    W->>W: Check IP rate limit (10/hr)
+
+    alt Authenticated User
+        W->>D: INSERT events (status=scheduled)
+        W->>D: INSERT moderation_queue (approved)
+    else Anonymous User
+        W->>D: INSERT events (status=pending_approval)
+        W->>D: INSERT moderation_queue (pending)
+    end
+
+    D-->>W: event_id
+    W-->>AC: Event created
+    AC-->>R: Success response
+    R-->>U: Show confirmation
+
+    Note over U,D: Ingestion Flow (Cross-Source Dedup)
+
+    participant CLI as CLI Scripts
+    CLI->>W: ingest-*.js or sync-feeds.js
+    W->>D: Phase 1: Hash lookup event_sources
+    alt Hash match
+        W->>D: Log to skipped_duplicates
+    else No hash match
+        W->>D: Phase 2: Fuzzy match (title/date)
+        alt Match found (aggregator)
+            W->>D: Log to skipped_duplicates
+        else New event
+            W->>D: INSERT event + venue
+            W->>D: Record in event_sources
+        end
+    end
+
+    Note over U,D: Auth Flow (Magic Link)
+
+    U->>R: Enter email
+    R->>AC: requestMagicLink(email)
+    AC->>W: POST /graphql
+    W->>D: INSERT magic_link token
+    D-->>W: Token created
+    W-->>AC: Success
+    AC-->>R: Show check email
+
+    U->>R: Click magic link
+    R->>AC: consumeMagicLink(token)
+    AC->>W: POST /graphql
+    W->>D: Validate and consume token
+    D-->>W: User data
+    W-->>AC: JWT + user
+    AC-->>R: Authenticated
+    R-->>U: Logged in state
+                </div>
+            </div>
+        </div>
+
+        <!-- Database Schema -->
+        <div class="diagram-card" id="database">
+            <div class="diagram-header" onclick="toggleDiagram(this)">
+                <div class="diagram-toggle">&#x25BC;</div>
+                <h3>Database Schema</h3>
+                <span class="diagram-badge">ER Diagram</span>
+            </div>
+            <div class="diagram-content">
+                <p class="diagram-description">Cloudflare D1 (SQLite) - 25 migrations</p>
+                <div class="mermaid">
+erDiagram
+    users ||--o{ agents : "owns"
+    users ||--o{ magic_links : "has"
+    users ||--o{ favourite_cities : "selects"
+    users ||--o{ posts : "writes"
+
+    agents ||--o{ events : "creates"
+    agents ||--o{ moderation_decisions : "makes"
+    agents ||--o{ audit_log : "generates"
+
+    events ||--o| venues : "held at"
+    events ||--o{ posts : "discussed in"
+    events ||--o{ moderation_queue : "reviewed in"
+    events ||--o{ moderation_decisions : "has"
+    events ||--o{ event_sources : "sourced from"
+    events ||--o{ skipped_duplicates : "matched by"
+
+    venues ||--o{ events : "hosts"
+
+    moderation_rules ||--o{ rule_execution_log : "triggers"
+    feed_sources ||--o{ feed_sync_history : "tracks"
+
+    users {
+        string user_id PK
+        string email UK
+        string display_name
+        string username UK
+        boolean is_admin
+        datetime created_at
+    }
+
+    agents {
+        string agent_id PK
+        string user_id FK
+        string name
+        string type
+        string roles
+        string scope
+    }
+
+    events {
+        string event_id PK
+        string event_name
+        datetime event_date
+        string venue_id FK
+        string city
+        string status
+        string poster_url
+        string created_by FK
+        datetime last_seen_at
+    }
+
+    venues {
+        string venue_id PK
+        string venue_name
+        string city
+        float latitude
+        float longitude
+    }
+
+    event_sources {
+        int id PK
+        string event_id FK
+        string source_name
+        string hash UK
+    }
+
+    feed_sources {
+        string id PK
+        string name
+        string url
+        string city
+        boolean enabled
+        datetime last_sync_at
+    }
+
+    skipped_duplicates {
+        string id PK
+        string source_name
+        string matched_event_id FK
+        string match_type
+        float confidence_score
+    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Authentication & Authorization -->
+        <div class="diagram-card" id="auth">
+            <div class="diagram-header" onclick="toggleDiagram(this)">
+                <div class="diagram-toggle">&#x25BC;</div>
+                <h3>Authentication &amp; Authorization</h3>
+                <span class="diagram-badge">Flowchart</span>
+            </div>
+            <div class="diagram-content">
+                <p class="diagram-description">Magic link auth + JWT + RBAC</p>
+                <div class="mermaid">
+flowchart TB
+    subgraph AUTH["Authentication Flow"]
+        direction TB
+        START([User visits site])
+        CHECK{Has valid JWT?}
+        LOGGED_IN([Authenticated session])
+
+        subgraph MAGIC["Magic Link Process"]
+            direction TB
+            EMAIL[Enter email]
+            SEND[Send magic link]
+            RESEND[Resend API]
+            INBOX[Check email]
+            CLICK[Click link]
+            VERIFY[Verify token]
+            CREATE_USER{User exists?}
+            NEW_USER[Create user + agent]
+            EXISTING[Load user]
+            ISSUE_JWT[Issue JWT<br/>7-day expiry]
+            STORE[Store in AsyncStorage]
+        end
+
+        START --> CHECK
+        CHECK -->|Yes| LOGGED_IN
+        CHECK -->|No| EMAIL
+        EMAIL --> SEND
+        SEND --> RESEND
+        RESEND --> INBOX
+        INBOX --> CLICK
+        CLICK --> VERIFY
+        VERIFY --> CREATE_USER
+        CREATE_USER -->|No| NEW_USER
+        CREATE_USER -->|Yes| EXISTING
+        NEW_USER --> ISSUE_JWT
+        EXISTING --> ISSUE_JWT
+        ISSUE_JWT --> STORE
+        STORE --> LOGGED_IN
+    end
+
+    subgraph AUTHZ["Authorization (RBAC)"]
+        direction TB
+        REQUEST([GraphQL Request])
+        PARSE[Parse JWT from<br/>Header or Cookie]
+        CHECK_OP{Operation<br/>requires auth?}
+        ANON_PATH([Anonymous allowed<br/>addEvent, addVenue<br/>IP rate limited])
+        LOAD[Load agent from DB]
+        CONTEXT[Build context<br/>user + currentAgent]
+
+        subgraph PERMS["Permission Check"]
+            direction TB
+            GET_ROLES[Get agent.roles]
+            MAP_PERMS[Map to permissions]
+            CHECK_PERM{Has required<br/>permission?}
+            ALLOW([Execute resolver])
+            DENY([Throw Forbidden])
+        end
+
+        REQUEST --> PARSE
+        PARSE --> CHECK_OP
+        CHECK_OP -->|No| ANON_PATH
+        CHECK_OP -->|Yes| LOAD
+        LOAD --> CONTEXT
+        CONTEXT --> GET_ROLES
+        GET_ROLES --> MAP_PERMS
+        MAP_PERMS --> CHECK_PERM
+        CHECK_PERM -->|Yes| ALLOW
+        CHECK_PERM -->|No| DENY
+        ANON_PATH --> ALLOW
+    end
+
+    subgraph ROLES["Role Hierarchy"]
+        direction LR
+        R_USER["user<br/>Basic access"]
+        R_MOD["moderator<br/>+ Review events"]
+        R_ADMIN_MOD["admin:moderation<br/>+ Manage moderators"]
+        R_ADMIN_SYS["admin:system<br/>+ System config"]
+        R_ADMIN_FULL["admin:full<br/>All permissions"]
+
+        R_USER --> R_MOD
+        R_MOD --> R_ADMIN_MOD
+        R_ADMIN_MOD --> R_ADMIN_SYS
+        R_ADMIN_SYS --> R_ADMIN_FULL
+    end
+
+    LOGGED_IN --> REQUEST
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================================== -->
+        <!-- CODEBASE SECTION -->
+        <!-- ================================================================== -->
+
+        <h2>Codebase Structure</h2>
+
+        <!-- Repository Structure -->
+        <div class="diagram-card" id="repo">
+            <div class="diagram-header" onclick="toggleDiagram(this)">
+                <div class="diagram-toggle">&#x25BC;</div>
+                <h3>Repository Structure</h3>
+                <span class="diagram-badge">Flowchart</span>
+            </div>
+            <div class="diagram-content">
+                <p class="diagram-description">Monorepo: React frontend + Cloudflare Worker backend</p>
+                <div class="mermaid">
+graph TB
+    subgraph ROOT["osd-v2/"]
+        CLAUDE["CLAUDE.md"]
+        PKG["package.json"]
+    end
+
+    subgraph APPS["apps/"]
+        subgraph MOBILE["mobile/ (Web App)"]
+            M_APP["app/ - Pages"]
+            M_SRC["src/ - Components"]
+        end
+
+        subgraph WORKER["worker/ (API)"]
+            W_SRC["src/ - Resolvers"]
+            W_CONN["connectors/"]
+            W_CLI["CLI Scripts"]
+        end
+    end
+
+    subgraph OTHER["Supporting"]
+        DOCS["docs/osd/<br/>110+ OSD docs"]
+        MIG["migrations/<br/>0001-0025.sql"]
+    end
+
+    ROOT --> APPS
+    ROOT --> OTHER
+
+    subgraph MOBILE_DETAIL["Frontend Detail"]
+        direction TB
+        COMP["components/"]
+        COMP_ADMIN["admin/"]
+        COMP_AUTH["auth/"]
+        COMP_NAV["navigation/"]
+        COMP_GRID["GridV2/"]
+    end
+
+    subgraph WORKER_DETAIL["Backend Detail"]
+        direction TB
+        RESOLV["resolvers.ts<br/>adminResolvers.ts<br/>ingestionResolver.ts"]
+    end
+
+    subgraph CONNECTORS["Connectors (12 files)"]
+        direction TB
+        CONN_EXT["External APIs:<br/>ticketmaster, gancio,<br/>gracenote, quebecSit"]
+        CONN_DEDUP["Deduplication:<br/>deduplication, crossSourceDedup,<br/>sourceTypes"]
+        CONN_SYNC["Sync:<br/>universalConnector,<br/>schemaOrgExtractor"]
+    end
+
+    M_SRC --> MOBILE_DETAIL
+    W_SRC --> WORKER_DETAIL
+    W_CONN --> CONNECTORS
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>
+                OSD-v2 Architecture v0.5.3 | Last updated: 2026-01-25 |
+                <code>wireframes/v1/*.mermaid.md</code>
+            </p>
+            <p>
+                Stack: React + Expo Web, Cloudflare Workers, D1, R2 | GraphQL Yoga | Apollo Client |
+                <a href="https://github.com/chrislyons/osd-v2">GitHub</a> |
+                <a href="https://osdevents.ca">Production</a>
+            </p>
+        </footer>
+    </div>
+
+    <div class="keyboard-hints">
+        <div><kbd>&uarr;</kbd><kbd>&darr;</kbd> Navigate</div>
+        <div><kbd>&larr;</kbd> Collapse</div>
+        <div><kbd>&rarr;</kbd> Expand</div>
+        <div><kbd>Esc</kbd> Collapse all</div>
+        <div><kbd>A</kbd> Expand all</div>
+    </div>
+
+    <script>
+        // Initialize Mermaid with dark theme
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'dark',
+            themeVariables: {
+                fontFamily: '"InputMono-Regular", "SF Mono", "Fira Code", monospace',
+                primaryColor: '#2a2a2a',
+                primaryTextColor: '#e0e0e0',
+                primaryBorderColor: '#333',
+                lineColor: '#66BB6A',
+                secondaryColor: '#1a1a1a',
+                tertiaryColor: '#242424',
+                background: '#1a1a1a',
+                mainBkg: '#2a2a2a',
+                nodeBorder: '#333',
+                clusterBkg: '#242424',
+                clusterBorder: '#333',
+                titleColor: '#e0e0e0',
+                edgeLabelBackground: '#1a3a2a',
+                lineWidth: 2
+            },
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'monotoneY',
+                nodeSpacing: 80,
+                rankSpacing: 100,
+                padding: 30
+            },
+            sequence: {
+                mirrorActors: false
+            }
+        });
+
+        // Keyboard navigation state
+        let selectedIndex = -1;
+        const cards = document.querySelectorAll('.diagram-card');
+
+        function selectCard(index) {
+            cards.forEach(c => c.classList.remove('selected'));
+            if (index >= 0 && index < cards.length) {
+                selectedIndex = index;
+                cards[index].classList.add('selected');
+                cards[index].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        function toggleDiagram(header) {
+            const card = header.closest('.diagram-card');
+            card.classList.toggle('collapsed');
+            // Set as active for keyboard nav
+            const index = Array.from(cards).indexOf(card);
+            selectCard(index);
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                cards.forEach(card => card.classList.add('collapsed'));
+                cards.forEach(c => c.classList.remove('selected'));
+                selectedIndex = -1;
+            } else if (e.key.toLowerCase() === 'a' && !e.ctrlKey && !e.metaKey) {
+                cards.forEach(card => card.classList.remove('collapsed'));
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                selectCard(selectedIndex < cards.length - 1 ? selectedIndex + 1 : 0);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                selectCard(selectedIndex > 0 ? selectedIndex - 1 : cards.length - 1);
+            } else if (e.key === 'ArrowRight' && selectedIndex >= 0) {
+                e.preventDefault();
+                cards[selectedIndex].classList.remove('collapsed');
+            } else if (e.key === 'ArrowLeft' && selectedIndex >= 0) {
+                e.preventDefault();
+                cards[selectedIndex].classList.add('collapsed');
+            }
+        });
+
+        // Smooth scroll for quick nav
+        document.querySelectorAll('.quick-nav a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = document.querySelector(link.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    target.classList.remove('collapsed');
+                    // Set as active for keyboard nav
+                    const index = Array.from(cards).indexOf(target);
+                    selectCard(index);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

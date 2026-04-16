@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>max4live-mcp Architecture Gallery</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+    <style>
+        /* Input Sans */
+        @font-face {
+            font-family: 'InputSans-Regular';
+            src: url('/fonts/InputSans-Regular.ttf') format('truetype');
+            font-weight: 400;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'InputSans-Medium';
+            src: url('/fonts/InputSans-Medium.ttf') format('truetype');
+            font-weight: 500;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'InputSans-Bold';
+            src: url('/fonts/InputSans-Bold.ttf') format('truetype');
+            font-weight: 700;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'InputSans-Light';
+            src: url('/fonts/InputSans-Light.ttf') format('truetype');
+            font-weight: 300;
+            font-display: swap;
+        }
+        /* Input Mono */
+        @font-face {
+            font-family: 'InputMono-Regular';
+            src: url('/fonts/InputMono-Regular.ttf') format('truetype');
+            font-weight: 400;
+            font-display: swap;
+        }
+
+        :root {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #242424;
+            --bg-card: #2a2a2a;
+            --accent: #FF764D;
+            --accent-secondary: #00D4AA;
+            --text-primary: #e0e0e0;
+            --text-secondary: #888;
+            --border: #333;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'InputSans-Regular', 'Input Sans', system-ui, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            padding: 1rem 2rem;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            background: var(--bg-secondary);
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .version-badge {
+            background: var(--accent);
+            color: white;
+            padding: 0.15rem 0.4rem;
+            border-radius: 3px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-left: 1rem;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            font-size: 0.75rem;
+            padding: 0 0.75rem;
+        }
+
+        /* Stats */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            padding: 0.75rem;
+            border-radius: 6px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+
+        .stat-value {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .stat-label {
+            font-size: 0.625rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Info */
+        .info {
+            background: var(--bg-secondary);
+            border-left: 3px solid var(--accent);
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border-radius: 3px;
+            font-size: 0.75rem;
+        }
+
+        .info-title {
+            color: var(--accent);
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        /* Section headers */
+        h2.section-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin: 1.5rem 0 0.75rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* Quick Nav + Legend Row */
+        .nav-legend-row {
+            display: flex;
+            gap: 0.35rem;
+            margin: 0.75rem 0 1rem 0;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .quick-nav {
+            display: flex;
+            gap: 0.3rem;
+            padding: 0.25rem 0.5rem;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            align-items: center;
+        }
+
+        .quick-nav a {
+            color: var(--text-primary);
+            text-decoration: none;
+            padding: 0.2rem 0.5rem;
+            background: var(--bg-card);
+            border-radius: 3px;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .quick-nav a:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .quick-nav .section-label {
+            color: var(--text-secondary);
+            font-size: 0.7rem;
+            padding: 0 0.25rem;
+        }
+
+        /* Legend */
+        .legend {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 0.3rem 0.5rem;
+        }
+
+        .legend h3 {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        .legend-grid {
+            display: flex;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .legend-color {
+            width: 9px;
+            height: 9px;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        /* Diagram Cards */
+        .diagram-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            margin-bottom: 1.25rem;
+            overflow: hidden;
+            transition: border-color 0.2s;
+            scroll-margin-top: 1.5rem;
+            scroll-margin-bottom: 1.5rem;
+        }
+
+        .diagram-card:hover {
+            border-color: var(--accent-secondary);
+        }
+
+        .diagram-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.8rem 1.5rem;
+            background: var(--bg-card);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .diagram-header h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex: 1;
+        }
+
+        .diagram-badge {
+            font-size: 0.9rem;
+            padding: 0.3rem 0.6rem;
+            background: var(--accent-secondary);
+            border-radius: 6px;
+            color: white;
+        }
+
+        .diagram-toggle {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            transition: transform 0.3s;
+            font-size: 1.5rem;
+        }
+
+        .diagram-card.collapsed .diagram-toggle {
+            transform: rotate(-90deg);
+        }
+
+        .diagram-content {
+            padding: 1.5rem;
+            overflow-x: auto;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+        }
+
+        .diagram-card.collapsed .diagram-content {
+            max-height: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+            overflow: hidden;
+        }
+
+        .diagram-description {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.95rem;
+            font-family: 'InputSans-Light', 'Input Sans', system-ui, sans-serif;
+            font-weight: 300;
+        }
+
+        .mermaid {
+            background: var(--bg-primary);
+            border-radius: 12px;
+            padding: 1.5rem;
+            min-height: 200px;
+            overflow-x: auto;
+            overflow-y: visible;
+        }
+
+        .mermaid svg {
+            min-width: 900px;
+            display: block;
+            margin: 0 auto;
+        }
+
+        /* Selected diagram card for keyboard nav */
+        .diagram-card.selected {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        /* Keyboard Hints */
+        .keyboard-hints {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .keyboard-hints div {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .keyboard-hints kbd {
+            background: var(--bg-primary);
+            padding: 0.15rem 0.4rem;
+            border-radius: 3px;
+            border: 1px solid var(--border);
+            font-family: monospace;
+            font-size: 0.7rem;
+            min-width: 1.2rem;
+            text-align: center;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            border-top: 1px solid var(--border);
+            margin-top: 2rem;
+        }
+
+        footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        footer code {
+            font-family: 'InputMono-Regular', monospace;
+            font-size: 0.75rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .nav-legend-row {
+                flex-direction: column;
+                gap: 0.35rem;
+                align-items: flex-start;
+            }
+            .mermaid svg {
+                min-width: auto;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 0.5rem; }
+            header { padding: 0.4rem 0.6rem; }
+            header h1 { font-size: 1rem; }
+            .version-badge {
+                font-size: 0.6rem;
+                padding: 0.1rem 0.3rem;
+                margin-left: 0.5rem;
+            }
+            .quick-nav {
+                width: 100%;
+                flex-wrap: wrap;
+            }
+            .quick-nav a {
+                font-size: 0.7rem;
+                padding: 0.15rem 0.4rem;
+            }
+            .legend {
+                width: 100%;
+                flex-wrap: wrap;
+            }
+            .legend h3 { font-size: 0.65rem; }
+            .legend-item { font-size: 0.65rem; }
+            .diagram-header {
+                padding: 0.6rem 1rem;
+                gap: 0.5rem;
+            }
+            .diagram-header h2 { font-size: 1rem; }
+            .diagram-badge {
+                font-size: 0.7rem;
+                padding: 0.2rem 0.4rem;
+            }
+            .diagram-toggle {
+                width: 28px;
+                height: 28px;
+                font-size: 1.2rem;
+            }
+            .diagram-content { padding: 1rem; }
+            .diagram-description { font-size: 0.85rem; }
+            .mermaid {
+                padding: 1rem;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            .mermaid svg {
+                min-width: auto;
+                max-width: none;
+            }
+            .keyboard-hints { display: none; }
+            footer {
+                padding: 1rem;
+                font-size: 0.7rem;
+            }
+            .stats {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>max4live-mcp Architecture</h1>
+            <span class="version-badge">v2-2025-11-18</span>
+        </header>
+        <p class="subtitle">MCP Server for Max/MSP and Ableton Live Integration via OSC</p>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value">5</div>
+                <div class="stat-label">Diagrams</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">64</div>
+                <div class="stat-label">MCP Tools</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">5</div>
+                <div class="stat-label">Resources</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">5</div>
+                <div class="stat-label">Prompts</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">10</div>
+                <div class="stat-label">Tool Modules</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">13</div>
+                <div class="stat-label">M4L Docs</div>
+            </div>
+        </div>
+
+        <div class="info">
+            <div class="info-title">Diagram Collection</div>
+            5 architectural diagrams covering system architecture, component hierarchy, data flow, entry points, and repository structure.
+            Click headers to expand/collapse. Diagrams render via Mermaid.js. Press <kbd>a</kbd> to expand all, <kbd>Esc</kbd> to collapse all. Arrow keys to navigate.
+        </div>
+
+        <div class="nav-legend-row">
+            <nav class="quick-nav">
+                <span class="section-label">System:</span>
+                <a href="#architecture">Architecture</a>
+                <a href="#components">Components</a>
+                <span class="section-label">Data:</span>
+                <a href="#dataflow">Data Flow</a>
+                <a href="#entry">Entry Points</a>
+                <span class="section-label">Codebase:</span>
+                <a href="#repo">Repository</a>
+            </nav>
+            <div class="legend">
+                <h3>Legend:</h3>
+                <div class="legend-grid">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #E8F4F8;"></div>
+                        <span>Claude/MCP Client</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #F0F8E8;"></div>
+                        <span>MCP Server</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #FFF4E6;"></div>
+                        <span>OSC/UDP Layer</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #F3E5F5;"></div>
+                        <span>Max4Live Bridge</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #FFE0E0;"></div>
+                        <span>Ableton Live</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================================== -->
+        <!-- SYSTEM OVERVIEW SECTION -->
+        <!-- ================================================================== -->
+
+        <h2 class="section-title">System Overview</h2>
+
+        <!-- Architecture Overview -->
+        <div class="diagram-card" id="architecture">
+            <div class="diagram-header" onclick="toggleDiagram(this)">
+                <div class="diagram-toggle">&#9660;</div>
+                <h2>System Architecture</h2>
+                <span class="diagram-badge">FLOWCHART</span>
+            </div>
+            <div class="diagram-content">
+                <p class="diagram-description">Claude to Ableton Live via MCP + OSC</p>
+                <div class="mermaid">
+graph TB
+    subgraph Claude["Claude Code / Desktop"]
+        User["User<br/>Natural language requests"]
+        MCPClient["MCP Client<br/>JSON-RPC protocol"]
+    end
+
+    subgraph MCPServer["MCP Server Process"]
+        StdioTransport["StdioServerTransport<br/>stdin/stdout"]
+        ServerCore["Server Instance<br/>Request routing"]
+        subgraph Handlers["Request Handlers"]
+            ToolHandler["Tools: 64"]
+            ResourceHandler["Resources: 5"]
+            PromptHandler["Prompts: 5"]
+        end
+        OSCClient["MaxBridgeClient<br/>OSC/UDP"]
+        Metrics["MetricsCollector"]
+    end
+
+    subgraph OSCLayer["OSC/UDP Layer"]
+        SendPort["Port 7400: Send"]
+        ReceivePort["Port 7401: Receive"]
+    end
+
+    subgraph MaxBridge["Max4Live Bridge"]
+        OSCReceiver["udpreceive 7400"]
+        BridgeJS["bridge.js"]
+        LiveAPI["Live API"]
+        OSCSender["udpsend 7401"]
+    end
+
+    subgraph Ableton["Ableton Live"]
+        LOM["Live Object Model<br/>Song, Tracks, Clips"]
+    end
+
+    User --> MCPClient
+    MCPClient <--> StdioTransport
+    StdioTransport <--> ServerCore
+    ServerCore --> Handlers
+    Handlers --> OSCClient
+    OSCClient --> Metrics
+    OSCClient --> SendPort
+    ReceivePort --> OSCClient
+    SendPort -.-> OSCReceiver
+    OSCReceiver --> BridgeJS
+    BridgeJS --> LiveAPI
+    LiveAPI <--> LOM
+    BridgeJS --> OSCSender
+    OSCSender -.-> ReceivePort
+                </div>
+            </div>
+        </div>
+
+        <!-- Component Map -->
+        <div class="diagram-card" id="components">
+            <div class="diagram-header" onclick="toggleDiagram(this)">
+                <div class="diagram-toggle">&#9660;</div>
+                <h2>Component Map</h2>
+                <span class="diagram-badge">CLASS</span>
+            </div>
+            <div class="diagram-content">
+                <p class="diagram-description">Module relationships and class hierarchy</p>
+                <div class="mermaid">
+classDiagram
+    class StdioServerTransport {
+        +connect()
+        +close()
+        +onMessage(callback)
+        +sendMessage(message)
+    }
+
+    class Server {
+        +setRequestHandler(schema, handler)
+        +connect(transport)
+        +tool[] tools
+        +resource[] resources
+    }
+
+    class MaxBridgeClient {
+        -OSCPort sendPort
+        -OSCPort receivePort
+        -Map pendingRequests
+        -Map cache
+        +sendRequest(request) Promise
+        +close()
+    }
+
+    class MetricsCollector {
+        -number totalRequests
+        -number[] latencies
+        +recordRequest(command, latency)
+        +getReport() MetricsReport
+    }
+
+    class ToolRegistry {
+        +registerTools(context) Tool[]
+    }
+
+    class SongTools {
+        +get_song_info()
+        +set_tempo()
+        +play()
+        +stop()
+    }
+
+    class TrackTools {
+        +get_all_tracks()
+        +create_midi_track()
+        +arm_track()
+    }
+
+    class ClipTools {
+        +get_clip()
+        +create_midi_clip()
+        +fire_clip()
+    }
+
+    class BridgeJS {
+        -LiveAPI liveAPI
+        +bang()
+        +list(args)
+        -handleCommand()
+        -withLiveAPI(path, callback)
+    }
+
+    StdioServerTransport --> Server : connects
+    Server --> ToolRegistry : registerTools
+    Server --> MaxBridgeClient : creates
+    ToolRegistry --> SongTools : imports
+    ToolRegistry --> TrackTools : imports
+    ToolRegistry --> ClipTools : imports
+    MaxBridgeClient --> MetricsCollector : tracks
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================================== -->
+        <!-- DATA FLOW SECTION -->
+        <!-- ================================================================== -->
+
+        <h2 class="section-title">Data Flow</h2>
+
+        <!-- Data Flow -->
+        <div class="diagram-card" id="dataflow">
+            <div class="diagram-header" onclick="toggleDiagram(this)">
+                <div class="diagram-toggle">&#9660;</div>
+                <h2>Request/Response Flow</h2>
+                <span class="diagram-badge">SEQUENCE</span>
+            </div>
+            <div class="diagram-content">
+                <p class="diagram-description">Tool call, resource read, and error flows</p>
+                <div class="mermaid">
+sequenceDiagram
+    participant User
+    participant Claude as Claude MCP Client
+    participant Transport as StdioServerTransport
+    participant Server as MCP Server
+    participant Tool as Tool Handler
+    participant OSCClient as MaxBridgeClient
+    participant UDP
+    participant BridgeJS as bridge.js (Max)
+    participant LiveAPI
+    participant Live as Ableton Live
+
+    Note over User,Live: Tool Call Flow: Set Tempo to 128 BPM
+
+    User->>Claude: "Set tempo to 128"
+    activate Claude
+    Note over Claude: Parse intent<br/>Identify tool: set_tempo
+    Claude->>Transport: CallToolRequest<br/>{name: "set_tempo", args: {tempo: 128}}
+    activate Transport
+
+    Transport->>Server: Parse JSON-RPC<br/>Validate schema
+    activate Server
+
+    Server->>Tool: Find tool in registry<br/>Call handler(args, context)
+    activate Tool
+
+    Tool->>OSCClient: context.sendOSC({<br/>  command: "set_tempo",<br/>  args: {tempo: 128}<br/>})
+    activate OSCClient
+
+    Note over OSCClient: Generate requestId<br/>Check cache (miss)<br/>Create Promise<br/>Set 5000ms timeout
+
+    OSCClient->>UDP: Send OSC /m4l/request<br/>["req_42_...", "set_tempo", "{\"tempo\":128}"]
+
+    UDP->>BridgeJS: UDP packet on port 7400
+
+    activate BridgeJS
+
+    Note over BridgeJS: Parse OSC message<br/>Extract requestId, command, argsJson
+
+    BridgeJS->>LiveAPI: withLiveAPI("live_set", fn)<br/>api.set("tempo", 128)
+    activate LiveAPI
+
+    LiveAPI->>Live: Set tempo property
+    activate Live
+
+    Live-->>LiveAPI: Success
+    deactivate Live
+
+    LiveAPI-->>BridgeJS: Return
+    deactivate LiveAPI
+
+    Note over BridgeJS: Format response:<br/>{status: "success", result: {tempo: 128}}
+
+    BridgeJS->>UDP: Send OSC /m4l/response<br/>["req_42_...", "success", "{\"tempo\":128}"]
+    deactivate BridgeJS
+
+    UDP->>OSCClient: UDP packet on port 7401
+
+    Note over OSCClient: Match requestId<br/>Clear timeout<br/>Resolve Promise<br/>Record metrics
+
+    OSCClient-->>Tool: Return {status: "success", result: {tempo: 128}}
+    deactivate OSCClient
+
+    Tool-->>Server: Return {tempo: 128}
+    deactivate Tool
+
+    Note over Server: Format MCP response
+
+    Server-->>Transport: CallToolResponse
+    deactivate Server
+
+    Transport-->>Claude: JSON-RPC response
+    deactivate Transport
+
+    Claude-->>User: "Tempo set to 128 BPM"
+    deactivate Claude
+
+    Note over User,Live: Error Flow: Invalid Track Index
+
+    User->>Claude: "Rename track 99 to 'Test'"
+    activate Claude
+
+    Claude->>Transport: CallToolRequest
+    activate Transport
+
+    Transport->>Server: Validate
+    activate Server
+
+    Server->>Tool: Call handler
+    activate Tool
+
+    Tool->>OSCClient: context.sendOSC()
+    activate OSCClient
+
+    OSCClient->>UDP: OSC /m4l/request
+
+    UDP->>BridgeJS: Request
+    activate BridgeJS
+
+    BridgeJS->>LiveAPI: withLiveAPI("live_set tracks 99", fn)
+    activate LiveAPI
+
+    Note over LiveAPI: Track 99 doesn't exist<br/>Throw exception
+
+    LiveAPI-->>BridgeJS: Exception: Invalid path
+    deactivate LiveAPI
+
+    BridgeJS->>UDP: OSC /m4l/response<br/>["req_...", "error", "{\"error\":\"Invalid track index\"}"]
+    deactivate BridgeJS
+
+    UDP->>OSCClient: Error response
+
+    OSCClient-->>Tool: Reject with Error
+    deactivate OSCClient
+
+    Tool-->>Server: Throw Error
+    deactivate Tool
+
+    Server-->>Transport: Error response
+    deactivate Server
+
+    Transport-->>Claude: JSON-RPC error
+    deactivate Transport
+
+    Claude-->>User: "Error: Track 99 doesn't exist"
+    deactivate Claude
+                </div>
+            </div>
+        </div>
+
+        <!-- Entry Points -->
+        <div class="diagram-card" id="entry">
+            <div class="diagram-header" onclick="toggleDiagram(this)">
+                <div class="diagram-toggle">&#9660;</div>
+                <h2>Entry Points</h2>
+                <span class="diagram-badge">FLOWCHART</span>
+            </div>
+            <div class="diagram-content">
+                <p class="diagram-description">All ways to interact with the system</p>
+                <div class="mermaid">
+graph TB
+    subgraph UserAccess["User Access Points"]
+        NaturalLang["Natural Language<br/>via Claude Code/Desktop<br/>Examples:<br/>'Set tempo to 128'<br/>'Create a drum track'<br/>'Show all clips'"]
+
+        MCPConfig["MCP Configuration<br/>claude_desktop_config.json<br/>~/.config/claude/config.json"]
+    end
+
+    subgraph ProcessInit["Process Initialization"]
+        NPMRun["npm run dev<br/>tsx src/index.ts<br/>(Development)"]
+
+        NPMStart["npm start<br/>node dist/index.js<br/>(Production)"]
+
+        MCPSpawn["Claude spawns process<br/>command: 'node'<br/>args: ['/path/to/dist/index.js']"]
+
+        IndexTS["index.ts<br/>Main entry point<br/>1. Create StdioServerTransport<br/>2. Create MCP server<br/>3. Connect transport<br/>4. Setup shutdown handlers"]
+    end
+
+    subgraph ToolEntryPoints["Tool Entry Points (64 tools)"]
+        SystemTools["System Tools (2)<br/>ping<br/>get_api_info"]
+
+        SongTools["Song Tools (15)<br/>get_song_info, set_tempo<br/>play / stop / continue_playback<br/>enable_loop / disable_loop<br/>set_record_mode, toggle_metronome"]
+
+        TrackTools["Track Tools (25)<br/>get_all_tracks / get_track<br/>create_audio_track / create_midi_track<br/>arm_track / mute_track / solo_track<br/>set_track_volume / set_track_pan"]
+
+        ClipTools["Clip Tools (20)<br/>get_clip, create_midi_clip<br/>fire_clip / stop_clip<br/>get_midi_notes / add_midi_note<br/>quantize_clip"]
+
+        OtherTools["Device, Parameter, Scene,<br/>Groove, Advanced,<br/>Arrangement Tools"]
+    end
+
+    subgraph ResourceEntryPoints["Resource Entry Points (5 URIs)"]
+        SongResource["max4live://song/state<br/>Real-time song state"]
+
+        TracksResource["max4live://tracks<br/>Complete track list"]
+
+        ClipsResource["max4live://clips<br/>Clip grid matrix"]
+
+        DevicesResource["max4live://devices/{trackIndex}<br/>Device chain for track"]
+    end
+
+    subgraph PromptEntryPoints["Prompt Templates (5)"]
+        CreateBeat["create_beat_pattern<br/>Generate drum pattern"]
+
+        SetupMix["setup_mix_environment<br/>Create return tracks"]
+
+        PrepareMIDI["prepare_midi_recording<br/>Configure for recording"]
+
+        ExportStems["export_stems<br/>Export individual tracks"]
+
+        CreateTemplate["create_session_template<br/>Set up project templates"]
+    end
+
+    subgraph MaxEntryPoints["Max Bridge Entry Points"]
+        MaxLoadbang["loadbang<br/>Device initialization"]
+
+        MaxOSCRecv["udpreceive 7400<br/>OSC message receiver"]
+
+        BridgeJSBang["bridge.js: bang()<br/>Initialize LiveAPI + observers"]
+
+        BridgeJSList["bridge.js: list()<br/>Parse & route OSC commands"]
+
+        LiveObservers["Live Property Observers<br/>Tempo, time sig, playback<br/>Beat position changes"]
+    end
+
+    NaturalLang --> MCPConfig
+    MCPConfig --> MCPSpawn
+    NPMRun --> IndexTS
+    NPMStart --> IndexTS
+    MCPSpawn --> IndexTS
+
+    IndexTS --> ToolEntryPoints
+    IndexTS --> ResourceEntryPoints
+    IndexTS --> PromptEntryPoints
+
+    MaxLoadbang --> BridgeJSBang
+    MaxOSCRecv --> BridgeJSList
+    BridgeJSBang --> LiveObservers
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================================== -->
+        <!-- CODEBASE SECTION -->
+        <!-- ================================================================== -->
+
+        <h2 class="section-title">Codebase Structure</h2>
+
+        <!-- Repository Structure -->
+        <div class="diagram-card" id="repo">
+            <div class="diagram-header" onclick="toggleDiagram(this)">
+                <div class="diagram-toggle">&#9660;</div>
+                <h2>Repository Structure</h2>
+                <span class="diagram-badge">FLOWCHART</span>
+            </div>
+            <div class="diagram-content">
+                <p class="diagram-description">Directory tree with file purposes</p>
+                <div class="mermaid">
+graph TB
+    Root["max4live-mcp/<br/>Root Directory"]
+
+    subgraph Config["Configuration Files"]
+        PackageJSON["package.json<br/>Node.js project config"]
+        TSConfig["tsconfig.json<br/>TypeScript compiler"]
+        ClaudeMD["CLAUDE.md<br/>Repository conventions"]
+        ReadmeMD["README.md<br/>Project overview"]
+    end
+
+    subgraph SourceCode["Source Code (TypeScript)"]
+        SrcDir["src/<br/>TypeScript source"]
+
+        subgraph CoreFiles["Core Entry Points"]
+            IndexTS["index.ts<br/>CLI entry point"]
+            ServerTS["server.ts<br/>MCP server initialization"]
+            OSCClientTS["osc-client.ts<br/>MaxBridgeClient class"]
+            TypesTS["types.ts<br/>Live Object Model types"]
+            MetricsTS["metrics.ts<br/>MetricsCollector"]
+        end
+
+        subgraph ToolsDir["Tools Directory (10 modules)"]
+            ToolRegistry["registry.ts<br/>Aggregates all tools"]
+            ToolSong["song.ts - 15 tools"]
+            ToolTracks["tracks.ts - 25 tools"]
+            ToolClips["clips.ts - 20 tools"]
+            ToolOther["devices, parameters, scenes<br/>groove, advanced, arrangement<br/>system"]
+        end
+
+        subgraph ResourcesDir["Resources Directory (4 modules)"]
+            ResourceRegistry["registry.ts<br/>Aggregates resources"]
+            ResourceFiles["song.ts, tracks.ts<br/>clips.ts, devices.ts"]
+        end
+
+        subgraph PromptsDir["Prompts Directory"]
+            PromptRegistry["registry.ts<br/>5 workflow templates"]
+        end
+    end
+
+    subgraph MaxDevice["Max4Live Bridge"]
+        MaxDeviceDir["max-device/<br/>Max for Live device"]
+        BridgeJS["bridge.js<br/>~600 lines JavaScript"]
+        PatcherSetup["PATCHER_SETUP.md<br/>Max patcher instructions"]
+    end
+
+    subgraph Documentation["Documentation"]
+        DocsDir["docs/m4l/<br/>Sprint documentation"]
+        M4LDocs["M4L001-M4L012<br/>13 PREFIX docs"]
+        IndexMD["INDEX.md<br/>Document registry"]
+    end
+
+    subgraph Wireframes["Wireframes"]
+        WireframesDir["wireframes/<br/>Architecture diagrams"]
+        V1Dir["v1-2025-11-08/"]
+        V2Dir["v2-2025-11-18/"]
+    end
+
+    Root --> Config
+    Root --> SourceCode
+    Root --> MaxDevice
+    Root --> Documentation
+    Root --> Wireframes
+
+    SourceCode --> SrcDir
+    SrcDir --> CoreFiles
+    SrcDir --> ToolsDir
+    SrcDir --> ResourcesDir
+    SrcDir --> PromptsDir
+
+    MaxDevice --> MaxDeviceDir
+    MaxDeviceDir --> BridgeJS
+    MaxDeviceDir --> PatcherSetup
+
+    Documentation --> DocsDir
+    DocsDir --> M4LDocs
+    DocsDir --> IndexMD
+
+    Wireframes --> WireframesDir
+    WireframesDir --> V1Dir
+    WireframesDir --> V2Dir
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p><strong>Source:</strong> <code>wireframes/v2-2025-11-18/*.mermaid.md</code></p>
+            <p>Generated for: <strong>max4live-mcp</strong> | Location: <code>~/dev/max4live-mcp</code></p>
+            <p>Stack: Node.js, MCP Protocol, OSC/UDP, Max/MSP, Ableton Live API</p>
+            <p>Docs: <a href="https://github.com/chrislyons/max4live-mcp">GitHub</a></p>
+        </footer>
+    </div>
+
+    <div class="keyboard-hints">
+        <div><kbd>&#8593;</kbd><kbd>&#8595;</kbd> Navigate</div>
+        <div><kbd>&#8592;</kbd> Collapse</div>
+        <div><kbd>&#8594;</kbd> Expand</div>
+        <div><kbd>Esc</kbd> Collapse all</div>
+        <div><kbd>A</kbd> Expand all</div>
+    </div>
+
+    <script>
+        // Initialize Mermaid with dark theme
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'dark',
+            themeVariables: {
+                fontFamily: '"InputMono-Regular", "SF Mono", "Fira Code", monospace',
+                primaryColor: '#2a2a2a',
+                primaryTextColor: '#e0e0e0',
+                primaryBorderColor: '#333',
+                lineColor: '#FF764D',
+                secondaryColor: '#1a1a1a',
+                tertiaryColor: '#242424',
+                background: '#1a1a1a',
+                mainBkg: '#2a2a2a',
+                nodeBorder: '#333',
+                clusterBkg: '#242424',
+                clusterBorder: '#333',
+                titleColor: '#e0e0e0',
+                edgeLabelBackground: '#333',
+                lineWidth: 2
+            },
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis',
+                nodeSpacing: 80,
+                rankSpacing: 100,
+                padding: 30
+            },
+            sequence: {
+                useMaxWidth: true,
+                showSequenceNumbers: false,
+                mirrorActors: false,
+                actorMargin: 50,
+                noteMargin: 10,
+                messageMargin: 35
+            }
+        });
+
+        // Keyboard navigation state
+        let selectedIndex = -1;
+        const cards = document.querySelectorAll('.diagram-card');
+
+        function selectCard(index) {
+            cards.forEach(c => c.classList.remove('selected'));
+            if (index >= 0 && index < cards.length) {
+                selectedIndex = index;
+                cards[index].classList.add('selected');
+                cards[index].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        function toggleDiagram(header) {
+            const card = header.closest('.diagram-card');
+            card.classList.toggle('collapsed');
+            const index = Array.from(cards).indexOf(card);
+            selectCard(index);
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                cards.forEach(card => card.classList.add('collapsed'));
+                cards.forEach(c => c.classList.remove('selected'));
+                selectedIndex = -1;
+            } else if (e.key.toLowerCase() === 'a' && !e.ctrlKey && !e.metaKey) {
+                cards.forEach(card => card.classList.remove('collapsed'));
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                selectCard(selectedIndex < cards.length - 1 ? selectedIndex + 1 : 0);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                selectCard(selectedIndex > 0 ? selectedIndex - 1 : cards.length - 1);
+            } else if (e.key === 'ArrowRight' && selectedIndex >= 0) {
+                e.preventDefault();
+                cards[selectedIndex].classList.remove('collapsed');
+            } else if (e.key === 'ArrowLeft' && selectedIndex >= 0) {
+                e.preventDefault();
+                cards[selectedIndex].classList.add('collapsed');
+            }
+        });
+
+        // Smooth scroll for quick nav
+        document.querySelectorAll('.quick-nav a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = document.querySelector(link.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    target.classList.remove('collapsed');
+                    const index = Array.from(cards).indexOf(target);
+                    selectCard(index);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

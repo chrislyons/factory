@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>autoresearch</title>
+<link rel="stylesheet" href="/shared/base.css">
+<link rel="stylesheet" href="/shared/gallery.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="site-header__inner">
+    <div class="brand">
+      <a class="brand__title" href="/pages/docs.html">dreamfactory</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="hero-row">
+    <div class="hero">
+      <span class="hero-eyebrow">ARCHITECTURE GALLERY</span>
+      <h1>autoresearch</h1>
+      <p>Loop scoping and execution framework for autonomous research agents</p>
+    </div>
+    <div class="hero-meta"><div class="meta-chip"><span class="meta-chip__label">UPDATED</span><span class="meta-chip__value">2026-03-29</span></div><div class="meta-chip"><span class="meta-chip__label">VERSION</span><span class="meta-chip__value">1.0</span></div></div>
+  </div>
+  <section class="gallery-nav"><div class="nav-group"><span class="nav-group__label">Diagrams:</span><a class="nav-chip" href="#lifecycle" data-target="lifecycle">Loop Lifecycle</a><a class="nav-chip" href="#integrity" data-target="integrity">Integrity Rules</a><a class="nav-chip" href="#harness" data-target="harness">Frozen Harness</a><a class="nav-chip" href="#researcher" data-target="researcher">Researcher Loop</a></div></section>
+  <section class="callout-grid"><article class="surface-card callout callout--info"><h2>Diagram Collection</h2><p>4 diagrams covering loop lifecycle, integrity auto-rejection rules, frozen harness boundaries, and a concrete researcher loop example.</p><p>Click headers to expand/collapse. Diagrams render via Mermaid.js. Press a to expand all, Esc to collapse all.</p></article></section>
+  <section class="section-block" data-section="loop-architecture"><div class="section-heading"><span>Loop Architecture</span></div><div class="diagram-stack"><article class="surface-card diagram-card" id="lifecycle" data-diagram-id="lifecycle"><button class="diagram-header" type="button" aria-expanded="true"><span class="diagram-arrow">&#9660;</span><span class="diagram-header__copy"><span class="diagram-title">Loop Lifecycle</span><p class="diagram-description">End-to-end flow from proposal to agent execution with rollback</p></span><span class="diagram-kind">FLOWCHART</span></button><div class="diagram-content"><div class="diagram-canvas"><div class="diagram-loading">Rendering diagram...</div></div><script type="application/json" class="mermaid-source">"graph TB\nP[\"Proposal\\nfrom agent\"]\nAS[\"Autoscope\\ndesign approval\"]\nMI[\"Metric Integrity\\nCheck\"]\nHC[\"Harness Completeness\\nCheck\"]\nMS[\"Mutable Surface\\nAudit\"]\nRV[\"Rollback\\nVerification\"]\nLS[\"Loop Spec File\\nfrozen YAML\"]\nEX[\"Agent Execution\\nfrozen coordinator\"]\nRB[\"Rollback\\nMechanism\"]\nP --> AS\nAS --> MI\nMI --> HC\nHC --> MS\nMS --> RV\nRV --> LS\nLS --> EX\nEX -.->|failure| RB\nstyle P fill:#cce5ff\nstyle AS fill:#fff3cd\nstyle LS fill:#d4edda\nstyle EX fill:#e7e7ff"</script></div></article><article class="surface-card diagram-card" id="integrity" data-diagram-id="integrity"><button class="diagram-header" type="button" aria-expanded="true"><span class="diagram-arrow">&#9660;</span><span class="diagram-header__copy"><span class="diagram-title">Autoscope Integrity Rules</span><p class="diagram-description">Validation gate that auto-rejects proposals violating integrity constraints</p></span><span class="diagram-kind">STATE DIAGRAM</span></button><div class="diagram-content"><div class="diagram-canvas"><div class="diagram-loading">Rendering diagram...</div></div><script type="application/json" class="mermaid-source">"stateDiagram-v2\n[*] --> Received: proposal submitted\nReceived --> CheckMetric: gameable metric?\nCheckMetric --> CheckCoord: coordinator frozen?\nCheckCoord --> CheckSoul: soul/principles frozen?\nCheckSoul --> CheckRollback: rollback defined?\nCheckRollback --> CheckBudget: budget bounded?\nCheckBudget --> Approved: all checks pass\nCheckMetric --> Rejected: violation detected\nCheckCoord --> Rejected\nCheckSoul --> Rejected\nCheckRollback --> Rejected\nCheckBudget --> Rejected\nApproved --> [*]\nRejected --> [*]"</script></div></article></div></section><section class="section-block" data-section="harness-and-examples"><div class="section-heading"><span>Harness &amp; Examples</span></div><div class="diagram-stack"><article class="surface-card diagram-card" id="harness" data-diagram-id="harness"><button class="diagram-header" type="button" aria-expanded="true"><span class="diagram-arrow">&#9660;</span><span class="diagram-header__copy"><span class="diagram-title">Frozen Harness Boundaries</span><p class="diagram-description">Immutable vs mutable surfaces enforced by loop spec</p></span><span class="diagram-kind">FLOWCHART</span></button><div class="diagram-content"><div class="diagram-canvas"><div class="diagram-loading">Rendering diagram...</div></div><script type="application/json" class="mermaid-source">"graph TB\nsubgraph FROZEN[\"Frozen -- Immutable\"]\nCOORD[\"coordinator/\\nrouting and lifecycle\"]\nSOUL[\"soul.md\\nBoot, IG-88, Kelk\"]\nPRINC[\"principles.md\\nall agents\"]\nSEC[\"security\\npretool-approval, secrets\"]\nRQ[\"research question\"]\nEVAL[\"evaluation harness\\nreindex scripts\"]\nSPEC[\"Loop Spec file\\nself-reference\"]\nend\nsubgraph MUTABLE[\"Mutable Surface\"]\nDOCS[\"docs/res/\\nresearch output\"]\nGRAPH[\"Graphiti\\ngroup isolation\"]\nend\nSPEC --> FROZEN\nSPEC --> MUTABLE\nstyle COORD fill:#f8d7da\nstyle SOUL fill:#f8d7da\nstyle DOCS fill:#d4edda\nstyle GRAPH fill:#d4edda"</script></div></article><article class="surface-card diagram-card" id="researcher" data-diagram-id="researcher"><button class="diagram-header" type="button" aria-expanded="true"><span class="diagram-arrow">&#9660;</span><span class="diagram-header__copy"><span class="diagram-title">Researcher Loop Example</span><p class="diagram-description">Concrete execution flow for a Solana MEV research loop</p></span><span class="diagram-kind">FLOWCHART</span></button><div class="diagram-content"><div class="diagram-canvas"><div class="diagram-loading">Rendering diagram...</div></div><script type="application/json" class="mermaid-source">"graph TB\nREQ[\"Loop Request\\nSolana MEV domain\"]\nVAL[\"Autoscope\\nValidation Pass\"]\nGEN[\"Generate Loop Spec\\nYAML\"]\nBOOT[\"Boot Receives Spec\\nvia env var\"]\nCTX[\"Bootstrap Agent\\nContext\"]\nRES[\"Research +\\nQdrant Indexing\"]\nDOC[\"Write RES###\\nBriefing\"]\nMAT[\"Post Summary\\nto Matrix\"]\nNEXT[\"Schedule Next\\nIteration\"]\nREC[\"Graphiti Record\\nconfirm completion\"]\nREQ --> VAL\nVAL --> GEN\nGEN --> BOOT\nBOOT --> CTX\nCTX --> RES\nRES --> DOC\nDOC --> MAT\nMAT --> NEXT\nNEXT --> REC\nstyle REQ fill:#cce5ff\nstyle GEN fill:#d4edda\nstyle DOC fill:#fff3cd\nstyle REC fill:#e7e7ff"</script></div></article></div></section>
+</main>
+
+<footer>
+  <div class="footer-notes"><p>autoresearch Architecture | Generated 2026-03-29</p><p>Stack: Python, YAML, Matrix, Graphiti, Qdrant</p></div>
+</footer>
+
+<script src="/shared/dust.js"></script>
+<script src="/shared/theme.js"></script>
+<script type="module" src="/shared/gallery.js"></script>
+</body>
+</html>

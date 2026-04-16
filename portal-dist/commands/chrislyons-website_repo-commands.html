@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>chrislyons-website - Command Reference</title>
+<link rel="stylesheet" href="/shared/base.css">
+<link rel="stylesheet" href="/shared/commands.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="site-header__inner">
+    <div class="brand">
+      <a class="brand__title" href="/pages/docs.html">dreamfactory</a>
+    </div>
+    <div class="header-actions"><button class="export-btn" id="export-btn" title="Copy visible results to clipboard as markdown">Export to Markdown</button></div>
+  </div>
+</header>
+
+<main>
+  <div class="hero-row">
+    <div class="hero">
+      <span class="hero-eyebrow">COMMAND REFERENCE</span>
+      <h1>chrislyons-website</h1>
+      <p>Personal portfolio — Vite SPA + Cloudflare Worker + Hono</p>
+    </div>
+    <div class="hero-meta"><div class="meta-chip"><span class="meta-chip__label">UPDATED</span><span class="meta-chip__value">2026-03-29</span></div><div class="meta-chip"><span class="meta-chip__label">REPO</span><span class="meta-chip__value">~/dev/chrislyons-website</span></div></div>
+  </div>
+  <div class="search-wrap"><span class="search-icon">&#x2315;</span><input class="search-input" type="text" placeholder="Search commands, snippets, or notes&#x2026;" id="search" autocomplete="off" spellcheck="false"><span class="search-count" id="search-count"></span><button class="search-clear" id="search-clear" title="Clear search">&times;</button></div>
+  <section class="surface-card section-card" data-section="setup"><button class="section-header" type="button" aria-expanded="true"><span class="section-arrow">&#x25BC;</span><span class="section-title">Setup</span><span class="section-count">2</span></button><div class="section-body"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="install dependencies npm install install dependencies"><td><div class="task-text">Install dependencies</div></td><td><button class="value-block value-block--shell" data-copy="npm install" title="Copy value"><code class="value-text">npm install</code></button></td><td class="desc-text">Install dependencies</td></tr><tr class="command-row" data-search="set admin credentials npx wrangler secret put admin_username set admin credentials"><td><div class="task-text">Set admin credentials</div></td><td><button class="value-block value-block--shell" data-copy="npx wrangler secret put ADMIN_USERNAME" title="Copy value"><code class="value-text">npx wrangler secret put ADMIN_USERNAME</code></button></td><td class="desc-text">Set admin credentials</td></tr></tbody></table></div></section>
+  <section class="surface-card section-card" data-section="development"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">&#x25BC;</span><span class="section-title">Development</span><span class="section-count">4</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="vite dev server npm run dev vite dev server (port 5173)"><td><div class="task-text">Vite dev server</div></td><td><button class="value-block value-block--shell" data-copy="npm run dev" title="Copy value"><code class="value-text">npm run dev</code></button></td><td class="desc-text">Vite dev server (port 5173)</td></tr><tr class="command-row" data-search="worker dev server npm run dev:worker worker dev server (port 8787)"><td><div class="task-text">Worker dev server</div></td><td><button class="value-block value-block--shell" data-copy="npm run dev:worker" title="Copy value"><code class="value-text">npm run dev:worker</code></button></td><td class="desc-text">Worker dev server (port 8787)</td></tr><tr class="command-row" data-search="both servers npm run dev:all both servers simultaneously"><td><div class="task-text">Both servers</div></td><td><button class="value-block value-block--shell" data-copy="npm run dev:all" title="Copy value"><code class="value-text">npm run dev:all</code></button></td><td class="desc-text">Both servers simultaneously</td></tr><tr class="command-row" data-search="run tests npm test run test suite with vitest"><td><div class="task-text">Run tests</div></td><td><button class="value-block value-block--shell" data-copy="npm test" title="Copy value"><code class="value-text">npm test</code></button></td><td class="desc-text">Run test suite with Vitest</td></tr></tbody></table></div></section>
+  <section class="surface-card section-card" data-section="building"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">&#x25BC;</span><span class="section-title">Building</span><span class="section-count">2</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="build npm run build build vite spa + asset manifest"><td><div class="task-text">Build</div></td><td><button class="value-block value-block--shell" data-copy="npm run build" title="Copy value"><code class="value-text">npm run build</code></button></td><td class="desc-text">Build Vite SPA + asset manifest</td></tr><tr class="command-row" data-search="preview npm run preview preview production build locally"><td><div class="task-text">Preview</div></td><td><button class="value-block value-block--shell" data-copy="npm run preview" title="Copy value"><code class="value-text">npm run preview</code></button></td><td class="desc-text">Preview production build locally</td></tr></tbody></table></div></section>
+  <section class="surface-card section-card" data-section="content"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">&#x25BC;</span><span class="section-title">Content Management</span><span class="section-count">1</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="parse song lyrics node scripts/parse-song-lyrics.js convert markdown songs to songs.js"><td><div class="task-text">Parse song lyrics</div></td><td><button class="value-block value-block--shell" data-copy="node scripts/parse-song-lyrics.js" title="Copy value"><code class="value-text">node scripts/parse-song-lyrics.js</code></button></td><td class="desc-text">Convert markdown songs to songs.js</td></tr></tbody></table></div></section>
+  <section class="surface-card section-card" data-section="deployment"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">&#x25BC;</span><span class="section-title">Deployment</span><span class="section-count">1</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="deploy npx wrangler deploy deploy worker and pages to production"><td><div class="task-text">Deploy</div></td><td><button class="value-block value-block--shell" data-copy="npx wrangler deploy" title="Copy value"><code class="value-text">npx wrangler deploy</code></button></td><td class="desc-text">Deploy Worker and Pages to production</td></tr></tbody></table></div></section>
+  <section class="surface-card section-card" data-section="docs"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">&#x25BC;</span><span class="section-title">Documentation</span><span class="section-count">2</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody><tr class="command-row" data-search="show highest 6 docs ls -1 docs/clw/clw*.md | sort -v | tail -6 show highest 6 docs"><td><div class="task-text">Show highest 6 docs</div></td><td><button class="value-block value-block--shell" data-copy="ls -1 docs/clw/CLW*.md | sort -V | tail -6" title="Copy value"><code class="value-text">ls -1 docs/clw/CLW*.md | sort -V | tail -6</code></button></td><td class="desc-text">Show highest 6 docs</td></tr><tr class="command-row" data-search="search docs by topic grep -l 'keyword' docs/clw/*.md search docs by topic"><td><div class="task-text">Search docs by topic</div></td><td><button class="value-block value-block--shell" data-copy="grep -l 'keyword' docs/clw/*.md" title="Copy value"><code class="value-text">grep -l 'keyword' docs/clw/*.md</code></button></td><td class="desc-text">Search docs by topic</td></tr></tbody></table></div></section>
+</main>
+
+<footer>
+  <div class="inner">
+    <span>chrislyons-website | PREFIX: CLW | npm</span>
+    <span>chrislyons-website_repo-commands.html</span>
+  </div>
+</footer>
+
+<script src="/shared/dust.js"></script>
+<script src="/shared/theme.js"></script>
+<script src="/shared/commands.js"></script>
+</body>
+</html>

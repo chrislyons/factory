@@ -54,10 +54,20 @@ function deriveProvider(config: Record<string, unknown>): string {
   const modelObj = (config.model ?? {}) as Record<string, unknown>;
   const stored = (modelObj.provider as string) ?? (config.provider as string) ?? "";
   const modelPath = (modelObj.default as string) ?? (config.model as string) ?? "";
+  const baseUrl = (modelObj.base_url as string) ?? "";
 
-  // Local model paths → map to correct engine:port
-  if (modelPath.includes("gemma-4-e4b-it")) return "mlx-vlm:41961";
-  if (modelPath.includes("gemma-4-26b") || modelPath.includes("flash-moe")) return "flash-moe:41966";
+  // Local engines: identify by base_url port (distinguishes :41961 from :41962)
+  if (baseUrl.includes("127.0.0.1") || baseUrl.includes("localhost")) {
+    const port = baseUrl.split(":").pop()?.split("/")[0] ?? "?";
+    if (modelPath.includes("26b") || modelPath.includes("flash-moe")) return `flash-moe:${port}`;
+    return `mlx-vlm:${port}`;
+  }
+
+  // Cloud providers by host
+  if (baseUrl.includes("nousresearch")) return "nous";
+  if (baseUrl.includes("openrouter")) return "openrouter";
+  if (baseUrl.includes("anthropic")) return "anthropic";
+  if (baseUrl.includes("openai")) return "openai";
 
   // Legacy "custom" → show as-is (can't determine port from config alone)
   if (stored === "custom") return stored;

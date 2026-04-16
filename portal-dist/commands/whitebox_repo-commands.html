@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>whitebox - Command Reference</title>
+<link rel="stylesheet" href="/shared/base.css">
+<link rel="stylesheet" href="/shared/commands.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="site-header__inner">
+    <div class="brand">
+      <a class="brand__title" href="/pages/docs.html">dreamfactory</a>
+    </div>
+    <div class="header-actions"><button class="export-btn" id="export-btn" title="Copy visible results to clipboard as markdown">Export to Markdown</button></div>
+  </div>
+</header>
+
+<main>
+  <div class="hero-row">
+    <div class="hero">
+      <span class="hero-eyebrow">COMMAND REFERENCE</span>
+      <h1>whitebox</h1>
+      <p>Primary services host — macOS M1 Max, Tailscale 100.88.222.111</p>
+    </div>
+    <div class="hero-meta">
+      <div class="meta-chip"><span class="meta-chip__label">UPDATED</span><span class="meta-chip__value">2026-04-14</span></div>
+      <div class="meta-chip"><span class="meta-chip__label">REPO</span><span class="meta-chip__value">~/dev/whitebox</span></div>
+    </div>
+  </div>
+  <div class="search-wrap"><span class="search-icon">&#x2315;</span><input class="search-input" type="text" placeholder="Search commands, snippets, or notes…" id="search" autocomplete="off" spellcheck="false"><span class="search-count" id="search-count"></span><button class="search-clear" id="search-clear" title="Clear search">&#xd7;</button></div>
+
+  <section class="surface-card section-card" data-section="launchd">
+    <button class="section-header" type="button" aria-expanded="true">
+      <span class="section-arrow">&#x25BC;</span>
+      <span class="section-title">LaunchAgent Services</span>
+      <span class="section-count">8</span>
+    </button>
+    <div class="section-body">
+      <table class="command-table">
+        <thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr class="command-row" data-search="list all services launchctl list | grep bootindustries show all factory launchd agents">
+            <td><div class="task-text">List all services</div></td>
+            <td><button class="value-block value-block--shell" data-copy="launchctl list | grep bootindustries" title="Copy value"><code class="value-text">launchctl list | grep bootindustries</code></button></td>
+            <td class="desc-text">Show all factory launchd agents</td>
+          </tr>
+          <tr class="command-row" data-search="pantalaimon status launchctl list | grep pantalaimon check pantalaimon launchd service retired">
+            <td><div class="task-text">Pantalaimon status</div></td>
+            <td><button class="value-block value-block--shell" data-copy="launchctl list | grep pantalaimon" title="Copy value"><code class="value-text">launchctl list | grep pantalaimon</code></button></td>
+            <td class="desc-text">RETIRED — Pantalaimon replaced by native E2EE (python-olm)</td>
+          </tr>
+          <tr class="command-row" data-search="restart service launchctl kickstart -k gui/$(id -u)/com.bootindustries.SERVICE force-restart a launchd service">
+            <td><div class="task-text">Restart service</div></td>
+            <td><button class="value-block value-block--shell" data-copy="launchctl kickstart -k gui/$(id -u)/com.bootindustries.SERVICE" title="Copy value"><code class="value-text">launchctl kickstart -k gui/$(id -u)/com.bootindustries.SERVICE</code></button></td>
+            <td class="desc-text">Force-restart a launchd service</td>
+          </tr>
+          <tr class="command-row" data-search="stop service launchctl bootout gui/$(id -u)/com.bootindustries.SERVICE stop and unload a launchd service">
+            <td><div class="task-text">Stop service</div></td>
+            <td><button class="value-block value-block--shell" data-copy="launchctl bootout gui/$(id -u)/com.bootindustries.SERVICE" title="Copy value"><code class="value-text">launchctl bootout gui/$(id -u)/com.bootindustries.SERVICE</code></button></td>
+            <td class="desc-text">Stop and unload a launchd service</td>
+          </tr>
+          <tr class="command-row" data-search="load service launchctl bootstrap gui/$(id -u) ~/library/launchagents/com.bootindustries.SERVICE.plist load a launchd plist">
+            <td><div class="task-text">Load service</div></td>
+            <td><button class="value-block value-block--shell" data-copy="launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.bootindustries.SERVICE.plist" title="Copy value"><code class="value-text">launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.bootindustries.SERVICE.plist</code></button></td>
+            <td class="desc-text">Load a launchd plist</td>
+          </tr>
+          <tr class="command-row" data-search="list plists ls ~/library/launchagents/com.bootindustries.* list all bootindustries plist files">
+            <td><div class="task-text">List plists</div></td>
+            <td><button class="value-block value-block--shell" data-copy="ls ~/Library/LaunchAgents/com.bootindustries.*" title="Copy value"><code class="value-text">ls ~/Library/LaunchAgents/com.bootindustries.*</code></button></td>
+            <td class="desc-text">List all bootindustries plist files</td>
+          </tr>
+          <tr class="command-row" data-search="service logs tail -f ~/logs/SERVICE.log tail logs for a launchd service">
+            <td><div class="task-text">Service logs</div></td>
+            <td><button class="value-block value-block--shell" data-copy="tail -f ~/logs/SERVICE.log" title="Copy value"><code class="value-text">tail -f ~/logs/SERVICE.log</code></button></td>
+            <td class="desc-text">Tail logs for a launchd service</td>
+          </tr>
+          <tr class="command-row" data-search="pantalaimon logs tail -f ~/logs/pantalaimon.log tail pantalaimon log output retired">
+            <td><div class="task-text">Pantalaimon logs</div></td>
+            <td><button class="value-block value-block--shell" data-copy="tail -f ~/logs/pantalaimon.log" title="Copy value"><code class="value-text">tail -f ~/logs/pantalaimon.log</code></button></td>
+            <td class="desc-text">RETIRED — Pantalaimon log (historical only)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="surface-card section-card" data-section="tailscale">
+    <button class="section-header collapsed" type="button" aria-expanded="false">
+      <span class="section-arrow">&#x25BC;</span>
+      <span class="section-title">Tailscale</span>
+      <span class="section-count">5</span>
+    </button>
+    <div class="section-body collapsed">
+      <table class="command-table">
+        <thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr class="command-row" data-search="tailscale status tailscale status show all tailnet peers and status">
+            <td><div class="task-text">Tailscale status</div></td>
+            <td><button class="value-block value-block--shell" data-copy="tailscale status" title="Copy value"><code class="value-text">tailscale status</code></button></td>
+            <td class="desc-text">Show all tailnet peers and status</td>
+          </tr>
+          <tr class="command-row" data-search="ping cloudkicker tailscale ping 100.86.68.16 latency check to cloudkicker">
+            <td><div class="task-text">Ping Cloudkicker</div></td>
+            <td><button class="value-block value-block--shell" data-copy="tailscale ping 100.86.68.16" title="Copy value"><code class="value-text">tailscale ping 100.86.68.16</code></button></td>
+            <td class="desc-text">Latency check to Cloudkicker</td>
+          </tr>
+          <tr class="command-row" data-search="ping blackbox tailscale ping 100.87.53.109 latency check to blackbox rp5">
+            <td><div class="task-text">Ping Blackbox</div></td>
+            <td><button class="value-block value-block--shell" data-copy="tailscale ping 100.87.53.109" title="Copy value"><code class="value-text">tailscale ping 100.87.53.109</code></button></td>
+            <td class="desc-text">Latency check to Blackbox RP5</td>
+          </tr>
+          <tr class="command-row" data-search="tailscale ip tailscale ip show whitebox tailscale ip address">
+            <td><div class="task-text">Tailscale IP</div></td>
+            <td><button class="value-block value-block--shell" data-copy="tailscale ip" title="Copy value"><code class="value-text">tailscale ip</code></button></td>
+            <td class="desc-text">Show Whitebox Tailscale IP address</td>
+          </tr>
+          <tr class="command-row" data-search="ssh from cloudkicker ssh whitebox connect from cloudkicker via tailscale">
+            <td><div class="task-text">SSH from Cloudkicker</div></td>
+            <td><button class="value-block value-block--shell" data-copy="ssh whitebox" title="Copy value"><code class="value-text">ssh whitebox</code></button></td>
+            <td class="desc-text">Connect from Cloudkicker via Tailscale</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="surface-card section-card" data-section="mlx">
+    <button class="section-header collapsed" type="button" aria-expanded="false">
+      <span class="section-arrow">&#x25BC;</span>
+      <span class="section-title">MLX-LM Inference</span>
+      <span class="section-count">14</span>
+    </button>
+    <div class="section-body collapsed">
+      <table class="command-table">
+        <thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr class="command-row" data-search="boot slot health curl -sf http://127.0.0.1:41961/v1/models check boot dedicated e4b mlx slot">
+            <td><div class="task-text">Boot slot health</div></td>
+            <td><button class="value-block value-block--shell" data-copy="curl -sf --max-time 3 http://127.0.0.1:41961/v1/models" title="Copy value"><code class="value-text">curl -sf --max-time 3 http://127.0.0.1:41961/v1/models</code></button></td>
+            <td class="desc-text">Check Boot dedicated MLX (E4B on :41961)</td>
+          </tr>
+          <tr class="command-row" data-search="kelk slot health curl -sf http://127.0.0.1:41962/v1/models check kelk dedicated e4b mlx slot">
+            <td><div class="task-text">Kelk slot health</div></td>
+            <td><button class="value-block value-block--shell" data-copy="curl -sf --max-time 3 http://127.0.0.1:41962/v1/models" title="Copy value"><code class="value-text">curl -sf --max-time 3 http://127.0.0.1:41962/v1/models</code></button></td>
+            <td class="desc-text">Check Kelk dedicated MLX (E4B on :41962)</td>
+          </tr>
+          <tr class="command-row" data-search="nan slot health curl -s http://127.0.0.1:41963/v1/models check nan observer slot (lfm 1.2b)">
+            <td><div class="task-text">Nan slot health</div></td>
+            <td><button class="value-block value-block--shell" data-copy="curl -s http://127.0.0.1:41963/v1/models" title="Copy value"><code class="value-text">curl -s http://127.0.0.1:41963/v1/models</code></button></td>
+            <td class="desc-text">Check Nan observer slot (LFM 1.2B)</td>
+          </tr>
+          <tr class="command-row" data-search="shared 26b aux slot health curl -s http://127.0.0.1:41966/v1/models check shared 26b aux gemma">
+            <td><div class="task-text">Shared 26B aux health</div></td>
+            <td><button class="value-block value-block--shell" data-copy="curl -s http://127.0.0.1:41966/v1/models" title="Copy value"><code class="value-text">curl -s http://127.0.0.1:41966/v1/models</code></button></td>
+            <td class="desc-text">Check shared 26B aux (Gemma 4 26B A4B, SSD expert streaming, ~5.4 tok/s)</td>
+          </tr>
+          <tr class="command-row" data-search="ig-88 slot health curl -sf http://127.0.0.1:41988/v1/models check ig-88 mlx slot retired openrouter">
+            <td><div class="task-text">IG-88 slot health</div></td>
+            <td><button class="value-block value-block--shell" data-copy="curl -sf --max-time 3 http://127.0.0.1:41988/v1/models" title="Copy value"><code class="value-text">curl -sf --max-time 3 http://127.0.0.1:41988/v1/models</code></button></td>
+            <td class="desc-text">RETIRED — IG-88 on OpenRouter (Nous Mimo Pro since FCT067)</td>
+          </tr>
+          <tr class="command-row" data-search="all slots health for p in 41961 41962 41963 41966 41988; do echo $p: $(curl -so /dev/null -w '%{http_code}' http://127.0.0.1:$p/v1/models); done probe all 5 inference slots at once">
+            <td><div class="task-text">All slots health</div></td>
+            <td><button class="value-block value-block--shell" data-copy="for p in 41961 41962 41963 41966 41988; do echo \"$p: $(curl -so /dev/null -w '%{http_code}' http://127.0.0.1:$p/v1/models)\"; done" title="Copy value"><code class="value-text">for p in 41961 41962 41963 41966 41988; do echo "$p: $(curl -so /dev/null -w '%{http_code}' http://127.0.0.1:$p/v1/models)"; done</code></button></td>
+            <td class="desc-text">Probe all 5 inference slots at once</td>
+          </tr>
+          <tr class="command-row" data-search="kickstart boot mlx launchctl mlx-vlm-boot restart server">
+            <td><div class="task-text">Kickstart Boot MLX</div></td>
+            <td><button class="value-block value-block--shell" data-copy="launchctl kickstart -k gui/$(id -u)/com.bootindustries.mlx-vlm-boot" title="Copy value"><code class="value-text">launchctl kickstart -k gui/$(id -u)/com.bootindustries.mlx-vlm-boot</code></button></td>
+            <td class="desc-text">Restart Boot MLX server</td>
+          </tr>
+          <tr class="command-row" data-search="kickstart kelk mlx launchctl mlx-vlm-kelk restart server">
+            <td><div class="task-text">Kickstart Kelk MLX</div></td>
+            <td><button class="value-block value-block--shell" data-copy="launchctl kickstart -k gui/$(id -u)/com.bootindustries.mlx-vlm-kelk" title="Copy value"><code class="value-text">launchctl kickstart -k gui/$(id -u)/com.bootindustries.mlx-vlm-kelk</code></button></td>
+            <td class="desc-text">Restart Kelk MLX server</td>
+          </tr>
+          <tr class="command-row" data-search="all mlx status launchctl list grep mlx-vlm all servers">
+            <td><div class="task-text">All MLX status</div></td>
+            <td><button class="value-block value-block--shell" data-copy="launchctl list | grep mlx-vlm" title="Copy value"><code class="value-text">launchctl list | grep mlx-vlm</code></button></td>
+            <td class="desc-text">List all MLX server launchd status</td>
+          </tr>
+          <tr class="command-row" data-search="boot mlx log tail mlx-vlm-boot.log library logs factory">
+            <td><div class="task-text">Boot MLX log</div></td>
+            <td><button class="value-block value-block--shell" data-copy="tail -20 ~/Library/Logs/factory/mlx-vlm-boot.log" title="Copy value"><code class="value-text">tail -20 ~/Library/Logs/factory/mlx-vlm-boot.log</code></button></td>
+            <td class="desc-text">View Boot MLX server log</td>
+          </tr>
+          <tr class="command-row" data-search="start boot mlx mlx_lm.server --model ~/models/nanbeige4.1-3b-8bit --port 41961 launch boot inference server manually">
+            <td><div class="task-text">Start Boot MLX</div></td>
+            <td><button class="value-block value-block--shell" data-copy="mlx_lm.server --model ~/models/Nanbeige4.1-3B-8bit --port 41961 &" title="Copy value"><code class="value-text">mlx_lm.server --model ~/models/Nanbeige4.1-3B-8bit --port 41961 &amp;</code></button></td>
+            <td class="desc-text">Launch Boot inference server manually</td>
+          </tr>
+          <tr class="command-row" data-search="start kelk mlx mlx_lm.server --model ~/models/qwen3.5-4b-mlx-8bit --port 41962 launch kelk inference server manually">
+            <td><div class="task-text">Start Kelk MLX</div></td>
+            <td><button class="value-block value-block--shell" data-copy="mlx_lm.server --model ~/models/Qwen3.5-4B-MLX-8bit --port 41962 &" title="Copy value"><code class="value-text">mlx_lm.server --model ~/models/Qwen3.5-4B-MLX-8bit --port 41962 &amp;</code></button></td>
+            <td class="desc-text">Launch Kelk inference server manually</td>
+          </tr>
+          <tr class="command-row" data-search="model storage du -sh ~/models/* list model sizes on disk">
+            <td><div class="task-text">Model storage</div></td>
+            <td><button class="value-block value-block--shell" data-copy="du -sh ~/models/*" title="Copy value"><code class="value-text">du -sh ~/models/*</code></button></td>
+            <td class="desc-text">List model sizes on disk</td>
+          </tr>
+          <tr class="command-row" data-search="ollama models ollama list check loaded ollama models (embeddings only)">
+            <td><div class="task-text">Ollama models</div></td>
+            <td><button class="value-block value-block--shell" data-copy="ollama list" title="Copy value"><code class="value-text">ollama list</code></button></td>
+            <td class="desc-text">Check Ollama models (embeddings only, :11434)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="surface-card section-card" data-section="matrix">
+    <button class="section-header collapsed" type="button" aria-expanded="false">
+      <span class="section-arrow">&#x25BC;</span>
+      <span class="section-title">Matrix / Pantalaimon — RETIRED</span>
+      <span class="section-count">5</span>
+    </button>
+    <div class="section-body collapsed">
+      <table class="command-table">
+        <thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr class="command-row" data-search="pantalaimon health curl -s http://127.0.0.1:41200/_matrix/client/versions check pantalaimon is responding">
+            <td><div class="task-text">Pantalaimon health</div></td>
+            <td><button class="value-block value-block--shell" data-copy="curl -s http://127.0.0.1:41200/_matrix/client/versions" title="Copy value"><code class="value-text">curl -s http://127.0.0.1:41200/_matrix/client/versions</code></button></td>
+            <td class="desc-text">RETIRED — Pantalaimon replaced by native E2EE (python-olm)</td>
+          </tr>
+          <tr class="command-row" data-search="pantalaimon config cat ~/.config/pantalaimon/pantalaimon.conf view pantalaimon configuration">
+            <td><div class="task-text">Pantalaimon config</div></td>
+            <td><button class="value-block value-block--shell" data-copy="cat ~/.config/pantalaimon/pantalaimon.conf" title="Copy value"><code class="value-text">cat ~/.config/pantalaimon/pantalaimon.conf</code></button></td>
+            <td class="desc-text">RETIRED — Pantalaimon config (historical only)</td>
+          </tr>
+          <tr class="command-row" data-search="restart pantalaimon launchctl kickstart -k gui/$(id -u)/com.pantalaimon force-restart pantalaimon service">
+            <td><div class="task-text">Restart Pantalaimon</div></td>
+            <td><button class="value-block value-block--shell" data-copy="launchctl kickstart -k gui/$(id -u)/com.pantalaimon" title="Copy value"><code class="value-text">launchctl kickstart -k gui/$(id -u)/com.pantalaimon</code></button></td>
+            <td class="desc-text">RETIRED — Pantalaimon no longer in use</td>
+          </tr>
+          <tr class="command-row" data-search="olm database ls -la ~/.local/share/pantalaimon/pan.db check olm session database size">
+            <td><div class="task-text">Olm database</div></td>
+            <td><button class="value-block value-block--shell" data-copy="ls -la ~/.local/share/pantalaimon/pan.db" title="Copy value"><code class="value-text">ls -la ~/.local/share/pantalaimon/pan.db</code></button></td>
+            <td class="desc-text">RETIRED — Olm sessions now managed by Hermes native E2EE</td>
+          </tr>
+          <tr class="command-row" data-search="pantalaimon remote curl -s http://100.88.222.111:41200/_matrix/client/versions probe pantalaimon over tailscale">
+            <td><div class="task-text">Pantalaimon remote</div></td>
+            <td><button class="value-block value-block--shell" data-copy="curl -s http://100.88.222.111:41200/_matrix/client/versions" title="Copy value"><code class="value-text">curl -s http://100.88.222.111:41200/_matrix/client/versions</code></button></td>
+            <td class="desc-text">RETIRED — Pantalaimon no longer running</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="surface-card section-card" data-section="mcp">
+    <button class="section-header collapsed" type="button" aria-expanded="false">
+      <span class="section-arrow">&#x25BC;</span>
+      <span class="section-title">MCP Servers</span>
+      <span class="section-count">8</span>
+    </button>
+    <div class="section-body collapsed">
+      <table class="command-table">
+        <thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr class="command-row" data-search="qdrant mcp status curl -so /dev/null -w '%{http_code}' http://127.0.0.1:41460/ check qdrant mcp daemon (406=healthy)">
+            <td><div class="task-text">Qdrant MCP status</div></td>
+            <td><button class="value-block value-block--shell" data-copy="curl -so /dev/null -w '%{http_code}' http://127.0.0.1:41460/" title="Copy value"><code class="value-text">curl -so /dev/null -w '%{http_code}' http://127.0.0.1:41460/</code></button></td>
+            <td class="desc-text">Check Qdrant MCP daemon (406=healthy)</td>
+          </tr>
+          <tr class="command-row" data-search="research mcp status curl -so /dev/null -w '%{http_code}' http://127.0.0.1:41470/ check research mcp daemon (406=healthy)">
+            <td><div class="task-text">Research MCP status</div></td>
+            <td><button class="value-block value-block--shell" data-copy="curl -so /dev/null -w '%{http_code}' http://127.0.0.1:41470/" title="Copy value"><code class="value-text">curl -so /dev/null -w '%{http_code}' http://127.0.0.1:41470/</code></button></td>
+            <td class="desc-text">Check Research MCP daemon (406=healthy)</td>
+          </tr>
+          <tr class="command-row" data-search="matrix coord mcp curl -so /dev/null -w '%{http_code}' http://127.0.0.1:41400/ check matrix coord mcp (405=healthy)">
+            <td><div class="task-text">Matrix Coord MCP</div></td>
+            <td><button class="value-block value-block--shell" data-copy="curl -so /dev/null -w '%{http_code}' http://127.0.0.1:41400/" title="Copy value"><code class="value-text">curl -so /dev/null -w '%{http_code}' http://127.0.0.1:41400/</code></button></td>
+            <td class="desc-text">DEPRECATED — Matrix Coord MCP (@coord removed from allowlists)</td>
+          </tr>
+          <tr class="command-row" data-search="matrix boot mcp curl -so /dev/null -w '%{http_code}' http://127.0.0.1:41401/ check matrix boot mcp (405=healthy)">
+            <td><div class="task-text">Matrix Boot MCP</div></td>
+            <td><button class="value-block value-block--shell" data-copy="curl -so /dev/null -w '%{http_code}' http://127.0.0.1:41401/" title="Copy value"><code class="value-text">curl -so /dev/null -w '%{http_code}' http://127.0.0.1:41401/</code></button></td>
+            <td class="desc-text">Check Matrix Boot MCP (405=healthy)</td>
+          </tr>
+          <tr class="command-row" data-search="graphiti mcp status curl -so /dev/null -w '%{http_code}' http://127.0.0.1:41440/sse check graphiti mcp sse endpoint">
+            <td><div class="task-text">Graphiti MCP status</div></td>
+            <td><button class="value-block value-block--shell" data-copy="curl -so /dev/null -w '%{http_code}' http://127.0.0.1:41440/sse" title="Copy value"><code class="value-text">curl -so /dev/null -w '%{http_code}' http://127.0.0.1:41440/sse</code></button></td>
+            <td class="desc-text">DOWN — Graphiti MCP disabled (FalkorDB down)</td>
+          </tr>
+          <tr class="command-row" data-search="all mcp health for p in 41400 41401 41440 41460 41470; do echo $p: $(curl -so /dev/null -w '%{http_code}' http://127.0.0.1:$p/); done probe all mcp servers at once">
+            <td><div class="task-text">All MCP health</div></td>
+            <td><button class="value-block value-block--shell" data-copy="for p in 41400 41401 41440 41460 41470; do echo \"$p: $(curl -so /dev/null -w '%{http_code}' http://127.0.0.1:$p/)\"; done" title="Copy value"><code class="value-text">for p in 41400 41401 41440 41460 41470; do echo "$p: $(curl -so /dev/null -w '%{http_code}' http://127.0.0.1:$p/)"; done</code></button></td>
+            <td class="desc-text">Probe all MCP servers at once</td>
+          </tr>
+          <tr class="command-row" data-search="qdrant access via mcp 41460 41470 no standalone server">
+            <td><div class="task-text">Qdrant access</div></td>
+            <td><button class="value-block value-block--text" data-copy="Qdrant MCP :41460 / Research MCP :41470 — no standalone Qdrant server on :41450/:41455" title="Copy value"><code class="value-text">Qdrant via MCP only (:41460 / :41470)</code></button></td>
+            <td class="desc-text">No standalone Qdrant HTTP (:41450) or gRPC (:41455) — access via MCP servers only</td>
+          </tr>
+          <tr class="command-row" data-search="falkordb ping docker exec graphiti-falkordb redis-cli -a $FALKORDB_PASSWORD ping ping falkordb with auth">
+            <td><div class="task-text">FalkorDB ping</div></td>
+            <td><button class="value-block value-block--shell" data-copy="docker exec graphiti-falkordb redis-cli -a $FALKORDB_PASSWORD PING" title="Copy value"><code class="value-text">docker exec graphiti-falkordb redis-cli -a $FALKORDB_PASSWORD PING</code></button></td>
+            <td class="desc-text">DOWN — FalkorDB not running (:41430)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="surface-card section-card" data-section="coordinator">
+    <button class="section-header collapsed" type="button" aria-expanded="false">
+      <span class="section-arrow">&#x25BC;</span>
+      <span class="section-title">Coordinator — DEPRECATED</span>
+      <span class="section-count">6</span>
+    </button>
+    <div class="section-body collapsed">
+      <table class="command-table">
+        <thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr class="command-row" data-search="coordinator status launchctl list | grep coordinator check coordinator launchd state">
+            <td><div class="task-text">Coordinator status</div></td>
+            <td><button class="value-block value-block--shell" data-copy="launchctl list | grep coordinator" title="Copy value"><code class="value-text">launchctl list | grep coordinator</code></button></td>
+            <td class="desc-text">DEPRECATED — coordinator-rs replaced by Hermes gateways</td>
+          </tr>
+          <tr class="command-row" data-search="restart coordinator launchctl kickstart -k gui/$(id -u)/com.bootindustries.coordinator force-restart coordinator-rs">
+            <td><div class="task-text">Restart coordinator</div></td>
+            <td><button class="value-block value-block--shell" data-copy="launchctl kickstart -k gui/$(id -u)/com.bootindustries.coordinator" title="Copy value"><code class="value-text">launchctl kickstart -k gui/$(id -u)/com.bootindustries.coordinator</code></button></td>
+            <td class="desc-text">DEPRECATED — coordinator-rs no longer primary</td>
+          </tr>
+          <tr class="command-row" data-search="coordinator logs tail -f ~/library/logs/factory/coordinator.log tail coordinator log output">
+            <td><div class="task-text">Coordinator logs</div></td>
+            <td><button class="value-block value-block--shell" data-copy="tail -f ~/Library/Logs/factory/coordinator.log" title="Copy value"><code class="value-text">tail -f ~/Library/Logs/factory/coordinator.log</code></button></td>
+            <td class="desc-text">DEPRECATED — coordinator log (historical)</td>
+          </tr>
+          <tr class="command-row" data-search="reload config kill -hup $(pgrep coordinator-rs) sighup reload config without restart">
+            <td><div class="task-text">Reload config</div></td>
+            <td><button class="value-block value-block--shell" data-copy="kill -HUP $(pgrep coordinator-rs)" title="Copy value"><code class="value-text">kill -HUP $(pgrep coordinator-rs)</code></button></td>
+            <td class="desc-text">DEPRECATED — coordinator config reload</td>
+          </tr>
+          <tr class="command-row" data-search="runtime state cat ~/.config/ig88/runtime-state.json check agent runtime state and token usage">
+            <td><div class="task-text">Runtime state</div></td>
+            <td><button class="value-block value-block--shell" data-copy="cat ~/.config/ig88/runtime-state.json" title="Copy value"><code class="value-text">cat ~/.config/ig88/runtime-state.json</code></button></td>
+            <td class="desc-text">Check agent runtime state and token usage</td>
+          </tr>
+          <tr class="command-row" data-search="run events ls -la ~/.config/ig88/runs/ list agent run event logs">
+            <td><div class="task-text">Run events</div></td>
+            <td><button class="value-block value-block--shell" data-copy="ls -la ~/.config/ig88/runs/" title="Copy value"><code class="value-text">ls -la ~/.config/ig88/runs/</code></button></td>
+            <td class="desc-text">List agent run event logs</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="surface-card section-card" data-section="containers">
+    <button class="section-header collapsed" type="button" aria-expanded="false">
+      <span class="section-arrow">&#x25BC;</span>
+      <span class="section-title">Containers (Colima / Docker)</span>
+      <span class="section-count">7</span>
+    </button>
+    <div class="section-body collapsed">
+      <table class="command-table">
+        <thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr class="command-row" data-search="colima status colima status check colima vm state">
+            <td><div class="task-text">Colima status</div></td>
+            <td><button class="value-block value-block--shell" data-copy="colima status" title="Copy value"><code class="value-text">colima status</code></button></td>
+            <td class="desc-text">Check Colima VM state</td>
+          </tr>
+          <tr class="command-row" data-search="start colima colima start --cpu 4 --memory 8 --disk 60 start colima vm with factory settings">
+            <td><div class="task-text">Start Colima</div></td>
+            <td><button class="value-block value-block--shell" data-copy="colima start --cpu 4 --memory 8 --disk 60" title="Copy value"><code class="value-text">colima start --cpu 4 --memory 8 --disk 60</code></button></td>
+            <td class="desc-text">Start Colima VM with factory settings</td>
+          </tr>
+          <tr class="command-row" data-search="docker containers docker ps --format 'table {{.names}}\t{{.status}}\t{{.ports}}' list running containers with ports">
+            <td><div class="task-text">Docker containers</div></td>
+            <td><button class="value-block value-block--shell" data-copy="docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'" title="Copy value"><code class="value-text">docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'</code></button></td>
+            <td class="desc-text">List running containers with ports</td>
+          </tr>
+          <tr class="command-row" data-search="graphiti stack up cd ~/projects/graphiti && ./compose-start.sh start graphiti + falkordb stack">
+            <td><div class="task-text">Graphiti stack up</div></td>
+            <td><button class="value-block value-block--shell" data-copy="cd ~/projects/graphiti && ./compose-start.sh" title="Copy value"><code class="value-text">cd ~/projects/graphiti &amp;&amp; ./compose-start.sh</code></button></td>
+            <td class="desc-text">Start Graphiti + FalkorDB stack</td>
+          </tr>
+          <tr class="command-row" data-search="graphiti stack down cd ~/projects/graphiti && docker compose down stop graphiti + falkordb stack">
+            <td><div class="task-text">Graphiti stack down</div></td>
+            <td><button class="value-block value-block--shell" data-copy="cd ~/projects/graphiti && docker compose down" title="Copy value"><code class="value-text">cd ~/projects/graphiti &amp;&amp; docker compose down</code></button></td>
+            <td class="desc-text">Stop Graphiti + FalkorDB stack</td>
+          </tr>
+          <tr class="command-row" data-search="qdrant container docker start qdrant start standalone qdrant container">
+            <td><div class="task-text">Qdrant container</div></td>
+            <td><button class="value-block value-block--shell" data-copy="docker start qdrant" title="Copy value"><code class="value-text">docker start qdrant</code></button></td>
+            <td class="desc-text">Start standalone Qdrant container</td>
+          </tr>
+          <tr class="command-row" data-search="docker logs docker logs --tail 50 -f graphiti-mcp tail graphiti mcp container logs">
+            <td><div class="task-text">Docker logs</div></td>
+            <td><button class="value-block value-block--shell" data-copy="docker logs --tail 50 -f graphiti-mcp" title="Copy value"><code class="value-text">docker logs --tail 50 -f graphiti-mcp</code></button></td>
+            <td class="desc-text">Tail Graphiti MCP container logs</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="surface-card section-card" data-section="backups">
+    <button class="section-header collapsed" type="button" aria-expanded="false">
+      <span class="section-arrow">&#x25BC;</span>
+      <span class="section-title">Backups &amp; Maintenance</span>
+      <span class="section-count">7</span>
+    </button>
+    <div class="section-body collapsed">
+      <table class="command-table">
+        <thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr class="command-row" data-search="disk usage df -h / check root volume disk usage">
+            <td><div class="task-text">Disk usage</div></td>
+            <td><button class="value-block value-block--shell" data-copy="df -h /" title="Copy value"><code class="value-text">df -h /</code></button></td>
+            <td class="desc-text">Check root volume disk usage</td>
+          </tr>
+          <tr class="command-row" data-search="model disk du -sh ~/models total model storage footprint">
+            <td><div class="task-text">Model disk</div></td>
+            <td><button class="value-block value-block--shell" data-copy="du -sh ~/models" title="Copy value"><code class="value-text">du -sh ~/models</code></button></td>
+            <td class="desc-text">Total model storage footprint</td>
+          </tr>
+          <tr class="command-row" data-search="qdrant data du -sh ~/qdrant-data qdrant persistent volume size">
+            <td><div class="task-text">Qdrant data</div></td>
+            <td><button class="value-block value-block--shell" data-copy="du -sh ~/qdrant-data" title="Copy value"><code class="value-text">du -sh ~/qdrant-data</code></button></td>
+            <td class="desc-text">Qdrant persistent volume size</td>
+          </tr>
+          <tr class="command-row" data-search="log sizes du -sh ~/logs/* check log file sizes">
+            <td><div class="task-text">Log sizes</div></td>
+            <td><button class="value-block value-block--shell" data-copy="du -sh ~/logs/*" title="Copy value"><code class="value-text">du -sh ~/logs/*</code></button></td>
+            <td class="desc-text">Check log file sizes</td>
+          </tr>
+          <tr class="command-row" data-search="archive docs ~/dev/scripts/archive-old-docs.sh archive docs older than 180 days">
+            <td><div class="task-text">Archive docs</div></td>
+            <td><button class="value-block value-block--shell" data-copy="~/dev/scripts/archive-old-docs.sh" title="Copy value"><code class="value-text">~/dev/scripts/archive-old-docs.sh</code></button></td>
+            <td class="desc-text">Archive docs older than 180 days</td>
+          </tr>
+          <tr class="command-row" data-search="find root clutter ~/dev/scripts/find-root-clutter.sh detect stray files in repo roots">
+            <td><div class="task-text">Find root clutter</div></td>
+            <td><button class="value-block value-block--shell" data-copy="~/dev/scripts/find-root-clutter.sh" title="Copy value"><code class="value-text">~/dev/scripts/find-root-clutter.sh</code></button></td>
+            <td class="desc-text">Detect stray files in repo roots</td>
+          </tr>
+          <tr class="command-row" data-search="prefix collisions ~/dev/scripts/check-prefix-collisions.sh --verbose find duplicate prefix doc numbers">
+            <td><div class="task-text">Prefix collisions</div></td>
+            <td><button class="value-block value-block--shell" data-copy="~/dev/scripts/check-prefix-collisions.sh --verbose" title="Copy value"><code class="value-text">~/dev/scripts/check-prefix-collisions.sh --verbose</code></button></td>
+            <td class="desc-text">Find duplicate PREFIX doc numbers</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="surface-card section-card" data-section="infisical">
+    <button class="section-header collapsed" type="button" aria-expanded="false">
+      <span class="section-arrow">&#x25BC;</span>
+      <span class="section-title">Infisical Secrets</span>
+      <span class="section-count">5</span>
+    </button>
+    <div class="section-body collapsed">
+      <table class="command-table">
+        <thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr class="command-row" data-search="infisical env factory inject secrets run command">
+            <td><div class="task-text">Factory env</div></td>
+            <td><button class="value-block value-block--shell" data-copy="~/dev/factory/scripts/infisical-env.sh factory -- env" title="Copy value"><code class="value-text">~/dev/factory/scripts/infisical-env.sh factory -- env</code></button></td>
+            <td class="desc-text">Inject factory secrets and run a command</td>
+          </tr>
+          <tr class="command-row" data-search="infisical env ig88 inject ig-88 secrets run command">
+            <td><div class="task-text">IG-88 env</div></td>
+            <td><button class="value-block value-block--shell" data-copy="~/dev/factory/scripts/infisical-env.sh ig88 -- env" title="Copy value"><code class="value-text">~/dev/factory/scripts/infisical-env.sh ig88 -- env</code></button></td>
+            <td class="desc-text">Inject IG-88 secrets and run a command</td>
+          </tr>
+          <tr class="command-row" data-search="infisical login infisical login authenticate cli">
+            <td><div class="task-text">Infisical login</div></td>
+            <td><button class="value-block value-block--shell" data-copy="infisical login" title="Copy value"><code class="value-text">infisical login</code></button></td>
+            <td class="desc-text">Authenticate Infisical CLI</td>
+          </tr>
+          <tr class="command-row" data-search="infisical secrets list project environment">
+            <td><div class="task-text">List secrets</div></td>
+            <td><button class="value-block value-block--shell" data-copy="infisical secrets --env prod --projectId PROJECT_ID" title="Copy value"><code class="value-text">infisical secrets --env prod --projectId PROJECT_ID</code></button></td>
+            <td class="desc-text">List secrets for a project/environment</td>
+          </tr>
+          <tr class="command-row" data-search="infisical run inject exec wrapper script location">
+            <td><div class="task-text">Wrapper script</div></td>
+            <td><button class="value-block value-block--shell" data-copy="cat ~/dev/factory/scripts/infisical-env.sh" title="Copy value"><code class="value-text">cat ~/dev/factory/scripts/infisical-env.sh</code></button></td>
+            <td class="desc-text">View infisical-env.sh wrapper script</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="surface-card section-card" data-section="secrets">
+    <button class="section-header collapsed" type="button" aria-expanded="false">
+      <span class="section-arrow">&#x25BC;</span>
+      <span class="section-title">Secrets Management</span>
+      <span class="section-count">5</span>
+    </button>
+    <div class="section-body collapsed">
+      <table class="command-table">
+        <thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr class="command-row" data-search="bitwarden unlock bw-open unlock bitwarden and cache session">
+            <td><div class="task-text">Bitwarden unlock</div></td>
+            <td><button class="value-block value-block--shell" data-copy="bw-open" title="Copy value"><code class="value-text">bw-open</code></button></td>
+            <td class="desc-text">Unlock Bitwarden and cache session</td>
+          </tr>
+          <tr class="command-row" data-search="bitwarden lock bw-close clear bitwarden session from env">
+            <td><div class="task-text">Bitwarden lock</div></td>
+            <td><button class="value-block value-block--shell" data-copy="bw-close" title="Copy value"><code class="value-text">bw-close</code></button></td>
+            <td class="desc-text">Clear Bitwarden session from env</td>
+          </tr>
+          <tr class="command-row" data-search="bw status bw status check bitwarden cli lock state">
+            <td><div class="task-text">BW status</div></td>
+            <td><button class="value-block value-block--shell" data-copy="bw status" title="Copy value"><code class="value-text">bw status</code></button></td>
+            <td class="desc-text">Check Bitwarden CLI lock state</td>
+          </tr>
+          <tr class="command-row" data-search="bws status bws secret list --help check bws service account availability">
+            <td><div class="task-text">BWS status</div></td>
+            <td><button class="value-block value-block--shell" data-copy="bws secret list --help" title="Copy value"><code class="value-text">bws secret list --help</code></button></td>
+            <td class="desc-text">Check bws service account availability</td>
+          </tr>
+          <tr class="command-row" data-search="keychain query security find-generic-password -s SERVICE -a ACCOUNT query macos keychain entry (read-only)">
+            <td><div class="task-text">Keychain query</div></td>
+            <td><button class="value-block value-block--shell" data-copy="security find-generic-password -s SERVICE -a ACCOUNT" title="Copy value"><code class="value-text">security find-generic-password -s SERVICE -a ACCOUNT</code></button></td>
+            <td class="desc-text">Query macOS keychain entry (read-only)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="surface-card section-card" data-section="terminal">
+    <button class="section-header collapsed" type="button" aria-expanded="false">
+      <span class="section-arrow">&#x25BC;</span>
+      <span class="section-title">Terminal Sessions</span>
+      <span class="section-count">7</span>
+    </button>
+    <div class="section-body collapsed">
+      <table class="command-table">
+        <thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr class="command-row" data-search="list tmux sessions tmux ls list all active tmux sessions">
+            <td><div class="task-text">List sessions</div></td>
+            <td><button class="value-block value-block--shell" data-copy="tmux ls" title="Copy value"><code class="value-text">tmux ls</code></button></td>
+            <td class="desc-text">List all active tmux sessions</td>
+          </tr>
+          <tr class="command-row" data-search="start new session tmux new-session -d -s NAME start a new named tmux session detached">
+            <td><div class="task-text">Start new session</div></td>
+            <td><button class="value-block value-block--shell" data-copy="tmux new-session -d -s NAME -c ~/dev" title="Copy value"><code class="value-text">tmux new-session -d -s NAME -c ~/dev</code></button></td>
+            <td class="desc-text">Start a new named tmux session (detached)</td>
+          </tr>
+          <tr class="command-row" data-search="new or attach session tmux new -A -s NAME create or reattach idempotent">
+            <td><div class="task-text">New or attach session</div></td>
+            <td><button class="value-block value-block--shell" data-copy="tmux new -A -s NAME" title="Copy value"><code class="value-text">tmux new -A -s NAME</code></button></td>
+            <td class="desc-text">Create or reattach (idempotent)</td>
+          </tr>
+          <tr class="command-row" data-search="attach session tmux attach -t NAME attach to existing session">
+            <td><div class="task-text">Attach session</div></td>
+            <td><button class="value-block value-block--shell" data-copy="tmux attach -t NAME" title="Copy value"><code class="value-text">tmux attach -t NAME</code></button></td>
+            <td class="desc-text">Attach to an existing session</td>
+          </tr>
+          <tr class="command-row" data-search="watch session read-only tmux attach -t NAME -r attach read-only observer">
+            <td><div class="task-text">Watch session (read-only)</div></td>
+            <td><button class="value-block value-block--shell" data-copy="tmux attach -t NAME -r" title="Copy value"><code class="value-text">tmux attach -t NAME -r</code></button></td>
+            <td class="desc-text">Attach read-only observer</td>
+          </tr>
+          <tr class="command-row" data-search="kill session tmux kill-session -t NAME terminate a named session">
+            <td><div class="task-text">Kill session</div></td>
+            <td><button class="value-block value-block--shell" data-copy="tmux kill-session -t NAME" title="Copy value"><code class="value-text">tmux kill-session -t NAME</code></button></td>
+            <td class="desc-text">Terminate a named tmux session</td>
+          </tr>
+          <tr class="command-row" data-search="attach dev session agent-console-dev tmux attach implementation session">
+            <td><div class="task-text">Attach dev session</div></td>
+            <td><button class="value-block value-block--shell" data-copy="tmux attach -t agent-console-dev" title="Copy value"><code class="value-text">tmux attach -t agent-console-dev</code></button></td>
+            <td class="desc-text">Attach to agent-console implementation session</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="surface-card section-card" data-section="hermes">
+    <button class="section-header collapsed" type="button" aria-expanded="false">
+      <span class="section-arrow">&#x25BC;</span>
+      <span class="section-title">Hermes Agent Operations</span>
+      <span class="section-count">17</span>
+    </button>
+    <div class="section-body collapsed">
+      <table class="command-table">
+        <thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr class="command-row" data-search="start boot cli hermes agent launch boot session alias h-boot">
+            <td><div class="task-text">Start Boot CLI</div></td>
+            <td><button class="value-block value-block--shell" data-copy="HERMES_STREAM_READ_TIMEOUT=600 HERMES_STREAM_STALE_TIMEOUT=600 HERMES_AGENT_TIMEOUT=7200 ~/dev/factory/scripts/infisical-env.sh factory -- env -u OPENROUTER_API_KEY -u ANTHROPIC_API_KEY -u ANTHROPIC_AUTH_TOKEN -u OPENAI_BASE_URL -u OPENAI_API_BASE hermes -p boot chat" title="Copy value"><code class="value-text">HERMES_STREAM_READ_TIMEOUT=600 ... infisical-env.sh factory -- env -u OPENROUTER_API_KEY ... hermes -p boot chat</code></button></td>
+            <td class="desc-text">Launch Boot agent CLI session (alias: h-boot)</td>
+          </tr>
+          <tr class="command-row" data-search="start kelk cli hermes agent launch kelk session alias h-kelk">
+            <td><div class="task-text">Start Kelk CLI</div></td>
+            <td><button class="value-block value-block--shell" data-copy="HERMES_STREAM_READ_TIMEOUT=600 HERMES_STREAM_STALE_TIMEOUT=600 HERMES_AGENT_TIMEOUT=7200 ~/dev/factory/scripts/infisical-env.sh factory -- env -u OPENROUTER_API_KEY -u ANTHROPIC_API_KEY -u ANTHROPIC_AUTH_TOKEN -u OPENAI_BASE_URL -u OPENAI_API_BASE hermes -p kelk chat" title="Copy value"><code class="value-text">HERMES_STREAM_READ_TIMEOUT=600 ... infisical-env.sh factory -- env -u OPENROUTER_API_KEY ... hermes -p kelk chat</code></button></td>
+            <td class="desc-text">Launch Kelk agent CLI session (alias: h-kelk)</td>
+          </tr>
+          <tr class="command-row" data-search="start ig-88 cli hermes agent launch ig88 session alias h-ig88 openrouter">
+            <td><div class="task-text">Start IG-88 CLI</div></td>
+            <td><button class="value-block value-block--shell" data-copy="HERMES_STREAM_READ_TIMEOUT=600 HERMES_STREAM_STALE_TIMEOUT=600 HERMES_AGENT_TIMEOUT=7200 ~/dev/factory/scripts/infisical-env.sh factory -- env -u ANTHROPIC_API_KEY -u ANTHROPIC_AUTH_TOKEN -u OPENAI_BASE_URL -u OPENAI_API_BASE hermes -p ig88 chat" title="Copy value"><code class="value-text">HERMES_STREAM_READ_TIMEOUT=600 ... infisical-env.sh factory -- env -u ANTHROPIC_API_KEY ... hermes -p ig88 chat</code></button></td>
+            <td class="desc-text">Launch IG-88 agent CLI (alias: h-ig88). OPENROUTER_API_KEY NOT unset (IG-88 uses OpenRouter)</td>
+          </tr>
+          <tr class="command-row" data-search="resume session hermes h-boot --resume session_id resume specific hermes session">
+            <td><div class="task-text">Resume session</div></td>
+            <td><button class="value-block value-block--shell" data-copy="h-boot --resume SESSION_ID" title="Copy value"><code class="value-text">h-boot --resume SESSION_ID</code></button></td>
+            <td class="desc-text">Resume a specific Hermes session (use -p profile flag)</td>
+          </tr>
+          <tr class="command-row" data-search="list sessions hermes -p ig88 sessions list recent sessions profile">
+            <td><div class="task-text">List sessions</div></td>
+            <td><button class="value-block value-block--shell" data-copy="hermes -p ig88 sessions list" title="Copy value"><code class="value-text">hermes -p ig88 sessions list</code></button></td>
+            <td class="desc-text">List recent sessions for a profile</td>
+          </tr>
+          <tr class="command-row" data-search="kickstart ig-88 gateway launchctl hermes-ig88 restart launchd">
+            <td><div class="task-text">Kickstart IG-88 gateway</div></td>
+            <td><button class="value-block value-block--shell" data-copy="launchctl kickstart -k gui/$(id -u)/com.bootindustries.hermes-ig88" title="Copy value"><code class="value-text">launchctl kickstart -k gui/$(id -u)/com.bootindustries.hermes-ig88</code></button></td>
+            <td class="desc-text">Restart IG-88 gateway (launchd-managed)</td>
+          </tr>
+          <tr class="command-row" data-search="check ig-88 gateway launchctl list grep hermes-ig88 status">
+            <td><div class="task-text">Check IG-88 gateway</div></td>
+            <td><button class="value-block value-block--shell" data-copy="launchctl list | grep hermes-ig88" title="Copy value"><code class="value-text">launchctl list | grep hermes-ig88</code></button></td>
+            <td class="desc-text">Check IG-88 gateway launchd status</td>
+          </tr>
+          <tr class="command-row" data-search="ig-88 gateway log tail agent.log hermes profiles ig88">
+            <td><div class="task-text">IG-88 gateway log</div></td>
+            <td><button class="value-block value-block--shell" data-copy="tail -20 ~/.hermes/profiles/ig88/logs/agent.log" title="Copy value"><code class="value-text">tail -20 ~/.hermes/profiles/ig88/logs/agent.log</code></button></td>
+            <td class="desc-text">View IG-88 agent log</td>
+          </tr>
+          <tr class="command-row" data-search="ig-88 gateway errors tail hermes-ig88.log wrapper errors">
+            <td><div class="task-text">IG-88 gateway errors</div></td>
+            <td><button class="value-block value-block--shell" data-copy="tail -20 ~/Library/Logs/factory/hermes-ig88.log" title="Copy value"><code class="value-text">tail -20 ~/Library/Logs/factory/hermes-ig88.log</code></button></td>
+            <td class="desc-text">View IG-88 wrapper/gateway errors</td>
+          </tr>
+          <tr class="command-row" data-search="boot agent log tail agent.log hermes profiles boot">
+            <td><div class="task-text">Boot agent log</div></td>
+            <td><button class="value-block value-block--shell" data-copy="tail -20 ~/.hermes/profiles/boot/logs/agent.log" title="Copy value"><code class="value-text">tail -20 ~/.hermes/profiles/boot/logs/agent.log</code></button></td>
+            <td class="desc-text">View Boot agent log</td>
+          </tr>
+          <tr class="command-row" data-search="kelk agent log tail agent.log hermes profiles kelk">
+            <td><div class="task-text">Kelk agent log</div></td>
+            <td><button class="value-block value-block--shell" data-copy="tail -20 ~/.hermes/profiles/kelk/logs/agent.log" title="Copy value"><code class="value-text">tail -20 ~/.hermes/profiles/kelk/logs/agent.log</code></button></td>
+            <td class="desc-text">View Kelk agent log</td>
+          </tr>
+          <tr class="command-row" data-search="check profiles ls hermes profiles list all">
+            <td><div class="task-text">Check profiles</div></td>
+            <td><button class="value-block value-block--shell" data-copy="ls ~/.hermes/profiles/" title="Copy value"><code class="value-text">ls ~/.hermes/profiles/</code></button></td>
+            <td class="desc-text">List all Hermes profiles</td>
+          </tr>
+          <tr class="command-row" data-search="edit boot profile cat hermes profiles boot config.yaml view">
+            <td><div class="task-text">Edit Boot profile</div></td>
+            <td><button class="value-block value-block--shell" data-copy="cat ~/.hermes/profiles/boot/config.yaml" title="Copy value"><code class="value-text">cat ~/.hermes/profiles/boot/config.yaml</code></button></td>
+            <td class="desc-text">View/edit Boot Hermes config</td>
+          </tr>
+          <tr class="command-row" data-search="edit ig-88 profile cat hermes profiles ig88 config.yaml view">
+            <td><div class="task-text">Edit IG-88 profile</div></td>
+            <td><button class="value-block value-block--shell" data-copy="cat ~/.hermes/profiles/ig88/config.yaml" title="Copy value"><code class="value-text">cat ~/.hermes/profiles/ig88/config.yaml</code></button></td>
+            <td class="desc-text">View/edit IG-88 Hermes config</td>
+          </tr>
+          <tr class="command-row" data-search="edit kelk profile cat hermes profiles kelk config.yaml view">
+            <td><div class="task-text">Edit Kelk profile</div></td>
+            <td><button class="value-block value-block--shell" data-copy="cat ~/.hermes/profiles/kelk/config.yaml" title="Copy value"><code class="value-text">cat ~/.hermes/profiles/kelk/config.yaml</code></button></td>
+            <td class="desc-text">View/edit Kelk Hermes config</td>
+          </tr>
+          <tr class="command-row" data-search="hermes version hermes --version check hermes installation version">
+            <td><div class="task-text">Hermes version</div></td>
+            <td><button class="value-block value-block--shell" data-copy="hermes --version" title="Copy value"><code class="value-text">hermes --version</code></button></td>
+            <td class="desc-text">Check Hermes installation (v0.6.0, ~/.local/bin)</td>
+          </tr>
+          <tr class="command-row" data-search="hermes smoke test hermes --profile boot chat -q hello -Q --source tool test hermes boot runtime">
+            <td><div class="task-text">Hermes smoke test</div></td>
+            <td><button class="value-block value-block--shell" data-copy="hermes --profile boot chat -q 'hello' -Q --source tool" title="Copy value"><code class="value-text">hermes --profile boot chat -q 'hello' -Q --source tool</code></button></td>
+            <td class="desc-text">Test Hermes Boot runtime (FCT047)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="surface-card section-card" data-section="console">
+    <button class="section-header collapsed" type="button" aria-expanded="false">
+      <span class="section-arrow">&#x25BC;</span>
+      <span class="section-title">Agent Console (FCT048)</span>
+      <span class="section-count">4</span>
+    </button>
+    <div class="section-body collapsed">
+      <table class="command-table">
+        <thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr class="command-row" data-search="attach boot console ~/dev/factory/scripts/agent-console.sh boot --attach read-write agent console">
+            <td><div class="task-text">Attach Boot console</div></td>
+            <td><button class="value-block value-block--shell" data-copy="~/dev/factory/scripts/agent-console.sh boot --attach" title="Copy value"><code class="value-text">~/dev/factory/scripts/agent-console.sh boot --attach</code></button></td>
+            <td class="desc-text">Read-write attach to Boot agent tmux session</td>
+          </tr>
+          <tr class="command-row" data-search="watch boot console ~/dev/factory/scripts/agent-console.sh boot --watch read-only observer">
+            <td><div class="task-text">Watch Boot console</div></td>
+            <td><button class="value-block value-block--shell" data-copy="~/dev/factory/scripts/agent-console.sh boot --watch" title="Copy value"><code class="value-text">~/dev/factory/scripts/agent-console.sh boot --watch</code></button></td>
+            <td class="desc-text">Read-only observer mode (no accidental input)</td>
+          </tr>
+          <tr class="command-row" data-search="list agent sessions ~/dev/factory/scripts/agent-console.sh --list list all agent tmux sessions">
+            <td><div class="task-text">List agent sessions</div></td>
+            <td><button class="value-block value-block--shell" data-copy="~/dev/factory/scripts/agent-console.sh --list" title="Copy value"><code class="value-text">~/dev/factory/scripts/agent-console.sh --list</code></button></td>
+            <td class="desc-text">List all active agent tmux sessions</td>
+          </tr>
+          <tr class="command-row" data-search="create agent session ~/dev/factory/scripts/agent-console.sh boot --create manually create tmux session">
+            <td><div class="task-text">Create session</div></td>
+            <td><button class="value-block value-block--shell" data-copy="~/dev/factory/scripts/agent-console.sh boot --create" title="Copy value"><code class="value-text">~/dev/factory/scripts/agent-console.sh boot --create</code></button></td>
+            <td class="desc-text">Manually create agent tmux session</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="surface-card section-card" data-section="portal">
+    <button class="section-header collapsed" type="button" aria-expanded="false">
+      <span class="section-arrow">&#x25BC;</span>
+      <span class="section-title">Portal &amp; Sidecars</span>
+      <span class="section-count">5</span>
+    </button>
+    <div class="section-body collapsed">
+      <table class="command-table">
+        <thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr class="command-row" data-search="portal health curl -so /dev/null -w '%{http_code}' http://127.0.0.1:41910/ check portal caddy">
+            <td><div class="task-text">Portal health</div></td>
+            <td><button class="value-block value-block--shell" data-copy="curl -so /dev/null -w '%{http_code}' http://127.0.0.1:41910/" title="Copy value"><code class="value-text">curl -so /dev/null -w '%{http_code}' http://127.0.0.1:41910/</code></button></td>
+            <td class="desc-text">Check Portal Caddy (:41910)</td>
+          </tr>
+          <tr class="command-row" data-search="gsd health curl -so /dev/null -w '%{http_code}' http://127.0.0.1:41911/jobs.json check gsd sidecar">
+            <td><div class="task-text">GSD health</div></td>
+            <td><button class="value-block value-block--shell" data-copy="curl -so /dev/null -w '%{http_code}' http://127.0.0.1:41911/jobs.json" title="Copy value"><code class="value-text">curl -so /dev/null -w '%{http_code}' http://127.0.0.1:41911/jobs.json</code></button></td>
+            <td class="desc-text">Check GSD sidecar (:41911)</td>
+          </tr>
+          <tr class="command-row" data-search="auth status launchctl list | grep factory-auth check auth sidecar">
+            <td><div class="task-text">Auth status</div></td>
+            <td><button class="value-block value-block--shell" data-copy="launchctl list | grep factory-auth" title="Copy value"><code class="value-text">launchctl list | grep factory-auth</code></button></td>
+            <td class="desc-text">Check auth sidecar (:41914) — exit 0 = healthy</td>
+          </tr>
+          <tr class="command-row" data-search="restart auth launchctl unload load factory-auth restart auth sidecar">
+            <td><div class="task-text">Restart auth</div></td>
+            <td><button class="value-block value-block--shell" data-copy="launchctl unload ~/Library/LaunchAgents/com.bootindustries.factory-auth.plist; launchctl load ~/Library/LaunchAgents/com.bootindustries.factory-auth.plist" title="Copy value"><code class="value-text">launchctl unload ...factory-auth.plist; launchctl load ...factory-auth.plist</code></button></td>
+            <td class="desc-text">Unload + reload auth sidecar</td>
+          </tr>
+          <tr class="command-row" data-search="regen index.json regenerate docs index after rsync delete">
+            <td><div class="task-text">Regen index.json</div></td>
+            <td><button class="value-block value-block--shell" data-copy="cd ~/dev/factory/portal/dist && python3 ../src/generate_index.py --repos-dir ../repos --output ./index.json" title="Copy value"><code class="value-text">cd ~/dev/factory/portal/dist &amp;&amp; python3 ../src/generate_index.py --repos-dir ../repos --output ./index.json</code></button></td>
+            <td class="desc-text">Regenerate docs index.json (required after rsync --delete)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="surface-card section-card" data-section="docs">
+    <button class="section-header collapsed" type="button" aria-expanded="false">
+      <span class="section-arrow">&#x25BC;</span>
+      <span class="section-title">Documentation</span>
+      <span class="section-count">3</span>
+    </button>
+    <div class="section-body collapsed">
+      <table class="command-table">
+        <thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr class="command-row" data-search="latest whb docs ls -1 docs/whb/whb*.md | sort -v | tail -6 list 6 most recent whb docs">
+            <td><div class="task-text">Latest WHB docs</div></td>
+            <td><button class="value-block value-block--shell" data-copy="ls -1 docs/whb/WHB*.md | sort -V | tail -6" title="Copy value"><code class="value-text">ls -1 docs/whb/WHB*.md | sort -V | tail -6</code></button></td>
+            <td class="desc-text">List 6 most recent WHB docs</td>
+          </tr>
+          <tr class="command-row" data-search="search docs grep -l 'keyword' docs/whb/*.md search whb docs by keyword">
+            <td><div class="task-text">Search docs</div></td>
+            <td><button class="value-block value-block--shell" data-copy="grep -l 'KEYWORD' docs/whb/*.md" title="Copy value"><code class="value-text">grep -l 'KEYWORD' docs/whb/*.md</code></button></td>
+            <td class="desc-text">Search WHB docs by keyword</td>
+          </tr>
+          <tr class="command-row" data-search="next doc number last=$(ls -1 docs/whb/ | grep -e '^whb[0-9]' | sed -e 's/whb\([0-9]*\).*/\1/' | sort -n | tail -1) && echo whb$((last + 1)) find next available whb prefix number">
+            <td><div class="task-text">Next doc number</div></td>
+            <td><button class="value-block value-block--shell" data-copy="last=$(ls -1 docs/whb/ | grep -E '^WHB[0-9]{3}' | sed -E 's/WHB([0-9]+).*/\1/' | sort -n | tail -1) && echo \"Next: WHB$((last + 1))\"" title="Copy value"><code class="value-text">last=$(ls -1 docs/whb/ | grep -E '^WHB[0-9]{3}' | sed -E 's/WHB([0-9]+).*/\1/' | sort -n | tail -1) &amp;&amp; echo "Next: WHB$((last + 1))"</code></button></td>
+            <td class="desc-text">Find next available WHB prefix number</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="inner">
+    <span>whitebox | PREFIX: WHB | macOS infra</span>
+    <span>whitebox_repo-commands.html</span>
+  </div>
+</footer>
+
+<script src="/shared/dust.js"></script>
+<script src="/shared/theme.js"></script>
+<script src="/shared/commands.js"></script>
+</body>
+</html>

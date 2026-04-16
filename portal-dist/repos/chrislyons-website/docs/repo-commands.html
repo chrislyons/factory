@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>chrislyons-website - Command Reference</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            padding: 1rem 2rem;
+            line-height: 1.5;
+            font-size: 0.75rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: #fff;
+        }
+
+        .subtitle {
+            color: #888;
+            margin-bottom: 0.75rem;
+            font-size: 0.675rem;
+        }
+
+        .last-updated {
+            color: #666;
+            font-size: 0.625rem;
+            margin-bottom: 0.75rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #242424;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        thead {
+            background: #2a2a2a;
+        }
+
+        th {
+            padding: 0.75rem;
+            text-align: left;
+            font-weight: 600;
+            color: #fff;
+            border-bottom: 2px solid #333;
+            font-size: 0.75rem;
+        }
+
+        th:nth-child(1) { width: 20%; }
+        th:nth-child(2) { width: 35%; }
+        th:nth-child(3) { width: 45%; }
+
+        td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #2a2a2a;
+            font-size: 0.75rem;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background: #2a2a2a;
+        }
+
+        .command {
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Courier New', monospace;
+            background: #1a1a1a;
+            padding: 0.375rem 0.5rem;
+            border-radius: 3px;
+            font-size: 0.675rem;
+            color: #4fc3f7;
+            cursor: pointer;
+            display: inline-block;
+            transition: background 0.2s;
+            position: relative;
+        }
+
+        .command:hover {
+            background: #222;
+        }
+
+        .command:active {
+            background: #2a4858;
+        }
+
+        .command::after {
+            content: '📋';
+            margin-left: 0.5rem;
+            opacity: 0.5;
+        }
+
+        .copied {
+            animation: flash 0.3s;
+        }
+
+        @keyframes flash {
+            0%, 100% { background: #1a1a1a; }
+            50% { background: #2a5a3a; }
+        }
+
+        .description {
+            color: #b0b0b0;
+            font-size: 0.675rem;
+        }
+
+        .job {
+            color: #fff;
+            font-weight: 500;
+            font-size: 0.75rem;
+        }
+
+        .section-header {
+            background: #2a2a2a;
+            font-weight: 600;
+            color: #fff;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .section-header:hover {
+            background: #333;
+        }
+
+        .section-header:focus {
+            outline: 2px solid #4fc3f7;
+            outline-offset: -2px;
+        }
+
+        .section-header td {
+            padding: 0.5rem 0.75rem;
+            border-bottom: 2px solid #333;
+            position: relative;
+            font-size: 0.75rem;
+        }
+
+        .section-header td::before {
+            content: '▼';
+            margin-right: 0.375rem;
+            font-size: 0.5625rem;
+            transition: transform 0.2s;
+            display: inline-block;
+        }
+
+        .section-header.collapsed td::before {
+            transform: rotate(-90deg);
+        }
+
+        .section-row {
+            transition: opacity 0.2s;
+        }
+
+        .section-row.hidden {
+            display: none;
+        }
+
+        footer {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #333;
+            color: #666;
+            font-size: 0.625rem;
+        }
+
+        .warning {
+            background: #3a2a1a;
+            border-left: 3px solid #ff9800;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+            border-radius: 3px;
+            font-size: 0.675rem;
+        }
+
+        .warning-title {
+            color: #ff9800;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            font-size: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>chrislyons-website - Command Reference</h1>
+        <p class="subtitle">Personal website with SPA + Infinite Canvas Blog (Vite/Hono/Cloudflare Workers)</p>
+        <p class="last-updated">Last updated: 2025-11-02</p>
+
+        <div class="warning">
+            <div class="warning-title">⚠️ Local Use Only</div>
+            This page is for local development reference. Click any command to copy it to clipboard.
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Job</th>
+                    <th>Command</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Setup -->
+                <tr class="section-header" data-section="setup" tabindex="0">
+                    <td colspan="3">Setup & Installation</td>
+                </tr>
+                <tr class="section-row" data-section="setup">
+                    <td class="job">Install dependencies</td>
+                    <td><code class="command">npm install</code></td>
+                    <td class="description">Install all project dependencies</td>
+                </tr>
+
+                <!-- Development -->
+                <tr class="section-header collapsed" data-section="dev" tabindex="0">
+                    <td colspan="3">Development</td>
+                </tr>
+                <tr class="section-row hidden" data-section="dev">
+                    <td class="job">Start dev server</td>
+                    <td><code class="command">npm run dev</code></td>
+                    <td class="description">Start Vite dev server for SPA</td>
+                </tr>
+                <tr class="section-row hidden" data-section="dev">
+                    <td class="job">Start Wrangler dev</td>
+                    <td><code class="command">npx wrangler dev --local</code></td>
+                    <td class="description">Start Cloudflare Workers local dev (port 8787)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="dev">
+                    <td class="job">Start with port</td>
+                    <td><code class="command">npx wrangler dev --local --port 8787</code></td>
+                    <td class="description">Start Workers dev on specific port</td>
+                </tr>
+
+                <!-- Build -->
+                <tr class="section-header collapsed" data-section="build" tabindex="0">
+                    <td colspan="3">Build & Deploy</td>
+                </tr>
+                <tr class="section-row hidden" data-section="build">
+                    <td class="job">Build for production</td>
+                    <td><code class="command">npm run build</code></td>
+                    <td class="description">Build Vite project to dist/</td>
+                </tr>
+                <tr class="section-row hidden" data-section="build">
+                    <td class="job">Preview build</td>
+                    <td><code class="command">npm run preview</code></td>
+                    <td class="description">Preview production build locally</td>
+                </tr>
+                <tr class="section-row hidden" data-section="build">
+                    <td class="job">Deploy to Workers</td>
+                    <td><code class="command">npx wrangler deploy</code></td>
+                    <td class="description">Deploy to Cloudflare Workers (production)</td>
+                </tr>
+
+                <!-- Database (D1) -->
+                <tr class="section-header collapsed" data-section="database" tabindex="0">
+                    <td colspan="3">Database (D1) Operations</td>
+                </tr>
+                <tr class="section-row hidden" data-section="database">
+                    <td class="job">Create D1 database</td>
+                    <td><code class="command">npx wrangler d1 create blog-db</code></td>
+                    <td class="description">Create new D1 database</td>
+                </tr>
+                <tr class="section-row hidden" data-section="database">
+                    <td class="job">List databases</td>
+                    <td><code class="command">npx wrangler d1 list</code></td>
+                    <td class="description">List all D1 databases</td>
+                </tr>
+                <tr class="section-row hidden" data-section="database">
+                    <td class="job">Execute migration</td>
+                    <td><code class="command">npx wrangler d1 execute blog-db --local --file=./migrations/001_create_entries_table.sql</code></td>
+                    <td class="description">Run migration locally</td>
+                </tr>
+                <tr class="section-row hidden" data-section="database">
+                    <td class="job">Execute migration (prod)</td>
+                    <td><code class="command">npx wrangler d1 execute blog-db --remote --file=./migrations/001_create_entries_table.sql</code></td>
+                    <td class="description">Run migration in production</td>
+                </tr>
+                <tr class="section-row hidden" data-section="database">
+                    <td class="job">Query database</td>
+                    <td><code class="command">npx wrangler d1 execute blog-db --local --command="SELECT * FROM entries"</code></td>
+                    <td class="description">Execute SQL query locally</td>
+                </tr>
+
+                <!-- R2 Storage -->
+                <tr class="section-header collapsed" data-section="r2" tabindex="0">
+                    <td colspan="3">R2 Storage Operations</td>
+                </tr>
+                <tr class="section-row hidden" data-section="r2">
+                    <td class="job">Create R2 bucket</td>
+                    <td><code class="command">npx wrangler r2 bucket create blog-images</code></td>
+                    <td class="description">Create new R2 bucket</td>
+                </tr>
+                <tr class="section-row hidden" data-section="r2">
+                    <td class="job">List buckets</td>
+                    <td><code class="command">npx wrangler r2 bucket list</code></td>
+                    <td class="description">List all R2 buckets</td>
+                </tr>
+                <tr class="section-row hidden" data-section="r2">
+                    <td class="job">List objects</td>
+                    <td><code class="command">npx wrangler r2 object list blog-images</code></td>
+                    <td class="description">List objects in bucket</td>
+                </tr>
+                <tr class="section-row hidden" data-section="r2">
+                    <td class="job">Upload file</td>
+                    <td><code class="command">npx wrangler r2 object put blog-images/test.jpg --file=./test.jpg</code></td>
+                    <td class="description">Upload file to R2 bucket</td>
+                </tr>
+                <tr class="section-row hidden" data-section="r2">
+                    <td class="job">Delete object</td>
+                    <td><code class="command">npx wrangler r2 object delete blog-images/filename.jpg</code></td>
+                    <td class="description">Delete object from bucket</td>
+                </tr>
+
+                <!-- Secrets -->
+                <tr class="section-header collapsed" data-section="secrets" tabindex="0">
+                    <td colspan="3">Secrets Management</td>
+                </tr>
+                <tr class="section-row hidden" data-section="secrets">
+                    <td class="job">Set Giphy API key</td>
+                    <td><code class="command">npx wrangler secret put GIPHY_API_KEY</code></td>
+                    <td class="description">Set Giphy API key secret (interactive)</td>
+                </tr>
+                <tr class="section-row hidden" data-section="secrets">
+                    <td class="job">List secrets</td>
+                    <td><code class="command">npx wrangler secret list</code></td>
+                    <td class="description">List all configured secrets</td>
+                </tr>
+                <tr class="section-row hidden" data-section="secrets">
+                    <td class="job">Delete secret</td>
+                    <td><code class="command">npx wrangler secret delete SECRET_NAME</code></td>
+                    <td class="description">Delete a secret</td>
+                </tr>
+
+                <!-- Git -->
+                <tr class="section-header collapsed" data-section="git" tabindex="0">
+                    <td colspan="3">Git Operations</td>
+                </tr>
+                <tr class="section-row hidden" data-section="git">
+                    <td class="job">Check status</td>
+                    <td><code class="command">git status</code></td>
+                    <td class="description">View current branch and changed files</td>
+                </tr>
+                <tr class="section-row hidden" data-section="git">
+                    <td class="job">View diff</td>
+                    <td><code class="command">git diff</code></td>
+                    <td class="description">See unstaged changes</td>
+                </tr>
+                <tr class="section-row hidden" data-section="git">
+                    <td class="job">Stage all changes</td>
+                    <td><code class="command">git add .</code></td>
+                    <td class="description">Stage all modified files</td>
+                </tr>
+                <tr class="section-row hidden" data-section="git">
+                    <td class="job">Commit changes</td>
+                    <td><code class="command">git commit -m "Your message here"</code></td>
+                    <td class="description">Commit staged changes</td>
+                </tr>
+                <tr class="section-row hidden" data-section="git">
+                    <td class="job">View recent commits</td>
+                    <td><code class="command">git log --oneline -10</code></td>
+                    <td class="description">Show last 10 commits</td>
+                </tr>
+                <tr class="section-row hidden" data-section="git">
+                    <td class="job">Pull latest</td>
+                    <td><code class="command">git pull origin main</code></td>
+                    <td class="description">Fetch and merge latest changes</td>
+                </tr>
+                <tr class="section-row hidden" data-section="git">
+                    <td class="job">Push commits</td>
+                    <td><code class="command">git push origin main</code></td>
+                    <td class="description">Push commits to remote</td>
+                </tr>
+
+                <!-- Diagnostics -->
+                <tr class="section-header collapsed" data-section="diagnostics" tabindex="0">
+                    <td colspan="3">Diagnostics</td>
+                </tr>
+                <tr class="section-row hidden" data-section="diagnostics">
+                    <td class="job">Check Node version</td>
+                    <td><code class="command">node --version</code></td>
+                    <td class="description">Verify Node.js version</td>
+                </tr>
+                <tr class="section-row hidden" data-section="diagnostics">
+                    <td class="job">Check npm version</td>
+                    <td><code class="command">npm --version</code></td>
+                    <td class="description">Verify npm version</td>
+                </tr>
+                <tr class="section-row hidden" data-section="diagnostics">
+                    <td class="job">Check Wrangler version</td>
+                    <td><code class="command">npx wrangler --version</code></td>
+                    <td class="description">Verify Wrangler CLI version</td>
+                </tr>
+                <tr class="section-row hidden" data-section="diagnostics">
+                    <td class="job">Tail worker logs</td>
+                    <td><code class="command">npx wrangler tail</code></td>
+                    <td class="description">Stream live production worker logs</td>
+                </tr>
+                <tr class="section-row hidden" data-section="diagnostics">
+                    <td class="job">Show deployment info</td>
+                    <td><code class="command">npx wrangler deployments list</code></td>
+                    <td class="description">List recent deployments</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <footer>
+            <p><strong>Note:</strong> This is a local reference page. Commands are safe to run in your development environment.</p>
+            <p>Generated for: <strong>chrislyons-website</strong> | Location: <code>~/dev/chrislyons-website</code></p>
+            <p style="margin-top: 1rem;">⌨️ <strong>Keyboard Navigation:</strong> Use <strong>↑↓</strong> to navigate sections, <strong>→</strong> to expand, <strong>←</strong> to collapse, <strong>Space/Enter</strong> to toggle, <strong>Cmd+Click</strong> to collapse all others.</p>
+        </footer>
+    </div>
+
+    <script>
+        // Click-to-copy functionality
+        document.querySelectorAll('.command').forEach(cmd => {
+            cmd.addEventListener('click', async function() {
+                const text = this.textContent.replace('📋', '').trim();
+                try {
+                    await navigator.clipboard.writeText(text);
+                    this.classList.add('copied');
+                    setTimeout(() => this.classList.remove('copied'), 300);
+                } catch (err) {
+                    // Fallback for older browsers
+                    const textarea = document.createElement('textarea');
+                    textarea.value = text;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                    this.classList.add('copied');
+                    setTimeout(() => this.classList.remove('copied'), 300);
+                }
+            });
+        });
+
+        // Section toggle functionality
+        const sectionHeaders = document.querySelectorAll('.section-header');
+
+        function toggleSection(header, collapseOthers = false) {
+            const section = header.dataset.section;
+            const isCollapsed = header.classList.contains('collapsed');
+
+            if (collapseOthers) {
+                // Collapse all other sections
+                sectionHeaders.forEach(h => {
+                    if (h !== header) {
+                        h.classList.add('collapsed');
+                        document.querySelectorAll(`.section-row[data-section="${h.dataset.section}"]`)
+                            .forEach(row => row.classList.add('hidden'));
+                    }
+                });
+            }
+
+            // Toggle current section
+            header.classList.toggle('collapsed');
+            const rows = document.querySelectorAll(`.section-row[data-section="${section}"]`);
+            rows.forEach(row => {
+                row.classList.toggle('hidden');
+            });
+        }
+
+        // Click to toggle
+        sectionHeaders.forEach(header => {
+            header.addEventListener('click', (e) => {
+                toggleSection(header, e.metaKey || e.ctrlKey);
+            });
+        });
+
+        // Keyboard navigation
+        let currentHeaderIndex = -1;
+        const headerArray = Array.from(sectionHeaders);
+
+        function focusHeader(index) {
+            if (index >= 0 && index < headerArray.length) {
+                currentHeaderIndex = index;
+                headerArray[index].focus();
+                headerArray[index].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            // Only handle if we're not in an input field
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                return;
+            }
+
+            // Find currently focused header
+            const focusedHeader = document.activeElement;
+            if (focusedHeader && focusedHeader.classList.contains('section-header')) {
+                currentHeaderIndex = headerArray.indexOf(focusedHeader);
+            }
+
+            switch(e.key) {
+                case 'ArrowDown':
+                    e.preventDefault();
+                    if (currentHeaderIndex < headerArray.length - 1) {
+                        focusHeader(currentHeaderIndex + 1);
+                    } else if (currentHeaderIndex === -1 && headerArray.length > 0) {
+                        focusHeader(0);
+                    }
+                    break;
+
+                case 'ArrowUp':
+                    e.preventDefault();
+                    if (currentHeaderIndex > 0) {
+                        focusHeader(currentHeaderIndex - 1);
+                    } else if (currentHeaderIndex === -1 && headerArray.length > 0) {
+                        focusHeader(headerArray.length - 1);
+                    }
+                    break;
+
+                case 'ArrowRight':
+                    // Expand current section
+                    if (focusedHeader && focusedHeader.classList.contains('section-header')) {
+                        e.preventDefault();
+                        if (focusedHeader.classList.contains('collapsed')) {
+                            toggleSection(focusedHeader);
+                        }
+                    }
+                    break;
+
+                case 'ArrowLeft':
+                    // Collapse current section
+                    if (focusedHeader && focusedHeader.classList.contains('section-header')) {
+                        e.preventDefault();
+                        if (!focusedHeader.classList.contains('collapsed')) {
+                            toggleSection(focusedHeader);
+                        }
+                    }
+                    break;
+
+                case ' ':
+                case 'Enter':
+                    if (focusedHeader && focusedHeader.classList.contains('section-header')) {
+                        e.preventDefault();
+                        toggleSection(focusedHeader, e.metaKey || e.ctrlKey);
+                    }
+                    break;
+            }
+        });
+
+        // Focus first section on page load for immediate keyboard nav
+        if (headerArray.length > 0) {
+            headerArray[0].focus();
+            currentHeaderIndex = 0;
+        }
+    </script>
+</body>
+</html>

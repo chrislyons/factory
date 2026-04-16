@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>autoresearch - Command Reference</title>
+<link rel="stylesheet" href="/shared/base.css">
+<link rel="stylesheet" href="/shared/commands.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="site-header__inner">
+    <div class="brand">
+      <a class="brand__title" href="/pages/docs.html">dreamfactory</a>
+    </div>
+    <div class="header-actions"><button class="export-btn" id="export-btn" title="Copy visible results to clipboard as markdown">Export to Markdown</button></div>
+  </div>
+</header>
+
+<main>
+  <div class="hero-row">
+    <div class="hero">
+      <span class="hero-eyebrow">COMMAND REFERENCE</span>
+      <h1>autoresearch</h1>
+      <p>Loop scoping and execution framework for autonomous research agents</p>
+    </div>
+    <div class="hero-meta"><div class="meta-chip"><span class="meta-chip__label">UPDATED</span><span class="meta-chip__value">2026-03-29</span></div><div class="meta-chip"><span class="meta-chip__label">REPO</span><span class="meta-chip__value">~/dev/autoresearch</span></div></div>
+  </div>
+  <div class="search-wrap"><span class="search-icon">&#x2315;</span><input class="search-input" type="text" placeholder="Search commands, snippets, or notes…" id="search" autocomplete="off" spellcheck="false"><span class="search-count" id="search-count"></span><button class="search-clear" id="search-clear" title="Clear search">&times;</button></div>
+
+  <section class="surface-card section-card" data-section="loops"><button class="section-header" type="button" aria-expanded="true"><span class="section-arrow">&#x25BC;</span><span class="section-title">Loop Management</span><span class="section-count">4</span></button><div class="section-body"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody>
+    <tr class="command-row" data-search="list all loop specs ls -1 loop-specs/*.md | sort list all loop specs"><td><div class="task-text">List all loop specs</div></td><td><button class="value-block value-block--shell" data-copy="ls -1 loop-specs/*.md | sort" title="Copy value"><code class="value-text">ls -1 loop-specs/*.md | sort</code></button></td><td class="desc-text">List all loop specs</td></tr>
+    <tr class="command-row" data-search="find approved specs grep -l 'status: approved' loop-specs/*.md find approved specs"><td><div class="task-text">Find approved specs</div></td><td><button class="value-block value-block--shell" data-copy="grep -l 'status: approved' loop-specs/*.md" title="Copy value"><code class="value-text">grep -l 'status: approved' loop-specs/*.md</code></button></td><td class="desc-text">Find approved specs</td></tr>
+    <tr class="command-row" data-search="audit mutable surface grep -a5 'mutable_surface:' loop-specs/spec-name.md audit mutable surface"><td><div class="task-text">Audit mutable surface</div></td><td><button class="value-block value-block--shell" data-copy="grep -A5 'mutable_surface:' loop-specs/spec-name.md" title="Copy value"><code class="value-text">grep -A5 'mutable_surface:' loop-specs/spec-name.md</code></button></td><td class="desc-text">Audit mutable surface</td></tr>
+    <tr class="command-row" data-search="check loop budget limits grep -e 'wall_clock_minutes|budget' loop-specs/spec-name.md check loop budget limits"><td><div class="task-text">Check loop budget limits</div></td><td><button class="value-block value-block--shell" data-copy="grep -E 'wall_clock_minutes|budget' loop-specs/spec-name.md" title="Copy value"><code class="value-text">grep -E 'wall_clock_minutes|budget' loop-specs/spec-name.md</code></button></td><td class="desc-text">Check loop budget limits</td></tr>
+  </tbody></table></div></section>
+
+  <section class="surface-card section-card" data-section="validation"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">&#x25BC;</span><span class="section-title">Validation</span><span class="section-count">3</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody>
+    <tr class="command-row" data-search="review frozen harness items grep -a5 'frozen_harness:' loop-specs/spec-name.md review frozen harness items"><td><div class="task-text">Review frozen harness</div></td><td><button class="value-block value-block--shell" data-copy="grep -A5 'frozen_harness:' loop-specs/spec-name.md" title="Copy value"><code class="value-text">grep -A5 'frozen_harness:' loop-specs/spec-name.md</code></button></td><td class="desc-text">Review frozen harness items</td></tr>
+    <tr class="command-row" data-search="list gaming vectors for metric grep -a10 'gaming vector' loop-specs/spec-name.md list gaming vectors for metric"><td><div class="task-text">List gaming vectors</div></td><td><button class="value-block value-block--shell" data-copy="grep -A10 'Gaming vector' loop-specs/spec-name.md" title="Copy value"><code class="value-text">grep -A10 'Gaming vector' loop-specs/spec-name.md</code></button></td><td class="desc-text">List gaming vectors for metric</td></tr>
+    <tr class="command-row" data-search="review rollback procedure grep -a5 'rollback_mechanism:' loop-specs/spec-name.md review rollback procedure"><td><div class="task-text">Review rollback procedure</div></td><td><button class="value-block value-block--shell" data-copy="grep -A5 'rollback_mechanism:' loop-specs/spec-name.md" title="Copy value"><code class="value-text">grep -A5 'rollback_mechanism:' loop-specs/spec-name.md</code></button></td><td class="desc-text">Review rollback procedure</td></tr>
+  </tbody></table></div></section>
+
+  <section class="surface-card section-card" data-section="docs"><button class="section-header collapsed" type="button" aria-expanded="false"><span class="section-arrow">&#x25BC;</span><span class="section-title">Documentation</span><span class="section-count">2</span></button><div class="section-body collapsed"><table class="command-table"><thead><tr><th>Task</th><th>Command / Snippet</th><th>Description</th></tr></thead><tbody>
+    <tr class="command-row" data-search="show latest 6 docs ls -1 docs/atr/atr*.md | sort -v | tail -6 show latest 6 docs"><td><div class="task-text">Show latest 6 docs</div></td><td><button class="value-block value-block--shell" data-copy="ls -1 docs/atr/ATR*.md | sort -V | tail -6" title="Copy value"><code class="value-text">ls -1 docs/atr/ATR*.md | sort -V | tail -6</code></button></td><td class="desc-text">Show latest 6 docs</td></tr>
+    <tr class="command-row" data-search="search docs by topic grep -l 'harness|mutable|integrity' docs/atr/*.md search docs by topic"><td><div class="task-text">Search docs by topic</div></td><td><button class="value-block value-block--shell" data-copy="grep -l 'harness\|mutable\|integrity' docs/atr/*.md" title="Copy value"><code class="value-text">grep -l 'harness\|mutable\|integrity' docs/atr/*.md</code></button></td><td class="desc-text">Search docs by topic</td></tr>
+  </tbody></table></div></section>
+</main>
+
+<footer>
+  <div class="inner">
+    <span>autoresearch | PREFIX: ATR | Python + YAML + Matrix</span>
+    <span>autoresearch_repo-commands.html</span>
+  </div>
+</footer>
+
+<script src="/shared/dust.js"></script>
+<script src="/shared/theme.js"></script>
+<script src="/shared/commands.js"></script>
+</body>
+</html>

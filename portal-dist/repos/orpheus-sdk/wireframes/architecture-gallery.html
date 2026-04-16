@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orpheus SDK - Architecture Gallery</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+    <style>
+        /* Input Sans */
+        @font-face {
+            font-family: 'InputSans-Regular';
+            src: url('/fonts/InputSans-Regular.ttf') format('truetype');
+            font-weight: 400;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'InputSans-Medium';
+            src: url('/fonts/InputSans-Medium.ttf') format('truetype');
+            font-weight: 500;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'InputSans-Bold';
+            src: url('/fonts/InputSans-Bold.ttf') format('truetype');
+            font-weight: 700;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'InputSans-Light';
+            src: url('/fonts/InputSans-Light.ttf') format('truetype');
+            font-weight: 300;
+            font-display: swap;
+        }
+        /* Input Mono */
+        @font-face {
+            font-family: 'InputMono-Regular';
+            src: url('/fonts/InputMono-Regular.ttf') format('truetype');
+            font-weight: 400;
+            font-display: swap;
+        }
+
+        :root {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #242424;
+            --bg-card: #2a2a2a;
+            --accent: #FF9800;
+            --accent-secondary: #E65100;
+            --text-primary: #eaeaea;
+            --text-secondary: #a0a0a0;
+            --border: #333;
+            --success: #4ade80;
+            --warning: #fbbf24;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'InputSans-Regular', 'Input Sans', system-ui, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            padding: 1rem 2rem;
+        }
+
+        /* Header - Minimal single line */
+        header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            background: var(--bg-secondary);
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        header .subtitle {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            margin-left: 0.5rem;
+        }
+
+        .version-badge {
+            background: var(--accent);
+            color: white;
+            padding: 0.15rem 0.4rem;
+            border-radius: 3px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-left: 1rem;
+        }
+
+        /* Stats row */
+        .stats {
+            display: flex;
+            gap: 0.35rem;
+            margin: 0.75rem 0 0.5rem 0;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            border: 1px solid var(--border);
+        }
+
+        .stat-value {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .stat-label {
+            font-size: 0.6rem;
+            color: var(--text-secondary);
+        }
+
+        /* Quick Nav + Legend Row */
+        .nav-legend-row {
+            display: flex;
+            gap: 0.35rem;
+            margin: 0.75rem 0 1rem 0;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .quick-nav {
+            display: flex;
+            gap: 0.3rem;
+            padding: 0.25rem 0.5rem;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            align-items: center;
+        }
+
+        .quick-nav .section-label {
+            color: var(--text-secondary);
+            font-size: 0.7rem;
+            padding: 0;
+            cursor: default;
+        }
+
+        .quick-nav a {
+            color: var(--text-primary);
+            text-decoration: none;
+            padding: 0.2rem 0.5rem;
+            background: var(--bg-card);
+            border-radius: 3px;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .quick-nav a:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        /* Color Legend - Compact inline */
+        .legend {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 0.3rem 0.5rem;
+        }
+
+        .legend h3 {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        .legend-grid {
+            display: flex;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .legend-color {
+            width: 9px;
+            height: 9px;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        /* Section headings */
+        h2.section-heading {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin: 1rem 0 0.5rem 0;
+            padding-bottom: 0.35rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* Diagram Cards */
+        .diagram-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            margin-bottom: 1.25rem;
+            overflow: hidden;
+            transition: border-color 0.2s;
+            scroll-margin-top: 1.5rem;
+            scroll-margin-bottom: 1.5rem;
+        }
+
+        .diagram-card:hover {
+            border-color: var(--accent-secondary);
+        }
+
+        .diagram-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.8rem 1.5rem;
+            background: var(--bg-card);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .diagram-header h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex: 1;
+        }
+
+        .diagram-badge {
+            font-size: 0.9rem;
+            padding: 0.3rem 0.6rem;
+            background: var(--accent-secondary);
+            border-radius: 6px;
+            color: white;
+        }
+
+        .diagram-toggle {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            transition: transform 0.3s;
+            font-size: 1.5rem;
+        }
+
+        .diagram-card.collapsed .diagram-toggle {
+            transform: rotate(-90deg);
+        }
+
+        .diagram-content {
+            padding: 1.5rem;
+            overflow-x: auto;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+        }
+
+        .diagram-card.collapsed .diagram-content {
+            max-height: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+            overflow: hidden;
+        }
+
+        .diagram-description {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.95rem;
+            font-family: 'InputSans-Light', 'Input Sans', system-ui, sans-serif;
+            font-weight: 300;
+        }
+
+        .mermaid {
+            background: var(--bg-primary);
+            border-radius: 12px;
+            padding: 1.5rem;
+            min-height: 200px;
+            overflow-x: auto;
+            overflow-y: visible;
+        }
+
+        .mermaid svg {
+            min-width: 900px;
+            display: block;
+            margin: 0 auto;
+        }
+
+        /* Mermaid edge label styling */
+        .mermaid .edgeLabel foreignObject {
+            overflow: visible;
+        }
+        .mermaid .edgeLabel div {
+            padding: 4px 10px;
+            background: #3a2a1a !important;
+            border-radius: 3px;
+        }
+        .mermaid .edgeLabel rect,
+        .mermaid .labelBkg {
+            fill: #3a2a1a !important;
+            rx: 3px;
+            ry: 3px;
+        }
+
+        /* Mermaid line and border thickness */
+        .mermaid .flowchart-link,
+        .mermaid .edgePath path,
+        .mermaid .transition path {
+            stroke-width: 2px !important;
+        }
+        .mermaid .node rect,
+        .mermaid .node circle,
+        .mermaid .node polygon,
+        .mermaid .cluster rect,
+        .mermaid .statediagram-state rect {
+            stroke-width: 2px !important;
+        }
+
+        /* Mermaid node text - prevent clipping */
+        .mermaid .cluster-label {
+            white-space: nowrap;
+            padding: 8px 12px;
+        }
+        .mermaid .cluster-label .nodeLabel {
+            white-space: nowrap;
+            padding: 4px 8px;
+        }
+        .mermaid .nodeLabel {
+            white-space: nowrap;
+        }
+        .mermaid .label foreignObject {
+            overflow: visible;
+        }
+        .mermaid .cluster rect {
+            rx: 8px;
+            ry: 8px;
+        }
+        .mermaid .cluster .label {
+            margin-bottom: 12px;
+        }
+        .mermaid .cluster foreignObject {
+            overflow: visible;
+        }
+
+        /* Keyboard Hints */
+        .keyboard-hints {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .keyboard-hints div {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .keyboard-hints kbd {
+            background: var(--bg-primary);
+            padding: 0.15rem 0.4rem;
+            border-radius: 3px;
+            border: 1px solid var(--border);
+            font-family: monospace;
+            font-size: 0.7rem;
+            min-width: 1.2rem;
+            text-align: center;
+        }
+
+        /* Selected diagram card for keyboard nav */
+        .diagram-card.selected {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            border-top: 1px solid var(--border);
+            margin-top: 2rem;
+        }
+
+        footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        footer code {
+            font-family: 'InputMono-Regular', 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.75rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .nav-legend-row {
+                flex-direction: column;
+                gap: 0.35rem;
+                align-items: flex-start;
+            }
+            .mermaid svg {
+                min-width: auto;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 0.5rem; }
+            header { padding: 0.4rem 0.6rem; }
+            header h1 { font-size: 1rem; }
+            .version-badge {
+                font-size: 0.6rem;
+                padding: 0.1rem 0.3rem;
+                margin-left: 0.5rem;
+            }
+            .quick-nav {
+                width: 100%;
+                flex-wrap: wrap;
+            }
+            .quick-nav a {
+                font-size: 0.7rem;
+                padding: 0.15rem 0.4rem;
+            }
+            .legend {
+                width: 100%;
+                flex-wrap: wrap;
+            }
+            .legend h3 { font-size: 0.65rem; }
+            .legend-item { font-size: 0.65rem; }
+            .diagram-header {
+                padding: 0.6rem 1rem;
+                gap: 0.5rem;
+            }
+            .diagram-header h3 { font-size: 1rem; }
+            .diagram-badge {
+                font-size: 0.7rem;
+                padding: 0.2rem 0.4rem;
+            }
+            .diagram-toggle {
+                width: 28px;
+                height: 28px;
+                font-size: 1.2rem;
+            }
+            .diagram-content { padding: 1rem; }
+            .diagram-description { font-size: 0.85rem; }
+            .mermaid {
+                padding: 1rem;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            .mermaid svg {
+                min-width: auto;
+                max-width: none;
+            }
+            .keyboard-hints { display: none; }
+            footer {
+                padding: 1rem;
+                font-size: 0.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Orpheus SDK</h1>
+            <span class="subtitle">C++20 Core + Host Adapters + Clip Composer</span>
+            <span class="version-badge">ORP121 + shmui v2.0.0</span>
+        </header>
+
+        <div class="stats">
+            <div class="stat-card"><span class="stat-value">6</span><span class="stat-label">Diagrams</span></div>
+            <div class="stat-card"><span class="stat-value">27</span><span class="stat-label">Routing</span></div>
+            <div class="stat-card"><span class="stat-value">4x</span><span class="stat-label">TruePeak</span></div>
+            <div class="stat-card"><span class="stat-value">256</span><span class="stat-label">SPSC</span></div>
+            <div class="stat-card"><span class="stat-value">48k</span><span class="stat-label">Hz</span></div>
+            <div class="stat-card"><span class="stat-value">154</span><span class="stat-label">Tests</span></div>
+        </div>
+
+        <div class="nav-legend-row">
+            <nav class="quick-nav">
+                <span class="section-label">System:</span>
+                <a href="#architecture">Architecture</a>
+                <a href="#components">Components</a>
+                <a href="#dataflow">Data Flow</a>
+                <span class="section-label">Structure:</span>
+                <a href="#repo">Repository</a>
+                <a href="#entry">Entry Points</a>
+                <a href="#cicd">CI/CD</a>
+            </nav>
+            <div class="legend">
+                <h3>Legend:</h3>
+                <div class="legend-grid">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #e3f2fd;"></div>
+                        <span>Applications</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #c8e6c9;"></div>
+                        <span>shmui-juce</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #fff8e1;"></div>
+                        <span>Core SDK</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #e8f5e9;"></div>
+                        <span>Drivers</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #fce4ec;"></div>
+                        <span>Platform</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #ffccbc;"></div>
+                        <span>ORP121 Routing</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #f3e5f5;"></div>
+                        <span>Adapters</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================================== -->
+        <!-- SYSTEM OVERVIEW SECTION -->
+        <!-- ================================================================== -->
+
+        <h2 class="section-heading">System Overview</h2>
+
+        <!-- Architecture Overview -->
+        <div class="diagram-card" id="architecture">
+            <div class="diagram-header" onclick="toggleDiagram(this)">
+                <div class="diagram-toggle">&#9660;</div>
+                <h3>System Architecture</h3>
+                <span class="diagram-badge">Flowchart</span>
+            </div>
+            <div class="diagram-content">
+                <p class="diagram-description">
+                    Layered SDK with ORP121 routing enhancements
+                </p>
+                <div class="mermaid">
+graph TB
+    subgraph APPS["Application Layer"]
+        direction TB
+        CC["Clip Composer<br/>JUCE Desktop"]
+        WF["Wave Finder<br/>(Planned)"]
+        FX["FX Engine<br/>(Planned)"]
+        DEMO["Demo Host"]
+    end
+
+    subgraph SHMUI["shmui-juce (v2.0.0)"]
+        direction TB
+        ANALYZER["Audio/<br/>AudioAnalyzer<br/>(thread-safe)"]
+        COMPONENTS["Components/<br/>Waveform, Bar, Orb<br/>Matrix, LevelMeter"]
+        CONTROLS["Controls/<br/>Button hierarchy<br/>Transport, Clip"]
+    end
+
+    subgraph ADAPTERS["Adapter Layer"]
+        direction TB
+        MINHOST["Minhost CLI"]
+        REAPER["REAPER Ext<br/>(Quarantined)"]
+        CUSTOM["Custom Adapters"]
+    end
+
+    subgraph DRIVERS["TypeScript Drivers"]
+        direction TB
+        NATIVE["Native Driver<br/>@orpheus/engine-native"]
+        SERVICE["Service Driver<br/>@orpheus/engine-service"]
+        WASM["WASM Driver<br/>@orpheus/engine-wasm"]
+        BROKER["Client Broker<br/>@orpheus/client"]
+    end
+
+    subgraph CORE["Core SDK (C++20)"]
+        direction TB
+        SESSION["Session: Graph, JSON"]
+        TRANSPORT["Transport: Controller,<br/>ActiveClip, SPSC Queue"]
+        ROUTING["Routing (ORP121):<br/>Matrix, Gain, TruePeak,<br/>Headroom, Limiter"]
+        AUDIO["Audio I/O:<br/>FileReader, Drivers"]
+    end
+
+    subgraph PLATFORM["Platform Layer"]
+        direction TB
+        COREAUDIO["macOS CoreAudio"]
+        WASAPI["Windows WASAPI"]
+        ALSA["Linux ALSA"]
+        SNDFILE["libsndfile"]
+    end
+
+    CC --> SHMUI
+    CC --> CORE
+    WF -.-> CORE
+    FX -.-> CORE
+    DEMO --> CORE
+    DEMO -.-> SHMUI
+
+    SHMUI --> CORE
+
+    MINHOST --> CORE
+    REAPER -.-> CORE
+    CUSTOM -.-> CORE
+
+    NATIVE --> CORE
+    SERVICE --> CORE
+    WASM --> CORE
+    BROKER --> NATIVE
+    BROKER --> SERVICE
+    BROKER --> WASM
+
+    AUDIO --> COREAUDIO
+    AUDIO --> WASAPI
+    AUDIO --> ALSA
+    AUDIO --> SNDFILE
+                </div>
+            </div>
+        </div>
+
+        <!-- Component Map -->
+        <div class="diagram-card" id="components">
+            <div class="diagram-header" onclick="toggleDiagram(this)">
+                <div class="diagram-toggle">&#9660;</div>
+                <h3>Component Map</h3>
+                <span class="diagram-badge">Flowchart</span>
+            </div>
+            <div class="diagram-content">
+                <p class="diagram-description">
+                    ORP121 classes + shmui-juce v2.0.0 components
+                </p>
+                <div class="mermaid">
+graph TB
+    subgraph SESSION_CLASSES["Session Classes"]
+        direction TB
+        SG["SessionGraph<br/>tracks: Track[]<br/>tempo: TempoInfo"]
+        TRK["Track<br/>id, name<br/>clips: Clip[]"]
+        CLIP["Clip<br/>audioFilePath<br/>trimIn/Out, fades<br/>gainDb, loopEnabled"]
+    end
+
+    subgraph TRANSPORT_CLASSES["Transport Classes"]
+        direction TB
+        TC["TransportController<br/>activeClips: map<br/>+startClip()<br/>+stopClip()<br/>+processAudio()"]
+        AC["ActiveClip<br/>currentFrame: atomic<br/>gainLinear: atomic<br/>loopEnabled: atomic"]
+        SQ["SPSCCallbackQueue<br/>ring: function[256]<br/>writeIndex: atomic<br/>readIndex: atomic"]
+    end
+
+    subgraph ROUTING_CLASSES["Routing Classes (ORP121)"]
+        direction TB
+        RM["RoutingMatrix<br/>channels: ChannelState[]<br/>groups: GroupState[]<br/>+setRouting()<br/>+process()"]
+        RC["RoutingConfig<br/>numInputChannels<br/>numOutputChannels<br/>sampleRate, headroomMode"]
+        HM["HeadroomMode<br/>None / PerGroup /<br/>Global / Logarithmic"]
+        GS["GainSmoother<br/>currentGain, targetGain<br/>MAX_GAIN_DB: 12.0"]
+        TPM["TruePeakMeter<br/>history: float[12]<br/>OVERSAMPLE: 4<br/>TAPS_PER_PHASE: 12"]
+        SKL["SoftKneeLimiter<br/>THRESHOLD: 0.794<br/>KNEE_WIDTH: 0.3"]
+    end
+
+    subgraph SHMUI_CLASSES["shmui-juce v2.0.0"]
+        direction TB
+        SAA["AudioAnalyzer<br/>(thread-safe)<br/>FFT, RMS, bands"]
+        SWV["WaveformVisualizer<br/>WaveformEditor"]
+        SBV["BarVisualizer<br/>OrbVisualizer"]
+        SLM["LevelMeter<br/>MatrixDisplay"]
+        SBT["Button (base)<br/>TextButton, IconButton"]
+        STB["TransportButton<br/>MuteButton, ClipButton"]
+    end
+
+    SG --> TRK
+    TRK --> CLIP
+
+    TC --> AC
+    TC --> SQ
+
+    RM --> RC
+    RC --> HM
+    RM --> GS
+    RM --> TPM
+    RM --> SKL
+    TC --> RM
+
+    SWV --> SAA
+    SBV --> SAA
+    SLM --> SAA
+    SBT --> STB
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Flow -->
+        <div class="diagram-card" id="dataflow">
+            <div class="diagram-header" onclick="toggleDiagram(this)">
+                <div class="diagram-toggle">&#9660;</div>
+                <h3>Data Flow</h3>
+                <span class="diagram-badge">Sequence</span>
+            </div>
+            <div class="diagram-content">
+                <p class="diagram-description">
+                    Lock-free callbacks, true-peak metering, shmui visualization
+                </p>
+                <div class="mermaid">
+sequenceDiagram
+    participant U as User
+    participant UI as UI Thread
+    participant Q as SPSC Queue
+    participant T as Transport
+    participant R as RoutingMatrix
+    participant M as TruePeakMeter
+    participant AA as shmui::AudioAnalyzer
+    participant V as shmui Visualizers
+    participant D as Audio Driver
+
+    Note over U,D: Initialization
+    U->>UI: Load Session
+    UI->>T: new TransportController
+    T->>R: new RoutingMatrix(config)
+    R->>M: Init per-channel meters
+
+    Note over U,D: Audio Processing (every 5ms)
+    D->>T: processAudio(buffer)
+    Note right of T: Read samples from clips
+    Note right of T: Apply fades per clip
+    T->>R: Add to input buffer
+    Note right of R: GainSmoother processing
+    R->>M: 4x oversample metering
+    Note right of R: Group mixing + headroom
+    Note right of R: Soft-knee limiter
+    R-->>T: Output buffer
+
+    alt Clip reached end
+        alt Loop enabled
+            T->>Q: postCallback(onLooped)
+        else No loop
+            T->>Q: postCallback(onFinished)
+        end
+    end
+
+    Note over U,D: UI Callback (10Hz)
+    UI->>Q: processCallbacks()
+    Q-->>UI: callback
+    UI->>U: Update UI state
+
+    Note over U,D: shmui Visualization (60 FPS)
+    D->>AA: pushSamples(buffer)
+    Note right of AA: Lock-free ring buffer
+    V->>AA: getFFTData() / getRMS()
+    AA-->>V: FFTData / BandLevels
+    V->>U: Paint visualizers
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================================== -->
+        <!-- STRUCTURE SECTION -->
+        <!-- ================================================================== -->
+
+        <h2 class="section-heading">Repository Structure</h2>
+
+        <!-- Repository Structure -->
+        <div class="diagram-card" id="repo">
+            <div class="diagram-header" onclick="toggleDiagram(this)">
+                <div class="diagram-toggle">&#9660;</div>
+                <h3>Repository Structure</h3>
+                <span class="diagram-badge">Flowchart</span>
+            </div>
+            <div class="diagram-content">
+                <p class="diagram-description">
+                    Monorepo: C++ core + TypeScript drivers + Applications
+                </p>
+                <div class="mermaid">
+graph TB
+    subgraph ROOT["orpheus-sdk/"]
+        direction TB
+        CONFIG["CLAUDE.md<br/>CMakeLists.txt<br/>package.json"]
+    end
+
+    subgraph CORE["Core C++ (src/, include/)"]
+        direction TB
+        SRC["src/<br/>core/session/<br/>core/transport/<br/>core/routing/<br/>core/audio_io/<br/>platform/"]
+        INCLUDE["include/orpheus/<br/>abi_version.h<br/>transport_controller.h<br/>routing_matrix.h<br/>audio_driver.h"]
+        ORP121["ORP121 Additions<br/>true_peak_meter.h<br/>gain_smoother.cpp<br/>GAIN_STAGING.md"]
+    end
+
+    subgraph TESTING["Testing (tests/)"]
+        direction TB
+        TESTS["routing_matrix_test (27)<br/>callback_queue_stress (6)<br/>transport_test"]
+    end
+
+    subgraph SHMUI_PKG["shmui-juce (v2.0.0)"]
+        direction TB
+        SHMUI_HDR["ShmUI.h (main include)<br/>CMakeLists.txt"]
+        SHMUI_AUD["Audio/<br/>AudioAnalyzer (thread-safe)"]
+        SHMUI_CMP["Components/<br/>Waveform, Bar, Orb, Matrix<br/>LevelMeter, TransportBar"]
+        SHMUI_CTL["Controls/<br/>Button, Text, Icon<br/>Transport, Mute, Clip"]
+    end
+
+    subgraph APPLICATIONS["Applications"]
+        direction TB
+        APPS["apps/clip-composer/<br/>apps/juce-demo-host/"]
+    end
+
+    subgraph DOCUMENTATION["Documentation"]
+        direction TB
+        DOCS["docs/orp/ (120+ docs)<br/>ARCHITECTURE.md<br/>ROADMAP.md"]
+        WIREFRAMES["wireframes/<br/>v2025-11-08/<br/>v2026-01-18/"]
+    end
+
+    ROOT --> CORE
+    ROOT --> TESTING
+    ROOT --> SHMUI_PKG
+    ROOT --> APPLICATIONS
+    ROOT --> DOCUMENTATION
+
+    SRC --> ORP121
+    SHMUI_HDR --> SHMUI_AUD
+    SHMUI_HDR --> SHMUI_CMP
+    SHMUI_HDR --> SHMUI_CTL
+    APPS --> SHMUI_PKG
+                </div>
+            </div>
+        </div>
+
+        <!-- Entry Points -->
+        <div class="diagram-card" id="entry">
+            <div class="diagram-header" onclick="toggleDiagram(this)">
+                <div class="diagram-toggle">&#9660;</div>
+                <h3>Entry Points</h3>
+                <span class="diagram-badge">Flowchart</span>
+            </div>
+            <div class="diagram-content">
+                <p class="diagram-description">
+                    All ways to interact with the SDK
+                </p>
+                <div class="mermaid">
+graph TB
+    subgraph USERS["User Personas"]
+        direction TB
+        END_USER["End User<br/>Broadcast/Theater"]
+        APP_DEV["App Developer<br/>TypeScript/JavaScript"]
+        PLUGIN_DEV["Plugin Developer<br/>C++/Native"]
+        DEVOPS["DevOps/QA<br/>CLI Tools"]
+    end
+
+    subgraph GUI["GUI Applications"]
+        direction TB
+        CC_APP["Clip Composer<br/>960 buttons, 8 tabs"]
+        DEMO_APP["Demo Host"]
+        CUSTOM_APP["Custom Apps"]
+    end
+
+    subgraph CLI["CLI Tools"]
+        direction TB
+        MINHOST_CLI["orpheus_minhost<br/>--session, --render"]
+        INSPECT_CLI["inspect_session<br/>--file, --validate"]
+    end
+
+    subgraph JS_API["JavaScript Drivers"]
+        direction TB
+        JS_NATIVE["@orpheus/engine-native"]
+        JS_SERVICE["@orpheus/engine-service"]
+        JS_WASM["@orpheus/engine-wasm"]
+        JS_CLIENT["@orpheus/client"]
+    end
+
+    subgraph CPP_API["Native C++ API"]
+        direction TB
+        CPP_HEADERS["Direct C++ Linking<br/>routing_matrix.h<br/>transport_controller.h"]
+    end
+
+    subgraph SHMUI_API["shmui-juce (v2.0.0)"]
+        direction TB
+        SHMUI_INC["#include ShmUI.h<br/>Visualization + Controls"]
+        SHMUI_BTN["Button hierarchy<br/>Transport, Clip, Mute"]
+    end
+
+    subgraph CONFIG["Configuration"]
+        direction TB
+        SESSION_JSON["session.json"]
+        ENV_VARS["Environment Variables"]
+        ROUTING_CFG["RoutingConfig"]
+    end
+
+    END_USER --> CC_APP
+    APP_DEV --> JS_CLIENT
+    PLUGIN_DEV --> CPP_HEADERS
+    DEVOPS --> MINHOST_CLI
+
+    CC_APP --> CPP_HEADERS
+    CC_APP --> SHMUI_API
+    DEMO_APP --> CPP_HEADERS
+    CUSTOM_APP --> CPP_HEADERS
+    CUSTOM_APP -.-> JS_CLIENT
+
+    SHMUI_INC --> CPP_HEADERS
+
+    JS_CLIENT --> JS_NATIVE
+    JS_CLIENT --> JS_SERVICE
+    JS_CLIENT --> JS_WASM
+    JS_NATIVE --> CPP_HEADERS
+
+    MINHOST_CLI --> CPP_HEADERS
+    INSPECT_CLI --> CPP_HEADERS
+
+    CC_APP -.-> SESSION_JSON
+    CC_APP -.-> ROUTING_CFG
+                </div>
+            </div>
+        </div>
+
+        <!-- CI/CD Pipeline -->
+        <div class="diagram-card" id="cicd">
+            <div class="diagram-header" onclick="toggleDiagram(this)">
+                <div class="diagram-toggle">&#9660;</div>
+                <h3>CI/CD Pipeline</h3>
+                <span class="diagram-badge">Flowchart</span>
+            </div>
+            <div class="diagram-content">
+                <p class="diagram-description">
+                    Build, test, and deployment infrastructure
+                </p>
+                <div class="mermaid">
+graph TB
+    subgraph DEV["Development"]
+        direction TB
+        LOCAL["Developer Workstation<br/>C++20, CMake, Node.js"]
+        BUILD_LOCAL["cmake --build build"]
+        TEST_LOCAL["ctest + sanitizers"]
+    end
+
+    subgraph SHMUI_SYNC["shmui-juce Sync"]
+        direction TB
+        SHMUI_SRC["~/dev/shmui<br/>juce/Source/"]
+        SHMUI_RSYNC["rsync → packages/<br/>shmui-juce/"]
+        SHMUI_VER["Version: 2.0.0"]
+    end
+
+    subgraph GIT["Version Control"]
+        direction TB
+        REPO["Git Repository<br/>main, feature/*, claude/*"]
+        PR["Pull Request<br/>CI must pass"]
+        TAG["Release Tags<br/>v1.0.0-rc.1"]
+    end
+
+    subgraph CI["CI Pipeline"]
+        direction TB
+        MATRIX["Matrix Build<br/>Ubuntu, Windows, macOS"]
+        LINT["Lint: clang-format, eslint"]
+        NATIVE["Native Driver: N-API"]
+        TS_BUILD["TypeScript: pnpm build"]
+        INTEGRATION["Integration Tests"]
+        PERF["Performance Budgets"]
+    end
+
+    subgraph ORP121_TESTS["ORP121 Test Suite"]
+        direction TB
+        ROUTING_T["routing_matrix_test<br/>27 tests"]
+        CALLBACK_T["callback_queue_stress<br/>6 tests"]
+        PERF_T["Performance Tests"]
+    end
+
+    subgraph ARTIFACTS["Build Artifacts"]
+        direction TB
+        LIBS["C++ Libraries<br/>liborpheus_*.a"]
+        EXES["Executables<br/>orpheus_minhost<br/>ClipComposer.app"]
+        NPM["npm Packages<br/>@orpheus/*"]
+    end
+
+    subgraph DIST["Distribution"]
+        direction TB
+        GH_RELEASE["GitHub Releases"]
+        NPM_REG["npm Registry"]
+        GH_PAGES["GitHub Pages"]
+    end
+
+    LOCAL --> BUILD_LOCAL
+    BUILD_LOCAL --> TEST_LOCAL
+    TEST_LOCAL --> REPO
+
+    SHMUI_SRC --> SHMUI_RSYNC
+    SHMUI_RSYNC --> SHMUI_VER
+    SHMUI_RSYNC --> BUILD_LOCAL
+
+    REPO --> PR
+    PR --> CI
+
+    CI --> MATRIX
+    CI --> LINT
+    CI --> NATIVE
+    CI --> TS_BUILD
+    CI --> INTEGRATION
+    CI --> PERF
+
+    MATRIX --> ROUTING_T
+    MATRIX --> CALLBACK_T
+    MATRIX --> PERF_T
+
+    MATRIX --> LIBS
+    MATRIX --> EXES
+    TS_BUILD --> NPM
+
+    LIBS --> GH_RELEASE
+    EXES --> GH_RELEASE
+    NPM --> NPM_REG
+
+    PR --> TAG
+    TAG --> GH_RELEASE
+    TAG --> GH_PAGES
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p><strong>Source:</strong> <code>wireframes/v2026-01-18/*.mermaid.md</code></p>
+            <p>Generated for: <strong>Orpheus SDK</strong> | Location: <code>~/dev/orpheus-sdk</code></p>
+            <p>Stack: C++20 (Core), TypeScript (Drivers), JUCE (Applications) | ITU-R BS.1770-4 (True-Peak)</p>
+            <p>Apps: <a href="https://github.com/chrislyons/orpheus-sdk">Clip Composer</a> | shmui-juce v2.0.0 (Audio Visualization + Controls)</p>
+            <p>Updated: 2026-01-25 | shmui sync: <code>rsync -av --delete ~/dev/shmui/juce/Source/ packages/shmui-juce/</code></p>
+        </footer>
+    </div>
+
+    <div class="keyboard-hints">
+        <div><kbd>&uarr;</kbd><kbd>&darr;</kbd> Navigate</div>
+        <div><kbd>&larr;</kbd> Collapse</div>
+        <div><kbd>&rarr;</kbd> Expand</div>
+        <div><kbd>Esc</kbd> Collapse all</div>
+        <div><kbd>A</kbd> Expand all</div>
+    </div>
+
+    <script>
+        // Initialize Mermaid with dark theme
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'dark',
+            themeVariables: {
+                fontFamily: '"InputMono-Regular", "SF Mono", "Fira Code", monospace',
+                primaryColor: '#2a2a2a',
+                primaryTextColor: '#eaeaea',
+                primaryBorderColor: '#333',
+                lineColor: '#FF9800',
+                secondaryColor: '#1a1a1a',
+                tertiaryColor: '#242424',
+                background: '#1a1a1a',
+                mainBkg: '#2a2a2a',
+                nodeBorder: '#333',
+                clusterBkg: '#242424',
+                clusterBorder: '#333',
+                titleColor: '#eaeaea',
+                edgeLabelBackground: '#3a2a1a',
+                lineWidth: 2
+            },
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'monotoneY',
+                nodeSpacing: 80,
+                rankSpacing: 100,
+                padding: 30
+            },
+            sequence: {
+                mirrorActors: false,
+                useMaxWidth: true
+            }
+        });
+
+        // Keyboard navigation state
+        let selectedIndex = -1;
+        const cards = document.querySelectorAll('.diagram-card');
+
+        function selectCard(index) {
+            cards.forEach(c => c.classList.remove('selected'));
+            if (index >= 0 && index < cards.length) {
+                selectedIndex = index;
+                cards[index].classList.add('selected');
+                cards[index].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        function toggleDiagram(header) {
+            const card = header.closest('.diagram-card');
+            card.classList.toggle('collapsed');
+            // Set as active for keyboard nav
+            const index = Array.from(cards).indexOf(card);
+            selectCard(index);
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                cards.forEach(card => card.classList.add('collapsed'));
+                cards.forEach(c => c.classList.remove('selected'));
+                selectedIndex = -1;
+            } else if (e.key.toLowerCase() === 'a' && !e.ctrlKey && !e.metaKey) {
+                cards.forEach(card => card.classList.remove('collapsed'));
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                selectCard(selectedIndex < cards.length - 1 ? selectedIndex + 1 : 0);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                selectCard(selectedIndex > 0 ? selectedIndex - 1 : cards.length - 1);
+            } else if (e.key === 'ArrowRight' && selectedIndex >= 0) {
+                e.preventDefault();
+                cards[selectedIndex].classList.remove('collapsed');
+            } else if (e.key === 'ArrowLeft' && selectedIndex >= 0) {
+                e.preventDefault();
+                cards[selectedIndex].classList.add('collapsed');
+            }
+        });
+
+        // Smooth scroll for quick nav
+        document.querySelectorAll('.quick-nav a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = document.querySelector(link.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    target.classList.remove('collapsed');
+                    // Set as active for keyboard nav
+                    const index = Array.from(cards).indexOf(target);
+                    selectCard(index);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

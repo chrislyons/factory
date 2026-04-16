@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>nmos</title>
+<link rel="stylesheet" href="/shared/base.css">
+<link rel="stylesheet" href="/shared/gallery.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="site-header__inner">
+    <div class="brand">
+      <a class="brand__title" href="/pages/docs.html">dreamfactory</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="hero-row">
+    <div class="hero">
+      <span class="hero-eyebrow">ARCHITECTURE GALLERY</span>
+      <h1>nmos</h1>
+      <p>MCP server for NMOS IS-04/05/08 broadcast infrastructure control</p>
+    </div>
+    <div class="hero-meta"><div class="meta-chip"><span class="meta-chip__label">UPDATED</span><span class="meta-chip__value">2026-03-29</span></div><div class="meta-chip"><span class="meta-chip__label">VERSION</span><span class="meta-chip__value">1.0</span></div></div>
+  </div>
+  <section class="gallery-nav"><div class="nav-group"><span class="nav-group__label">System:</span><a class="nav-chip" href="#architecture" data-target="architecture">Architecture</a><a class="nav-chip" href="#resources" data-target="resources">Resource Hierarchy</a><a class="nav-chip" href="#tiers" data-target="tiers">Tool Tiers</a><a class="nav-chip" href="#connection" data-target="connection">Connection Flow</a></div></section>
+  <section class="callout-grid"><article class="surface-card callout callout--info"><h2>Diagram Collection</h2><p>4 diagrams covering system architecture, NMOS resource hierarchy, tool tier organization, and connection management flow.</p><p>Click headers to expand/collapse. Diagrams render via Mermaid.js. Press a to expand all, Esc to collapse all.</p></article></section>
+  <section class="section-block" data-section="system-overview"><div class="section-heading"><span>System Overview</span></div><div class="diagram-stack"><article class="surface-card diagram-card" id="architecture" data-diagram-id="architecture"><button class="diagram-header" type="button" aria-expanded="true"><span class="diagram-arrow">&#9660;</span><span class="diagram-header__copy"><span class="diagram-title">System Architecture</span><p class="diagram-description">MCP server connecting Claude Desktop to NMOS IS-04/05/08 APIs</p></span><span class="diagram-kind">FLOWCHART</span></button><div class="diagram-content"><div class="diagram-canvas"><div class="diagram-loading">Rendering diagram&hellip;</div></div><script type="application/json" class="mermaid-source">"graph LR\nCD[\"Claude Desktop\"]\nMCP[\"nmos-mcp Server\\nstdio\"]\nHC[\"NMOS HTTP Client\"]\nsubgraph APIS[\"NMOS APIs\"]\nIS04[\"IS-04 Query\"]\nIS05[\"IS-05 Connection\"]\nIS08[\"IS-08 Channel Map\"]\nend\nREG[\"NMOS Registry\"]\nCD --> MCP\nMCP --> HC\nHC --> IS04\nHC --> IS05\nHC --> IS08\nIS04 --> REG\nIS05 --> REG\nstyle CD fill:#cce5ff\nstyle MCP fill:#d4edda\nstyle REG fill:#e7e7ff"</script></div></article><article class="surface-card diagram-card" id="resources" data-diagram-id="resources"><button class="diagram-header" type="button" aria-expanded="true"><span class="diagram-arrow">&#9660;</span><span class="diagram-header__copy"><span class="diagram-title">NMOS Resource Hierarchy</span><p class="diagram-description">Node, device, source, flow, sender, and receiver relationships</p></span><span class="diagram-kind">FLOWCHART</span></button><div class="diagram-content"><div class="diagram-canvas"><div class="diagram-loading">Rendering diagram&hellip;</div></div><script type="application/json" class="mermaid-source">"graph TB\nNODE[\"Node\\nDevice host\"]\nDEV[\"Device\\nMedia processing unit\"]\nSRC[\"Source\\nSignal generator\"]\nFLOW[\"Flow\\nTimestamped signal\"]\nSEND[\"Sender\\nTransmitter\"]\nRECV[\"Receiver\\nWith capabilities\"]\nNODE --> DEV\nDEV --> SRC\nSRC --> FLOW\nDEV --> SEND\nDEV --> RECV\nSEND --> SRC\nSEND --> FLOW\nstyle NODE fill:#cce5ff\nstyle DEV fill:#d4edda\nstyle SEND fill:#fff3cd\nstyle RECV fill:#e7e7ff"</script></div></article></div></section><section class="section-block" data-section="tool-organization"><div class="section-heading"><span>Tool Organization</span></div><div class="diagram-stack"><article class="surface-card diagram-card" id="tiers" data-diagram-id="tiers"><button class="diagram-header" type="button" aria-expanded="true"><span class="diagram-arrow">&#9660;</span><span class="diagram-header__copy"><span class="diagram-title">Tool Tiers (22 Tools)</span><p class="diagram-description">Four tiers: discovery, connection, channel mapping, and monitoring</p></span><span class="diagram-kind">FLOWCHART</span></button><div class="diagram-content"><div class="diagram-canvas"><div class="diagram-loading">Rendering diagram&hellip;</div></div><script type="application/json" class="mermaid-source">"graph TB\nsubgraph T1[\"Tier 1: Discovery (7)\"]\nD1[\"list_nodes\"]\nD2[\"list_devices\"]\nD3[\"list_senders\"]\nD4[\"list_receivers\"]\nD5[\"list_flows\"]\nD6[\"get_resource\"]\nD7[\"search\"]\nend\nsubgraph T2[\"Tier 2: Connection (6)\"]\nC1[\"connect\"]\nC2[\"disconnect\"]\nC3[\"get_connection_status\"]\nC4[\"stage_connection\"]\nC5[\"activate_staged\"]\nend\nsubgraph T3[\"Tier 3: Channel Map (3)\"]\nCH1[\"get_channel_map\"]\nCH2[\"set_channel_map\"]\nCH3[\"get_io_map\"]\nend\nsubgraph T4[\"Tier 4: Monitoring (4)\"]\nMO1[\"health_check\"]\nMO2[\"get_transport_params\"]\nMO3[\"audit_connections\"]\nend\nstyle T1 fill:#cce5ff\nstyle T2 fill:#d4edda\nstyle T3 fill:#fff3cd\nstyle T4 fill:#e7e7ff"</script></div></article><article class="surface-card diagram-card" id="connection" data-diagram-id="connection"><button class="diagram-header" type="button" aria-expanded="true"><span class="diagram-arrow">&#9660;</span><span class="diagram-header__copy"><span class="diagram-title">Connection Management Flow</span><p class="diagram-description">Staged connection workflow via IS-05 sender and receiver APIs</p></span><span class="diagram-kind">SEQUENCE</span></button><div class="diagram-content"><div class="diagram-canvas"><div class="diagram-loading">Rendering diagram&hellip;</div></div><script type="application/json" class="mermaid-source">"sequenceDiagram\nparticipant A as Agent\nparticipant N as nmos-mcp\nparticipant S as Sender API\nparticipant R as Receiver API\nA->>N: nmos_connect(sender, receiver)\nN->>S: GET transport params\nS-->>N: sender params\nN->>R: PATCH stage connection\nR-->>N: staged OK\nN->>R: GET /staged → activate\nR-->>N: active\nN-->>A: connection success"</script></div></article></div></section>
+</main>
+
+<footer>
+  <div class="footer-notes"><p><strong>nmos Architecture</strong> | Generated 2026-03-29</p><p>Stack: TypeScript, MCP SDK 1.12.1, NMOS IS-04/05/08</p></div>
+</footer>
+
+<script src="/shared/dust.js"></script>
+<script src="/shared/theme.js"></script>
+<script type="module" src="/shared/gallery.js"></script>
+</body>
+</html>

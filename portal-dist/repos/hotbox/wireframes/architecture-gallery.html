@@ -1,0 +1,839 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hotbox - Architecture Gallery</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <script type="module">
+      import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: "dark",
+        themeVariables: {
+          darkMode: true,
+          background: "#1a1a1a",
+          primaryColor: "#B45309",
+          primaryTextColor: "#e0e0e0",
+          primaryBorderColor: "#E7A556",
+          lineColor: "#E7A556",
+          secondaryColor: "#7C9A8D",
+          tertiaryColor: "#4A6C7A",
+        },
+        flowchart: { curve: "basis" },
+        sequence: { mirrorActors: false },
+      });
+    </script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          "Inter",
+          -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
+        background: #1a1a1a;
+        color: #e0e0e0;
+        padding: 1rem 2rem;
+        line-height: 1.5;
+        font-size: 0.875rem;
+      }
+
+      .container {
+        max-width: 1600px;
+        margin: 0 auto;
+      }
+
+      /* Header - Compact single row */
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        margin-bottom: 0.35rem;
+        padding: 0.25rem 0.5rem;
+        background: linear-gradient(135deg, #242424 0%, #2a2a2a 100%);
+        border-radius: 6px;
+        border: 1px solid #333;
+      }
+
+      .header-title {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+      }
+
+      header h1 {
+        font-size: 0.9rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #e7a556 0%, #b45309 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        white-space: nowrap;
+        margin: 0;
+      }
+
+      .header-subtitle {
+        color: #888;
+        font-size: 0.65rem;
+        padding-left: 0.3rem;
+        border-left: 1px solid #444;
+      }
+
+      .version-badge {
+        display: inline-block;
+        background: #e7a556;
+        color: #1a1a1a;
+        padding: 0.05rem 0.25rem;
+        border-radius: 3px;
+        font-size: 0.55rem;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      h2 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #e7a556;
+        margin: 1.5rem 0 0.75rem 0;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #333;
+      }
+
+      /* Stats Grid - Compact inline */
+      .stats-grid {
+        display: flex;
+        gap: 0.2rem;
+      }
+
+      .stat-card {
+        background: #1a1a1a;
+        border: 1px solid #333;
+        border-radius: 3px;
+        padding: 0.1rem 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.15rem;
+        transition: border-color 0.2s;
+      }
+
+      .stat-card:hover {
+        border-color: #e7a556;
+      }
+
+      .stat-value {
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: #e7a556;
+      }
+
+      .stat-label {
+        font-size: 0.55rem;
+        color: #888;
+      }
+
+      .diagram-grid {
+        display: grid;
+        gap: 1rem;
+      }
+
+      .diagram-card {
+        background: #242424;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+      }
+
+      .diagram-header {
+        background: #2a2a2a;
+        padding: 0.75rem 1rem;
+        cursor: pointer;
+        user-select: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border-bottom: 1px solid #333;
+      }
+
+      .diagram-header:hover {
+        background: #333;
+      }
+
+      .diagram-header::before {
+        content: "\25BC";
+        font-size: 0.625rem;
+        transition: transform 0.2s;
+        color: #888;
+      }
+
+      .diagram-header.collapsed::before {
+        transform: rotate(-90deg);
+      }
+
+      .diagram-title {
+        font-weight: 600;
+        color: #fff;
+        font-size: 0.875rem;
+      }
+
+      .diagram-type {
+        font-size: 0.625rem;
+        padding: 0.2rem 0.5rem;
+        border-radius: 3px;
+        font-weight: 600;
+        margin-left: auto;
+      }
+
+      .diagram-type.flowchart {
+        background: #3a2a1a;
+        color: #e7a556;
+      }
+      .diagram-type.sequence {
+        background: #1a2a2a;
+        color: #7c9a8d;
+      }
+      .diagram-type.class {
+        background: #1a2a3a;
+        color: #6b9ebf;
+      }
+      .diagram-type.er {
+        background: #2a1a2a;
+        color: #b78db5;
+      }
+
+      .diagram-description {
+        font-size: 0.7rem;
+        color: #888;
+        margin-left: 0.5rem;
+      }
+
+      .diagram-content {
+        padding: 1rem;
+        overflow-x: auto;
+        background: #1e1e1e;
+      }
+
+      .diagram-content.hidden {
+        display: none;
+      }
+
+      .diagram-content pre {
+        background: transparent;
+        margin: 0;
+      }
+
+      .mermaid {
+        display: flex;
+        justify-content: center;
+      }
+
+      .mermaid svg {
+        max-width: 100%;
+        height: auto;
+      }
+
+      footer {
+        margin-top: 1.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid #333;
+        color: #666;
+        font-size: 0.625rem;
+      }
+
+      footer a {
+        color: #e7a556;
+      }
+
+      /* Quick Nav Row */
+      .nav-row {
+        display: flex;
+        gap: 0.35rem;
+        margin-bottom: 0.5rem;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+
+      .quick-nav {
+        display: flex;
+        gap: 0.25rem;
+        padding: 0.2rem 0.35rem;
+        background: #242424;
+        border-radius: 4px;
+        border: 1px solid #333;
+        align-items: center;
+      }
+
+      .quick-nav a {
+        color: #e0e0e0;
+        text-decoration: none;
+        padding: 0.15rem 0.4rem;
+        background: #2a2a2a;
+        border-radius: 3px;
+        font-size: 0.65rem;
+        transition: all 0.2s;
+        border: 1px solid transparent;
+      }
+
+      .quick-nav a:hover {
+        background: #e7a556;
+        color: #1a1a1a;
+        border-color: #e7a556;
+      }
+
+      .nav-label {
+        font-size: 0.6rem;
+        color: #666;
+        padding-right: 0.25rem;
+      }
+
+      kbd {
+        background: #333;
+        padding: 0.1rem 0.4rem;
+        border-radius: 3px;
+        font-size: 0.65rem;
+        border: 1px solid #444;
+      }
+
+      @media (max-width: 900px) {
+        header {
+          flex-wrap: wrap;
+        }
+        .stats-grid {
+          flex-wrap: wrap;
+        }
+        .nav-row {
+          flex-direction: column;
+          gap: 0.25rem;
+          align-items: flex-start;
+        }
+      }
+
+      @media (max-width: 600px) {
+        body {
+          padding: 0.5rem 1rem;
+        }
+        header {
+          padding: 0.2rem 0.35rem;
+        }
+        header h1 {
+          font-size: 0.8rem;
+        }
+        .header-subtitle {
+          display: none;
+        }
+        .stat-card {
+          padding: 0.08rem 0.2rem;
+        }
+        .stat-value {
+          font-size: 0.6rem;
+        }
+        .stat-label {
+          font-size: 0.5rem;
+        }
+        .diagram-content {
+          padding: 0.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <div class="header-title">
+          <h1>Hotbox Architecture</h1>
+          <span class="header-subtitle">Citation-first LLM chat + Beat-driven composition</span>
+          <span class="version-badge">v1.1.0 - 2026-01-18</span>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value">5</div>
+            <div class="stat-label">Layers</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">8</div>
+            <div class="stat-label">Routes</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">7</div>
+            <div class="stat-label">Pipelines</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">4</div>
+            <div class="stat-label">CF Services</div>
+          </div>
+        </div>
+      </header>
+
+      <div class="nav-row">
+        <nav class="quick-nav">
+          <span class="nav-label">System:</span>
+          <a href="#architecture">Architecture</a>
+          <a href="#components">Components</a>
+          <a href="#repo">Repo</a>
+        </nav>
+        <nav class="quick-nav">
+          <span class="nav-label">Data:</span>
+          <a href="#dataflow">Flow</a>
+          <a href="#schema">Schema</a>
+        </nav>
+        <nav class="quick-nav">
+          <span class="nav-label">Ops:</span>
+          <a href="#deployment">Deploy</a>
+          <a href="#auth">Auth</a>
+          <a href="#entry">Entry</a>
+        </nav>
+      </div>
+
+      <!-- ================================================================== -->
+      <!-- SYSTEM ARCHITECTURE SECTION -->
+      <!-- ================================================================== -->
+
+      <h2>System Architecture</h2>
+
+      <div class="diagram-grid">
+        <!-- Architecture Overview -->
+        <div class="diagram-card" id="architecture">
+          <div class="diagram-header" onclick="toggleDiagram(this)">
+            <span class="diagram-title">5-Layer Architecture Overview</span>
+            <span class="diagram-description"
+              >Content → Pipelines → Retrieval → Runtime → Presentation</span
+            >
+            <span class="diagram-type flowchart">FLOWCHART</span>
+          </div>
+          <div class="diagram-content">
+            <pre class="mermaid">
+graph TB
+    subgraph CONTENT["Layer 1: Content"]
+        direction TB
+        ContentFiles["Content Files<br/>beats.yaml, claims.csv,<br/>edges.csv, registry.jsonld"]
+    end
+
+    subgraph PIPELINES["Layer 2: Pipelines"]
+        direction TB
+        BuildTools["Build Tools<br/>build:beatpacks, compose,<br/>stitch, validate"]
+        IngestTools["Ingest Tools<br/>ingest, bm25, ingest:beatpacks"]
+    end
+
+    subgraph RETRIEVAL["Layer 3: Retrieval (Cloudflare)"]
+        direction TB
+        Vectorize["Vectorize<br/>Dense embeddings"]
+        Storage["Storage: KV, R2, DO<br/>Sparse index, sources, sessions"]
+    end
+
+    subgraph RUNTIME["Layer 4: Runtime (Worker)"]
+        direction TB
+        PublicAPIs["Public APIs<br/>POST /chat/stream<br/>GET /search, /meta/edges"]
+        AuthAPIs["Author APIs (gated)<br/>POST /author/compose,stitch"]
+    end
+
+    subgraph PRESENTATION["Layer 5: Presentation"]
+        direction TB
+        ReaderUI["Reader UI<br/>Chat, citations, See Also"]
+        AuthorUI["Author Console<br/>Pipeline orchestration"]
+    end
+
+    subgraph EXTERNAL["External Providers"]
+        direction TB
+        LLM["LLM: OpenAI, Ollama"]
+        Embed["Embeddings: OpenAI, Local"]
+    end
+
+    ContentFiles --> BuildTools
+    BuildTools --> IngestTools
+    IngestTools --> Embed
+    Embed --> Vectorize
+    IngestTools --> Storage
+
+    Vectorize --> PublicAPIs
+    Storage --> PublicAPIs
+    PublicAPIs --> LLM
+
+    PublicAPIs --> ReaderUI
+    AuthAPIs --> AuthorUI
+                    </pre>
+          </div>
+        </div>
+
+        <!-- Component Map -->
+        <div class="diagram-card" id="components">
+          <div class="diagram-header collapsed" onclick="toggleDiagram(this)">
+            <span class="diagram-title">Component Map</span>
+            <span class="diagram-description">Module boundaries, dependencies</span>
+            <span class="diagram-type flowchart">FLOWCHART</span>
+          </div>
+          <div class="diagram-content hidden">
+            <pre class="mermaid">
+graph TB
+    subgraph WORKER["Worker (Hono)"]
+        direction TB
+        ChatRoute["ChatRoute<br/>stream, coverage, escalate"]
+        SearchRoute["SearchRoute<br/>hybrid, dense, sparse"]
+        MetaRoute["MetaRoute<br/>edges, See Also"]
+        AuthorRoute["AuthorRoute<br/>compose, stitch, validate"]
+    end
+
+    subgraph MODULES["Shared Modules"]
+        direction TB
+        Retrieval["Retrieval<br/>searchAndRerank, hybridMerge"]
+        Vector["Vector<br/>embedQuery, resolveProvider"]
+        Compose["Compose<br/>coverage, IEEE format"]
+        Copyright["Copyright<br/>validateCopyright"]
+    end
+
+    subgraph CORE["@hotbox/core"]
+        direction TB
+        CoreUtils["Utils<br/>chunker, tokenize,<br/>fuzzy, stopwords"]
+    end
+
+    subgraph PIPELINES["Pipelines CLI"]
+        direction TB
+        PipelineCmds["Commands<br/>ingest, bm25, beatpacks,<br/>compose, stitch"]
+    end
+
+    subgraph CLIENT["React Client"]
+        direction TB
+        UIViews["Views<br/>Reader, Search, Author"]
+    end
+
+    ChatRoute --> Retrieval
+    ChatRoute --> Compose
+    SearchRoute --> Retrieval
+    Retrieval --> Vector
+    Compose --> Copyright
+    Vector --> CoreUtils
+    PipelineCmds --> CoreUtils
+    ChatRoute -.-> UIViews
+                    </pre>
+          </div>
+        </div>
+
+        <!-- Repository Structure -->
+        <div class="diagram-card" id="repo">
+          <div class="diagram-header collapsed" onclick="toggleDiagram(this)">
+            <span class="diagram-title">Repository Structure</span>
+            <span class="diagram-description">Workspaces, content, build artifacts</span>
+            <span class="diagram-type flowchart">FLOWCHART</span>
+          </div>
+          <div class="diagram-content hidden">
+            <pre class="mermaid">
+graph TB
+    subgraph ROOT["hotbox/ (monorepo)"]
+        direction TB
+        Apps["app/<br/>web/ (React+Vite)<br/>worker/ (Hono)"]
+        Packages["packages/<br/>core/ (@hotbox/core)"]
+        Pipes["pipelines/<br/>node/ (CLI tools)"]
+    end
+
+    subgraph CONTENT["content/"]
+        direction TB
+        Chapters["chapters/*/<br/>beats.yaml, claims.csv,<br/>edges.csv, exhibits.csv"]
+        Core["core/<br/>registry.jsonld,<br/>query_maps/"]
+    end
+
+    subgraph BUILD["Build Artifacts (.build/)"]
+        direction TB
+        Generated["Generated<br/>beat_packs/, beat_drafts/,<br/>vector/ (embeddings)"]
+    end
+
+    subgraph DOCS["docs/"]
+        direction TB
+        HBX["HBX/<br/>PREFIX specs<br/>(HBX001-HBX034)"]
+    end
+
+    ROOT --> CONTENT
+    Chapters --> Generated
+    ROOT --> DOCS
+                    </pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================================================================== -->
+      <!-- DATA SECTION -->
+      <!-- ================================================================== -->
+
+      <h2>Data Architecture</h2>
+
+      <div class="diagram-grid">
+        <!-- Data Flow -->
+        <div class="diagram-card" id="dataflow">
+          <div class="diagram-header collapsed" onclick="toggleDiagram(this)">
+            <span class="diagram-title">Data Flow</span>
+            <span class="diagram-description">Chat request/response cycle</span>
+            <span class="diagram-type sequence">SEQUENCE</span>
+          </div>
+          <div class="diagram-content hidden">
+            <pre class="mermaid">
+sequenceDiagram
+    participant User
+    participant UI as React UI
+    participant W as Worker
+    participant V as Vectorize
+    participant KV
+    participant LLM as OpenAI
+
+    User->>UI: Type query
+    UI->>W: POST /api/chat/stream
+
+    par Hybrid Retrieval
+        W->>V: Dense search (top-12)
+        V-->>W: Passages
+    and
+        W->>KV: BM25 sparse search
+        KV-->>W: Scores
+    end
+
+    W->>W: hybridMerge + rerank (top-5)
+    W->>LLM: Chat completion + context
+    LLM-->>W: Answer + citations
+
+    W->>W: calculateCoverage
+
+    alt Coverage below 40%
+        W->>LLM: Retry with gpt-4o
+        LLM-->>W: Better answer
+    end
+
+    W->>W: validateCopyright
+    W-->>UI: Stream JSON deltas
+    UI-->>User: Display with [n] citations
+                    </pre
+            >
+          </div>
+        </div>
+
+        <!-- Database Schema -->
+        <div class="diagram-card" id="schema">
+          <div class="diagram-header collapsed" onclick="toggleDiagram(this)">
+            <span class="diagram-title">Database Schema</span>
+            <span class="diagram-description">Vectorize, KV, R2 data models</span>
+            <span class="diagram-type flowchart">FLOWCHART</span>
+          </div>
+          <div class="diagram-content hidden">
+            <pre class="mermaid">
+graph TB
+    subgraph VECTORIZE["Vectorize (Dense Index)"]
+        direction TB
+        VecMeta["namespace: container_id<br/>index: hotbox-index"]
+        Passage["PASSAGE<br/>id, values (256/1536d),<br/>paragraphId, citationKeys,<br/>text, filePath"]
+        BeatPack["BEATPACK<br/>id, values, beat_id,<br/>title, tone"]
+    end
+
+    subgraph KV["KV Store"]
+        direction TB
+        BM25["BM25_INDEX<br/>key: bm25:container<br/>terms, avgDocLen, totalDocs"]
+        Session["SESSION<br/>id, container_id, created_at"]
+    end
+
+    subgraph R2["R2 Object Storage"]
+        direction TB
+        Source["SOURCE_FILE<br/>key: content/chapters/...<br/>content, contentType"]
+    end
+
+    VecMeta --> Passage
+    VecMeta --> BeatPack
+                    </pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================================================================== -->
+      <!-- OPERATIONS SECTION -->
+      <!-- ================================================================== -->
+
+      <h2>Operations</h2>
+
+      <div class="diagram-grid">
+        <!-- Deployment Infrastructure -->
+        <div class="diagram-card" id="deployment">
+          <div class="diagram-header collapsed" onclick="toggleDiagram(this)">
+            <span class="diagram-title">Deployment Infrastructure</span>
+            <span class="diagram-description">CI/CD pipeline, Cloudflare deployment</span>
+            <span class="diagram-type flowchart">FLOWCHART</span>
+          </div>
+          <div class="diagram-content hidden">
+            <pre class="mermaid">
+graph TB
+    subgraph DEV["Developer"]
+        direction TB
+        Local["Local Dev<br/>wrangler dev"]
+        Commit["git commit"]
+    end
+
+    subgraph GITHUB["GitHub"]
+        direction TB
+        Repo["chrislyons/hotbox"]
+        CI["CI: lint, type, test"]
+    end
+
+    subgraph CF_BUILD["Cloudflare Build"]
+        direction TB
+        PagesBuild["Pages Build<br/>(React + Vite)"]
+        WorkerBuild["Worker Bundle<br/>(Hono + esbuild)"]
+    end
+
+    subgraph CF_EDGE["Cloudflare Edge"]
+        direction TB
+        Worker["Worker Runtime"]
+        Pages["Pages (static)"]
+        Services["Services<br/>Vectorize, KV, R2, DO"]
+        Secrets["Secrets<br/>OPENAI_API_KEY"]
+    end
+
+    Local --> Commit
+    Commit --> Repo
+    Repo --> CI
+    Repo --> PagesBuild
+    Repo --> WorkerBuild
+    PagesBuild --> Pages
+    WorkerBuild --> Worker
+    Worker --> Services
+    Worker --> Secrets
+    Pages --> Worker
+                    </pre>
+          </div>
+        </div>
+
+        <!-- Authentication & Authorization -->
+        <div class="diagram-card" id="auth">
+          <div class="diagram-header collapsed" onclick="toggleDiagram(this)">
+            <span class="diagram-title">Authentication & Authorization</span>
+            <span class="diagram-description">Token gating, access control</span>
+            <span class="diagram-type sequence">SEQUENCE</span>
+          </div>
+          <div class="diagram-content hidden">
+            <pre class="mermaid">
+sequenceDiagram
+    participant User
+    participant UI as React UI
+    participant W as Worker
+    participant V as Vectorize
+
+    Note over User,V: Public Reader (No Auth)
+    User->>UI: Visit /
+    UI->>W: POST /api/chat/stream
+    W->>V: Query (Read permission)
+    V-->>W: Results
+    W-->>UI: Stream response
+
+    Note over User,V: Debug Routes (Token-Gated)
+    User->>UI: Visit /author
+    UI->>W: GET /api/debug/vectorize
+
+    alt DEBUG_MODE=local
+        W-->>UI: Debug data (no token)
+    else DEBUG_MODE=shared
+        alt Valid token
+            W-->>UI: Debug data
+        else Invalid token
+            W-->>UI: HTTP 403
+        end
+    end
+
+    Note over User,V: Author Routes (Token-Gated)
+    User->>UI: Click Compose
+    UI->>W: POST /api/author/compose<br/>Authorization: Bearer token
+
+    alt Token valid
+        W-->>UI: Pipeline response
+    else Token invalid
+        W-->>UI: HTTP 403
+    end
+                    </pre>
+          </div>
+        </div>
+
+        <!-- Entry Points -->
+        <div class="diagram-card" id="entry">
+          <div class="diagram-header collapsed" onclick="toggleDiagram(this)">
+            <span class="diagram-title">Entry Points</span>
+            <span class="diagram-description">APIs, CLI commands, UI routes</span>
+            <span class="diagram-type flowchart">FLOWCHART</span>
+          </div>
+          <div class="diagram-content hidden">
+            <pre class="mermaid">
+graph TB
+    subgraph HTTP["HTTP API (Worker)"]
+        direction TB
+        Public["Public APIs<br/>POST /chat/stream<br/>GET /search<br/>GET /meta/edges<br/>POST /receipts"]
+        Author["Author APIs (gated)<br/>POST /author/compose<br/>POST /author/stitch<br/>POST /author/validate"]
+        Debug["Debug APIs (gated)<br/>GET /debug/openai<br/>GET /debug/vectorize"]
+    end
+
+    subgraph CLI["CLI Commands"]
+        direction TB
+        BuildCmds["Build<br/>npm run build:beatpacks<br/>npm run compose<br/>npm run stitch"]
+        IngestCmds["Ingest<br/>npm run ingest<br/>npm run bm25"]
+        WranglerCmds["Deploy<br/>wrangler vectorize insert<br/>wrangler deploy"]
+    end
+
+    subgraph UI["UI Routes (React)"]
+        direction TB
+        UIRoutes["Routes<br/>/ (Reader)<br/>/search<br/>/author"]
+    end
+
+    UIRoutes --> Public
+    UIRoutes --> Author
+    BuildCmds --> IngestCmds
+    IngestCmds --> WranglerCmds
+                    </pre>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        <p>
+          <strong>Source:</strong> <code>wireframes/v1.1-2026-01-18/*.mermaid.md</code> |
+          <strong>Notes:</strong> <code>wireframes/v1.1-2026-01-18/*.notes.md</code>
+        </p>
+        <p>Generated for: <strong>Hotbox</strong> | Location: <code>~/dev/hotbox</code></p>
+        <p>Stack: Cloudflare Workers (Hono) | React + Vite | Vectorize | R2 | KV | OpenAI/Ollama</p>
+        <p>
+          Documentation: <a href="../../docs/hbx/INDEX.md">HBX PREFIX Docs</a> |
+          <a href="../../README.md">README</a>
+        </p>
+      </footer>
+    </div>
+
+    <script>
+      function toggleDiagram(header) {
+        header.classList.toggle("collapsed");
+        const content = header.nextElementSibling;
+        content.classList.toggle("hidden");
+      }
+
+      // Keyboard navigation
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          document.querySelectorAll(".diagram-header:not(.collapsed)").forEach((h) => {
+            h.classList.add("collapsed");
+            h.nextElementSibling.classList.add("hidden");
+          });
+        }
+        // 'a' to expand all
+        if (
+          e.key === "a" &&
+          !e.ctrlKey &&
+          !e.metaKey &&
+          document.activeElement.tagName !== "INPUT"
+        ) {
+          document.querySelectorAll(".diagram-header.collapsed").forEach((h) => {
+            h.classList.remove("collapsed");
+            h.nextElementSibling.classList.remove("hidden");
+          });
+        }
+      });
+    </script>
+  </body>
+</html>

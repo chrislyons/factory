@@ -1,1 +1,0 @@
-"# The Emperor's Vigil\n\nParagraph 1: The Antarctic expanse was a canvas of monochrome
