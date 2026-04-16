@@ -3989,10 +3989,23 @@ textarea {
   grid-template-columns: 1fr 1fr 1fr;
 }
 
+@media (max-width: 600px) {
+  .config-settings-grid--3col {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
 .config-segmented-row {
   display: flex;
   gap: 20px;
   margin-top: 16px;
+}
+
+@media (max-width: 600px) {
+  .config-segmented-row {
+    flex-direction: column;
+    gap: 12px;
+  }
 }
 
 .config-segmented-field {
