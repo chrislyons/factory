@@ -3736,12 +3736,21 @@ textarea {
   gap: 8px;
 }
 
-.config-agent-card__identity {
+.config-agent-card__name {
   flex: 1;
   min-width: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-top: 1px;
+}
+
+.config-agent-card__right {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  align-items: flex-end;
+  gap: 3px;
+  flex-shrink: 0;
 }
 
 .config-agent-card__dot {
@@ -3750,13 +3759,6 @@ textarea {
   border-radius: 50%;
   flex-shrink: 0;
   margin-top: 4px;
-}
-
-.config-agent-card__name {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-primary);
-  line-height: 1.3;
 }
 
 .config-agent-card__model {
@@ -4081,13 +4083,7 @@ textarea {
 
 .config-field__input,
 .config-field__select {
-  min-height: 34px;
   min-width: 140px;
-  padding: 0 11px;
-  border-radius: 9px;
-  border: 1px solid var(--border);
-  background: var(--bg-deep);
-  color: var(--text-primary);
   font-size: 12px;
   font-family: var(--font-mono, monospace);
   transition: border-color 0.15s;
@@ -4743,6 +4739,146 @@ textarea {
   gap: 8px;
   padding-top: 6px;
   border-top: 1px solid var(--border);
+}
+
+/* Memory budget bar */
+
+.memory-bar {
+  margin: 12px 0 4px;
+  padding: 10px 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.memory-bar__track {
+  position: relative;
+  height: 40px;
+  background: var(--surface-3);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.memory-bar__fill {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.memory-bar__fill--inference {
+  left: 0;
+  background: var(--accent);
+  opacity: 0.7;
+}
+
+.memory-bar__fill--inference.memory-bar__fill--crit {
+  background: var(--danger);
+  opacity: 0.9;
+}
+
+.memory-bar__fill--available {
+  background: var(--success);
+  opacity: 0.4;
+}
+
+.memory-bar__labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+
+.memory-bar__label {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+
+.memory-bar__label--crit {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.memory-bar__label--tight {
+  color: var(--warning);
+}
+
+.memory-bar__warn {
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--danger);
+  font-weight: 500;
+}
+
+/* Restart error */
+
+.config-restart-error {
+  margin-top: 4px;
+  padding: 4px 8px;
+  background: rgba(255, 82, 82, 0.08);
+  border: 1px solid rgba(255, 82, 82, 0.2);
+  border-radius: 4px;
+  font-size: 11px;
+  color: var(--danger);
+  font-family: var(--font-mono);
+  max-width: 600px;
+  word-break: break-word;
+}
+
+/* Memory budget per-model details */
+
+.memory-budget-details {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.memory-budget-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  padding: 3px 8px;
+  background: var(--surface-3);
+  border-radius: 4px;
+}
+
+.memory-budget-row__agent {
+  color: var(--text);
+  font-weight: 500;
+  min-width: 40px;
+}
+
+.memory-budget-row__port {
+  color: var(--muted);
+}
+
+.memory-budget-row__est {
+  color: var(--accent);
+  margin-left: auto;
+}
+
+.memory-budget-row__status {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.memory-budget-row__status--up {
+  color: var(--success);
+  background: rgba(80, 250, 123, 0.08);
+}
+
+.memory-budget-row__status--down {
+  color: var(--muted);
+  background: var(--surface-1);
 }
 
 /* ── Config Page Responsive ──────────────────────────────────────── */

@@ -14,10 +14,12 @@ import {
   fetchAgentHealth,
   restartAgentGateway,
   toggleMcpServer,
+  fetchMemoryBudget,
 } from "../lib/api";
 import type {
   AgentConfigSummary,
   AgentHealth,
+  MemoryBudget,
 } from "../lib/api";
 
 const CONFIG_AGENTS = AGENTS.filter((a) =>
@@ -262,10 +264,12 @@ function Preferences({
   agentId,
   config,
   disabled,
+  budget,
 }: {
   agentId: string;
   config: Record<string, unknown>;
   disabled: boolean;
+  budget?: MemoryBudget;
 }) {
   const queryClient = useQueryClient();
   const display = (config.display ?? {}) as Record<string, unknown>;
@@ -452,9 +456,71 @@ function Preferences({
               <span className="config-threshold-control__label">{Math.round(parseFloat(localThreshold || "0.5") * 100)}%</span>
             </div>
           </div>
+
+          {/* Local Memory Budget */}
+          {budget && (
+            <div className="config-pref-section">
+              <span className="config-prefs-col__title" style={{ marginTop: 12, paddingTop: 10, borderTop: "1px solid var(--border)" }}>
+                Local Memory Budget
+              </span>
+              <MemoryBar budget={budget} />
+              <div className="memory-budget-details">
+                {budget.models
+                  .filter((m) => m.port !== null)
+                  .map((m) => (
+                    <div key={m.agent} className="memory-budget-row">
+                      <span className="memory-budget-row__agent">{m.agent}</span>
+                      <span className="memory-budget-row__port">:{m.port}</span>
+                      <span className="memory-budget-row__est">{m.est_gb}GB</span>
+                      <span className={cn("memory-budget-row__status", m.loaded ? "memory-budget-row__status--up" : "memory-budget-row__status--down")}>
+                        {m.loaded ? "loaded" : "idle"}
+                      </span>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </SurfaceCard>
+  );
+}
+
+function MemoryBar({ budget }: { budget: MemoryBudget }) {
+  if (!budget) return null;
+  const pctUsed = Math.min(100, (budget.used_by_inference_gb / budget.total_gb) * 100);
+  const pctAvailable = Math.min(100 - pctUsed, (budget.available_gb / budget.total_gb) * 100);
+  const crit = budget.available_gb < 1.0;
+  const tight = budget.available_gb < 3.0 && !crit;
+
+  return (
+    <div className="memory-bar">
+      <div className="memory-bar__track">
+        <div
+          className={cn("memory-bar__fill memory-bar__fill--inference", crit && "memory-bar__fill--crit")}
+          style={{ width: `${pctUsed}%` }}
+          title={`Inference: ${budget.used_by_inference_gb}GB`}
+        />
+        <div
+          className="memory-bar__fill memory-bar__fill--available"
+          style={{ width: `${pctAvailable}%`, left: `${pctUsed}%` }}
+          title={`Available: ${budget.available_gb}GB`}
+        />
+      </div>
+      <div className="memory-bar__labels">
+        <span className="memory-bar__label">
+          {budget.used_by_inference_gb}GB inference
+        </span>
+        <span className={cn("memory-bar__label", crit && "memory-bar__label--crit", tight && "memory-bar__label--tight")}>
+          {budget.available_gb}GB free / {budget.total_gb}GB total
+        </span>
+      </div>
+      {crit && (
+        <div className="memory-bar__warn">
+          Memory critical — restarts blocked unless forced
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -465,14 +531,18 @@ function ModelAndAgent({
   agentLabel,
   config,
   health,
+  budget,
 }: {
   agentId: string;
   agentLabel: string;
   config: Record<string, unknown>;
   health?: AgentHealth;
+  budget?: MemoryBudget;
 }) {
   const queryClient = useQueryClient();
   const [restartConfirm, setRestartConfirm] = useState(false);
+  const [restartError, setRestartError] = useState<string | null>(null);
+  const [needsForce, setNeedsForce] = useState(false);
 
   // ── Mutations ──
   const healthMutation = useMutation({
@@ -487,10 +557,21 @@ function ModelAndAgent({
   });
 
   const restartMutation = useMutation({
-    mutationFn: () => restartAgentGateway(agentId),
-    onSuccess: () => {
-      setRestartConfirm(false);
-      queryClient.invalidateQueries({ queryKey: ["config"] });
+    mutationFn: (force: boolean) => restartAgentGateway(agentId, force),
+    onSuccess: (data) => {
+      if (data.ok) {
+        setRestartConfirm(false);
+        setRestartError(null);
+        setNeedsForce(false);
+        queryClient.invalidateQueries({ queryKey: ["config"] });
+        queryClient.invalidateQueries({ queryKey: ["memory-budget"] });
+      } else {
+        setRestartError(data.error ?? "Restart failed");
+        setNeedsForce(!!data.needs_force);
+      }
+    },
+    onError: (err) => {
+      setRestartError(err instanceof Error ? err.message : "Restart failed");
     },
   });
 
@@ -550,7 +631,10 @@ function ModelAndAgent({
                 {healthMutation.isPending ? "Refreshing…" : "Refresh Status"}
               </button>
               {!restartConfirm ? (
-                <button className="config-action-btn config-action-btn--accent" onClick={() => setRestartConfirm(true)}>
+                <button
+                  className="config-action-btn config-action-btn--accent"
+                  onClick={() => { setRestartConfirm(true); setRestartError(null); setNeedsForce(false); }}
+                >
                   Apply (Restart Agent)
                 </button>
               ) : (
@@ -559,12 +643,25 @@ function ModelAndAgent({
                   <button
                     className="config-action-btn config-action-btn--danger"
                     disabled={restartMutation.isPending}
-                    onClick={() => restartMutation.mutate()}
+                    onClick={() => restartMutation.mutate(false)}
                   >
                     {restartMutation.isPending ? "Restarting…" : "Confirm"}
                   </button>
-                  <button className="config-action-btn" onClick={() => setRestartConfirm(false)}>Cancel</button>
+                  {needsForce && (
+                    <button
+                      className="config-action-btn config-action-btn--danger"
+                      disabled={restartMutation.isPending}
+                      onClick={() => restartMutation.mutate(true)}
+                      title="Force restart despite low memory"
+                    >
+                      Force Restart
+                    </button>
+                  )}
+                  <button className="config-action-btn" onClick={() => { setRestartConfirm(false); setRestartError(null); setNeedsForce(false); }}>Cancel</button>
                 </div>
+              )}
+              {restartError && (
+                <div className="config-restart-error">{restartError}</div>
               )}
             </div>
 
@@ -812,6 +909,19 @@ export function ConfigPage() {
     })),
   });
 
+  // Memory budget — refetch every 30s with agent configs
+  const memoryQuery = useQueries({
+    queries: [
+      {
+        queryKey: ["memory-budget"] as const,
+        queryFn: fetchMemoryBudget,
+        refetchInterval: 30_000,
+        staleTime: 0,
+      },
+    ],
+  });
+  const budget: MemoryBudget | undefined = memoryQuery[0]?.data;
+
   const configMap = useMemo(() => {
     const map: Record<string, { config: Record<string, unknown>; health?: AgentHealth }> = {};
     detailQueries.forEach((q, i) => {
@@ -891,7 +1001,7 @@ export function ConfigPage() {
       {showContent && (
         <div className="config-rows">
           {/* Row 1: Preferences (full width) */}
-          <Preferences agentId={selectedId} config={config} disabled={false} />
+          <Preferences agentId={selectedId} config={config} disabled={false} budget={budget} />
 
           {/* Row 2: Model & Agent (full width, merged) */}
           <ModelAndAgent
@@ -899,6 +1009,7 @@ export function ConfigPage() {
             agentLabel={selectedAgent?.label ?? selectedId}
             config={config}
             health={health}
+            budget={budget}
           />
         </div>
       )}
