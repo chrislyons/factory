@@ -264,10 +264,12 @@ function Preferences({
   agentId,
   config,
   disabled,
+  budget,
 }: {
   agentId: string;
   config: Record<string, unknown>;
   disabled: boolean;
+  budget?: MemoryBudget;
 }) {
   const queryClient = useQueryClient();
   const display = (config.display ?? {}) as Record<string, unknown>;
@@ -454,6 +456,30 @@ function Preferences({
               <span className="config-threshold-control__label">{Math.round(parseFloat(localThreshold || "0.5") * 100)}%</span>
             </div>
           </div>
+
+          {/* Local Memory Budget */}
+          {budget && (
+            <div className="config-pref-section">
+              <span className="config-prefs-col__title" style={{ marginTop: 12, paddingTop: 10, borderTop: "1px solid var(--border)" }}>
+                Local Memory Budget
+              </span>
+              <MemoryBar budget={budget} />
+              <div className="memory-budget-details">
+                {budget.models
+                  .filter((m) => m.port !== null)
+                  .map((m) => (
+                    <div key={m.agent} className="memory-budget-row">
+                      <span className="memory-budget-row__agent">{m.agent}</span>
+                      <span className="memory-budget-row__port">:{m.port}</span>
+                      <span className="memory-budget-row__est">{m.est_gb}GB</span>
+                      <span className={cn("memory-budget-row__status", m.loaded ? "memory-budget-row__status--up" : "memory-budget-row__status--down")}>
+                        {m.loaded ? "loaded" : "idle"}
+                      </span>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </SurfaceCard>
@@ -964,9 +990,6 @@ export function ConfigPage() {
         ))}
       </div>
 
-      {/* Memory budget bar */}
-      {budget && <MemoryBar budget={budget} />}
-
       {detailQueries[selectedIdx]?.isError && (
         <SurfaceCard title="Error" subtitle="Failed to load agent config" className="surface-card--compact">
           <div className="config-error">
@@ -978,7 +1001,7 @@ export function ConfigPage() {
       {showContent && (
         <div className="config-rows">
           {/* Row 1: Preferences (full width) */}
-          <Preferences agentId={selectedId} config={config} disabled={false} />
+          <Preferences agentId={selectedId} config={config} disabled={false} budget={budget} />
 
           {/* Row 2: Model & Agent (full width, merged) */}
           <ModelAndAgent

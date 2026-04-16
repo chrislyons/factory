@@ -4749,7 +4749,7 @@ textarea {
 
 .memory-bar {
   margin: 12px 0 4px;
-  padding: 8px 12px;
+  padding: 10px 12px;
   background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: 6px;
@@ -4757,9 +4757,9 @@ textarea {
 
 .memory-bar__track {
   position: relative;
-  height: 8px;
+  height: 40px;
   background: var(--surface-3);
-  border-radius: 4px;
+  border-radius: 6px;
   overflow: hidden;
 }
 
@@ -4829,6 +4829,60 @@ textarea {
   font-family: var(--font-mono);
   max-width: 600px;
   word-break: break-word;
+}
+
+/* Memory budget per-model details */
+
+.memory-budget-details {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.memory-budget-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  padding: 3px 8px;
+  background: var(--surface-3);
+  border-radius: 4px;
+}
+
+.memory-budget-row__agent {
+  color: var(--text);
+  font-weight: 500;
+  min-width: 40px;
+}
+
+.memory-budget-row__port {
+  color: var(--muted);
+}
+
+.memory-budget-row__est {
+  color: var(--accent);
+  margin-left: auto;
+}
+
+.memory-budget-row__status {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.memory-budget-row__status--up {
+  color: var(--success);
+  background: rgba(80, 250, 123, 0.08);
+}
+
+.memory-budget-row__status--down {
+  color: var(--muted);
+  background: var(--surface-1);
 }
 
 /* ── Config Page Responsive ──────────────────────────────────────── */
