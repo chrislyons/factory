@@ -50,7 +50,7 @@ async function parseResponse<T>(response: Response): Promise<T> {
   if (response.status === 401) {
     const here = window.location.pathname + window.location.search;
     window.location.assign(`/pages/login.html?redirect=${encodeURIComponent(here)}`);
-    return new Promise(() => {});  // never resolves — navigation is underway
+    throw new ApiError("Session expired — redirecting to login", 401);
   }
   if (!response.ok) {
     throw new ApiError(`HTTP ${response.status}`, response.status);

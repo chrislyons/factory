@@ -24,7 +24,54 @@ const CONFIG_AGENTS = AGENTS.filter((a) =>
   ["boot", "kelk", "ig88"].includes(a.id)
 );
 
-const PROVIDER_OPTIONS = [
+const AGENT_PROVIDERS: Record<string, { value: string; label: string }[]> = {
+  boot: [
+    { value: "mlx-vlm:41961", label: "MLX-VLM :41961" },
+  ],
+  kelk: [
+    { value: "mlx-vlm:41962", label: "MLX-VLM :41962" },
+  ],
+  ig88: [
+    { value: "nous", label: "Nous Portal" },
+    { value: "openrouter", label: "OpenRouter" },
+    { value: "flash-moe:41966", label: "Flash-MoE :41966" },
+  ],
+};
+
+/** Aux provider options per agent — :41966 is aux engine for Boot/Kelk */
+const AGENT_AUX_PROVIDERS: Record<string, { value: string; label: string }[]> = {
+  boot: [
+    { value: "flash-moe:41966", label: "Flash-MoE :41966" },
+  ],
+  kelk: [
+    { value: "flash-moe:41966", label: "Flash-MoE :41966" },
+  ],
+  ig88: [
+    { value: "nous", label: "Nous Portal" },
+    { value: "openrouter", label: "OpenRouter" },
+    { value: "flash-moe:41966", label: "Flash-MoE :41966" },
+  ],
+};
+
+/** Model options per agent per provider — local ~/models/ paths, cloud model slugs */
+const AGENT_PROVIDER_MODELS: Record<string, Record<string, string[]>> = {
+  boot: {
+    "mlx-vlm:41961": ["~/models/gemma-4-e4b-it-6bit"],
+    "flash-moe:41966": ["~/models/gemma-4-26b-a4b-it-6bit"],
+  },
+  kelk: {
+    "mlx-vlm:41962": ["~/models/gemma-4-e4b-it-6bit"],
+    "flash-moe:41966": ["~/models/gemma-4-26b-a4b-it-6bit"],
+  },
+  ig88: {
+    "nous": ["xiaomi/mimo-v2-pro", "nous-hermes-2-mixtral-8x7b-dpo", "nous-capybara-34b"],
+    "openrouter": ["xiaomi/mimo-v2-omni", "anthropic/claude-sonnet-4", "anthropic/claude-opus-4", "openai/gpt-4o", "openai/o3-mini"],
+    "flash-moe:41966": ["~/models/gemma-4-26b-a4b-it-6bit"],
+  },
+};
+
+/** Shared flat provider list for display labels (providerLabel fallback) */
+const ALL_PROVIDER_OPTIONS = [
   { value: "mlx-vlm:41961", label: "MLX-VLM :41961" },
   { value: "mlx-vlm:41962", label: "MLX-VLM :41962" },
   { value: "flash-moe:41966", label: "Flash-MoE :41966" },
@@ -34,19 +81,17 @@ const PROVIDER_OPTIONS = [
   { value: "openai", label: "OpenAI" },
 ];
 
-const PROVIDER_MODELS: Record<string, string[]> = {
-  "mlx-vlm:41961": ["~/models/gemma-4-e4b-it-6bit"],
-  "mlx-vlm:41962": ["~/models/gemma-4-e4b-it-6bit"],
-  "flash-moe:41966": ["~/models/gemma-4-26b-a4b-it-6bit"],
-  "nous": ["xiaomi/mimo-v2-pro"],
-  "openrouter": ["xiaomi/mimo-v2-omni", "anthropic/claude-sonnet-4", "anthropic/claude-opus-4", "openai/gpt-4o", "openai/o3-mini"],
-  "anthropic": ["claude-sonnet-4-20250514", "claude-opus-4-20250514", "claude-haiku-3.5"],
-  "openai": ["gpt-4o", "o3-mini", "gpt-4.1"],
-};
+function agentProviderOptions(agentId: string): { value: string; label: string }[] {
+  return AGENT_PROVIDERS[agentId] ?? [];
+}
 
-function providerModelOptions(provider: string): string[] {
+function agentAuxProviderOptions(agentId: string): { value: string; label: string }[] {
+  return AGENT_AUX_PROVIDERS[agentId] ?? [];
+}
+
+function agentModelOptions(agentId: string, provider: string): string[] {
   if (!provider) return [];
-  return PROVIDER_MODELS[provider] ?? [];
+  return AGENT_PROVIDER_MODELS[agentId]?.[provider] ?? [];
 }
 
 /** Derive the real inference provider from model path and config context */
@@ -120,7 +165,7 @@ function providerLabel(provider?: string) {
   // Legacy "custom" value
   if (provider === "custom") return "local";
   // Find in options for nice label
-  const opt = PROVIDER_OPTIONS.find((p) => p.value === provider);
+  const opt = ALL_PROVIDER_OPTIONS.find((p) => p.value === provider);
   if (opt) return opt.label;
   return provider;
 }
@@ -273,7 +318,7 @@ function Preferences({
               <span className="config-pref-row__desc">CLI visual theme</span>
             </div>
             <select
-              className="config-field__select select-input config-field__select--inline config-field__select--narrow"
+              className="config-field__select select-input config-field__select--narrow"
               value={skinValue}
               disabled={disabled || patchMutation.isPending}
               onChange={(e) => {
@@ -342,7 +387,7 @@ function Preferences({
               <span className="config-pref-row__desc">Default shell directory</span>
             </div>
             <select
-              className="config-field__select select-input config-field__select--inline config-field__select--narrow"
+              className="config-field__select select-input config-field__select--narrow"
               value={cwdValue}
               disabled={disabled || patchMutation.isPending}
               onChange={(e) => {
@@ -366,7 +411,7 @@ function Preferences({
               <span className="config-pref-row__desc">Per-command timeout (s)</span>
             </div>
             <select
-              className="config-field__select select-input config-field__select--inline config-field__select--narrow"
+              className="config-field__select select-input config-field__select--narrow"
               value={String(timeoutValue)}
               disabled={disabled || patchMutation.isPending}
               onChange={(e) => patch("terminal.timeout", parseInt(e.target.value, 10))}
@@ -438,6 +483,7 @@ function ModelAndAgent({
   const patchMutation = useMutation({
     mutationFn: (patch: Record<string, unknown>) => patchAgentConfig(agentId, patch),
     onSettled: () => queryClient.invalidateQueries({ queryKey: ["config"] }),
+    onError: (err) => console.error(`[config] PATCH ${agentId} failed:`, err),
   });
 
   const restartMutation = useMutation({
@@ -538,7 +584,7 @@ function ModelAndAgent({
                   }}
                 >
                   <option value="">—</option>
-                  {PROVIDER_OPTIONS.map((p) => (
+                  {agentProviderOptions(agentId).map((p) => (
                     <option key={p.value} value={p.value}>{p.label}</option>
                   ))}
                 </select>
@@ -551,10 +597,10 @@ function ModelAndAgent({
                   }}
                 >
                   <option value="">—</option>
-                  {providerModelOptions(currentProvider).map((m) => (
+                  {agentModelOptions(agentId, currentProvider).map((m) => (
                     <option key={m} value={m}>{shortenPath(m)}</option>
                   ))}
-                  {currentModel && !providerModelOptions(currentProvider).includes(currentModel) && (
+                  {currentModel && !agentModelOptions(agentId, currentProvider).includes(currentModel) && (
                     <option value={currentModel}>{shortenPath(currentModel)}</option>
                   )}
                 </select>
@@ -585,7 +631,7 @@ function ModelAndAgent({
                       onChange={(e) => patch(`auxiliary.${slotName}.provider`, e.target.value)}
                     >
                       <option value="">—</option>
-                      {PROVIDER_OPTIONS.map((p) => (
+                      {agentAuxProviderOptions(agentId).map((p) => (
                         <option key={p.value} value={p.value}>{p.label}</option>
                       ))}
                     </select>
@@ -596,10 +642,10 @@ function ModelAndAgent({
                       onChange={(e) => patch(`auxiliary.${slotName}.model`, e.target.value)}
                     >
                       <option value="">—</option>
-                      {providerModelOptions(currentProvider).map((m) => (
+                      {agentModelOptions(agentId, currentProvider).map((m) => (
                         <option key={m} value={m}>{shortenPath(m)}</option>
                       ))}
-                      {currentModel && !providerModelOptions(currentProvider).includes(currentModel) && (
+                      {currentModel && !agentModelOptions(agentId, currentProvider).includes(currentModel) && (
                         <option value={currentModel}>{shortenPath(currentModel)}</option>
                       )}
                     </select>
