@@ -137,6 +137,13 @@ class AuthHandler(http.server.BaseHTTPRequestHandler):
         csrf_header = self.headers.get("X-CSRF-Token", "")
         return csrf_cookie and csrf_header and hmac.compare_digest(csrf_cookie, csrf_header)
 
+    def _ensure_csrf_cookie(self):
+        """Set CSRF cookie on every authenticated response if not already present."""
+        existing = get_cookie(self.headers, "factory_csrf")
+        if not existing:
+            csrf_token = generate_csrf_token()
+            self.send_header("Set-Cookie", make_csrf_cookie(csrf_token))
+
     def do_GET(self):
         # Auth check endpoint (client-side session verification)
         if self.path in ("/auth/check", "/auth/validate"):
@@ -151,6 +158,7 @@ class AuthHandler(http.server.BaseHTTPRequestHandler):
         # Config API — validate cookie then forward to GSD
         if self.path.startswith(CONFIG_API_PATHS):
             if self._cookie_valid():
+                self._ensure_csrf_cookie()
                 self.proxy_to_gsd(self.path)
             else:
                 self.send_response(401)

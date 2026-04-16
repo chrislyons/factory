@@ -244,13 +244,13 @@ function AgentCard({
     >
       <div className="config-agent-card__header">
         <span className="config-agent-card__dot" style={{ background: agent.color }} />
-        <div className="config-agent-card__identity">
-          <span className="config-agent-card__name">{agent.label}</span>
+        <span className="config-agent-card__name">{agent.label}</span>
+        <div className="config-agent-card__right">
+          <span className={cn("config-provider-badge", providerBadgeClass(summary?.provider))}>
+            {providerLabel(summary?.provider)}
+          </span>
           <span className="config-agent-card__model">{truncateModel(summary?.model ?? agent.model)}</span>
         </div>
-        <span className={cn("config-provider-badge", providerBadgeClass(summary?.provider))}>
-          {providerLabel(summary?.provider)}
-        </span>
       </div>
     </button>
   );
@@ -615,7 +615,9 @@ function ModelAndAgent({
                 const slot = (aux[slotName] ?? {}) as Record<string, unknown>;
                 if (!slot.provider && !slot.model && !aux[slotName]) return null;
 
-                const currentProvider = (slot.provider as string) ?? "";
+                const currentProvider = deriveProvider({
+                  model: { provider: slot.provider, base_url: slot.base_url, default: slot.model },
+                });
                 const currentModel = (slot.model as string) ?? "";
 
                 return (
