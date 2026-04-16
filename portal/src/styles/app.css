@@ -4745,6 +4745,92 @@ textarea {
   border-top: 1px solid var(--border);
 }
 
+/* Memory budget bar */
+
+.memory-bar {
+  margin: 12px 0 4px;
+  padding: 8px 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.memory-bar__track {
+  position: relative;
+  height: 8px;
+  background: var(--surface-3);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.memory-bar__fill {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.memory-bar__fill--inference {
+  left: 0;
+  background: var(--accent);
+  opacity: 0.7;
+}
+
+.memory-bar__fill--inference.memory-bar__fill--crit {
+  background: var(--danger);
+  opacity: 0.9;
+}
+
+.memory-bar__fill--available {
+  background: var(--success);
+  opacity: 0.4;
+}
+
+.memory-bar__labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+
+.memory-bar__label {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+
+.memory-bar__label--crit {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.memory-bar__label--tight {
+  color: var(--warning);
+}
+
+.memory-bar__warn {
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--danger);
+  font-weight: 500;
+}
+
+/* Restart error */
+
+.config-restart-error {
+  margin-top: 4px;
+  padding: 4px 8px;
+  background: rgba(255, 82, 82, 0.08);
+  border: 1px solid rgba(255, 82, 82, 0.2);
+  border-radius: 4px;
+  font-size: 11px;
+  color: var(--danger);
+  font-family: var(--font-mono);
+  max-width: 600px;
+  word-break: break-word;
+}
+
 /* ── Config Page Responsive ──────────────────────────────────────── */
 
 @media (max-width: 800px) {

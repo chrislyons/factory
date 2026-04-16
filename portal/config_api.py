@@ -318,6 +318,203 @@ def restart_gateway(agent: str) -> dict:
         return {"ok": False, "error": str(e)}
 
 
+# --- Phase 3: Memory Budget & Restart Gate ---
+
+# Estimated RSS (GB) per model when loaded into memory
+MODEL_MEMORY_GB = {
+    "mlx-community/gemma-4-e4b-it-6bit": 7.3,
+    "gemma-4-e4b-it-6bit": 7.3,
+    "gemma-4-26b-a4b-it-6bit": 3.0,
+    "mlx-community/gemma-4-26b-a4b-it-6bit": 3.0,
+}
+
+# Ports and their associated plists (for restart sequencing)
+INFERENCE_PORTS = {
+    "mlx-vlm:41961": {"port": 41961, "plist": "com.bootindustries.mlx-vlm-boot"},
+    "mlx-vlm:41962": {"port": 41962, "plist": "com.bootindustries.mlx-vlm-kelk"},
+    "flash-moe:41966": {"port": 41966, "plist": "com.bootindustries.flash-moe-26b"},
+}
+
+import time
+
+# Guard: prevent concurrent restarts (timestamp-based)
+_restart_lock = {"busy": False, "last_ts": 0}
+
+
+def check_memory_budget() -> dict:
+    """Check live memory usage of inference servers.
+
+    Returns {"total_gb": float, "used_by_inference_gb": float, "free_gb": float,
+             "models": [{"provider": str, "port": int, "model": str, "loaded": bool, "est_gb": float}]}
+    """
+    # Use macOS sysctl — no psutil dependency needed
+    import subprocess as _sp
+    total_bytes = int(
+        _sp.check_output(["sysctl", "-n", "hw.memsize"], text=True).strip()
+    )
+    total_gb = total_bytes / (1024 ** 3)
+    # Parse "free" from top output: "PhysMem: 31G used (3G wired, 8G compressor), 493M unused."
+    top_out = _sp.run(["top", "-l", "1", "-s", "0"], capture_output=True, text=True).stdout
+    import re as _re
+    _m = _re.search(r"(\d+[MG])\s*unused", top_out)
+    if _m:
+        val_str = _m.group(1)
+        if val_str.endswith("G"):
+            available_gb = float(val_str[:-1])
+        else:
+            available_gb = float(val_str[:-1]) / 1024
+    else:
+        available_gb = total_gb * 0.15  # conservative fallback
+
+    models = []
+    for agent_id, info in AGENTS.items():
+        config = read_config(agent_id)
+        provider = _derive_provider(config)
+        model = _get_nested(config, "model.default") or ""
+        port = None
+        if ":" in provider:
+            port_str = provider.split(":")[-1].split("/")[0]
+            try:
+                port = int(port_str)
+            except ValueError:
+                pass
+
+        # Check if the inference server is actually responding
+        loaded = False
+        if port:
+            try:
+                req = urllib.request.Request(
+                    f"http://127.0.0.1:{port}/v1/models", method="GET"
+                )
+                with urllib.request.urlopen(req, timeout=2) as resp:
+                    loaded = resp.status == 200
+            except Exception:
+                pass
+
+        # Estimate memory from model name
+        est_gb = 0.0
+        for mname, mem_est in MODEL_MEMORY_GB.items():
+            if mname in model or model in mname:
+                est_gb = mem_est
+                break
+
+        models.append({
+            "agent": agent_id,
+            "provider": provider,
+            "port": port,
+            "model": model,
+            "loaded": loaded,
+            "est_gb": est_gb,
+        })
+
+    used_by_inference_gb = sum(m["est_gb"] for m in models if m["loaded"])
+
+    return {
+        "total_gb": round(total_gb, 1),
+        "available_gb": round(available_gb, 1),
+        "used_by_inference_gb": round(used_by_inference_gb, 1),
+        "headroom_gb": round(available_gb - used_by_inference_gb, 1),
+        "models": models,
+    }
+
+
+def restart_gateway_safe(agent: str, force: bool = False) -> dict:
+    """Restart with memory budget pre-flight check and sequencing.
+
+    Steps:
+    1. Check if another restart is in progress (concurrent guard).
+    2. Verify the inference server for this agent is reachable (or cloud).
+    3. If local engine: check available memory would allow re-loading.
+    4. Stop the gateway, wait 2s, start it (don't restart inference server).
+    5. Verify the gateway comes back up.
+    """
+    info = AGENTS.get(agent)
+    if not info:
+        return {"ok": False, "error": f"Unknown agent: {agent}"}
+
+    label = info["launchd_label"]
+
+    # Guard: concurrent restart prevention (5s cooldown)
+    now = time.time()
+    if _restart_lock["busy"] and (now - _restart_lock["last_ts"]) < 5:
+        return {"ok": False, "error": "Another restart is in progress. Wait a few seconds."}
+    _restart_lock["busy"] = True
+    _restart_lock["last_ts"] = now
+
+    try:
+        config = read_config(agent)
+        provider = _derive_provider(config)
+        model = _get_nested(config, "model.default") or ""
+        inference_url = _get_inference_url(config)
+
+        # Check if local inference server
+        is_local = False
+        port = None
+        if inference_url and ("127.0.0.1" in inference_url or "localhost" in inference_url):
+            is_local = True
+            port = int(inference_url.split(":")[-1].split("/")[0])
+
+        # Memory pre-flight for local models
+        if is_local and not force:
+            budget = check_memory_budget()
+            # Check if model would need to be re-loaded
+            est_gb = 0
+            for mname, mem_est in MODEL_MEMORY_GB.items():
+                if mname in model:
+                    est_gb = mem_est
+                    break
+            if est_gb > 0 and budget["available_gb"] < est_gb * 0.5:
+                return {
+                    "ok": False,
+                    "error": f"Insufficient memory for {model} (~{est_gb}GB). Only {budget['available_gb']}GB available. Stop other services first.",
+                    "budget": budget,
+                    "needs_force": True,
+                }
+
+        # Verify inference server is up (for local providers)
+        if is_local:
+            health = check_inference_health(agent)
+            if not health["reachable"]:
+                return {
+                    "ok": False,
+                    "error": f"Inference server on :{port} is not reachable. Cannot restart gateway without a live model.",
+                    "inference_health": health,
+                }
+
+        # Execute restart
+        subprocess.run(["launchctl", "stop", label], capture_output=True, timeout=10)
+        time.sleep(2)
+        subprocess.run(["launchctl", "start", label], capture_output=True, timeout=10)
+
+        # Verify gateway comes back (15s timeout)
+        time.sleep(3)
+        running = False
+        try:
+            result = subprocess.run(
+                ["launchctl", "list", label],
+                capture_output=True, text=True, timeout=5,
+            )
+            running = '"PID"' in result.stdout
+        except Exception:
+            pass
+
+        return {
+            "ok": True,
+            "agent": agent,
+            "label": label,
+            "provider": provider,
+            "gateway_running": running,
+            "inference_url": inference_url,
+        }
+
+    except subprocess.TimeoutExpired:
+        return {"ok": False, "error": "launchctl timed out"}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+    finally:
+        _restart_lock["busy"] = False
+
+
 def get_agent_summaries() -> list[dict]:
     """Return summary info for all agents (for the config page overview)."""
     summaries = []
@@ -379,6 +576,11 @@ def handle_request(method: str, path: str, body: bytes | None = None) -> tuple[i
         return 405, {"error": "Method not allowed"}
 
     agent = parts[2]
+
+    # Non-agent routes — must be checked before AGENTS validation
+    if agent == "memory-budget" and method == "GET":
+        return 200, check_memory_budget()
+
     if agent not in AGENTS:
         return 404, {"error": f"Unknown agent: {agent}"}
 
@@ -390,7 +592,14 @@ def handle_request(method: str, path: str, body: bytes | None = None) -> tuple[i
 
     # POST /api/config/{agent}/restart
     if action == "restart" and method == "POST":
-        result = restart_gateway(agent)
+        force = False
+        if body:
+            try:
+                body_data = json.loads(body)
+                force = body_data.get("force", False)
+            except Exception:
+                pass
+        result = restart_gateway_safe(agent, force=force)
         return 200 if result["ok"] else 500, result
 
     # POST /api/config/{agent}/mcp/{server_name}/toggle

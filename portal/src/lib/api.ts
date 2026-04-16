@@ -227,11 +227,30 @@ export async function fetchAgentHealth(agentId: string) {
   return fetchJson<AgentHealth>(`/api/config/${agentId}/health`);
 }
 
-export async function restartAgentGateway(agentId: string) {
-  return fetchJson<{ ok: boolean; agent?: string; label?: string; error?: string }>(
+export async function restartAgentGateway(agentId: string, force: boolean = false) {
+  return fetchJson<{ ok: boolean; agent?: string; label?: string; error?: string; budget?: MemoryBudget; needs_force?: boolean }>(
     `/api/config/${agentId}/restart`,
-    { method: "POST" }
+    { method: "POST", body: JSON.stringify({ force }) }
   );
+}
+
+export interface MemoryBudget {
+  total_gb: number;
+  available_gb: number;
+  used_by_inference_gb: number;
+  headroom_gb: number;
+  models: {
+    agent: string;
+    provider: string;
+    port: number | null;
+    model: string;
+    loaded: boolean;
+    est_gb: number;
+  }[];
+}
+
+export async function fetchMemoryBudget(): Promise<MemoryBudget> {
+  return fetchJson<MemoryBudget>("/api/config/memory-budget");
 }
 
 export async function toggleMcpServer(agentId: string, serverName: string, enabled: boolean) {
