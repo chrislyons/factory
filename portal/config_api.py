@@ -94,7 +94,8 @@ SAFE_PATCH_FIELDS = {
 FIELD_VALIDATORS = {
     "agent.tool_use_enforcement": {"none", "warn", "enforce"},
     "approvals.mode": {"off", "per_tool", "always"},
-    "model.provider": {"custom", "nous", "openrouter", "anthropic", "openai"},
+    "model.provider": {"custom", "nous", "openrouter", "anthropic", "openai",
+                        "mlx-vlm:41961", "mlx-vlm:41962", "flash-moe:41966"},
 }
 
 

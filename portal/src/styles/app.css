@@ -4247,6 +4247,8 @@ textarea {
 .config-field__select--inline {
   height: 28px;
   min-width: 120px;
+  width: auto;
+  flex: 0 0 auto;
   padding: 0 24px 0 8px;
   font-size: 11px;
   background-size: 8px;
@@ -4257,8 +4259,6 @@ textarea {
 .config-field__select--narrow {
   min-width: 90px;
   max-width: 120px;
-  width: auto;
-  flex: 0 0 auto;
 }
 
 /* Provider select in info row */

@@ -49,6 +49,22 @@ function providerModelOptions(provider: string): string[] {
   return PROVIDER_MODELS[provider] ?? [];
 }
 
+/** Derive the real inference provider from model path and config context */
+function deriveProvider(config: Record<string, unknown>): string {
+  const modelObj = (config.model ?? {}) as Record<string, unknown>;
+  const stored = (modelObj.provider as string) ?? (config.provider as string) ?? "";
+  const modelPath = (modelObj.default as string) ?? (config.model as string) ?? "";
+
+  // Local model paths → map to correct engine:port
+  if (modelPath.includes("gemma-4-e4b-it")) return "mlx-vlm:41961";
+  if (modelPath.includes("gemma-4-26b") || modelPath.includes("flash-moe")) return "flash-moe:41966";
+
+  // Legacy "custom" → show as-is (can't determine port from config alone)
+  if (stored === "custom") return stored;
+
+  return stored;
+}
+
 const SKIN_OPTIONS = [
   { value: "", label: "Default" },
   { value: "mono", label: "Mono" },
@@ -435,7 +451,8 @@ function ModelAndAgent({
   // ── Model / Provider data ──
   const modelObj = (config.model ?? {}) as Record<string, unknown>;
   const currentModel = (modelObj.default as string) ?? (config.model as string) ?? "";
-  const currentProvider = (modelObj.provider as string) ?? (config.provider as string) ?? "";
+  const storedProvider = (modelObj.provider as string) ?? (config.provider as string) ?? "";
+  const currentProvider = deriveProvider(config);
   const liveHealth = healthMutation.data ?? health;
 
   // ── Agent params data ──
@@ -771,8 +788,7 @@ export function ConfigPage() {
   function cardProvider(id: string): string {
     const c = configMap[id]?.config;
     if (!c) return "—";
-    const m = (c.model ?? {}) as Record<string, unknown>;
-    return (m.provider as string) ?? (c.provider as string) ?? "—";
+    return deriveProvider(c);
   }
 
   function cardAuxModel(id: string): string | undefined {
