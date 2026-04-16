@@ -35,9 +35,9 @@ const PROVIDER_OPTIONS = [
 ];
 
 const PROVIDER_MODELS: Record<string, string[]> = {
-  "mlx-vlm:41961": ["gemma-4-e4b-it-6bit"],
-  "mlx-vlm:41962": ["gemma-4-e4b-it-6bit"],
-  "flash-moe:41966": ["gemma-4-26b-a4b-it-6bit"],
+  "mlx-vlm:41961": ["~/models/gemma-4-e4b-it-6bit"],
+  "mlx-vlm:41962": ["~/models/gemma-4-e4b-it-6bit"],
+  "flash-moe:41966": ["~/models/gemma-4-26b-a4b-it-6bit"],
   "nous": ["xiaomi/mimo-v2-pro"],
   "openrouter": ["xiaomi/mimo-v2-omni", "anthropic/claude-sonnet-4", "anthropic/claude-opus-4", "openai/gpt-4o", "openai/o3-mini"],
   "anthropic": ["claude-sonnet-4-20250514", "claude-opus-4-20250514", "claude-haiku-3.5"],
