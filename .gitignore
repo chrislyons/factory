@@ -89,3 +89,4 @@ portal/public/**/*.draft
 portal/docs/*.html
 agents/ig88/docs/ig88/plots/
 agents/ig88/timers/
+portal-dist/
