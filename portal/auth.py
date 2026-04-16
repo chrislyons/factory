@@ -166,7 +166,7 @@ class AuthHandler(http.server.BaseHTTPRequestHandler):
             return
 
         # Data proxy paths — validate cookie then forward to GSD
-        if self.path.startswith(DATA_PATHS) or self.path.startswith("/status/"):
+        if self.path.startswith(DATA_PATHS) or self.path.startswith(("/status/", "/analytics/", "/budget/")):
             if self._cookie_valid():
                 self.proxy_to_gsd(self.path)
             else:
