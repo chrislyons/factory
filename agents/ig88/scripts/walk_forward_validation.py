@@ -589,10 +589,9 @@ class StrategyEngine:
 
 def load_symbol_data(symbol: str) -> Optional[pd.DataFrame]:
     """Load OHLCV data for a symbol"""
-    # Try different file name patterns
+    # Try different file name patterns — PRIORITY: deep 60m data first
+    # DO NOT use _1h.parquet files (truncated to 500 bars, created Apr 15 2026)
     patterns = [
-        f'binance_{symbol}USDT_1h.parquet',
-        f'binance_{symbol}USDT.parquet',
         f'binance_{symbol}_USDT_60m.parquet',
         f'binance_{symbol}USDT_60m.parquet',
         f'binance_{symbol}USD_1440m.parquet',
