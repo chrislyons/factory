@@ -155,29 +155,42 @@ venues:
 
   jupiter_perps:
     enabled: true
-    effort_pct: 25
+    effort_pct: 40          # Primary venue — most effort here
     paper_mode: true
     pairs:
-      - SOL-PERP
-      - AVAX-PERP
-      - ETH-PERP
-      - NEAR-PERP
-      - LINK-PERP
-      - BTC-PERP
+      # LONG sleeve (9 validated assets)
+      - FIL-PERP            # PF 2.37-2.74, uncorrelated with core
+      - SUI-PERP            # PF 1.93-2.74
+      - AVAX-PERP           # WF PF 1.91
+      - NEAR-PERP           # WF PF 1.91
+      - RNDR-PERP           # PF 1.68-2.28, uncorrelated with core
+      - WLD-PERP            # PF 1.67-2.36
+      - ETH-PERP            # WF PF 1.72
+      - LINK-PERP           # WF PF 1.71
+      - SOL-PERP            # WF PF 2.03
+      # SHORT sleeve (5 validated assets)
+      # Same pairs, short direction with Variant B params
     leverage:
       default: 2
-      max: 3
+      max: 3                # 3x only after live DD < 25%
     fees:
-      open_close_pct: 0.07    # Each side
-      round_trip_pct: 0.14    # Minimum; can reach 0.22% with price impact
+      open_close_pct: 0.07  # Each side
+      round_trip_pct: 0.14  # Minimum; can reach 0.22% with price impact
       borrow_rate_hourly: true # Varies by utilization
-    min_expected_move_pct: 0.01  # Lowered for MR paper trading
-    max_open_positions: 6    # Allow multiple pairs
+    strategy: atr_breakout  # ONLY validated edge (IG88075)
+    atr_params:
+      lookback: 20          # Donchian period (asset-specific overrides in registry)
+      atr_period: 10
+      atr_mult: 1.5         # IG88075: 1.5x confirmed on 4/5 assets (was 2.0)
+      trail_pct: 0.02       # 2% trailing stop from highest close
+      max_hold_hours: 96    # 4 days
+      short_atr_mult: 2.5   # Variant B short entry
+      short_trail_pct: 0.025
+      short_max_hold_hours: 48
+    max_open_positions: 6
     min_hold_hours: 2
-    max_hold_hours: 8
-    tp_sl_required: true       # No naked positions
-    borrow_fee_autoclose_pct: 50  # Auto-close when borrow fee hits 50% of TP
-    edge_threshold: 0.01       # Lowered for MR paper trading
+    tp_sl_required: true    # No naked positions
+    funding_monitoring: true # Short funding is 11-22% ann in bull markets
 
   solana_dex:
     enabled: true
