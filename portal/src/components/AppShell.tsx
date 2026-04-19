@@ -86,6 +86,14 @@ export function AppShell({
         </div>
       </header>
 
+      {import.meta.env.VITE_DEMO_MODE === "true" && (
+        <div className="demo-banner" role="status">
+          <span className="demo-banner__badge">DEMO</span>
+          Static preview — mock data, no live backend.
+          <a href="https://github.com/chrislyons/factory" className="demo-banner__link">View source →</a>
+        </div>
+      )}
+
       <main className="portal-main">
         <section className="portal-hero">
           {eyebrow && <div className="portal-hero__eyebrow">{eyebrow}</div>}

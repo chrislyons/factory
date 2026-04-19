@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { matchDemoUrl } from "./demo-data";
 import type {
   ActiveLoop,
   AgentBudgetStatus,
@@ -46,8 +47,11 @@ function getCsrfToken(): string {
   return match?.[1] ?? "";
 }
 
+const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === "true";
+
 async function parseResponse<T>(response: Response): Promise<T> {
   if (response.status === 401) {
+    if (DEMO_MODE) throw new ApiError("Demo mode — no backend", 401);
     const here = window.location.pathname + window.location.search;
     window.location.assign(`/pages/login.html?redirect=${encodeURIComponent(here)}`);
     throw new ApiError("Session expired — redirecting to login", 401);
@@ -59,6 +63,12 @@ async function parseResponse<T>(response: Response): Promise<T> {
 }
 
 export async function fetchJson<T>(input: string, init?: RequestInit) {
+  // Demo mode: intercept GET requests and return mock data
+  if (DEMO_MODE && (!init || !init.method || init.method === "GET")) {
+    const mock = matchDemoUrl(input);
+    if (mock !== null) return mock as T;
+  }
+
   const method = init?.method?.toUpperCase() ?? "GET";
   const csrfHeaders: Record<string, string> =
     method === "POST" || method === "PUT" || method === "DELETE" || method === "PATCH"

@@ -1,0 +1,75 @@
+name: Deploy Portal to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "portal/src/**"
+      - "portal/public/**"
+      - "portal/*.html"
+      - "portal/vite.config.ts"
+      - "portal/package.json"
+      - ".github/workflows/deploy-portal.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: portal/pnpm-lock.yaml
+
+      - name: Install dependencies
+        working-directory: portal
+        run: pnpm install --frozen-lockfile
+
+      - name: Build (demo mode)
+        working-directory: portal
+        run: pnpm build
+        env:
+          VITE_DEMO_MODE: "true"
+
+      - name: Add SPA fallback for GitHub Pages
+        run: |
+          # GitHub Pages serves static files — redirect deep links to index
+          # For multi-page app, copy each page's HTML as 404 fallback
+          cd portal/dist/pages
+          for f in *.html; do
+            name="${f%.html}"
+            mkdir -p "$name"
+            cp "$f" "$name/index.html"
+          done
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: portal/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
