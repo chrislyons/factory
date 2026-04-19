@@ -7,8 +7,11 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(dirname "$SCRIPT_DIR")"
 PORTAL_DIR="$REPO_ROOT/portal"
 
-echo "── Installing pnpm ──"
-npm install -g pnpm@latest
+echo "── Ensuring pnpm ──"
+if ! command -v pnpm &>/dev/null; then
+  npm install -g pnpm@latest
+fi
+pnpm --version
 
 echo "── Installing dependencies ──"
 cd "$PORTAL_DIR"
