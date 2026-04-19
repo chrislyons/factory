@@ -5,6 +5,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { SyncClock } from "../components/primitives/SyncClock";
+import { MemoryBar } from "../components/primitives/MemoryBar";
 import { AppShell, SurfaceCard } from "../components/AppShell";
 import { AGENTS } from "../lib/constants";
 import { cn } from "../lib/utils";
@@ -483,44 +484,6 @@ function Preferences({
         </div>
       </div>
     </SurfaceCard>
-  );
-}
-
-function MemoryBar({ budget }: { budget: MemoryBudget }) {
-  if (!budget) return null;
-  const pctUsed = Math.min(100, (budget.used_by_inference_gb / budget.total_gb) * 100);
-  const pctAvailable = Math.min(100 - pctUsed, (budget.available_gb / budget.total_gb) * 100);
-  const crit = budget.available_gb < 1.0;
-  const tight = budget.available_gb < 3.0 && !crit;
-
-  return (
-    <div className="memory-bar">
-      <div className="memory-bar__track">
-        <div
-          className={cn("memory-bar__fill memory-bar__fill--inference", crit && "memory-bar__fill--crit")}
-          style={{ width: `${pctUsed}%` }}
-          title={`Inference: ${budget.used_by_inference_gb}GB`}
-        />
-        <div
-          className="memory-bar__fill memory-bar__fill--available"
-          style={{ width: `${pctAvailable}%`, left: `${pctUsed}%` }}
-          title={`Available: ${budget.available_gb}GB`}
-        />
-      </div>
-      <div className="memory-bar__labels">
-        <span className="memory-bar__label">
-          {budget.used_by_inference_gb}GB inference
-        </span>
-        <span className={cn("memory-bar__label", crit && "memory-bar__label--crit", tight && "memory-bar__label--tight")}>
-          {budget.available_gb}GB free / {budget.total_gb}GB total
-        </span>
-      </div>
-      {crit && (
-        <div className="memory-bar__warn">
-          Memory critical — restarts blocked unless forced
-        </div>
-      )}
-    </div>
   );
 }
 

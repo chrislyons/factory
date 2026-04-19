@@ -5,10 +5,10 @@ import { BudgetBar } from "../components/primitives/BudgetBar";
 import { EmptyState } from "../components/primitives/EmptyState";
 import { SyncClock } from "../components/primitives/SyncClock";
 import {
-  useBudgetOverride,
   useFactoryStats,
   useTasksDocument
 } from "../hooks/usePortalQueries";
+import { MemoryBar } from "../components/primitives/MemoryBar";
 import type { AgentId } from "../lib/types";
 import { budgetStatusKind, cn, formatUsd } from "../lib/utils";
 
@@ -119,69 +119,11 @@ function AgentStatCard({
   );
 }
 
-// ── Memory bar ──────────────────────────────────────────────────────
-
-function MemoryBar({
-  totalGb,
-  inferenceGb,
-  availableGb
-}: {
-  totalGb: number;
-  inferenceGb: number;
-  availableGb: number;
-}) {
-  const usedOther = Math.max(0, totalGb - inferenceGb - availableGb);
-  const infPct = totalGb > 0 ? (inferenceGb / totalGb) * 100 : 0;
-  const usedPct = totalGb > 0 ? (usedOther / totalGb) * 100 : 0;
-  const availPct = totalGb > 0 ? (availableGb / totalGb) * 100 : 100;
-
-  return (
-    <div className="stats-memory-bar">
-      <div className="stats-memory-bar__track">
-        {inferenceGb > 0 && (
-          <div
-            className="stats-memory-bar__seg stats-memory-bar__seg--inference"
-            style={{ width: `${infPct}%` }}
-            title={`Inference: ${inferenceGb.toFixed(1)} GB`}
-          />
-        )}
-        {usedOther > 0 && (
-          <div
-            className="stats-memory-bar__seg stats-memory-bar__seg--used"
-            style={{ width: `${usedPct}%` }}
-            title={`System: ${usedOther.toFixed(1)} GB`}
-          />
-        )}
-        <div
-          className="stats-memory-bar__seg stats-memory-bar__seg--available"
-          style={{ width: `${availPct}%` }}
-          title={`Available: ${availableGb.toFixed(1)} GB`}
-        />
-      </div>
-      <div className="stats-memory-bar__legend">
-        <span>
-          <i className="stats-memory-bar__swatch stats-memory-bar__swatch--inference" />
-          Inference {inferenceGb.toFixed(1)} GB
-        </span>
-        <span>
-          <i className="stats-memory-bar__swatch stats-memory-bar__swatch--used" />
-          System {usedOther.toFixed(1)} GB
-        </span>
-        <span>
-          <i className="stats-memory-bar__swatch stats-memory-bar__swatch--available" />
-          Free {availableGb.toFixed(1)} GB
-        </span>
-      </div>
-    </div>
-  );
-}
-
 // ── Main page ───────────────────────────────────────────────────────
 
 export function AnalyticsPage() {
   const stats = useFactoryStats();
   const tasks = useTasksDocument();
-  const override = useBudgetOverride();
 
   const configAgents = stats.config.data?.agents ?? [];
   const memBudget = stats.memory.data;
@@ -295,11 +237,7 @@ export function AnalyticsPage() {
           <EmptyState compact title="Loading memory data" detail="Polling /api/config/memory-budget" />
         ) : (
           <div className="stats-memory-section">
-            <MemoryBar
-              totalGb={memBudget.total_gb}
-              inferenceGb={memBudget.used_by_inference_gb}
-              availableGb={memBudget.available_gb}
-            />
+            <MemoryBar budget={memBudget} />
 
             <div className="stats-models-grid">
               {memBudget.models.map((m) => {
@@ -443,8 +381,8 @@ export function AnalyticsPage() {
                     <button
                       className="secondary-button"
                       type="button"
-                      disabled={override.isPending}
-                      onClick={() => override.mutate(agent.agent_id as AgentId)}
+                      disabled={true}
+                      title="Budget override not yet implemented"
                     >
                       Override
                     </button>
