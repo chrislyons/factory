@@ -47,6 +47,11 @@ jobs:
         env:
           VITE_DEMO_MODE: "true"
 
+      - name: Fix root entry point
+        run: |
+          cd portal/dist
+          cp portal.html index.html
+
       - name: Add SPA fallback for GitHub Pages
         run: |
           # GitHub Pages serves static files — redirect deep links to index
