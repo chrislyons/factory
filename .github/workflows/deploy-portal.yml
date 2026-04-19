@@ -41,27 +41,10 @@ jobs:
         working-directory: portal
         run: pnpm install --frozen-lockfile
 
-      - name: Build (demo mode)
-        working-directory: portal
-        run: pnpm build
+      - name: Build demo
+        run: bash scripts/build-demo.sh
         env:
           VITE_DEMO_MODE: "true"
-
-      - name: Fix root entry point
-        run: |
-          cd portal/dist
-          cp portal.html index.html
-
-      - name: Add SPA fallback for GitHub Pages
-        run: |
-          # GitHub Pages serves static files — redirect deep links to index
-          # For multi-page app, copy each page's HTML as 404 fallback
-          cd portal/dist/pages
-          for f in *.html; do
-            name="${f%.html}"
-            mkdir -p "$name"
-            cp "$f" "$name/index.html"
-          done
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
