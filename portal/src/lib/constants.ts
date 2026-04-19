@@ -21,6 +21,13 @@ export const AGENTS: AgentDefinition[] = [
   { id: "ig88", label: "IG-88", shortLabel: "IG", color: "#f97316", accent: "#f97316", model: "Nanbeige4.1-3B-8bit", trust: "L3 Operator" },
 ];
 
+/** Demo anonymized agents — used only when VITE_DEMO_MODE=true */
+export const DEMO_AGENTS_LIST: AgentDefinition[] = [
+  { id: "agent-1", label: "Agent 1", shortLabel: "A1", color: "#38bdf8", accent: "#38bdf8", model: "gemma-4-7b", trust: "L2 Advisor" },
+  { id: "agent-2", label: "Agent 2", shortLabel: "A2", color: "#a78bfa", accent: "#a78bfa", model: "gemma-4-7b", trust: "L2 Advisor" },
+  { id: "agent-3", label: "Agent 3", shortLabel: "A3", color: "#f97316", accent: "#f97316", model: "mimo-v2", trust: "L3 Operator" },
+];
+
 export const NAV_LINKS = [
   { href: PORTAL_HOME, label: "Jobs" },
   { href: "/pages/loops.html", label: "Loops" },
@@ -43,6 +50,6 @@ export interface AssigneeDefinition {
 }
 
 export const ASSIGNEES: AssigneeDefinition[] = [
-  ...AGENTS.map(a => ({ id: a.id, label: a.label, color: a.color })),
+  ...(import.meta.env.VITE_DEMO_MODE === "true" ? DEMO_AGENTS_LIST : AGENTS).map(a => ({ id: a.id, label: a.label, color: a.color })),
   { id: "chris", label: "Chris", color: "#94a3b8" },
 ];

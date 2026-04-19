@@ -231,7 +231,7 @@ export function AnalyticsPage() {
       {/* ── Memory & Inference ──────────────────────────────────────── */}
       <SurfaceCard
         title="Memory & Inference"
-        subtitle={memBudget ? `${memBudget.total_gb.toFixed(0)} GB total on Whitebox` : "Loading..."}
+        subtitle={memBudget ? `${memBudget.total_gb.toFixed(0)} GB total` : "Loading..."}
       >
         {!memBudget ? (
           <EmptyState compact title="Loading memory data" detail="Polling /api/config/memory-budget" />

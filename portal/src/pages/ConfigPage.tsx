@@ -7,7 +7,7 @@ import {
 import { SyncClock } from "../components/primitives/SyncClock";
 import { MemoryBar } from "../components/primitives/MemoryBar";
 import { AppShell, SurfaceCard } from "../components/AppShell";
-import { AGENTS } from "../lib/constants";
+import { AGENTS, DEMO_AGENTS_LIST } from "../lib/constants";
 import { cn } from "../lib/utils";
 import {
   fetchAgentConfig,
@@ -23,11 +23,19 @@ import type {
   MemoryBudget,
 } from "../lib/api";
 
-const CONFIG_AGENTS = AGENTS.filter((a) =>
-  ["boot", "kelk", "ig88"].includes(a.id)
-);
+const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === "true";
 
-const AGENT_PROVIDERS: Record<string, { value: string; label: string }[]> = {
+const CONFIG_AGENTS = DEMO_MODE
+  ? DEMO_AGENTS_LIST
+  : AGENTS.filter((a) => ["boot", "kelk", "ig88"].includes(a.id));
+
+const AGENT_PROVIDERS: Record<string, { value: string; label: string }[]> = DEMO_MODE
+  ? {
+    "agent-1": [{ value: "local", label: "Local" }],
+    "agent-2": [{ value: "local", label: "Local" }],
+    "agent-3": [{ value: "cloud", label: "Cloud" }, { value: "openrouter", label: "OpenRouter" }],
+  }
+  : {
   boot: [
     { value: "mlx-vlm:41961", label: "MLX-VLM :41961" },
   ],
@@ -42,7 +50,13 @@ const AGENT_PROVIDERS: Record<string, { value: string; label: string }[]> = {
 };
 
 /** Aux provider options per agent — :41966 is aux engine for Boot/Kelk */
-const AGENT_AUX_PROVIDERS: Record<string, { value: string; label: string }[]> = {
+const AGENT_AUX_PROVIDERS: Record<string, { value: string; label: string }[]> = DEMO_MODE
+  ? {
+    "agent-1": [{ value: "shared", label: "Shared Engine" }],
+    "agent-2": [{ value: "shared", label: "Shared Engine" }],
+    "agent-3": [{ value: "cloud", label: "Cloud" }, { value: "openrouter", label: "OpenRouter" }],
+  }
+  : {
   boot: [
     { value: "flash-moe:41966", label: "Flash-MoE :41966" },
   ],
@@ -57,7 +71,13 @@ const AGENT_AUX_PROVIDERS: Record<string, { value: string; label: string }[]> = 
 };
 
 /** Model options per agent per provider — local ~/models/ paths, cloud model slugs */
-const AGENT_PROVIDER_MODELS: Record<string, Record<string, string[]>> = {
+const AGENT_PROVIDER_MODELS: Record<string, Record<string, string[]>> = DEMO_MODE
+  ? {
+    "agent-1": { local: ["gemma-4-7b"] },
+    "agent-2": { local: ["gemma-4-7b"] },
+    "agent-3": { cloud: ["mimo-v2"], openrouter: ["mimo-v2-omni", "claude-sonnet-4", "gpt-4o"] },
+  }
+  : {
   boot: {
     "mlx-vlm:41961": ["~/models/gemma-4-e4b-it-6bit"],
     "flash-moe:41966": ["~/models/gemma-4-26b-a4b-it-6bit"],
@@ -466,12 +486,12 @@ function Preferences({
               </span>
               <MemoryBar budget={budget} />
               <div className="memory-budget-details">
-                {budget.models
-                  .filter((m) => m.port !== null)
-                  .map((m) => (
+                {budget.models.map((m) => (
                     <div key={m.agent} className="memory-budget-row">
                       <span className="memory-budget-row__agent">{m.agent}</span>
-                      <span className="memory-budget-row__port">:{m.port}</span>
+                      {m.port !== null && (
+                        <span className="memory-budget-row__port">:{m.port}</span>
+                      )}
                       <span className="memory-budget-row__est">{m.est_gb}GB</span>
                       <span className={cn("memory-budget-row__status", m.loaded ? "memory-budget-row__status--up" : "memory-budget-row__status--down")}>
                         {m.loaded ? "loaded" : "idle"}
