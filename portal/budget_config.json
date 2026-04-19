@@ -1,0 +1,8 @@
+{
+  "monthly_limits_usd": {
+    "boot": 50.0,
+    "kelk": 25.0,
+    "ig88": 100.0,
+    "coord": 10.0
+  }
+}
