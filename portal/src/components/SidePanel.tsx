@@ -2,22 +2,87 @@ import { useRef, useEffect, useCallback } from "react";
 import type { TaskRecord, TaskBlock } from "../lib/types";
 import { cn } from "../lib/utils";
 
+// ── Generic Slide-Over Panel ─────────────────────────────────────────
+
 interface SidePanelProps {
   open: boolean;
-  view: "deps" | "completions";
   onClose: () => void;
-  tasks: TaskRecord[];
-  blocks: Record<string, TaskBlock>;
+  // Generic mode
+  title?: string;
+  children?: React.ReactNode;
+  // Jobs-specific mode
+  view?: "deps" | "completions";
+  tasks?: TaskRecord[];
+  blocks?: Record<string, TaskBlock>;
 }
 
-interface SidePanelContentProps {
+export function SidePanel({ open, onClose, title, children, view, tasks, blocks }: SidePanelProps) {
+  const panelRef = useRef<HTMLDivElement>(null);
+  const touchStartX = useRef(0);
+
+  useEffect(() => {
+    if (!open) return;
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, [open, onClose]);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  }, []);
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    const diff = e.changedTouches[0].clientX - touchStartX.current;
+    if (diff > 80) onClose();
+  }, [onClose]);
+
+  return (
+    <>
+      <div
+        className={cn("side-panel__backdrop", open && "is-visible")}
+        onClick={onClose}
+      />
+      <div
+        ref={panelRef}
+        className={cn("side-panel", open && "is-open")}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
+        {/* Jobs-specific mode: render task panel content */}
+        {view && tasks ? (
+          <TaskSidePanelContent view={view} tasks={tasks} blocks={blocks ?? {}} onClose={onClose} />
+        ) : (
+          <>
+            {title && (
+              <div className="side-panel__header">
+                <div>
+                  <h2>{title}</h2>
+                </div>
+                <button className="secondary-button" type="button" onClick={onClose}>&times;</button>
+              </div>
+            )}
+            <div className="side-panel__body">
+              {children}
+            </div>
+          </>
+        )}
+      </div>
+    </>
+  );
+}
+
+// ── Jobs-Specific Content (used by Dashboard) ────────────────────────
+
+interface TaskSidePanelContentProps {
   view: "deps" | "completions";
   tasks: TaskRecord[];
   blocks: Record<string, TaskBlock>;
   onClose?: () => void;
 }
 
-export function SidePanelContent({ view, tasks, blocks, onClose }: SidePanelContentProps) {
+function TaskSidePanelContent({ view, tasks, blocks, onClose }: TaskSidePanelContentProps) {
   const blockedTasks = tasks.filter(t => t.blocked_by.length > 0);
   const completedTasks = tasks
     .filter(t => t.status === "done")
@@ -65,42 +130,22 @@ export function SidePanelContent({ view, tasks, blocks, onClose }: SidePanelCont
   );
 }
 
-export function SidePanel({ open, view, onClose, tasks, blocks }: SidePanelProps) {
-  const panelRef = useRef<HTMLDivElement>(null);
-  const touchStartX = useRef(0);
+// ── Generic Content Wrapper ──────────────────────────────────────────
 
-  useEffect(() => {
-    if (!open) return;
-    function handleKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
-    }
-    document.addEventListener("keydown", handleKey);
-    return () => document.removeEventListener("keydown", handleKey);
-  }, [open, onClose]);
+interface SidePanelContentProps {
+  view?: "deps" | "completions";
+  tasks?: TaskRecord[];
+  blocks?: Record<string, TaskBlock>;
+  onClose?: () => void;
+  children?: React.ReactNode;
+}
 
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-  }, []);
+export function SidePanelContent({ view, tasks, blocks, onClose, children }: SidePanelContentProps) {
+  // Jobs-specific mode
+  if (view && tasks) {
+    return <TaskSidePanelContent view={view} tasks={tasks} blocks={blocks ?? {}} onClose={onClose} />;
+  }
 
-  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-    const diff = e.changedTouches[0].clientX - touchStartX.current;
-    if (diff > 80) onClose();
-  }, [onClose]);
-
-  return (
-    <>
-      <div
-        className={cn("side-panel__backdrop", open && "is-visible")}
-        onClick={onClose}
-      />
-      <div
-        ref={panelRef}
-        className={cn("side-panel", open && "is-open")}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-      >
-        <SidePanelContent view={view} tasks={tasks} blocks={blocks} onClose={onClose} />
-      </div>
-    </>
-  );
+  // Generic mode: just render children
+  return <>{children}</>;
 }

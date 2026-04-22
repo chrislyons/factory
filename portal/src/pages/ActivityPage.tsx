@@ -52,7 +52,7 @@ function kindTone(kind: ActivityEntry["kind"]): string {
   }
 }
 
-type FilterKind = "all" | ActivityEntry["kind"];
+type GroupFilter = "all" | "session" | "tool" | "cron" | "task" | "error" | "config";
 
 // ── Activity Row ────────────────────────────────────────────────────
 
@@ -82,16 +82,40 @@ function ActivityRow({ entry }: { entry: ActivityEntry }) {
 // ── Main Page ───────────────────────────────────────────────────────
 
 export function ActivityPage() {
-  const [kindFilter, setKindFilter] = useState<FilterKind>("all");
   const [search, setSearch] = useState("");
 
   const allActivity: ActivityEntry[] = DEMO_MODE ? DEMO_ACTIVITY : [];
 
+  const [groupFilter, setGroupFilter] = useState<GroupFilter>("all");
+
+  const groupKinds: Record<string, ActivityEntry["kind"][]> = {
+    session: ["session_start", "session_end"],
+    tool: ["tool_call"],
+    cron: ["cron_run"],
+    task: ["task_update"],
+    error: ["error"],
+    config: ["config_change"],
+  };
+
+  const groupLabels: Record<string, string> = {
+    all: "All",
+    session: "Session",
+    tool: "Tool",
+    cron: "Cron",
+    task: "Task",
+    error: "Error",
+    config: "Config",
+  };
+
+  const groups: GroupFilter[] = ["all", "session", "tool", "cron", "task", "error", "config"];
+
+  // Update filtered logic
   const filtered = useMemo(() => {
     let entries = [...allActivity];
 
-    if (kindFilter !== "all") {
-      entries = entries.filter((e) => e.kind === kindFilter);
+    if (groupFilter !== "all") {
+      const matchKinds = groupKinds[groupFilter] ?? [];
+      entries = entries.filter((e) => matchKinds.includes(e.kind));
     }
 
     if (search.trim()) {
@@ -99,24 +123,13 @@ export function ActivityPage() {
       entries = entries.filter(
         (e) =>
           e.summary.toLowerCase().includes(q) ||
-          e.agent.toLowerCase().includes(q) ||
-          (e.detail && e.detail.toLowerCase().includes(q))
+          (e.agent ?? "").toLowerCase().includes(q) ||
+          (e.detail ?? "").toLowerCase().includes(q)
       );
     }
 
     return entries;
-  }, [allActivity, kindFilter, search]);
-
-  const kinds: FilterKind[] = [
-    "all",
-    "session_start",
-    "session_end",
-    "tool_call",
-    "cron_run",
-    "task_update",
-    "error",
-    "config_change",
-  ];
+  }, [allActivity, groupFilter, search]);
 
   const errorCount = allActivity.filter((e) => e.kind === "error").length;
 
@@ -161,14 +174,14 @@ export function ActivityPage() {
             onChange={(e) => setSearch(e.target.value)}
           />
           <div className="activity-filter-pills">
-            {kinds.map((k) => (
+            {groups.map((g) => (
               <button
-                key={k}
+                key={g}
                 type="button"
-                className={cn("activity-pill", kindFilter === k && "activity-pill--active")}
-                onClick={() => setKindFilter(k)}
+                className={cn("activity-pill", groupFilter === g && "activity-pill--active")}
+                onClick={() => setGroupFilter(g)}
               >
-                {k === "all" ? "All" : kindLabel(k as ActivityEntry["kind"])}
+                {groupLabels[g]}
               </button>
             ))}
           </div>
@@ -180,7 +193,7 @@ export function ActivityPage() {
             compact
             title="No events found"
             detail={
-              search || kindFilter !== "all"
+              search || groupFilter !== "all"
                 ? "Try adjusting your filters."
                 : "Activity will appear here as agents work."
             }
