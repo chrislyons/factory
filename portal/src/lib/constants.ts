@@ -30,7 +30,11 @@ export const DEMO_AGENTS_LIST: AgentDefinition[] = [
 
 export const NAV_LINKS = [
   { href: PORTAL_HOME, label: "Jobs" },
+  { href: "/pages/sessions.html", label: "Sessions" },
   { href: "/pages/loops.html", label: "Loops" },
+  { href: "/pages/cron.html", label: "Cron" },
+  { href: "/pages/health.html", label: "Health" },
+  { href: "/pages/activity.html", label: "Activity" },
   { href: "/pages/docs.html", label: "Docs" },
   { href: "/pages/analytics.html", label: "Stats" },
   { href: "/pages/config.html", label: "Config" },
