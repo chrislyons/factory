@@ -1,19 +1,27 @@
 #!/usr/bin/env python3
 """
-ATR Breakout Paper Trader v5 — Walk-Forward Validated Portfolio
-================================================================
-Based on walk-forward bootstrap validation (IG88080):
-- ETH LONG with 50% ATR% vol filter (PF 1.93, avg 0.64%/trade)
-- LINK LONG, no filter (PF 2.43, 4/4 WF splits profitable)
+ATR Breakout Paper Trader v5 — Regime-Agnostic Portfolio
+=========================================================
+Key change from v4: SHORT entries fire when assets are BELOW SMA100.
+This prevents the strategy from sitting idle during bearish regimes.
 
-Only 2 strategies — honest assessment of what's actually robust.
-Previous v4 ran 14 strategies, most of which fail walk-forward.
+LONG (above SMA100):
+  - 12 assets: ETH, AVAX, SOL, LINK, NEAR, FIL, SUI, RNDR, DOGE, LTC, AAVE, OP
+  - Entry: close > prev Donchian(20) upper
+  - 1.0% trailing stop, 96h max hold
 
-State file: data/paper_v5/state.json
+SHORT (below SMA100):
+  - 4 assets: ARB, OP, ETH, APT (WF-validated: PF 4.14, 2.57, 1.85, 1.76)
+  - Entry: close < prev Donchian(20) lower - ATR * 2.5
+  - 2.5% trailing stop, 48h max hold
+  - Funding rate bonus: +11-22% ann in bull markets
+
+Regime gate: SMA100 per-asset
+  - close > SMA100 → LONG eligible, SHORT blocked
+  - close < SMA100 → SHORT eligible, LONG blocked
 """
 import json
-import sys
-import time
+import hashlib
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -25,258 +33,335 @@ BASE_DIR = Path("/Users/nesbitt/dev/factory/agents/ig88")
 DATA_DIR = BASE_DIR / "data" / "paper_v7"
 STATE_FILE = DATA_DIR / "state.json"
 LOG_FILE = DATA_DIR / "scan_log.jsonl"
-
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
-# Strategy config — pair-specific
-STRATEGIES = {
-    "ETH_LONG": {
-        "symbol": "ETH",
-        "side": "long",
-        "donchian": 20,
-        "atr_period": 10,
-        "atr_mult": 1.5,
-        "trail": 0.01,
-        "sma_regime": 100,
-        "vol_filter": 0.50,   # ATR% >= 50th percentile
-        "vol_lookback": 500,
-    },
-    "LINK_LONG": {
-        "symbol": "LINK",
-        "side": "long",
-        "donchian": 20,
-        "atr_period": 10,
-        "atr_mult": 1.5,
-        "trail": 0.01,
-        "sma_regime": 100,
-        "vol_filter": None,   # No vol filter — robust without it
-        "vol_lookback": 500,
-    },
+# Assets — regime-agnostic
+LONG_ASSETS = ["ETH", "AVAX", "SOL", "LINK", "NEAR", "FIL", "SUI", "RNDR",
+               "DOGE", "LTC", "AAVE", "OP"]
+SHORT_ASSETS = ["ARB", "OP", "ETH", "APT"]  # WF-validated robust shorts
+ALL_ASSETS = sorted(set(LONG_ASSETS + SHORT_ASSETS))
+
+# Strategy params
+DONCHIAN = 20
+ATR_PERIOD = 10
+ATR_MULT_ENTRY_SHORT = 1.5  # IG88081: 1.5x optimal (PF 2.95, 345 trades vs 2.67/68 at 2.5x)
+ATR_MULT_STOP = 1.5
+TRAIL_LONG = 0.01       # 1.0%
+TRAIL_SHORT = 0.025     # 2.5%
+MAX_HOLD_LONG = 96
+MAX_HOLD_SHORT = 48
+SMA_REGIME = 100
+FRICTION = 0.0014       # Jupiter perps RT
+
+BINANCE = "https://api.binance.com"
+CANDLE_LIMIT = 200
+
+# Symbol mapping (Binance uses different symbols for some assets)
+SYMBOL_MAP = {
+    "ARB": "ARBUSDT",
+    "OP": "OPUSDT",
+    "ETH": "ETHUSDT",
+    "APT": "APTUSDT",
+    "AVAX": "AVAXUSDT",
+    "SOL": "SOLUSDT",
+    "LINK": "LINKUSDT",
+    "NEAR": "NEARUSDT",
+    "FIL": "FILUSDT",
+    "SUI": "SUIUSDT",
+    "RNDR": "RNDRUSDT",
+    "DOGE": "DOGEUSDT",
+    "LTC": "LTCUSDT",
+    "AAVE": "AAVEUSDT",
 }
 
-CANDLE_LIMIT = 600  # Need 500+ for vol lookback + SMA100
-BINANCE = "https://api.binance.com"
 
-def fetch_klines(symbol, interval="1h", limit=CANDLE_LIMIT):
-    """Fetch OHLCV from Binance."""
+def fetch_klines(asset, interval="1h", limit=CANDLE_LIMIT):
+    symbol = SYMBOL_MAP.get(asset, f"{asset}USDT")
     url = f"{BINANCE}/api/v3/klines"
-    params = {"symbol": f"{symbol}USDT", "interval": interval, "limit": limit}
+    params = {"symbol": symbol, "interval": interval, "limit": limit}
     try:
         resp = requests.get(url, params=params, timeout=15)
         resp.raise_for_status()
         data = resp.json()
     except Exception as e:
-        print(f"  ERROR fetching {symbol}: {e}")
+        print(f"  ERROR fetching {asset} ({symbol}): {e}")
         return None
 
     candles = []
     for k in data:
         candles.append({
-            "time": k[0],
-            "open": float(k[1]),
-            "high": float(k[2]),
-            "low": float(k[3]),
-            "close": float(k[4]),
+            "time": k[0], "open": float(k[1]), "high": float(k[2]),
+            "low": float(k[3]), "close": float(k[4]),
         })
     return candles
 
-def compute_indicators(candles, cfg):
-    """Compute all indicators for a strategy config."""
+
+def compute_indicators(candles):
     n = len(candles)
     close = [c["close"] for c in candles]
     high = [c["high"] for c in candles]
     low = [c["low"] for c in candles]
 
-    # ATR
     tr = [0] * n
     for i in range(1, n):
         tr[i] = max(high[i] - low[i], abs(high[i] - close[i-1]), abs(low[i] - close[i-1]))
 
     atr = [0] * n
-    p = cfg["atr_period"]
-    for i in range(p, n):
-        atr[i] = sum(tr[i-p+1:i+1]) / p
+    for i in range(ATR_PERIOD, n):
+        atr[i] = sum(tr[i-ATR_PERIOD+1:i+1]) / ATR_PERIOD
 
-    # Donchian channels
-    don = cfg["donchian"]
     upper = [0] * n
     lower = [0] * n
-    for i in range(don - 1, n):
-        upper[i] = max(high[i-don+1:i+1])
-        lower[i] = min(low[i-don+1:i+1])
+    for i in range(DONCHIAN - 1, n):
+        upper[i] = max(high[i-DONCHIAN+1:i+1])
+        lower[i] = min(low[i-DONCHIAN+1:i+1])
 
-    # SMA regime
-    sma_period = cfg["sma_regime"]
     sma = [0] * n
-    for i in range(sma_period - 1, n):
-        sma[i] = sum(close[i-sma_period+1:i+1]) / sma_period
-
-    # ATR% percentile rank (for vol filter)
-    atr_pct_rank = [float('nan')] * n
-    if cfg["vol_filter"] is not None:
-        lookback = cfg["vol_lookback"]
-        atr_pct = [atr[i] / close[i] if close[i] > 0 else 0 for i in range(n)]
-        for i in range(lookback, n):
-            window = sorted(atr_pct[i-lookback:i])
-            rank = 0
-            for j, v in enumerate(window):
-                if v >= atr_pct[i]:
-                    rank = j / lookback
-                    break
-            else:
-                rank = 1.0
-            atr_pct_rank[i] = rank
+    for i in range(SMA_REGIME - 1, n):
+        sma[i] = sum(close[i-SMA_REGIME+1:i+1]) / SMA_REGIME
 
     return {
         "close": close, "high": high, "low": low,
-        "atr": atr, "upper": upper, "lower": lower,
-        "sma": sma, "atr_pct_rank": atr_pct_rank,
+        "atr": atr, "upper": upper, "lower": lower, "sma": sma
     }
+
 
 def load_state():
     if STATE_FILE.exists():
         with open(STATE_FILE) as f:
             return json.load(f)
-    return {"positions": {}, "closed_trades": [], "equity": 100000.0,
-            "last_scan": None, "total_trades": 0, "wins": 0}
+    return {
+        "positions": [], "closed_trades": [], "equity": 100000.0,
+        "last_scan": None, "total_trades": 0, "wins": 0,
+    }
+
 
 def save_state(state):
     state["last_scan"] = datetime.now(timezone.utc).isoformat()
     with open(STATE_FILE, "w") as f:
-        json.dump(state, f, indent=2, default=str)
+        json.dump(state, f, indent=2)
 
-def log_event(event):
-    with open(LOG_FILE, "a") as f:
-        f.write(json.dumps(event, default=str) + "\n")
 
-def scan_strategy(name, cfg, state):
-    """Run one scan cycle for a strategy."""
-    candles = fetch_klines(cfg["symbol"])
-    if candles is None or len(candles) < 200:
-        return
+def trade_id(asset, direction, entry_time):
+    raw = f"{asset}_{direction}_{entry_time}"
+    return hashlib.md5(raw.encode()).hexdigest()[:12]
 
-    ind = compute_indicators(candles, cfg)
-    n = len(candles)
-    close = ind["close"]
-    last_close = close[-1]
 
-    results = {"strategy": name, "price": last_close}
+def check_exits(ind, state):
+    closed = []
+    remaining = []
 
-    # Check open position
-    if name in state["positions"]:
-        pos = state["positions"][name]
-        entry = pos["entry"]
-        trail = pos["trail"]
-        side = pos["side"]
+    for pos in state["positions"]:
+        asset = pos["asset"]
+        direction = pos["direction"]
+        entry_price = pos["entry_price"]
+        trail_pct = TRAIL_LONG if direction == "LONG" else TRAIL_SHORT
+        max_hold = MAX_HOLD_LONG if direction == "LONG" else MAX_HOLD_SHORT
 
-        if side == "long":
-            new_trail = max(trail, last_close * (1 - cfg["trail"]))
-            if last_close < new_trail:
-                # Exit
-                pnl = (last_close - entry) / entry
-                pnl_usd = pos["size"] * pnl
-                state["equity"] += pnl_usd
-                state["closed_trades"].append({
-                    "strategy": name, "entry": entry, "exit": last_close,
-                    "pnl_pct": round(pnl * 100, 2), "pnl_usd": round(pnl_usd, 2),
-                    "bars_held": pos.get("bars", 0),
-                    "time": datetime.now(timezone.utc).isoformat()
-                })
-                state["total_trades"] += 1
-                if pnl > 0: state["wins"] += 1
-                del state["positions"][name]
-                results["action"] = "EXIT"
-                results["pnl_pct"] = round(pnl * 100, 2)
-                log_event({"type": "exit", "strategy": name, "pnl_pct": round(pnl*100, 2)})
+        if asset not in ind:
+            remaining.append(pos)
+            continue
+
+        data = ind[asset]
+        current_price = data["close"][-1]
+        current_high = data["high"][-1]
+        current_low = data["low"][-1]
+        current_time = datetime.now(timezone.utc).isoformat()
+
+        entry_dt = datetime.fromisoformat(pos["entry_time"])
+        hours_held = (datetime.now(timezone.utc) - entry_dt).total_seconds() / 3600
+
+        if direction == "LONG":
+            highest = max(pos.get("highest_since_entry", entry_price), current_high)
+            pos["highest_since_entry"] = highest
+            trail_stop = highest * (1 - trail_pct)
+            pos["stop_price"] = max(pos.get("stop_price", 0), trail_stop)
+
+            if pos.get("use_atr_stop", True) and hours_held < 4:
+                atr_stop = entry_price - data["atr"][-1] * ATR_MULT_STOP
+                pos["stop_price"] = max(pos["stop_price"], atr_stop)
+
+            hit_stop = current_low <= pos["stop_price"]
+            hit_hold = hours_held >= max_hold
+            exit_price = pos["stop_price"] if hit_stop else current_price
+        else:
+            lowest = min(pos.get("lowest_since_entry", entry_price), current_low)
+            pos["lowest_since_entry"] = lowest
+            trail_stop = lowest * (1 + trail_pct)
+            pos["stop_price"] = min(pos.get("stop_price", float("inf")), trail_stop)
+
+            hit_stop = current_high >= pos["stop_price"]
+            hit_hold = hours_held >= max_hold
+            exit_price = pos["stop_price"] if hit_stop else current_price
+
+        if hit_stop or hit_hold:
+            if direction == "LONG":
+                pnl_pct = (exit_price - entry_price) / entry_price
             else:
-                pos["trail"] = new_trail
-                pos["bars"] = pos.get("bars", 0) + 1
-                unrealized = (last_close - entry) / entry * 100
-                results["action"] = "HOLD"
-                results["unrealized_pct"] = round(unrealized, 2)
-                results["trail"] = round(new_trail, 2)
-        return results
+                pnl_pct = (entry_price - exit_price) / entry_price
+            net_pnl = pnl_pct - FRICTION
 
-    # Check entry conditions
-    sma = ind["sma"][-1]
-    if sma == 0:
-        return results
+            reason = "STOP" if hit_stop else "TIME"
+            is_win = net_pnl > 0
 
-    atr_val = ind["atr"][-1]
-    if atr_val == 0:
-        return results
+            trade = {
+                "trade_id": pos["trade_id"], "asset": asset,
+                "direction": direction, "entry_price": entry_price,
+                "exit_price": exit_price, "entry_time": pos["entry_time"],
+                "exit_time": current_time,
+                "pnl_pct": round(pnl_pct * 100, 3),
+                "net_pnl_pct": round(net_pnl * 100, 3),
+                "exit_reason": reason, "hours_held": round(hours_held, 1),
+            }
+            closed.append(trade)
+            state["closed_trades"].append(trade)
+            state["total_trades"] += 1
+            if is_win:
+                state["wins"] += 1
 
-    # Vol filter check
-    if cfg["vol_filter"] is not None:
-        vol_rank = ind["atr_pct_rank"][-1]
-        if np.isnan(vol_rank) or vol_rank < cfg["vol_filter"]:
-            results["action"] = "SKIP_VOL"
-            results["vol_rank"] = round(vol_rank, 2) if not np.isnan(vol_rank) else "nan"
-            return results
+            state["equity"] *= (1 + net_pnl)
+            wr = state["wins"] / state["total_trades"] * 100 if state["total_trades"] > 0 else 0
+            print(f"  EXIT {direction} {asset}: {exit_price:.4f} | PnL: {net_pnl*100:+.2f}% | {reason} | {hours_held:.0f}h | WR: {wr:.1f}%")
+        else:
+            remaining.append(pos)
 
-    mult = cfg["atr_mult"]
-    if cfg["side"] == "long":
-        breakout = ind["high"][-2] + mult * ind["atr"][-2]
-        regime_ok = last_close > sma
-        entry_signal = last_close > breakout
-    else:
-        breakout = ind["low"][-2] - mult * ind["atr"][-2]
-        regime_ok = last_close < sma
-        entry_signal = last_close < breakout
+    state["positions"] = remaining
+    return closed
 
-    if regime_ok and entry_signal:
-        # Entry
-        size = state["equity"] * 0.20  # 20% per position (equal weight 2 strategies)
-        if size < 100:
-            results["action"] = "SKIP_CAPITAL"
-            return results
 
-        trail = last_close * (1 - cfg["trail"]) if cfg["side"] == "long" else last_close * (1 + cfg["trail"])
-        state["positions"][name] = {
-            "entry": last_close,
-            "trail": trail,
-            "side": cfg["side"],
-            "size": size,
-            "bars": 0,
-            "time": datetime.now(timezone.utc).isoformat()
-        }
-        state["equity"] -= size  # Reserve capital
-        results["action"] = "ENTRY"
-        results["entry_price"] = last_close
-        results["trail"] = round(trail, 2)
-        results["size"] = round(size, 2)
-        log_event({"type": "entry", "strategy": name, "price": last_close, "size": size})
-    else:
-        results["action"] = "WAIT"
-        results["regime_ok"] = regime_ok
-        results["breakout"] = round(breakout, 2)
-        results["distance_pct"] = round((breakout / last_close - 1) * 100, 2)
+def check_entries(ind, state):
+    existing = {(p["asset"], p["direction"]) for p in state["positions"]}
+    entries = []
 
-    return results
+    # LONG entries: only when above SMA100
+    for asset in LONG_ASSETS:
+        if asset not in ind or (asset, "LONG") in existing:
+            continue
+        data = ind[asset]
+        if data["upper"][-2] == 0 or data["atr"][-1] == 0 or data["sma"][-1] == 0:
+            continue
+
+        close = data["close"][-1]
+        sma = data["sma"][-1]
+
+        # SMA100 regime gate
+        if close <= sma:
+            continue
+
+        prev_upper = data["upper"][-2]
+        if close > prev_upper:
+            entry_price = close
+            atr_stop = entry_price - data["atr"][-1] * ATR_MULT_STOP
+            trail_stop = entry_price * (1 - TRAIL_LONG)
+            stop = max(atr_stop, trail_stop)
+
+            pos = {
+                "trade_id": trade_id(asset, "LONG", datetime.now(timezone.utc).isoformat()),
+                "asset": asset, "direction": "LONG",
+                "entry_price": entry_price, "stop_price": stop,
+                "entry_atr": data["atr"][-1],
+                "entry_time": datetime.now(timezone.utc).isoformat(),
+                "highest_since_entry": entry_price,
+                "use_atr_stop": True,
+            }
+            entries.append(pos)
+            state["positions"].append(pos)
+            print(f"  ENTRY LONG {asset}: {entry_price:.4f} | Stop: {stop:.4f} | SMA100: {sma:.4f}")
+
+    # SHORT entries: only when below SMA100
+    for asset in SHORT_ASSETS:
+        if asset not in ind or (asset, "SHORT") in existing:
+            continue
+        data = ind[asset]
+        if data["lower"][-2] == 0 or data["atr"][-1] == 0 or data["sma"][-1] == 0:
+            continue
+
+        close = data["close"][-1]
+        sma = data["sma"][-1]
+
+        # SMA100 regime gate — SHORT below SMA100
+        if close >= sma:
+            continue
+
+        prev_lower = data["lower"][-2]
+        atr = data["atr"][-1]
+        short_trigger = prev_lower - atr * ATR_MULT_ENTRY_SHORT
+
+        if close < short_trigger:
+            entry_price = close
+            trail_stop = entry_price * (1 + TRAIL_SHORT)
+            atr_stop = entry_price + atr * ATR_MULT_STOP
+            stop = min(trail_stop, atr_stop)
+
+            pos = {
+                "trade_id": trade_id(asset, "SHORT", datetime.now(timezone.utc).isoformat()),
+                "asset": asset, "direction": "SHORT",
+                "entry_price": entry_price, "stop_price": stop,
+                "entry_atr": atr,
+                "entry_time": datetime.now(timezone.utc).isoformat(),
+                "lowest_since_entry": entry_price,
+            }
+            entries.append(pos)
+            state["positions"].append(pos)
+            print(f"  ENTRY SHORT {asset}: {entry_price:.4f} | Stop: {stop:.4f} | SMA100: {sma:.4f}")
+
+    return entries
+
 
 def main():
-    state = load_state()
-    print(f"\n=== ATR Breakout v5 Scan — {datetime.now(timezone.utc).isoformat()} ===")
-    print(f"Equity: ${state['equity']:.2f} | Trades: {state['total_trades']} | "
-          f"Win rate: {state['wins']}/{state['total_trades']}")
+    print(f"=== ATR Paper Trader v5 (Regime-Agnostic) — {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')} ===")
 
-    for name, cfg in STRATEGIES.items():
-        result = scan_strategy(name, cfg, state)
-        if result:
-            action = result.get("action", "?")
-            print(f"\n  {name}: {action}")
-            for k, v in result.items():
-                if k not in ("strategy", "action"):
-                    print(f"    {k}: {v}")
+    state = load_state()
+    print(f"Open positions: {len(state['positions'])} | Total trades: {state['total_trades']} | Equity: ${state['equity']:.2f}")
+
+    ind = {}
+    for asset in ALL_ASSETS:
+        candles = fetch_klines(asset)
+        if candles and len(candles) >= 100:
+            ind[asset] = compute_indicators(candles)
+            regime = "ABOVE" if ind[asset]["close"][-1] > ind[asset]["sma"][-1] else "BELOW"
+            print(f"  {asset}: {len(candles)} candles, close={ind[asset]['close'][-1]:.4f}, SMA100={ind[asset]['sma'][-1]:.4f} ({regime})")
+        else:
+            print(f"  {asset}: insufficient data ({len(candles) if candles else 0} candles)")
+
+    print("\n--- EXITS ---")
+    check_exits(ind, state)
+
+    print("\n--- ENTRIES ---")
+    check_entries(ind, state)
+
+    print(f"\n--- SUMMARY ---")
+    print(f"Open positions: {len(state['positions'])}")
+    for pos in state["positions"]:
+        direction = pos["direction"]
+        asset = pos["asset"]
+        entry = pos["entry_price"]
+        stop = pos["stop_price"]
+        current = ind.get(asset, {}).get("close", [0])[-1]
+        if current > 0:
+            if direction == "LONG":
+                unrealized = (current - entry) / entry * 100
+            else:
+                unrealized = (entry - current) / entry * 100
+            print(f"  {direction} {asset}: entry={entry:.4f} current={current:.4f} PnL={unrealized:+.2f}% stop={stop:.4f}")
+
+    wr = state["wins"] / state["total_trades"] * 100 if state["total_trades"] > 0 else 0
+    print(f"\nTotal closed: {state['total_trades']} | Wins: {state['wins']} | WR: {wr:.1f}% | Equity: ${state['equity']:.2f}")
 
     save_state(state)
 
-    # Summary
-    if state["closed_trades"]:
-        recent = state["closed_trades"][-5:]
-        print(f"\n  Recent trades:")
-        for t in recent:
-            print(f"    {t['strategy']}: {t['pnl_pct']:+.2f}% (${t['pnl_usd']:+.2f})")
+    log_entry = {
+        "time": datetime.now(timezone.utc).isoformat(),
+        "open_positions": len(state["positions"]),
+        "total_trades": state["total_trades"],
+        "equity": round(state["equity"], 2),
+        "win_rate": round(wr, 1),
+    }
+    with open(LOG_FILE, "a") as f:
+        f.write(json.dumps(log_entry) + "\n")
+
+    print("\nDone.")
+
 
 if __name__ == "__main__":
     main()
