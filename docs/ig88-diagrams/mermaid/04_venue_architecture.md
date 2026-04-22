@@ -1,3 +1,6 @@
+# Venue Architecture
+
+```mermaid
 graph TB
     subgraph KRAKEN["KRAKEN SPOT"]
         direction TB
@@ -38,3 +41,5 @@ graph TB
     style JUPITER fill:#a5d8ff,stroke:#adb5bd
     style POLYMARKET fill:#d0bfff,stroke:#adb5bd
     style LUNARCRUSH fill:#ffc9c9,stroke:#c92a2a,stroke-dasharray: 5 5
+
+```

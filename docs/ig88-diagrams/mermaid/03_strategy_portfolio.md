@@ -1,3 +1,6 @@
+# Strategy Portfolio — PnL% Rankings
+
+```mermaid
 graph TB
     subgraph STRATS["STRATEGY PORTFOLIO — PnL% RANKINGS"]
         direction TB
@@ -29,3 +32,5 @@ graph TB
     style S4 fill:#fff3bf,stroke:#adb5bd
     style S5 fill:#d0bfff,stroke:#adb5bd
     style FINDINGS fill:#f8f9fa,stroke:#adb5bd,stroke-dasharray: 5 5
+
+```

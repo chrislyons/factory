@@ -1,3 +1,6 @@
+# Trading Pipeline — Signal to Execution
+
+```mermaid
 flowchart LR
     subgraph FETCH["DATA FETCH"]
         F1["1. OHLCV Fetch\nKraken 1h candles\n11 pairs x 730 bars"]
@@ -35,3 +38,5 @@ flowchart LR
     style FILTER fill:#d0bfff,stroke:#adb5bd
     style EXEC fill:#b2f2bb,stroke:#adb5bd
     style LIVE fill:#b2f2bb,stroke:#2b8a3e,stroke-width:2px,stroke-dasharray: 5 5
+
+```

@@ -1,3 +1,6 @@
+# Project File Structure
+
+```mermaid
 graph LR
     subgraph ROOT["agents/ig88/"]
         direction TB
@@ -45,3 +48,5 @@ graph LR
     style CONFIG fill:#ffd8a8,stroke:#adb5bd
     style DOCS fill:#d0bfff,stroke:#adb5bd
     style MEMORY fill:#fcc2d7,stroke:#adb5bd
+
+```

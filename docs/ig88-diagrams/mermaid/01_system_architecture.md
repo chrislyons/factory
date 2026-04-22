@@ -1,3 +1,6 @@
+# IG-88 System Architecture
+
+```mermaid
 graph TB
     subgraph DATA["DATA SOURCES"]
         D1["Kraken OHLCV API\n(public candles)"]
@@ -51,3 +54,5 @@ graph TB
     SL -.->|"triggers"| CORE
     I1 -.->|"LLM reasoning"| CORE
     I2 -.->|"API keys"| EX
+
+```

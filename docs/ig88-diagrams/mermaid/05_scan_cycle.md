@@ -1,3 +1,6 @@
+# Autonomous Scan Cycle
+
+```mermaid
 flowchart TD
     START["scan-loop.py\n(cron 0 */4 * * *)"]
 
@@ -33,3 +36,5 @@ flowchart TD
     style EXIT fill:#ffc9c9,stroke:#c92a2a
     style SKIP fill:#e9ecef,stroke:#adb5bd
     style REPORT fill:#fcc2d7,stroke:#adb5bd
+
+```
