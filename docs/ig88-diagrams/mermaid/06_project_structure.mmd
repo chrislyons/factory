@@ -1,0 +1,47 @@
+graph LR
+    subgraph ROOT["agents/ig88/"]
+        direction TB
+
+        subgraph SRC["src/"]
+            direction TB
+            Q["quant/\n9 modules\n(backtest, indicators)"]
+            T["trading/\n10 modules\n(paper, executor)"]
+            S["scanner/\n5 modules\n(scan loop, regime)"]
+            V["viz/\n10 modules\n(charts, manim)"]
+        end
+
+        subgraph SCRIPTS["scripts/"]
+            direction TB
+            P9["atr4h_paper_trader_v9.py\n(production)"]
+            EX["executor.py\n(Kraken bridge)"]
+            SL["scan-loop.py\n(cron driver)"]
+            PL["portfolio.py\n(risk monitor)"]
+            AR["archive/\n240+ retired scripts"]
+        end
+
+        subgraph CONFIG["config/"]
+            CF["trading.yaml\n36 pairs, tiers, risk"]
+        end
+
+        subgraph DOCS["docs/ig88/"]
+            D["IG88081-086\nstrategy reports"]
+        end
+
+        subgraph MEMORY["memory/ig88/"]
+            SP["scratchpad.md"]
+            FT["fact/trading.md"]
+            FI["fact/infrastructure.md"]
+        end
+    end
+
+    ROOT --> SRC
+    ROOT --> SCRIPTS
+    ROOT --> CONFIG
+    ROOT --> DOCS
+    ROOT --> MEMORY
+
+    style SRC fill:#a5d8ff,stroke:#adb5bd
+    style SCRIPTS fill:#b2f2bb,stroke:#adb5bd
+    style CONFIG fill:#ffd8a8,stroke:#adb5bd
+    style DOCS fill:#d0bfff,stroke:#adb5bd
+    style MEMORY fill:#fcc2d7,stroke:#adb5bd
