@@ -1,7 +1,7 @@
 # FCT070 MLX Inference Optimization: KV Cache + Prefill Tuning
 
 **Date:** 2026-04-23
-**Status:** Amended — corrected flags after research (TurboQuant blocked)
+**Status:** Deployed — `--kv-bits 8 --prefill-step-size 4096` live on Boot + Kelk
 **Machine:** Mac Studio M1 Max (32GB), Whitebox
 
 ---
@@ -129,6 +129,25 @@ mlx_lib::swap "$OLD" "com.bootindustries.mlx-vlm-kelk" \
   plists/com.bootindustries.mlx-vlm-kelk.plist 41962
 mlx_lib::smoke_test_inference 41962
 ```
+
+## Benchmark Results (2026-04-23)
+
+Flags deployed: `--kv-bits 8 --prefill-step-size 4096` (was: no flags)
+
+| Metric | Boot BEFORE | Boot AFTER | Delta |
+|--------|-------------|------------|-------|
+| Prefill TTFT (~3k tokens) | 28.07s | 5.88s | **4.8x faster** |
+| Generation (256 max tokens) | 6.10s | 6.06s | ~same |
+
+| Metric | Kelk BEFORE | Kelk AFTER | Delta |
+|--------|-------------|------------|-------|
+| Prefill TTFT (~3k tokens) | 30.58s | 4.92s | **6.2x faster** |
+| Generation (256 max tokens) | 5.86s | 5.85s | ~same |
+
+Quality: identical (coherent 200-word output, no gibberish or regression).
+Memory: no baseline increase (KV-8 is lazy, prefill-step-size is transient).
+
+The 5-6x prefill improvement exceeds the 1.2-2x predicted from community benchmarks [5], likely because the default 512 step size was particularly suboptimal for M1 Max 400 GB/s bandwidth.
 
 ## TurboQuant Revisit (watch issue #904)
 
