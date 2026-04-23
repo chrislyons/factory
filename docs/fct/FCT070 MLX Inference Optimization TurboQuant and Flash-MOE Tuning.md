@@ -1,7 +1,7 @@
 # FCT070 MLX Inference Optimization: KV Cache + Prefill Tuning
 
 **Date:** 2026-04-23
-**Status:** Deployed — `--kv-bits 8 --prefill-step-size 4096` live on Boot + Kelk
+**Status:** Deployed — `--prefill-step-size 4096` live on Boot + Kelk. KV quantization removed (all modes broken on Gemma 4).
 **Machine:** Mac Studio M1 Max (32GB), Whitebox
 
 ---
@@ -23,9 +23,15 @@ IG-88 uses cloud inference (OpenRouter) with optional :41966 fallback.
 
 ## Research Findings
 
-### BLOCKER: TurboQuant broken on Gemma 4 MoE
+### BLOCKER: ALL KV quantization broken on Gemma 4
 
-**mlx-vlm issue [#904](https://github.com/Blaizzy/mlx-vlm/issues/904):** `--kv-quant-scheme turboquant` on Gemma 4 models produces `AttributeError: 'array' object has no attribute 'norms'` in `turboquant.py`. Blaizzy confirmed MoE-specific bug. No fix timeline.
+**Two separate bugs prevent any `--kv-bits` on Gemma 4:**
+
+1. **TurboQuant (issue [#904](https://github.com/Blaizzy/mlx-vlm/issues/904)):** `--kv-quant-scheme turboquant` produces `AttributeError: 'array' object has no attribute 'norms'` in `turboquant.py`. Confirmed MoE-specific.
+
+2. **Uniform KV quantization (RotatingKVCache):** `--kv-bits 8` (uniform) crashes during generation with `NotImplementedError: RotatingKVCache Quantization NYI` in `mlx_lm/models/cache.py:550`. Gemma 4's sliding-window attention layers (35 of 42) use `RotatingKVCache`, which has no `to_quantized()` implementation. The server starts fine but fails on first inference request.
+
+**Result:** No KV quantization is possible on Gemma 4 until both RotatingKVCache and TurboQuant MoE support are implemented upstream. Deployed with `--prefill-step-size 4096` only.
 
 ### KV Quantization Safety Matrix
 
@@ -72,7 +78,8 @@ Gemma 4 models are multimodal (`Gemma4ForConditionalGeneration` with `vision_con
 ### Phase 1: Corrected KV + Prefill Flags (all mlx_vlm plists)
 
 **Initial commit (wrong):** `--kv-bits 4 --kv-quant-scheme turboquant --prefill-step-size 512`
-**Amended to (correct):** `--kv-bits 8 --prefill-step-size 4096`
+**Second attempt (still broken):** `--kv-bits 8 --prefill-step-size 4096` — RotatingKVCache NYI crash on inference
+**Final (correct):** `--prefill-step-size 4096` only — no KV quantization
 
 Applied to all 9 mlx_vlm plists:
 - `com.bootindustries.mlx-vlm-boot.plist` (:41961)
@@ -149,7 +156,15 @@ Memory: no baseline increase (KV-8 is lazy, prefill-step-size is transient).
 
 The 5-6x prefill improvement exceeds the 1.2-2x predicted from community benchmarks [5], likely because the default 512 step size was particularly suboptimal for M1 Max 400 GB/s bandwidth.
 
-## TurboQuant Revisit (watch issue #904)
+## Context Length Raised to 128K
+
+Boot and Kelk Hermes profiles updated from `context_length: 96000` to `context_length: 131072` (model's `max_position_embeddings`). KV cache cost at 128K with fp16 (no quantization available): ~3.8GB per instance. At typical working context (8K-32K) the cost is 272MB-976MB. Requires Hermes gateway restart to take effect.
+
+## KV Quantization Revisit (watch both issues)
+
+Needs two upstream fixes before any `--kv-bits` works on Gemma 4:
+1. **RotatingKVCache.to_quantized()** — mlx-lm `cache.py:550`, currently raises NotImplementedError
+2. **TurboQuant MoE support** — mlx-vlm issue #904
 
 When fixed, deploy: `--kv-bits 4 --kv-quant-scheme turboquant --quantized-kv-start 200`
 Expected: ~4x KV savings, 0.997 cosine similarity. Gemma 4's 256-dim keys are favorable.
