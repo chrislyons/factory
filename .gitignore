@@ -90,3 +90,21 @@ portal/docs/*.html
 agents/ig88/docs/ig88/plots/
 agents/ig88/timers/
 portal-dist/
+
+# Root-level Claude Code workspace
+/.claude/
+
+# OS noise
+**/.DS_Store
+
+# Kelk vault (local Obsidian data)
+agents/kelk/kelk-vault/
+
+# Hermes conversation archive
+archive/
+
+# Backup files
+*.backup
+
+# Agent test artifacts
+agents/*/test.*
