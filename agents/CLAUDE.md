@@ -28,134 +28,36 @@ When asked about ANY project, topic, or question:
 
 ---
 
-## Teammate Tagging — Mandatory Protocol
+## Teammates & Tagging
 
-**MANDATORY:** Every message addressed to a teammate MUST include their @tag.
-No @tag = no routing = they don't see it. No exceptions.
+Tags: **@boot** (operator), **@kelk** (counselor), **@ig88** (analyst), **@chrislyons** (human), **@coord** (system)
 
-**Correct formats ONLY:** @boot, @ig88, @kelk, @chrislyons
-**NEVER use:** @boot.industries:matrix.org, @ig88bot:matrix.org, @sir.kelk:matrix.org
-Matrix user IDs are NOT mention tags. They are not parsed by the coordinator.
-
-**When to tag a teammate:**
-- To get a response from a specific agent in the current room: include `@agentname` in your message body. Group rooms require an @mention for the agent's coordinator to route the message to their Claude session. Without it, they won't see it.
-- To hand off a task to another agent's primary room: use `>> @agentname` on its own line. This triggers routing to their room.
-- Plain @mentions without `>>` are in-room requests — use these for collaboration, questions, and status checks.
-- Chris sees all messages. Tag `@chrislyons` for anything requiring his attention.
-
-**Don't police routing:**
-If a message is addressed to another agent and you're not that agent, you don't need to redirect.
-The coordinator handles routing — trust it. You can engage with the content if you have something
-to add. What you shouldn't do is make your response *about* the routing.
-If you have nothing useful to say about the content, say nothing.
-
-**Teammates:**
-- @boot — Projects, development, operations. The operator.
-- @kelk — Personal advisor, reflective companion. The counselor.
-- @ig88 — Market analysis, trading signals, quantitative reasoning. The analyst.
-- @coord — Whitebox system coordinator. System messages, infra alerts, tool approval threads.
+- Every message to a teammate MUST include their @tag — no tag = no routing
+- Use short tags only (@boot, not @boot.industries:matrix.org)
+- `>> @agentname` on its own line = hand off to their room
+- Plain @mention = in-room request
+- Don't police routing — trust the coordinator
 
 ---
 
-## Room Catalogue
+## Room Routing
 
-| Room | Room ID | Default agent | Also responds | all_agents_listen | worker_cwd | Notes |
-|------|---------|---------------|---------------|-------------------|------------|-------|
-| Backrooms | !TlibpvdxVpGNAgjlir | boot | @kelk, @ig88 | YES | (each agent's default_cwd) | General cross-team chat |
-| IG-88 Training | !zRnHwXlrVdCfdNbNOx | ig88 | @boot | no | ~/dev/factory/agents/ig88 | Also Chris<>IG-88 DM; Boot is approval delegate |
-| System Status | !jPovIiHiRrKTQWCOrp | boot | — | no | — | HUD + infra alerts; require_mention: true |
-| General | !MDVmYJtAiHZoBfaQdK | boot | — | no | — | require_mention: true |
-| Chris<>Boot DM | !WBXxFNvnQlbsQywTta | boot | — | — | ~/dev/factory/agents/boot | DM: no mention required |
-| Chris<>Kelk DM | !sLoMlfxPNQeYppNbbS | kelk | — | — | ~/dev/factory/agents/kelk | DM: no mention required |
-| Chris<>Coord DM | !vTNmcZzRgfeFzMEzLc | coord | — | — | — | Approval requests only |
-| Orpheus SDK | !DdGujpFMkFtSImKhTr | boot | — | no | ~/dev/orpheus-sdk | PREFIX: ORP |
-| Carbon | !qkRpAfXWtMLWaqcFDP | boot | — | no | ~/dev/carbon-acx | PREFIX: ACX |
-| Hotbox | !DLmhpBBnzlislEmdWC | boot | — | no | ~/dev/hotbox | PREFIX: HBX |
-| Wordbird | !ePOWKNAupEOwvWfXwV | boot | — | no | ~/dev/wordbird | PREFIX: WBD |
-| Helm | !kVANZjoELuxSiEDvPI | boot | — | no | ~/dev/helm | PREFIX: HLM |
-| Ondina | !YzzEKhPvzdOzCSXyyr | boot | — | no | ~/dev/ondina | PREFIX: OND |
-| Claudezilla | !OXfWqUSrLfbTtHucII | boot | — | no | ~/dev/claudezilla | PREFIX: CLZ |
-| 2110 io | !mABUmsgHyLLULwffPf | boot | — | no | ~/dev/2110-audio-io | PREFIX: AIO |
-| Listmaker | !qGKSZLmmvlwZXYEKIv | boot | — | no | ~/dev/listmaker | PREFIX: LMK |
-| OSD Events | !XzFACuTMTrwnrZKHIB | boot | — | no | ~/dev/osd-v2 | PREFIX: OSD |
+- **Backrooms** — all agents co-exist, general cross-team chat
+- **DM rooms** — auto-respond (no mention required)
+- **Group rooms** — require @mention unless you're the default agent
+- **Project rooms** (Orpheus, Carbon, etc.) — boot-only
 
-**Rules derived from this table:**
-- If your agent is not listed as default or "also responds" for a room: you're listening (if all_agents_listen) but NOT expected to reply unless explicitly @mentioned.
-- Project rooms (Orpheus, Carbon, Hotbox, etc.) are boot-only. IG-88 and Kelk have no role there.
-- DM rooms auto-respond (no mention required). Group rooms require @mention unless you're the default agent.
-- System Status and General have require_mention: true — even boot waits for @mention.
-- The Backrooms is the only room where all three agents actively co-exist.
+Full room catalogue with IDs and cwd mappings: `cat ~/dev/factory/agents/ROOM_CATALOGUE.md`
 
 ---
 
-## Task Coordination — Job Registry
+## Task Coordination
 
-Task tracking uses individual YAML job files in `~/dev/factory/jobs/` with the `job.##.###.####` addressing scheme. The compiled registry is at `~/dev/factory/jobs.json` (built by `scripts/build-jobs-json.py`).
+Jobs live in `~/dev/factory/jobs/` as YAML files, compiled to `jobs.json` via `scripts/build-jobs-json.py`. ID format: `job.BB.TTT.SSSS`.
 
-### Reading Tasks
+**Claim:** set assignee + status in the YAML, rebuild. **Complete:** set status=done, rebuild. **Status:** write to `~/dev/factory/portal/status/{agent}.json` (agent, status, current_task, last_update, blockers, notes).
 
-Read `~/dev/factory/jobs.json` to see all tasks, their status, assignments, dependencies, and blocks.
-
-Job ID format: `job.BB.TTT.SSSS` where BB=block, TTT=task, SSSS=subtask. Example: `job.07.055.0001`.
-
-Key fields per task:
-- id: job address in `job.##.###.####` format (use this in status reports and log entries)
-- status: pending | in-progress | blocked | done
-- assignee: null, "chris", or an agent ID
-- blocked_by: array of job IDs that must complete first
-- order: suggested execution sequence
-- block: grouping category
-
-Only work on tasks where:
-1. assignee is YOUR agent name or null (unassigned)
-2. status is "pending" or "in-progress"
-3. blocked_by is empty or all blockers have status "done"
-
-### Claiming a Task
-
-Edit the job's YAML file in `~/dev/factory/jobs/`, set assignee to your agent name and status to "in-progress". Then rebuild the registry: `python3 ~/dev/factory/scripts/build-jobs-json.py`.
-
-### Completing a Task
-
-Set the job's status to "done" in its YAML file. If other jobs depend on this one and all their blockers are now done, update those to "pending". Rebuild with `python3 ~/dev/factory/scripts/build-jobs-json.py`.
-
-### Reporting Status
-
-Write your status to `~/dev/factory/portal/status/{agent}.json` every time your state changes (starting a task, finishing, getting blocked, going idle). Schema:
-
-```json
-{
-  "agent": "{agent}",
-  "status": "working",
-  "current_task": "job.07.055.0001",
-  "last_update": "<ISO 8601>",
-  "blockers": [],
-  "notes": "human-readable status line"
-}
-```
-
-The dashboard renders this in real time. Chris sees your status within 5 seconds.
-
-### Concurrency Rules
-
-- No locking mechanism. Read-before-write, last-write-wins.
-- NEVER delete or reorder other agents' log entries.
-- NEVER change another agent's status file.
-- If your read of jobs.json shows unexpected state (someone else changed it), re-read and reconcile before writing.
-
-### When Idle
-
-Set your status file to:
-```json
-{
-  "agent": "{agent}",
-  "status": "idle",
-  "current_task": null,
-  "last_update": "<ISO 8601>",
-  "blockers": [],
-  "notes": "Waiting for assignment"
-}
-```
+Only work on tasks where: assignee is you or null, status is pending/in-progress, all blockers are done. Never modify another agent's status file.
 
 ---
 
