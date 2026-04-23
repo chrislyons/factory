@@ -77,9 +77,10 @@ Gemma 4 models are multimodal (`Gemma4ForConditionalGeneration` with `vision_con
 
 ### Phase 1: Corrected KV + Prefill Flags (all mlx_vlm plists)
 
-**Initial commit (wrong):** `--kv-bits 4 --kv-quant-scheme turboquant --prefill-step-size 512`
-**Second attempt (still broken):** `--kv-bits 8 --prefill-step-size 4096` — RotatingKVCache NYI crash on inference
-**Final (correct):** `--prefill-step-size 4096` only — no KV quantization
+**Iteration 1 (wrong):** `--kv-bits 4 --kv-quant-scheme turboquant --prefill-step-size 512`
+**Iteration 2 (broken):** `--kv-bits 8 --prefill-step-size 4096` — RotatingKVCache NYI crash on inference
+**Iteration 3 (Metal OOM):** `--prefill-step-size 4096` — crashes under concurrent load (two 30K+ token prefills simultaneously exhaust Metal GPU memory)
+**Final (stable):** `--prefill-step-size 2048` — 4x default, survives concurrent load, no KV quantization
 
 Applied to all 9 mlx_vlm plists:
 - `com.bootindustries.mlx-vlm-boot.plist` (:41961)
@@ -139,7 +140,7 @@ mlx_lib::smoke_test_inference 41962
 
 ## Benchmark Results (2026-04-23)
 
-Flags deployed: `--kv-bits 8 --prefill-step-size 4096` (was: no flags)
+Flags deployed: `--prefill-step-size 2048` (was: no flags)
 
 | Metric | Boot BEFORE | Boot AFTER | Delta |
 |--------|-------------|------------|-------|
