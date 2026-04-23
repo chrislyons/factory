@@ -1,47 +1,62 @@
-# FCT070 MLX Inference Optimization: TurboQuant and Flash-MOE Tuning
+# FCT070 MLX Inference Optimization: KV Cache + Prefill Tuning
 
 **Date:** 2026-04-23
-**Status:** Implemented (Phase 1), Partial (Phase 2)
+**Status:** Amended — corrected flags after research (TurboQuant blocked)
+**Machine:** Mac Studio M1 Max (32GB), Whitebox
 
 ---
 
 ## Summary
 
-Comprehensive research and optimization of our local MLX inference stack. Discovered that mlx_vlm v0.4.4 — already installed — ships with TurboQuant KV cache quantization, DFlash speculative decoding, vision feature caching, and prefill tuning, none of which were enabled in our launchd plists.
+Comprehensive research and optimization of our local MLX inference stack on M1 Max 32GB. Initial Phase 1 deployed TurboQuant KV + prefill flags, but deep research revealed TurboQuant is broken on Gemma 4 MoE (mlx-vlm issue #904) and uniform 4-bit KV destroys quality on small models. Plists amended to safe configuration: `--kv-bits 8 --prefill-step-size 4096`.
 
-## Current Stack (Pre-Optimization)
+## Active Inference Topology
 
-| Component | Version | Port(s) | Model |
-|-----------|---------|---------|-------|
-| mlx_vlm.server | 0.4.4 | :41961 (Boot), :41962 (Kelk), :41988 (IG-88) | gemma-4-e4b-it-6bit (6.6GB) |
-| mlx-flash | - | :41966 | gemma-4-26b-a4b-it-6bit (20GB split) |
-| flash-moe (Rust) | custom | (via subprocess wrapper) | gemma-4-26b-a4b-it-6bit-split |
-| mlx core | 0.31.1 | - | - |
-| mlx_lm | 0.31.2 | (experiments only) | Hermes-4-14B, Harmonic-9B |
+| Port | Agent | Backend | Model | Status |
+|------|-------|---------|-------|--------|
+| :41961 | Boot | mlx_vlm.server | gemma-4-e4b-it-6bit (6.6GB) | Active |
+| :41962 | Kelk | mlx_vlm.server | gemma-4-e4b-it-6bit (6.6GB) | Active |
+| :41966 | Shared aux | flash-moe (Rust) | gemma-4-26b-a4b-it-6bit-split (~2.88GB resident) | Active |
+| :41988 | IG-88 | mlx_vlm.server | (retained, not active) | Inactive |
+
+IG-88 uses cloud inference (OpenRouter) with optional :41966 fallback.
 
 ## Research Findings
 
+### BLOCKER: TurboQuant broken on Gemma 4 MoE
+
+**mlx-vlm issue [#904](https://github.com/Blaizzy/mlx-vlm/issues/904):** `--kv-quant-scheme turboquant` on Gemma 4 models produces `AttributeError: 'array' object has no attribute 'norms'` in `turboquant.py`. Blaizzy confirmed MoE-specific bug. No fix timeline.
+
+### KV Quantization Safety Matrix
+
+| kv-bits | Scheme | Quality on 4B (E4B) | Quality on 26B+ | Safe? |
+|---------|--------|---------------------|-----------------|-------|
+| 8 | uniform | Lossless | Lossless | **YES** |
+| 4 | uniform | **PPL >500 — catastrophic** | Acceptable | **NO for E4B** |
+| 4 | turboquant | Excellent (0.997 cosine) | Excellent | **BLOCKED (#904)** |
+| 3.5 | turboquant | Community sweet spot | Excellent | **BLOCKED** |
+
+Quality is head-dimension dependent: 128-dim heads get 0.988 cosine at 3-bit; 64-dim heads drop to 0.823. Gemma 4 uses 256-dim keys (favorable for TurboQuant when unblocked) [1][4].
+
+### Prefill Step Size
+
+mlx-vlm defaults to 512; mlx-lm defaults to 2048. Benchmarks show 512→4096 gives 1.2-2x prefill speedup on long prompts [5]. M1 Max (400 GB/s bandwidth) empirical sweet spot is 4096 for 4B models, 2048 for 26B MoE. 16384+ causes regression due to Metal kernel limits.
+
+### mlx-flash-compress vs flash-moe
+
+Our installed `mlx-flash` is actually `mlx-flash-compress` (matt-k-wong) — a generic mmap wrapper with NO MoE-specific expert routing [6]. The flash-moe Rust binary has explicit ECB file format, per-expert pread, speculative prefetch, co-occurrence calibration. **Flash-moe remains the correct 26B server.**
+
 ### Why mlx_vlm (not mlx_lm)
 
-Gemma 4 E4B and 26B-A4B are multimodal models (`Gemma4ForConditionalGeneration` with `vision_config`). `mlx_lm.server` has more performance features (prompt caching, concurrent decode, pipeline mode) but cannot handle vision inputs. `mlx_vlm` is the correct server for our multimodal models.
-
-### Untapped mlx_vlm v0.4.4 Features
-
-1. **TurboQuant KV cache** (`--kv-bits 4 --kv-quant-scheme turboquant`) — 89% KV memory savings, 0.85-1.90x speed [1]
-2. **DFlash speculative decoding** (`--draft-model`, `--draft-kind dflash`) — 2-3x throughput, but requires model-specific drafter weights (deferred)
-3. **Vision feature caching** (`--vision-cache-size N`) — avoids re-encoding images in multi-turn
-4. **Prefill step size** (`--prefill-step-size 512`) — tunable prompt processing chunk size
-
-### DFlash Status (Deferred)
-
-DFlash requires model-specific drafter weights. No Gemma 4 E4B DFlash drafter exists (only `RedHatAI/gemma-4-31B-it-speculator.dflash` for the 31B variant). 76 DFlash models exist on HuggingFace across Qwen, Gemma, LLaMA families. Deferred until we can investigate wrapping our own universal drafter.
+Gemma 4 models are multimodal (`Gemma4ForConditionalGeneration` with `vision_config`). `mlx_lm.server` v0.31.2+ has more perf features (prompt caching, concurrent decode, pipeline mode) but cannot handle vision inputs. mlx_vlm is correct for our multimodal models.
 
 ### Alternative Frameworks Evaluated
 
 - **vMLX / vLLM on Apple Silicon** — no mature port; MLX-native tools are superior
-- **llama.cpp Metal** — competitive for GGUF but no advantage over MLX-format models; loses multimodal support
-- **Ollama** — convenience wrapper, no performance advantage, no multimodal parity
+- **llama.cpp Metal** — competitive for GGUF but no advantage for MLX-format; loses multimodal
+- **Ollama** — convenience wrapper, no perf advantage, no multimodal parity
 - **LM Studio** — GUI-focused, not suitable for headless agent serving
+- **DFlash speculative decoding** — deferred; requires model-specific drafter weights (coupling risk); speculative decoding also hurts MoE models by ~35% [7]
 
 ### Model Landscape
 
@@ -50,14 +65,16 @@ DFlash requires model-specific drafter weights. No Gemma 4 E4B DFlash drafter ex
 | Gemma 4 E4B 6-bit | Active (main chat) | Multimodal, 6.6GB |
 | Gemma 4 26B-A4B 6-bit | Active (aux/reasoning) | MoE, SSD streaming, ~5.4 tok/s |
 | Ornstein 26B-A4B | On deck | Gemma 4 26B finetune, DDM-curated reasoning, MLX 6-bit available |
-| Qwen3.6-27B | Watching | Multimodal, dense 27B, MLX 9-bit available, no DFlash yet |
+| Qwen3.6-27B | Watching | Multimodal, dense 27B, MLX 9-bit available |
 
 ## Changes Made
 
-### Phase 1: TurboQuant KV + Prefill Tuning (all mlx_vlm plists)
+### Phase 1: Corrected KV + Prefill Flags (all mlx_vlm plists)
 
-Added `--kv-bits 4 --kv-quant-scheme turboquant --prefill-step-size 512` to all 8 mlx_vlm plists:
+**Initial commit (wrong):** `--kv-bits 4 --kv-quant-scheme turboquant --prefill-step-size 512`
+**Amended to (correct):** `--kv-bits 8 --prefill-step-size 4096`
 
+Applied to all 9 mlx_vlm plists:
 - `com.bootindustries.mlx-vlm-boot.plist` (:41961)
 - `com.bootindustries.mlx-vlm-kelk.plist` (:41962)
 - `com.bootindustries.mlx-vlm-ig88.plist` (:41988)
@@ -68,11 +85,12 @@ Added `--kv-bits 4 --kv-quant-scheme turboquant --prefill-step-size 512` to all 
 - `com.bootindustries.mlx-vlm-kelk-26b-a4b.plist` (:41962)
 - `com.bootindustries.mlx-vlm-kelk-e2b.plist` (:41962)
 
-### Phase 1b: mlx-flash 26B tuning
+### Phase 1b: mlx-flash-compress 26B plist
 
 Updated `com.bootindustries.mlx-flash-26b.plist`:
-- `--kv-bits` 8 → 4 (more aggressive KV compression)
+- `--kv-bits 8` (kept at 8; 4-bit uniform risky)
 - Added `--preload` (eliminates cold-start latency)
+- Kept `--cache-budget 0.3` (correct for concurrent E4B instances)
 
 ### Phase 2: Flash-MOE Expert Streaming (TODO)
 
@@ -80,23 +98,49 @@ Updated `com.bootindustries.mlx-flash-26b.plist`:
 - Add `--warm-set` to 26B launch config
 - Benchmark before/after tok/s
 
-## Deployment
+## OOM Safeguards
 
-Plists are gitignored — changes are on disk in `plists/`. To deploy:
+Memory budget on M1 Max 32GB:
+- macOS: ~4-5GB | Boot E4B: ~7.3GB | Kelk E4B: ~7.3GB | flash-moe 26B: ~2.88GB
+- **Steady-state: ~21.5-22.5GB | Free: ~9.5-10.5GB**
+
+Rules:
+1. Pre-flight memory check before every restart (need model_size + 2GB free)
+2. Never restart two MLX services simultaneously
+3. KV-8 is lazy — no baseline memory increase
+4. prefill-step-size 4096 adds ~200MB transient during prefill (within headroom)
+
+## Deployment (on Whitebox)
 
 ```bash
-# For each modified plist:
-install -m 644 plists/<label>.plist ~/Library/LaunchAgents/
-launchctl bootout gui/$(id -u)/<label>
-launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/<label>.plist
-
-# Or use _mlx-lib.sh helpers:
+cd ~/dev/factory && git pull
 source scripts/_mlx-lib.sh
-mlx_lib::swap "old_label" "new_label" "plists/<label>.plist" <port>
+
+# Boot (:41961) — memory pre-flight then swap
+OLD=$(mlx_lib::current_label_on_port 41961)
+mlx_lib::swap "$OLD" "com.bootindustries.mlx-vlm-boot" \
+  plists/com.bootindustries.mlx-vlm-boot.plist 41961
+mlx_lib::smoke_test_inference 41961
+
+# Kelk (:41962) — after Boot healthy
+sleep 10
+OLD=$(mlx_lib::current_label_on_port 41962)
+mlx_lib::swap "$OLD" "com.bootindustries.mlx-vlm-kelk" \
+  plists/com.bootindustries.mlx-vlm-kelk.plist 41962
+mlx_lib::smoke_test_inference 41962
 ```
+
+## TurboQuant Revisit (watch issue #904)
+
+When fixed, deploy: `--kv-bits 4 --kv-quant-scheme turboquant --quantized-kv-start 200`
+Expected: ~4x KV savings, 0.997 cosine similarity. Gemma 4's 256-dim keys are favorable.
 
 ## References
 
 [1] mlx-vlm v0.4.4 release notes: "Optimize TurboQuant Metal kernels: 0.85-1.90x baseline with 89% KV savings"
 [2] mlx-lm v0.31.3 release notes: thread-local generation streams, Gemma4 support fixes
 [3] DFlash speculative decoding: z-lab/mlx-vlm block-diffusion drafter architecture
+[4] TurboQuant paper: arXiv:2504.19874 — Walsh-Hadamard rotation + Lloyd-Max quantization
+[5] LM Studio issue #507 / lmstudio-mlx-patch: prefill-step-size benchmarks on Apple Silicon
+[6] mlx-flash-compress (matt-k-wong): generic mmap wrapper, no MoE-specific expert routing
+[7] mlx-lm issue #1132: speculative decoding hurts MoE models by ~35%
