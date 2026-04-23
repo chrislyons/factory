@@ -31,6 +31,20 @@ from src.quant.regime import assess_regime, regime_allows_venue, RegimeState, Ma
 from src.trading.polymarket_paper_trader import PolymarketPaperTrader
 
 
+def run_crypto_4h_scan() -> dict:
+    """Run the 4H ATR crypto scan (validated strategy)."""
+    import subprocess
+    result = subprocess.run(
+        ["/Users/nesbitt/dev/factory/agents/ig88/.venv/bin/python3",
+         str(IG88_ROOT / "scripts" / "atr4h_paper_trader_v9.py"), "scan"],
+        capture_output=True, text=True, timeout=120
+    )
+    return {
+        "stdout": result.stdout.strip()[-500:] if result.stdout else "",
+        "exit_code": result.returncode,
+    }
+
+
 def run_polymarket_scan(trader: PolymarketPaperTrader) -> dict:
     """Run a Polymarket paper trading scan cycle."""
     scan_result = {
@@ -156,7 +170,14 @@ def run_scan_cycle() -> dict:
 
         results["venues"][venue_name] = venue_result
 
-    # Step 3: Polymarket paper trading scan
+    # Step 3: 4H ATR Crypto scan (validated strategy)
+    try:
+        crypto_result = run_crypto_4h_scan()
+        results["crypto_4h"] = crypto_result
+    except Exception as e:
+        results["crypto_4h"] = {"error": str(e)}
+
+    # Step 4: Polymarket paper trading scan
     # Polymarket runs regardless of regime (regime-independent venue)
     try:
         pm_cfg = cfg.get_venue("polymarket")

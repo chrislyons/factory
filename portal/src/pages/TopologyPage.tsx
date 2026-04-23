@@ -179,7 +179,7 @@ export function TopologyPage() {
           </div>
           <div className="topology-mini-node">
             <div className="topology-mini-node__label">Hardware</div>
-            <div className="topology-mini-node__meta">Whitebox M1 Max / Cloudkicker M2</div>
+            <div className="topology-mini-node__meta">Local GPU nodes</div>
           </div>
         </div>
       </SurfaceCard>

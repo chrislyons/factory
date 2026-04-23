@@ -65,3 +65,4 @@ temp/
 .venv/
 renders/
 !renders/viewer.html
+data/archive_human-trades/

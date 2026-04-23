@@ -14,11 +14,17 @@ import {
   fetchAgentStatus,
   fetchAnalyticsSummary,
   fetchBudgetStatus,
+  fetchConfigSummaries,
+  fetchCronJobs,
   fetchLoopDetail,
   fetchLoops,
+  fetchMemoryBudget,
   fetchPendingApprovals,
   fetchResolvedApprovals,
+  fetchRLRuns,
   fetchRunEvents,
+  fetchHermesSessions,
+  fetchSessionDetail,
   fetchTasks,
   requestBudgetOverride,
   saveTasks,
@@ -33,8 +39,12 @@ import type {
   AgentStatus,
   AnalyticsSummary,
   ApprovalDecisionInput,
+  CronJobsResponse,
+  HermesSessionDetail,
+  HermesSessionsResponse,
   PendingApproval,
   ResolvedApproval,
+  RLRunsResponse,
   RunEvent,
   TasksDocument
 } from "../lib/types";
@@ -295,4 +305,73 @@ export function useAgentAction(agentId: AgentId) {
 
 export function latestDataUpdatedAt(results: Array<UseQueryResult<unknown, Error>>) {
   return results.reduce((latest, result) => Math.max(latest, result.dataUpdatedAt || 0), 0);
+}
+
+export function useConfigSummaries() {
+  return useQuery({
+    queryKey: ["config-summaries"],
+    ...pollingOptions(fetchConfigSummaries)
+  });
+}
+
+export function useMemoryBudget() {
+  return useQuery({
+    queryKey: ["memory-budget"],
+    queryFn: fetchMemoryBudget,
+    refetchInterval: POLL_INTERVAL_MS,
+    staleTime: 3_000,
+    placeholderData: (previousData) => previousData
+  });
+}
+
+export function useFactoryStats() {
+  const config = useConfigSummaries();
+  const memory = useMemoryBudget();
+  const budget = useBudgetStatus();
+
+  return {
+    config,
+    memory,
+    budget,
+    isLoading: config.isLoading || memory.isLoading,
+    dataUpdatedAt: Math.max(
+      config.dataUpdatedAt || 0,
+      memory.dataUpdatedAt || 0,
+      budget.dataUpdatedAt || 0
+    ),
+    hasError: Boolean(config.error || memory.error)
+  };
+}
+
+export function useHermesSessions() {
+  return useQuery<HermesSessionsResponse>({
+    queryKey: ["hermes-sessions"],
+    ...pollingOptions(fetchHermesSessions),
+    staleTime: 10_000,
+  });
+}
+
+export function useSessionDetail(sessionId: string | null) {
+  return useQuery<HermesSessionDetail>({
+    queryKey: ["session-detail", sessionId],
+    queryFn: () => fetchSessionDetail(sessionId!),
+    enabled: Boolean(sessionId),
+    staleTime: 15_000,
+  });
+}
+
+export function useCronJobs() {
+  return useQuery<CronJobsResponse>({
+    queryKey: ["cron-jobs"],
+    ...pollingOptions(fetchCronJobs),
+    staleTime: 30_000,
+  });
+}
+
+export function useRLRuns() {
+  return useQuery<RLRunsResponse>({
+    queryKey: ["rl-runs"],
+    ...pollingOptions(fetchRLRuns),
+    staleTime: 60_000,
+  });
 }

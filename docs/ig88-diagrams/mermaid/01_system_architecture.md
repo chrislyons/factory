@@ -1,0 +1,58 @@
+# IG-88 System Architecture
+
+```mermaid
+graph TB
+    subgraph DATA["DATA SOURCES"]
+        D1["Kraken OHLCV API\n(public candles)"]
+        D2["CoinGecko Global API\n(mcap, dominance)"]
+        D3["Fear & Greed Index\n(cfgi.io)"]
+        D4["Polymarket Gamma API\n(market data)"]
+        D5["Jupiter Swap API\n(price quotes)"]
+    end
+
+    subgraph CORE["IG-88 CORE"]
+        R["Regime Detection\nBTC trend + F&G + mcap\n+ funding rates"]
+        A4["4H ATR Scanner\n(SMA100 crossover)"]
+        A1["1H ATR Scanner\n(Donchian 20)"]
+        B["Bollinger MR\n(2σ mean reversion)"]
+        PT["Paper Trader v9"]
+        PM["Polymarket Trader"]
+        EX["Executor Bridge"]
+        PO["Portfolio Monitor"]
+        SL["Scan Loop (cron)"]
+    end
+
+    subgraph VENUES["VENUES"]
+        V1["Kraken Spot\n36 pairs, 0.26% taker"]
+        V2["Jupiter Perps\nSOL/ETH/BTC perps"]
+        V3["Polymarket\nPrediction markets"]
+    end
+
+    subgraph INFRA["INFRASTRUCTURE"]
+        I1["OpenRouter LLM\nMimo v2 Pro"]
+        I2["Infisical Secrets\n19 keys"]
+    end
+
+    D1 -->|"OHLCV"| CORE
+    D2 -->|"macro"| R
+    D3 -->|"sentiment"| R
+    D4 -->|"markets"| PM
+    D5 -->|"quotes"| EX
+
+    R -->|"regime state"| A4
+    R -->|"regime state"| A1
+    A4 -->|"signals"| PT
+    A1 -->|"signals"| PT
+    B -->|"signals"| PT
+    PM -->|"edge calc"| PT
+
+    PT -->|"execute"| EX
+    EX -->|"fills"| V1
+    EX -->|"fills"| V2
+    PM -->|"fills"| V3
+
+    SL -.->|"triggers"| CORE
+    I1 -.->|"LLM reasoning"| CORE
+    I2 -.->|"API keys"| EX
+
+```

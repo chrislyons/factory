@@ -1,0 +1,42 @@
+# Trading Pipeline — Signal to Execution
+
+```mermaid
+flowchart LR
+    subgraph FETCH["DATA FETCH"]
+        F1["1. OHLCV Fetch\nKraken 1h candles\n11 pairs x 730 bars"]
+    end
+
+    subgraph FILTER["REGIME & SIGNALS"]
+        F2["2. Regime Filter\nBTC trend + F&G\n+ mcap + funding"]
+        F3["3. ATR Compute\nATR(14) on 4H\nSMA100 crossover"]
+        F4["4. Signal Gen\nSMA100 cross = entry\nATR x2 = stop"]
+    end
+
+    subgraph EXEC["EXECUTION"]
+        F5["5. Risk Check\nMax $500/pos\nMax 8 open"]
+        F6["6. Paper Fill\nSimulated entry\nTrack P&L"]
+        F7["7. Position Mon\nCheck stops/targets\n4H candle close"]
+        F8["8. Exit Signal\nStop hit or\nSMA100 cross down"]
+    end
+
+    subgraph LIVE["LIVE PATH (when funded)"]
+        L1["Executor Bridge"]
+        L2["Jupiter Ultra API"]
+        L3["TX Sign + Send"]
+        L4["Filled"]
+    end
+
+    F1 --> F2 --> F3 --> F4
+    F4 --> F5 --> F6 --> F7 --> F8
+    F8 -.->|"next cycle"| F1
+
+    F5 -->|"signal"| L1 --> L2 --> L3 --> L4
+
+    F6 -.->|"stop hit?"| F8
+
+    style FETCH fill:#c3fae8,stroke:#adb5bd
+    style FILTER fill:#d0bfff,stroke:#adb5bd
+    style EXEC fill:#b2f2bb,stroke:#adb5bd
+    style LIVE fill:#b2f2bb,stroke:#2b8a3e,stroke-width:2px,stroke-dasharray: 5 5
+
+```

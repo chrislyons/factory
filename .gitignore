@@ -62,6 +62,9 @@ agents/kelk/docs/timeline/
 # Populated by /Users/nesbitt/dev/factory/.stash/ig88-recovery-20260408/ etc.
 .stash/
 
+# Archive — conversation logs, operational history
+archive/
+
 # Agent configs: scoped credentials, operational parameters
 agents/ig88/config/
 
