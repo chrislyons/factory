@@ -36,7 +36,7 @@ def run_crypto_4h_scan() -> dict:
     import subprocess
     result = subprocess.run(
         ["/Users/nesbitt/dev/factory/agents/ig88/.venv/bin/python3",
-         str(IG88_ROOT / "scripts" / "atr4h_paper_trader_v9.py"), "status"],
+         str(IG88_ROOT / "scripts" / "atr4h_paper_trader_v9.py"), "scan"],
         capture_output=True, text=True, timeout=120
     )
     return {
