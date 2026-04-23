@@ -10,6 +10,8 @@ Project documentation index for factory.
 - [[FCT064 Factory Profile Rotation and Aux-Route Hardening]]
 - [[FCT065 Hermes Agent Recovery and Context Ceiling Research]]
 - [[FCT067 SSD Expert Streaming, E2EE Migration, and Gemma Tool Call Parser Fix]]
+- [[FCT068 Inference Architecture Options and DFlash Research]]
+- [[FCT069 Stats Page Backend Wiring]]
 
 ## All Documents
 
