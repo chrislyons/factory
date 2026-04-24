@@ -86,12 +86,10 @@ if ! curl -sf --max-time 3 "${MLX_VLM_HEALTH_URL}" >/dev/null 2>&1; then
   exit 6
 fi
 
-# Working directory for file/terminal toolsets. Hermes's file_tools reads
-# TERMINAL_CWD from env (tools/terminal_tool.py:492), NOT from the profile
-# config's terminal.cwd field. Export explicitly and `cd` so both the env
-# var path and the os.getcwd() fallback land in the right place.
-export TERMINAL_CWD="/Users/nesbitt/dev/factory/agents/boot"
-cd "${TERMINAL_CWD}"
+# Working directory — v0.11.0 reads from config.yaml terminal.cwd, not env.
+# TERMINAL_CWD env var deprecated in v0.11.0 (was tools/terminal_tool.py:492).
+# Keep `cd` so the process CWD matches (launchd defaults to /).
+cd "/Users/nesbitt/dev/factory/agents/boot"
 
 # FCT059: raise Hermes agent wall-clock from 600s default to 2h for autonomous workloads.
 export HERMES_AGENT_TIMEOUT=7200

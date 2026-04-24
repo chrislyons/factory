@@ -71,9 +71,9 @@ if [[ ! -f "${IG88_PROFILE_CFG}" ]]; then
   echo "ERROR: IG-88 profile config not found at ${IG88_PROFILE_CFG}" >&2
   exit 3
 fi
-if ! grep -qE '^[[:space:]]*provider:[[:space:]]*(custom|openrouter)([[:space:]]|$)' "${IG88_PROFILE_CFG}"; then
+if ! grep -qE '^[[:space:]]*provider:[[:space:]]*(custom|openrouter|nous-nemotron)([[:space:]]|$)' "${IG88_PROFILE_CFG}"; then
   echo "ERROR: ${IG88_PROFILE_CFG} is missing explicit provider (custom or openrouter)." >&2
-  echo "       Without this, Hermes auto-detect may mis-route inference. See FCT055/FCT066." >&2
+  echo "       Without this, Hermes auto-detect may mis-route inference. See FCT055/FCT066. Valid: custom, openrouter, nous-nemotron." >&2
   exit 3
 fi
 
@@ -100,13 +100,10 @@ if ! curl -sf --max-time 3 "${MLX_VLM_HEALTH_URL}" >/dev/null 2>&1; then
   echo "      Check: launchctl list | grep mlx-vlm-ig88" >&2
 fi
 
-# Working directory for file/terminal toolsets. Hermes's file_tools reads
-# TERMINAL_CWD from env (tools/terminal_tool.py:492), NOT from the profile
-# config's terminal.cwd field — that field is only used by the terminal
-# toolset's shell context. Export explicitly so the file toolset lands in
-# the right place too. The `cd` below covers terminal-toolset shell state.
-export TERMINAL_CWD="/Users/nesbitt/dev/factory/agents/ig88"
-cd "${TERMINAL_CWD}"
+# Working directory — v0.11.0 reads from config.yaml terminal.cwd, not env.
+# TERMINAL_CWD env var deprecated in v0.11.0 (was tools/terminal_tool.py:492).
+# Keep `cd` so the process CWD matches (launchd defaults to /).
+cd "/Users/nesbitt/dev/factory/agents/ig88"
 
 # FCT059: raise Hermes agent wall-clock from 600s default to 2h for autonomous workloads.
 export HERMES_AGENT_TIMEOUT=7200
