@@ -1,0 +1,73 @@
+Ornstein3.6-35B-A3B Deployment Checklist
+=========================================
+FCT074 | Whitebox M1 Max 32GB
+
+PRE-DEPLOYMENT
+  [x] FCT074 doc written and approved
+  [x] Launchd plist created (com.bootindustries.mlx-vlm-ornstein)
+  [x] Deploy script created (deploy-ornstein.sh)
+  [x] Model switch script created (factory-model-switch.sh)
+  [x] Hermes config update script created (update-hermes-configs.py)
+  [x] Factory startup script updated (factory-startup.sh)
+  [x] Hermes wrapper scripts updated (hermes-boot.sh, hermes-kelk.sh)
+  [x] Status script created (factory-status.sh)
+  [ ] Model download complete (Ornstein3.6-35B-A3B-MLX-6bit via LM Studio)
+  [ ] Model moved to ~/models/
+
+DEPLOYMENT SEQUENCE
+  Step 1: Verify download complete
+    ls /Volumes/CL\ T04/models/DJLougen/Ornstein3.6-35B-A3B-MLX-6bit/*.safetensors | wc -l
+    Should show 6 complete files, 0 .part files
+
+  Step 2: Move model
+    mv "/Volumes/CL T04/models/DJLougen/Ornstein3.6-35B-A3B-MLX-6bit" ~/models/
+
+  Step 3: Stop old services
+    launchctl unload ~/Library/LaunchAgents/com.bootindustries.mlx-vlm-boot.plist
+    launchctl unload ~/Library/LaunchAgents/com.bootindustries.mlx-vlm-kelk.plist
+    launchctl unload ~/Library/LaunchAgents/com.bootindustries.mlx-vlm-whitebox.plist
+
+  Step 4: Start new service
+    launchctl load ~/Library/LaunchAgents/com.bootindustries.mlx-vlm-ornstein.plist
+
+  Step 5: Wait for health (up to 120s)
+    curl -sf http://127.0.0.1:41961/v1/models
+
+  Step 6: Smoke test
+    curl -sf http://127.0.0.1:41961/v1/chat/completions \
+      -H "Content-Type: application/json" \
+      -d '{"model":"Ornstein3.6-35B-A3B-MLX-6bit","messages":[{"role":"user","content":"Hello"}],"max_tokens":10}'
+
+  Step 7: Update Hermes configs
+    python3 ~/dev/factory/scripts/update-hermes-configs.py
+    (creates .bak files first)
+
+  Step 8: Restart Hermes gateways
+    launchctl unload ~/Library/LaunchAgents/com.bootindustries.hermes-boot.plist
+    launchctl load ~/Library/LaunchAgents/com.bootindustries.hermes-boot.plist
+    launchctl unload ~/Library/LaunchAgents/com.bootindustries.hermes-kelk.plist
+    launchctl load ~/Library/LaunchAgents/com.bootindustries.hermes-kelk.plist
+
+  Step 9: Final verification
+    bash ~/dev/factory/scripts/factory-status.sh
+
+POST-DEPLOYMENT
+  [ ] Benchmark tok/s at 8K/32K/128K context
+  [ ] Test Matrix integration (Boot + Kelk respond)
+  [ ] Test tool-use format (function calling works)
+  [ ] Test multi-turn conversation (KV cache grows correctly)
+  [ ] Monitor memory usage under load
+  [ ] Update AGENTS.md with new topology
+
+ROLLBACK
+  If anything goes wrong:
+    launchctl unload ~/Library/LaunchAgents/com.bootindustries.mlx-vlm-ornstein.plist
+    cp ~/.hermes/profiles/boot/config.yaml.bak ~/.hermes/profiles/boot/config.yaml
+    cp ~/.hermes/profiles/kelk/config.yaml.bak ~/.hermes/profiles/kelk/config.yaml
+    launchctl load ~/Library/LaunchAgents/com.bootindustries.mlx-vlm-boot.plist
+    launchctl load ~/Library/LaunchAgents/com.bootindustries.mlx-vlm-kelk.plist
+    launchctl load ~/Library/LaunchAgents/com.bootindustries.mlx-vlm-whitebox.plist
+    launchctl unload ~/Library/LaunchAgents/com.bootindustries.hermes-boot.plist
+    launchctl load ~/Library/LaunchAgents/com.bootindustries.hermes-boot.plist
+    launchctl unload ~/Library/LaunchAgents/com.bootindustries.hermes-kelk.plist
+    launchctl load ~/Library/LaunchAgents/com.bootindustries.hermes-kelk.plist

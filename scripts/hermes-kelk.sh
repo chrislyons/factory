@@ -43,12 +43,13 @@ export HERMES_HOME="/Users/nesbitt/.hermes/profiles/kelk"
 #   exit 4  — matrix-nio not importable in hermes-agent venv
 #   exit 5  — local model file missing
 #   exit 6  — mlx-vlm-kelk not reachable on :41962
+#   exit 6  — mlx-vlm-ornstein not reachable on :41961
 # ---------------------------------------------------------------------------
 
 KELK_PROFILE_CFG="${HERMES_HOME}/config.yaml"
 HERMES_AGENT_PY="/Users/nesbitt/.local/share/uv/tools/hermes-agent/bin/python3"
-KELK_MODEL_CONFIG="/Users/nesbitt/models/gemma-4-e4b-it-6bit/config.json"
-MLX_VLM_HEALTH_URL="http://127.0.0.1:41962/v1/models"
+KELK_MODEL_CONFIG="/Users/nesbitt/models/Ornstein3.6-35B-A3B-MLX-6bit/config.json"
+MLX_VLM_HEALTH_URL="http://127.0.0.1:41961/v1/models"
 
 # 1. Profile must exist AND pin provider: custom. See FCT055 RC-1.
 # FCT064: provider: custom may be top-level or indented under model: dict.
@@ -71,17 +72,17 @@ fi
   exit 4
 }
 
-# 3. Local model weights must be present on disk (FCT054: Kelk shares
-#    gemma-4-e4b-it-6bit via mlx-vlm-kelk on :41962).
+# 3. Local model weights must be present on disk (FCT074: Kelk shares
+#    Ornstein3.6-35B-A3B via mlx-vlm-ornstein on :41961).
 if [[ ! -f "${KELK_MODEL_CONFIG}" ]]; then
   echo "ERROR: local model config missing at ${KELK_MODEL_CONFIG}" >&2
   exit 5
 fi
 
-# 4. mlx-vlm-kelk must be listening on :41962. 15s max (model load takes ~10s).
+# 4. mlx-vlm-ornstein must be listening on :41961. 15s max.
 if ! curl -sf --max-time 15 "${MLX_VLM_HEALTH_URL}" >/dev/null 2>&1; then
-  echo "ERROR: mlx-vlm-kelk not reachable at ${MLX_VLM_HEALTH_URL}" >&2
-  echo "       Check: launchctl list | grep mlx-vlm-kelk" >&2
+  echo "ERROR: mlx-vlm-ornstein not reachable at ${MLX_VLM_HEALTH_URL}" >&2
+  echo "       Check: launchctl list | grep mlx-vlm-ornstein" >&2
   exit 6
 fi
 

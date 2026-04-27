@@ -71,9 +71,9 @@ if [[ ! -f "${IG88_PROFILE_CFG}" ]]; then
   echo "ERROR: IG-88 profile config not found at ${IG88_PROFILE_CFG}" >&2
   exit 3
 fi
-if ! grep -qE '^[[:space:]]*provider:[[:space:]]*(custom|openrouter|nous-nemotron)([[:space:]]|$)' "${IG88_PROFILE_CFG}"; then
-  echo "ERROR: ${IG88_PROFILE_CFG} is missing explicit provider (custom or openrouter)." >&2
-  echo "       Without this, Hermes auto-detect may mis-route inference. See FCT055/FCT066. Valid: custom, openrouter, nous-nemotron." >&2
+if ! grep -qE '^[[:space:]]*provider:[[:space:]]*(custom|openrouter|nous-nemotron)' "${IG88_PROFILE_CFG}"; then
+  echo "ERROR: ${IG88_PROFILE_CFG} is missing explicit provider (custom, custom:*, or openrouter)." >&2
+  echo "       Without this, Hermes auto-detect may mis-route inference. See FCT055/FCT066. Valid: custom, custom:*, openrouter, nous-nemotron." >&2
   exit 3
 fi
 

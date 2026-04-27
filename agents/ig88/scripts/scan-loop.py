@@ -32,16 +32,22 @@ from src.trading.polymarket_paper_trader import PolymarketPaperTrader
 
 
 def run_crypto_4h_scan() -> dict:
-    """Run the 4H ATR crypto scan (validated strategy)."""
+    """Run the 4H ATR crypto scan (validated strategy) — scan + check exits."""
     import subprocess
-    result = subprocess.run(
-        ["/Users/nesbitt/dev/factory/agents/ig88/.venv/bin/python3",
-         str(IG88_ROOT / "scripts" / "atr4h_paper_trader_v9.py"), "scan"],
-        capture_output=True, text=True, timeout=120
-    )
+    py = "/Users/nesbitt/dev/factory/agents/ig88/.venv/bin/python3"
+    script = str(IG88_ROOT / "scripts" / "atr4h_paper_trader_v9.py")
+
+    # Scan for new signals
+    scan = subprocess.run([py, script, "scan"], capture_output=True, text=True, timeout=120)
+
+    # Check open positions for exits
+    exits = subprocess.run([py, script, "positions"], capture_output=True, text=True, timeout=120)
+
     return {
-        "stdout": result.stdout.strip()[-500:] if result.stdout else "",
-        "exit_code": result.returncode,
+        "scan_stdout": scan.stdout.strip()[-500:] if scan.stdout else "",
+        "scan_exit": scan.returncode,
+        "exits_stdout": exits.stdout.strip()[-500:] if exits.stdout else "",
+        "exits_exit": exits.returncode,
     }
 
 

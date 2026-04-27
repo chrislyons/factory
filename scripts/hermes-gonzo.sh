@@ -1,1 +1,1 @@
-[['z "${NOUS_API_KEY:-}']]
+[[['z "${NOUS_API_KEY:-}" && -n "${NOUS_FACTORY_API_KEY:-}']], {'${NOUS_API_KEY:-}" ]]; then\n  echo': 'RROR: NOUS_API_KEY not set — run via infisical-env.sh factory --'}]

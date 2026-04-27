@@ -47,7 +47,7 @@ export HERMES_HOME="/Users/nesbitt/.hermes/profiles/boot"
 
 BOOT_PROFILE_CFG="${HERMES_HOME}/config.yaml"
 HERMES_AGENT_PY="/Users/nesbitt/.local/share/uv/tools/hermes-agent/bin/python3"
-BOOT_MODEL_CONFIG="/Users/nesbitt/models/gemma-4-e4b-it-6bit/config.json"
+BOOT_MODEL_CONFIG="/Users/nesbitt/models/Ornstein3.6-35B-A3B-MLX-6bit/config.json"
 MLX_VLM_HEALTH_URL="http://127.0.0.1:41961/v1/models"
 
 # 1. Profile must exist AND pin provider: custom. See FCT055 RC-1 for why.
@@ -73,15 +73,16 @@ fi
 }
 
 # 3. Local model weights must be present on disk (Boot uses
-#    gemma-4-e4b-it-6bit via mlx-vlm-boot on :41961).
+#    gemma-4-e4b-it-6bit via mlx-vlm on :41961).
+BOOT_MODEL_CONFIG="/Users/nesbitt/models/Ornstein-Hermes-3.6-27b-MLX-6bit/config.json"
 if [[ ! -f "${BOOT_MODEL_CONFIG}" ]]; then
   echo "ERROR: local model config missing at ${BOOT_MODEL_CONFIG}" >&2
   exit 5
 fi
 
-# 4. mlx-vlm-boot must be listening on :41961. 3s max.
+# 4. mlx-vlm must be listening on :41961. 15s max.
 if ! curl -sf --max-time 3 "${MLX_VLM_HEALTH_URL}" >/dev/null 2>&1; then
-  echo "ERROR: mlx-vlm-boot not reachable at ${MLX_VLM_HEALTH_URL}" >&2
+  echo "ERROR: mlx-vlm not reachable at ${MLX_VLM_HEALTH_URL}" >&2
   echo "       Check: launchctl list | grep mlx-vlm-boot" >&2
   exit 6
 fi
@@ -139,6 +140,13 @@ unset ANTHROPIC_AUTH_TOKEN
 unset OPENAI_BASE_URL
 unset OPENAI_API_BASE
 unset NOUS_MIMO_FACTORY_KEY
+
+# FCT071: Enable HTTP API server for Hermes Workspace frontend.
+# Binds localhost only — no API key needed for loopback.
+# Workspace connects here for live chat, SSE streaming, tool execution.
+export API_SERVER_ENABLED=true
+export API_SERVER_HOST=127.0.0.1
+export API_SERVER_PORT=8642
 
 exec /Users/nesbitt/.local/bin/hermes \
   --profile boot \

@@ -324,12 +324,43 @@ grep -l "keyword" docs/ig88/*.md                # search by topic
 ```
 ig88/
 ├── CLAUDE.md              # This file
+├── config/                # Trading config (trading.yaml, venues.yaml)
+├── data/
+│   ├── ohlcv/             # Market data (15m, 30m, 1h, 4h parquets)
+│   ├── paper/             # Paper trade logs + legacy v2-v8
+│   ├── paper_4h/          # 4H paper trader state (active)
+│   ├── paper_trades/      # Paper trade state (active)
+│   ├── live/              # Live execution logs
+│   ├── jupiter_state/     # Jupiter portfolio state
+│   ├── market/            # Market-specific data (dydx/, polymarket/)
+│   ├── research/          # All backtest/validation results
+│   │   ├── backtest/      # ATR, h2/h3, ichimoku results
+│   │   ├── walk_forward/  # WF validation results
+│   │   ├── edge/          # Edge discovery, hardening
+│   │   ├── optimization/  # Parameter sweeps
+│   │   ├── friction/      # Fee/slippage analysis
+│   │   ├── correlation/   # Cross-asset correlation
+│   │   ├── portfolio/     # Portfolio optimization
+│   │   ├── regime/        # Regime analysis
+│   │   └── ...            # short/, misc/, edge_discovery/, etc.
+│   ├── risk_state/        # Risk tracking
+│   ├── archive/           # Quarantined data, legacy state
+│   └── *.json             # Active state files (regime, strategy registry)
 ├── docs/ig88/             # Documentation (IG88### Title.md files)
 │   └── INDEX.md           # Document registry
 ├── docs/rp5/              # Legacy RP5 archive (read-only)
-├── src/                   # Source code
-├── tests/                 # Test suite
-├── .claude/               # Claude Code configuration
-├── .claudeignore          # Claude Code ignore patterns
-└── .gitignore             # Git ignore patterns
+├── renders/               # Visualization outputs (Manim images/videos)
+├── reports/               # Research reports
+├── scripts/               # Active scripts + archive/
+├── skills/                # Skill definitions
+├── src/
+│   ├── data/              # Data loading, indicator cache
+│   ├── quant/             # Backtest engines, indicators
+│   ├── scanner/           # Venue scanners (Kraken, Jupiter, etc.)
+│   ├── trading/           # Paper trader, executor, regime
+│   └── viz/               # Visualization scenes (Manim)
+├── memory/ig88/           # Session memory (scratchpad, facts)
+├── logs/                  # Executor logs
+├── mcp-servers/           # MCP server implementations
+└── tests/                 # Test suite
 ```
