@@ -1,12 +1,8 @@
 #!/bin/bash
 # factory-startup.sh — Sequenced startup for Factory services on Whitebox
 #
-# FCT074: Single model deployment (Ornstein3.6-35B-A3B via mlx-vlm.server).
-# The 35B-A3B is mmap'd — only ~5GB resident initially (attention/routing),
-# expert weights stream from SSD on demand. No thundering herd.
-#
 # Phase 1: Lightweight services (already RunAtLoad in their own plists)
-# Phase 2: MLX Ornstein3.6-35B-A3B (:41961)
+# Phase 2: MLX Qwen3.5-2B + v4v2 adapter (:41961 Boot, :41962 Kelk)
 # Phase 3: Hermes gateways — MLX guaranteed ready
 #
 # Called by: com.bootindustries.factory-startup.plist (RunAtLoad, not KeepAlive)
@@ -106,16 +102,18 @@ for svc in portal-caddy gsd-sidecar factory-auth qdrant-mcp research-mcp matrix-
   fi
 done
 
-# Phase 2: MLX Ornstein3.6-35B-A3B (:41961)
-# mmap-based: ~5GB resident initially (attention/routing), experts stream from SSD.
-# mmap spike is transient and smaller than loading a full dense model.
-# Require 10GB free (5GB model + 5GB headroom for macOS).
-log "Phase 2: MLX Ornstein3.6-35B-A3B (:41961)"
-if require_free_memory 10000 "Phase 2"; then
-  bootstrap "com.bootindustries.mlx-vlm-ornstein"
-  wait_for_health "http://127.0.0.1:41961/v1/models" "mlx-vlm-ornstein" 180
+# Phase 2: MLX Qwen3.5-2B + v4v2 adapter (:41961 Boot, :41962 Kelk)
+# 2B model: ~1.5GB resident. v4v2 adapter: 2.8M params. Total ~2.4GB per instance.
+# Require 6GB free (2x 2.4GB + headroom).
+log "Phase 2: MLX Qwen3.5-2B + v4v2 (:41961 Boot, :41962 Kelk)"
+if require_free_memory 6000 "Phase 2"; then
+  bootstrap "com.bootindustries.mlx-lm-boot"
+  sleep 3
+  bootstrap "com.bootindustries.mlx-lm-kelk"
+  wait_for_health "http://127.0.0.1:41961/v1/models" "mlx-lm-boot" 120
+  wait_for_health "http://127.0.0.1:41962/v1/models" "mlx-lm-kelk" 120
 else
-  log "Phase 2 SKIPPED — not enough memory for Ornstein model"
+  log "Phase 2 SKIPPED — not enough memory for Qwen3.5-2B"
   log "  Manual recovery: free memory, then run factory-startup.sh again"
 fi
 
@@ -132,11 +130,13 @@ log "=== Startup complete ==="
 log "Free: $(top -l 1 -s 0 2>/dev/null | grep PhysMem | sed 's/.*) //')"
 
 # Check all services
-if curl -sf --max-time 3 "http://127.0.0.1:41961/v1/models" >/dev/null 2>&1; then
-  log "  :41961 ornstein: UP"
-else
-  log "  :41961 ornstein: DOWN"
-fi
+for port in 41961 41962; do
+  if curl -sf --max-time 3 "http://127.0.0.1:${port}/v1/models" >/dev/null 2>&1; then
+    log "  :${port} qwen3.5-2b: UP"
+  else
+    log "  :${port} qwen3.5-2b: DOWN"
+  fi
+done
 
 for agent in boot kelk ig88; do
   if pgrep -f "hermes.*${agent}.*gateway" >/dev/null 2>&1; then
