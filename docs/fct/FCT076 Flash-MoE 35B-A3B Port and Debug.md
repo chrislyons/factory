@@ -223,21 +223,26 @@ needed.**
    q8/q4 decode is actually *slightly slower* than fp16 due to
    dequantization overhead in the cache layer.
 
-2. **FP16 KV cache works up to ~309K context on 32GB.** The hybrid
-   architecture (48 linear attn + 16 full attn) makes KV cache a
-   non-issue for memory. The original fear that "27B at 128K needs
-   quantization" was based on wrong assumptions about the architecture.
+2. **The REAL bottleneck is prefill activation memory, not KV cache storage.**
+   The KV cache is tiny (32 KB/token across 16 layers). But during prefill,
+   the attention computation intermediates blow up memory. Without chunked
+   prefill, 32K OOMs even though KV cache would only be ~1 GB. With
+   `prefill_step_size=2048`, 32K works at peak 30.0 GB.
 
-3. **Decode speed is flat at ~12 tok/s regardless of context or KV mode.**
-   This is the model's compute-bound speed on M1 Max at 6-bit.
+3. **Decode speed degrades with context.** At 8K: 12 tok/s. At 16K: 9.2 tok/s.
+   At 32K: 7.1 tok/s. The growing KV cache affects decode compute as
+   attention layers accumulate more cached tokens.
 
-4. **Prefill is flat at ~66 tok/s** regardless of context or KV mode.
+4. **32K is the practical ceiling on 32GB.** Peak 30.0 GB at 32K context
+   leaves ~2 GB headroom. 48K likely OOMs. The earlier "fp16 handles 262K
+   easily" claim was wrong — it only counted KV cache storage, not
+   activation memory during computation.
 
 5. **The tweet's situation does not apply.** The tweet described Qwen3.6
    27B dense on 24GB VRAM where q4 KV cache was needed to fit 262K.
    Our 27B has 4x fewer KV cache layers due to the hybrid architecture,
-   so fp16 handles 262K easily. The KV cache quantization unlock is
-   irrelevant for this model on this hardware.
+   so the KV cache itself is not the constraint. The constraint is
+   prefill activation memory, which chunked prefill partially solves.
 
 ### mlx_lm.server KV Cache Notes
 
@@ -250,6 +255,34 @@ pooling, not KV quantization.
 Since fp16 handles all practical context lengths, this is a non-issue. If we
 ever needed KV quant, a thin wrapper script using `stream_generate()` directly
 would work.
+
+## 35B-A3B vs 27B — Production Comparison
+
+| Metric | 35B-A3B (flash-moe) | 27B (mlx_lm) |
+|--------|-------------------|---------------|
+| Decode @ 512 | 7.2 tok/s | 12.1 tok/s |
+| Decode @ 8K | 7.2 tok/s | 11.6 tok/s |
+| Decode @ 16K | 7.2 tok/s | 9.2 tok/s |
+| Decode @ 32K | 7.2 tok/s | 7.1 tok/s |
+| Max context | 128K | ~32K |
+| RAM (resident) | ~3 GB | ~22 GB |
+| Speed at max ctx | 7.2 tok/s (flat) | 7.1 tok/s (degraded) |
+| Serving | flash-moe HTTP API | mlx_lm.server |
+
+**Verdict: 35B-A3B via flash-moe is the production choice.** The 27B's speed
+advantage only holds under 8K context. At 16K+ it degrades to match the
+35B-A3B, and 32K is its hard ceiling. The 35B-A3B uses 7x less RAM and
+provides 128K context at a flat 7.2 tok/s.
+
+The 27B may be useful as a draft model for speculative decoding (to boost
+the 35B-A3B to ~12-15 tok/s) or as a fast slot for short queries.
+
+### SABER Model Note
+
+DJLougen released `Ornstein-27B-SABER` — an abliterated variant using
+Spectral Analysis-Based Entanglement Resolution. 0% refusal, 0% perplexity
+degradation, 125 directions ablated across 25 layers. BF16 format.
+Downloaded to external drive for future evaluation.
 
 ## References
 
