@@ -355,6 +355,175 @@ Not beneficial. SSD bandwidth is the bottleneck — two instances would
 double expert I/O and halve throughput. Metal GPU is shared. One instance
 request-serialized is optimal.
 
+## Small Model Benchmarks — Qwen3.5-2B and 4B Distill
+
+**Run:** 2026-04-28 | Models: Qwen3.5-2B-6bit, Qwen3.5-4B-Claude-Opus-Distill-v2-6bit
+
+### Qwen3.5-2B (6-bit, /Users/nesbitt/models/Qwen3.5-2B-6bit)
+
+24 layers, 6 KV cache + 18 ArraysCache (hybrid). Model: 1.53 GB.
+KV per token: 12 KB (fp16). Both cache types have `merge=True` → server batching works.
+
+| Context | Prefill | Decode | Peak Mem |
+|---------|---------|--------|----------|
+| 512 | 916 tok/s | 123.1 tok/s | 2.3 GB |
+| 2048 | 1055 tok/s | 111.5 tok/s | 2.9 GB |
+| 8192 | 1114 tok/s | 114.7 tok/s | 3.4 GB |
+| 16384 | 1070 tok/s | 105.9 tok/s | 3.6 GB |
+| 32768 | 968 tok/s | 84.7 tok/s | 4.3 GB |
+
+KV quantization works but fp16 is fastest at all contexts. Not needed.
+
+### Qwen3.5-4B Claude Opus Reasoning Distill (6-bit)
+
+32 layers, 8 KV cache + 24 ArraysCache. Model: 3.42 GB.
+KV per token: 32 KB (fp16). Batchable.
+
+| Context | KV | Prefill | Decode | Peak Mem |
+|---------|-----|---------|--------|----------|
+| 512 | fp16 | 113 tok/s | 19.5 tok/s | 4.3 GB |
+| 2048 | fp16 | 217 tok/s | 35.0 tok/s | 5.1 GB |
+| 8192 | fp16 | 231 tok/s | 9.9 tok/s | 5.8 GB |
+| 16384 | q4 | 388 tok/s | 45.3 tok/s | 6.6 GB |
+| 32768 | fp16 | 384 tok/s | 48.2 tok/s | 8.2 GB |
+
+Noisy results — decode speed varies 10-48 tok/s. q4 KV helps at 16K+.
+
+### Quality Comparison: 2B vs 4B Distill
+
+Tested 8 tasks: simple Q&A, math, instruction following, code analysis,
+summarization, escalation detection, tool call recognition, multi-turn context.
+
+**2B won every test.** Not just speed — quality too. The 4B distill leaks
+"Thinking Process:" into responses even with `enable_thinking=False`. The
+distillation from Claude Opus baked in a "show your work" behavior that
+wastes tokens and confuses users.
+
+Speed: 2B = 121-138 tok/s, 4B = 61-63 tok/s (2x faster).
+
+### Memory Projection: Concurrent Serving
+
+Budget: 32 GB - 5 GB macOS - 6 GB flash-moe (with spike headroom) = 21 GB.
+
+| Config | 128K | 192K | 256K | Max |
+|--------|------|------|------|-----|
+| 2x 2B | 12.6 GB ✓ | 14.7 GB ✓ | 16.6 GB ✓ | ~407K |
+| 2x 4B | 24.4 GB ✗ | — | — | ~83K |
+| 1x 4B | 12.2 GB ✓ | 14.6 GB ✓ | 16.9 GB ✓ | ~371K |
+
+### Proposed Production Topology
+
+```
+:41961  mlx_lm.server   Qwen3.5-2B     Boot front door (123 tok/s, 256K ctx)
+:41962  mlx_lm.server   Qwen3.5-2B     Kelk front door (123 tok/s, 256K ctx)
+:41966  flash-moe        35B-A3B        Deep thinking consultant (7.2 tok/s, 128K ctx)
+```
+
+The "conversationalist + expert" pattern: 2B handles 90% of interactions at
+123 tok/s. When complex reasoning is needed, it calls the 35B-A3B as a tool.
+Both agents get dedicated fast front doors. Both can escalate to deep thinking.
+
+Memory: 2x 2B (16.6 GB) + 35B-A3B (6 GB) + macOS (5 GB) = 27.6 GB.
+Headroom: 4.4 GB.
+
+For N agent profiles (modular goal): add 2B instances on incremental ports.
+Each uses ~8 GB at 256K. 3 agents at 128K = 18 GB + 6 + 5 = 29 GB (works).
+
+### mlx_lm.server Batching
+
+Both Qwen3.5-2B and 4B are `is_batchable = True` — all cache layers have
+`merge=True`. The server's `BatchGenerator` can serve concurrent requests
+via `--decode-concurrency` and `--prompt-concurrency`. A single instance
+CAN serve multiple agents simultaneously (shared forward pass, separate KV caches).
+
+## Fine-Tuning Investigation — Can We Improve the 2B/4B?
+
+**Run:** 2026-04-28 | Sources: tuning-wizard, Unsloth docs, mlx-lora-finetune
+
+### tuning-wizard (existing pipeline)
+
+tuning-wizard already has the infrastructure for fine-tuning Qwen3.5 models:
+
+- **qwen-base role** — targets the 4 weaknesses we observed: identity adherence,
+  anti-sycophancy, structured output, tool-call format. 14 categories with
+  min/max example counts. bf16 LoRA only (no QLoRA — GatedDeltaNet sensitivity).
+- **kelk role** — agent LoRA stacking on qwen-base. 110 reviewed examples
+  exported (93 train / 17 eval). Categories: write_file_completion (99),
+  file_path_correction (6), patch_disambiguation (4), python_syntax_fix (1).
+- **boot role** — agent LoRA for Nanbeige4.1-3B (different model family).
+
+Training pipeline: Unsloth on CUDA → GGUF export → MLX convert.
+
+### Key finding: tuning-wizard targets the EXACT weaknesses we saw
+
+The 4B distill's "Thinking Process:" leak maps to the qwen-base categories:
+- `json-raw-output` — "return raw valid JSON, no markdown fences, no explanatory text"
+- `identity-style-constraint` — "follow style constraints from system prompt"
+- `malformed-output-recovery` — "fix errors without apologizing at length"
+
+These are exactly the behaviors the 4B distill violates. Fine-tuning with
+tuning-wizard's dataset could fix them.
+
+### Unsloth Qwen3.5-2B fine-tuning
+
+From Unsloth docs (unsloth.ai/docs/models/qwen3.5/fine-tune):
+- Qwen3.5-2B bf16 LoRA: **5 GB VRAM** (fits on Whitebox M1 Max)
+- QLoRA NOT recommended for Qwen3.5 (GatedDeltaNet quantization sensitivity)
+- Training: bf16 LoRA, `transformers v5`, Unsloth 1.5x speedup
+- Supports vision fine-tuning and RL (GRPO/GSPO)
+
+### mlx-lora-finetune (Mac-native LoRA)
+
+From sciences44/mlx-lora-finetune:
+- Fine-tunes Qwen3.5-2B on Apple Silicon in **15 minutes**, 600 iterations
+- Peak RAM: 5.9 GB (fits alongside flash-moe)
+- **Result: 2B beat 4B after fine-tuning** (50% vs 40% semantic accuracy on SQL)
+- "Prompt engineering doesn't work at this model size. Fine-tuning teaches
+  a deep behavioral pattern."
+- 0.36% of parameters trained (6.8M LoRA adapters)
+
+### What fine-tuning could fix for our 2B front door
+
+| Weakness | tuning-wizard category | Impact |
+|----------|----------------------|--------|
+| Leaks thinking into responses | json-raw-output | High — wastes tokens |
+| Follows style constraints | identity-style-constraint | Medium |
+| Corrects malformed output | malformed-output-recovery | High — agent reliability |
+| Recognizes when to escalate | New category needed | High — routing quality |
+| Tool call format | tool-call-single, tool-call-multi-step | High — agent integration |
+
+### Two paths to improvement
+
+**Path A: Unsloth bf16 LoRA on CUDA (higher quality)**
+- Train on Unsloth Studio (CUDA required — no Mac training yet)
+- bf16 LoRA on qwen-base categories
+- GGUF export → MLX convert for deployment
+- tuning-wizard already has the data pipeline
+
+**Path B: mlx-lora-finetune on Mac (faster iteration)**
+- Train directly on Whitebox with mlx_lm LoRA
+- 15 minutes per experiment, 5.9 GB peak RAM
+- No GGUF/MLX conversion needed — native MLX adapters
+- Can iterate on dataset quickly
+
+**Path B is more practical for now.** We can experiment locally without
+CUDA infrastructure. If quality improves, move to Path A for production.
+
+### Recommended next steps
+
+1. Create a qwen-2b role in tuning-wizard targeting front-door behaviors
+2. Curate training data: escalation decisions, tool calls, clean output format
+3. Run mlx-lora-finetune on Whitebox with the 2B model
+4. Benchmark fine-tuned 2B against base 2B on the same 8-task quality test
+5. If quality improves significantly, deploy fine-tuned 2B as front door
+
+### References
+
+1. Unsloth Qwen3.5 guide: unsloth.ai/docs/models/qwen3.5/fine-tune
+2. mlx-lora-finetune: github.com/sciences44/mlx-lora-finetune
+3. tuning-wizard: ~/dev/tuning-wizard/ (qwen-base.yaml, kelk.yaml)
+4. Fine-tuning small models: omdena.com/blog/fine-tuning-small-language-models
+
 ## References
 
 1. flash-moe issue #10: github.com/danveloper/flash-moe/issues/10
