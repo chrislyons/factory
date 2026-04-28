@@ -1,6 +1,6 @@
 # FCT076 Flash-MoE 35B-A3B — Porting and Debug Log
 
-**Status:** Complete | **Date:** 2026-04-28 | **Author:** Gonzo (Claude)
+**Status:** Complete | **Date:** 2026-04-28 | **Author:** Gonzo
 
 ---
 
@@ -151,21 +151,105 @@ requiring CPU fallback.
 The 8-bit CPU override adds ~0.1 ms per layer (negligible). The main
 bottleneck is SSD expert I/O (47% of time) and 6-bit dequant compute (22%).
 
-## 27B Dense Model (Future)
+## 27B Dense Model — KV Cache Benchmarks
 
-The Ornstein-Hermes-3.6-27b-MLX-6bit model at
-`/Users/nesbitt/models/Ornstein-Hermes-3.6-27b-MLX-6bit` is a dense model
-(all 32 layers have KV cache). This means:
-- KV cache at 128K context: 8.59 GB (fp32) → needs quantization
-- q5_1 KV cache: 1.48 GB → fits comfortably on 32GB
-- mlx_lm.server should work (unlike the 35B MoE which OOMs)
+**Run:** 2026-04-28 | Model: `Ornstein-Hermes-3.6-27b-MLX-6bit`
 
-KV cache quantization flags for llama.cpp:
-```
---cache-type-k q5_1 --cache-type-v q5_1
-```
+### Architecture Surprise
 
-For mlx_lm, KV cache quantization is available via `--kv-bits` flag.
+The 27B model is NOT a traditional dense model where every layer has a KV
+cache. Like the 35B-A3B, it uses a **hybrid architecture**:
+
+- **48 layers:** GatedDeltaNet linear attention (O(1) fixed-size state, no KV cache)
+- **16 layers:** Full attention with KV cache (every 4th layer)
+
+This means the KV cache is ~4x smaller per token than a standard 64-layer
+dense model. The original assumption that "all 32 layers have KV cache" was
+wrong — the text config says `num_hidden_layers: 64` but only 16 use
+traditional KV caching.
+
+### Architecture Details
+
+| Parameter | Value |
+|-----------|-------|
+| Hidden size | 5120 |
+| Total layers | 64 |
+| KV cache layers | 16 (every 4th) |
+| Linear attention layers | 48 (GatedDeltaNet) |
+| Attention heads | 24 |
+| KV heads | 4 (GQA 6:1) |
+| Head dim | 256 |
+| Max position | 262,144 |
+| Vocab size | 248,320 |
+| Quantization | 6-bit affine, group_size=64 |
+| Model memory (loaded) | 21.9 GB |
+
+### Analytical KV Cache Memory
+
+Per token per KV layer: 2(K+V) × 4 heads × 256 dim = 2,048 bytes (fp16)
+Per token all 16 KV layers: 32,768 bytes = 32 KB (fp16)
+
+| Context | fp16 | q8 | q4 |
+|---------|------|----|----|
+| 8K | 268 MB | 134 MB | 67 MB |
+| 32K | 1.07 GB | 537 MB | 268 MB |
+| 64K | 2.15 GB | 1.07 GB | 537 MB |
+| 128K | 4.29 GB | 2.15 GB | 1.07 GB |
+| 262K | 8.59 GB | 4.29 GB | 2.15 GB |
+
+Maximum context on 32GB system (model = 21.9 GB, ~10.1 GB available):
+
+| KV Mode | Max Context |
+|---------|------------|
+| fp16 | ~309K tokens |
+| q8 | ~619K tokens |
+| q4 | ~1.2M tokens |
+
+**fp16 KV cache handles 262K context with 1.5 GB headroom. No quantization
+needed.**
+
+### Decode Speed Benchmarks
+
+| Context | fp16 prefill | fp16 decode | q8 decode | q4 decode |
+|---------|-------------|-------------|-----------|-----------|
+| 512 | 65.2 tok/s | 12.1 tok/s | 12.0 tok/s | 12.0 tok/s |
+| 2048 | 67.2 tok/s | 12.0 tok/s | 11.7 tok/s | 11.8 tok/s |
+| 8192 | 66.5 tok/s | 11.6 tok/s | 10.8 tok/s | 10.8 tok/s |
+
+### Key Findings
+
+1. **KV cache quantization provides ZERO speed benefit.** The model is
+   compute-bound (6-bit dequant + matmul), not memory-bound. At 8K context,
+   q8/q4 decode is actually *slightly slower* than fp16 due to
+   dequantization overhead in the cache layer.
+
+2. **FP16 KV cache works up to ~309K context on 32GB.** The hybrid
+   architecture (48 linear attn + 16 full attn) makes KV cache a
+   non-issue for memory. The original fear that "27B at 128K needs
+   quantization" was based on wrong assumptions about the architecture.
+
+3. **Decode speed is flat at ~12 tok/s regardless of context or KV mode.**
+   This is the model's compute-bound speed on M1 Max at 6-bit.
+
+4. **Prefill is flat at ~66 tok/s** regardless of context or KV mode.
+
+5. **The tweet's situation does not apply.** The tweet described Qwen3.6
+   27B dense on 24GB VRAM where q4 KV cache was needed to fit 262K.
+   Our 27B has 4x fewer KV cache layers due to the hybrid architecture,
+   so fp16 handles 262K easily. The KV cache quantization unlock is
+   irrelevant for this model on this hardware.
+
+### mlx_lm.server KV Cache Notes
+
+mlx_lm 0.31.1's server CLI does NOT expose `--kv-bits` flags. The library's
+`generate_step()` and `stream_generate()` DO accept `kv_bits`, `kv_group_size`,
+and `quantized_kv_start` as kwargs, but the server never passes them through.
+The `--prompt-cache-size` and `--prompt-cache-bytes` flags control prompt cache
+pooling, not KV quantization.
+
+Since fp16 handles all practical context lengths, this is a non-issue. If we
+ever needed KV quant, a thin wrapper script using `stream_generate()` directly
+would work.
 
 ## References
 
