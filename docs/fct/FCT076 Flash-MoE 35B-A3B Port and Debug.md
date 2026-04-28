@@ -284,6 +284,77 @@ Spectral Analysis-Based Entanglement Resolution. 0% refusal, 0% perplexity
 degradation, 125 directions ablated across 25 layers. BF16 format.
 Downloaded to external drive for future evaluation.
 
+## Concurrent Small Models — Gemma4 E2B/E4B Benchmarks
+
+**Run:** 2026-04-28 | Question: Can small models run alongside the 35B-A3B?
+
+### Resource Budget
+
+35B-A3B flash-moe resident: ~3 GB. System total: 32 GB (~5 GB macOS).
+Available for small models: ~24 GB.
+
+### Gemma4 E2B (6-bit, /Users/nesbitt/models/gemma-4-e2b-6bit)
+
+15 layers, ALL with KV cache (dense, no hybrid). 1 KV head, head_dim=256.
+Model memory: 3.79 GB. KV per token: 15 KB (fp16).
+
+| Context | Prefill | Decode | Peak Mem |
+|---------|---------|--------|----------|
+| 512 | 1030 tok/s | 71.7 tok/s | 4.3 GB |
+| 2048 | 2432 tok/s | 73.4 tok/s | 4.6 GB |
+| 8192 | 2247 tok/s | 68.9 tok/s | 4.9 GB |
+| 16384 | 2189 tok/s | 65.0 tok/s | 5.2 GB |
+| 32768 | 2000 tok/s | 56.7 tok/s | 5.8 GB |
+
+### Gemma4 E4B (6-bit, /Users/nesbitt/models/gemma-4-e4b-6bit)
+
+24 layers, ALL with KV cache. Mixed KVCache + RotatingKVCache.
+Model memory: 6.15 GB.
+
+| Context | Prefill | Decode | Peak Mem |
+|---------|---------|--------|----------|
+| 512 | 545 tok/s | 45.8 tok/s | 6.7 GB |
+| 2048 | 674 tok/s | 44.2 tok/s | 7.0 GB |
+| 8192 | 658 tok/s | 41.4 tok/s | 7.4 GB |
+| 16384 | 655 tok/s | 37.4 tok/s | 7.8 GB |
+| 32768 | 624 tok/s | 31.4 tok/s | 8.6 GB |
+
+### KV Cache Quantization: NOT AVAILABLE
+
+Gemma4 uses RotatingKVCache (sliding window attention). mlx_lm 0.31.1
+throws "RotatingKVCache Quantization NYI" for q8/q4. Not needed — models
+are small enough that fp16 KV cache fits easily at all tested contexts.
+
+### Combined Topology Analysis
+
+```
+35B-A3B resident:     3.0 GB
+E4B at 32K context:   8.6 GB
+                      -------
+Total:               11.6 GB
+Headroom:            20.4 GB
+```
+
+Could run BOTH E2B and E4B alongside 35B-A3B with ~15 GB headroom.
+
+Proposed topology:
+```
+  :41961  E4B (mlx_lm.server)     46 tok/s   fast chat, short queries
+  :41962  E2B (mlx_lm.server)     72 tok/s   ultra-fast tasks
+  :41966  35B-A3B (flash-moe)      7.2 tok/s  deep reasoning, 128K context
+```
+
+Speed degradation with context:
+- E4B:  46 → 31 tok/s (512 → 32K)
+- E2B:  72 → 57 tok/s (512 → 32K)
+- 35B-A3B: flat 7.2 tok/s at all contexts
+
+### Question 1: Multiple 35B-A3B Instances
+
+Not beneficial. SSD bandwidth is the bottleneck — two instances would
+double expert I/O and halve throughput. Metal GPU is shared. One instance
+request-serialized is optimal.
+
 ## References
 
 1. flash-moe issue #10: github.com/danveloper/flash-moe/issues/10
