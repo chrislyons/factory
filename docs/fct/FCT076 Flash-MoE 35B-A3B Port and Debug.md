@@ -436,7 +436,81 @@ Both Qwen3.5-2B and 4B are `is_batchable = True` — all cache layers have
 via `--decode-concurrency` and `--prompt-concurrency`. A single instance
 CAN serve multiple agents simultaneously (shared forward pass, separate KV caches).
 
-## Fine-Tuning Investigation — Can We Improve the 2B/4B?
+**However:** batching two agents on one instance doubles the KV cache, which
+significantly reduces max context. 1x 4B batched for 2 agents maxes at 96K
+context (below 128K floor). This eliminates the 1+1 topology.
+
+### Qwen3.5-4B Base (NexVeridian, 6-bit)
+
+32 layers, 8 KV cache + 24 ArraysCache. Model: 3.42 GB. Batchable.
+
+| Context | KV | Prefill | Decode | Peak Mem |
+|---------|-----|---------|--------|----------|
+| 512 | fp16 | 384 tok/s | 62.2 tok/s | 4.3 GB |
+| 2048 | fp16 | 432 tok/s | 62.4 tok/s | 5.1 GB |
+| 8192 | fp16 | 426 tok/s | 58.1 tok/s | 5.8 GB |
+| 16384 | fp16 | 409 tok/s | 54.1 tok/s | 6.6 GB |
+| 32768 | fp16 | 384 tok/s | 47.8 tok/s | 8.2 GB |
+
+Much cleaner than the distill — consistent 48-62 tok/s, no noisy spikes.
+
+### Three-Way Quality Comparison: 2B vs 4B Distill vs 4B Base
+
+| Test | 2B | 4B Distill | 4B Base |
+|------|-----|-----------|---------|
+| Simple Q&A | Clean, fast | Leaks thinking | Clean, fast |
+| Math | Correct | Correct | Correct, best format |
+| Instruction (3 bullets) | Perfect | Leaks thinking | Perfect, best content |
+| Code analysis | Good | Good | Good, cleaner |
+| Summarization | Clean 2 sentences | Dumps analysis first | Clean 2 sentences, more detail |
+| Escalation | "ESCALATE" fast | "Let me think..." | "ESCALATE" clean |
+| Tool call | Clean JSON | Leaks reasoning | Clean JSON, better args |
+| Multi-turn | Good | Good | Most complete |
+| Speed | 122-138 tok/s | 61-63 tok/s | 62-71 tok/s |
+
+**4B distill eliminated.** Leaks "Thinking Process:" into every response.
+Claude Opus distillation baked in "show your work" behavior.
+
+**4B base is genuinely better quality** than 2B (better math formatting,
+better tool call args, more complete multi-turn answers). But 2B is 2x faster.
+
+### Topology Decision: 2+1 vs 1+1 vs 1+1+1
+
+| Setup | Description | Max Context | 128K Budget | Complexity |
+|-------|-------------|-------------|-------------|------------|
+| **2+1** | 2x 2B + 35B | **256K** | 23.6 GB ✓ (8.4 GB headroom) | Low |
+| 1+1+1 | 2B + 4B + 35B | 160K | 29.5 GB ✓ (2.5 GB headroom) | Medium |
+| 1+1 | 1x 4B batched + 35B | 96K | ✗ below 128K floor | Low |
+
+**1+1 eliminated:** Batching two agents on one 4B doubles KV cache, maxes at 96K.
+
+**1+1+1 eliminated:** 2.5 GB headroom at 128K is too tight for production.
+Any memory spike from the 35B during inference → OOM.
+
+**2+1 wins:** 256K context, 8.4 GB headroom at 128K, simple architecture.
+The 2B's quality gap vs the 4B base can be closed via fine-tuning with the
+frontdoor tuning profile (see below).
+
+### Production Topology
+
+```
+:41961  mlx_lm.server   Qwen3.5-2B     Boot front door (123 tok/s, 256K ctx)
+:41962  mlx_lm.server   Qwen3.5-2B     Kelk front door (123 tok/s, 256K ctx)
+:41966  flash-moe        35B-A3B        Deep thinking consultant (7.2 tok/s, 128K ctx)
+```
+
+The "conversationalist + expert" pattern: 2B handles 90% of interactions at
+123 tok/s. When complex reasoning is needed, it calls the 35B-A3B as a tool.
+Both agents get dedicated fast front doors. Both can escalate to deep thinking.
+
+Memory at 128K: 2x 2B (12.6 GB) + 35B-A3B (6 GB) + macOS (5 GB) = 23.6 GB.
+Headroom: 8.4 GB.
+
+Memory at 256K: 2x 2B (16.6 GB) + 35B-A3B (6 GB) + macOS (5 GB) = 27.6 GB.
+Headroom: 4.4 GB.
+
+For N agent profiles (modular goal): add 2B instances on incremental ports.
+Each uses ~8 GB at 256K. 3 agents at 128K = 18 GB + 6 + 5 = 29 GB (works).
 
 **Run:** 2026-04-28 | Sources: tuning-wizard, Unsloth docs, mlx-lora-finetune
 
