@@ -47,7 +47,7 @@ export HERMES_HOME="/Users/nesbitt/.hermes/profiles/boot"
 
 BOOT_PROFILE_CFG="${HERMES_HOME}/config.yaml"
 HERMES_AGENT_PY="/Users/nesbitt/.local/share/uv/tools/hermes-agent/bin/python3"
-BOOT_MODEL_CONFIG="/Users/nesbitt/models/Ornstein3.6-35B-A3B-MLX-6bit/config.json"
+BOOT_MODEL_CONFIG="/Users/nesbitt/models/Gemma-4-E4B-SABER-MLX-6bit/config.json"
 MLX_VLM_HEALTH_URL="http://127.0.0.1:41961/v1/models"
 
 # 1. Profile must exist AND pin provider: custom. See FCT055 RC-1 for why.
@@ -74,7 +74,7 @@ fi
 
 # 3. Local model weights must be present on disk (Boot uses
 #    gemma-4-e4b-it-6bit via mlx-vlm on :41961).
-BOOT_MODEL_CONFIG="/Users/nesbitt/models/Ornstein-Hermes-3.6-27b-MLX-6bit/config.json"
+BOOT_MODEL_CONFIG="/Users/nesbitt/models/Gemma-4-E4B-SABER-MLX-6bit/config.json"
 if [[ ! -f "${BOOT_MODEL_CONFIG}" ]]; then
   echo "ERROR: local model config missing at ${BOOT_MODEL_CONFIG}" >&2
   exit 5

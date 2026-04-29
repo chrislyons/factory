@@ -1,8 +1,9 @@
 #!/bin/bash
 # factory-startup.sh — Sequenced startup for Factory services on Whitebox
 #
-# Phase 1: Lightweight services (already RunAtLoad in their own plists)
-# Phase 2: MLX Qwen3.5-2B + v4v2 adapter (:41961 Boot, :41962 Kelk)
+# Phase 1: Lightweight services (flash-moe-ornstein also RunAtLoad) (already RunAtLoad in their own plists)
+# Phase 2: Gemma4-E4B-SABER (:41961 Boot, :41962 Kelk)
+# Phase 2.5: Ornstein 35B consultant (flash-moe, streams from SSD)
 # Phase 3: Hermes gateways — MLX guaranteed ready
 #
 # Called by: com.bootindustries.factory-startup.plist (RunAtLoad, not KeepAlive)
@@ -91,7 +92,7 @@ log "=== Factory startup sequence begin ==="
 log "Memory: $(sysctl -n hw.memsize | awk '{printf "%.0fGB", $1/1073741824}')"
 log "Free: $(top -l 1 -s 0 2>/dev/null | grep PhysMem | sed 's/.*) //')"
 
-# Phase 1: Lightweight services
+# Phase 1: Lightweight services (flash-moe-ornstein also RunAtLoad)
 # These have RunAtLoad=true in their own plists, so they're already starting.
 log "Phase 1: Lightweight services (already launching via RunAtLoad)"
 for svc in portal-caddy gsd-sidecar factory-auth qdrant-mcp research-mcp matrix-mcp-boot hindsight-api; do
@@ -102,19 +103,31 @@ for svc in portal-caddy gsd-sidecar factory-auth qdrant-mcp research-mcp matrix-
   fi
 done
 
-# Phase 2: MLX Qwen3.5-2B + v4v2 adapter (:41961 Boot, :41962 Kelk)
-# 2B model: ~1.5GB resident. v4v2 adapter: 2.8M params. Total ~2.4GB per instance.
-# Require 6GB free (2x 2.4GB + headroom).
-log "Phase 2: MLX Qwen3.5-2B + v4v2 (:41961 Boot, :41962 Kelk)"
-if require_free_memory 6000 "Phase 2"; then
+# Phase 2: Gemma4-E4B-SABER (:41961 Boot, :41962 Kelk)
+# SABER model: ~5.5GB resident per instance (dense, full RAM load).
+# Require 12GB free (2× 5.5GB + headroom).
+log "Phase 2: Gemma4-E4B-SABER (:41961 Boot, :41962 Kelk)"
+if require_free_memory 12000 "Phase 2"; then
   bootstrap "com.bootindustries.mlx-lm-boot"
   sleep 3
   bootstrap "com.bootindustries.mlx-lm-kelk"
   wait_for_health "http://127.0.0.1:41961/v1/models" "mlx-lm-boot" 120
   wait_for_health "http://127.0.0.1:41962/v1/models" "mlx-lm-kelk" 120
 else
-  log "Phase 2 SKIPPED — not enough memory for Qwen3.5-2B"
+  log "Phase 2 SKIPPED — not enough memory for SABER (2× 5.5 GB + headroom)"
   log "  Manual recovery: free memory, then run factory-startup.sh again"
+fi
+
+# Phase 2.5: Ornstein 35B consultant (flash-moe, streams from SSD)
+# Runs as deep reasoning consultant on :41966 — not memory-intensive (~3GB resident)
+log "Phase 2.5: Ornstein 35B flash-moe server (:41966)"
+SPLIT_PATH="/Users/nesbitt/models/Ornstein3.6-35B-A3B-flash-moe-8bit/resident/resident.safetensors"
+if [ ! -f "$SPLIT_PATH" ]; then
+  log "ERROR: Ornstein flash-moe split not found at $SPLIT_PATH"
+  log "  Run: flash-moe split --model-path /Users/nesbitt/models/Ornstein3.6-35B-A3B-MLX-8bit --output-path /Users/nesbitt/models/Ornstein3.6-35B-A3B-flash-moe-8bit"
+else
+  bootstrap "com.bootindustries.flash-moe-ornstein"
+  wait_for_health "http://127.0.0.1:41966/health" "Ornstein35B" 60
 fi
 
 # Phase 3: Hermes gateways
@@ -130,11 +143,11 @@ log "=== Startup complete ==="
 log "Free: $(top -l 1 -s 0 2>/dev/null | grep PhysMem | sed 's/.*) //')"
 
 # Check all services
-for port in 41961 41962; do
-  if curl -sf --max-time 3 "http://127.0.0.1:${port}/v1/models" >/dev/null 2>&1; then
-    log "  :${port} qwen3.5-2b: UP"
+for port in 41961 41962 41966; do
+  if curl -sf --max-time 3 "http://127.0.0.1:${port}/health" >/dev/null 2>&1 || curl -sf --max-time 3 "http://127.0.0.1:${port}/v1/models" >/dev/null 2>&1; then
+    log "  :${port}: UP"
   else
-    log "  :${port} qwen3.5-2b: DOWN"
+    log "  :${port}: DOWN"
   fi
 done
 

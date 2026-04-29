@@ -48,7 +48,7 @@ export HERMES_HOME="/Users/nesbitt/.hermes/profiles/kelk"
 
 KELK_PROFILE_CFG="${HERMES_HOME}/config.yaml"
 HERMES_AGENT_PY="/Users/nesbitt/.local/share/uv/tools/hermes-agent/bin/python3"
-KELK_MODEL_CONFIG="/Users/nesbitt/models/Ornstein3.6-35B-A3B-MLX-6bit/config.json"
+KELK_MODEL_CONFIG="/Users/nesbitt/models/Gemma-4-E4B-SABER-MLX-6bit/config.json"
 MLX_VLM_HEALTH_URL="http://127.0.0.1:41961/v1/models"
 
 # 1. Profile must exist AND pin provider: custom. See FCT055 RC-1.
