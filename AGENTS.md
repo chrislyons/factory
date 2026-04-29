@@ -1,6 +1,6 @@
 # Factory Agents — Topology and Routing
 
-**Updated:** 2026-04-14 | **Ref:** FCT067
+**Updated:** 2026-04-29 (SABER deployment) | **Ref:** FCT067, FCT083
 
 ---
 
@@ -8,8 +8,8 @@
 
 | Agent | Matrix User | Main Model | Provider | Port | Hermes Profile |
 |-------|------------|------------|----------|------|----------------|
-| **Boot** | @boot.industries:matrix.org | Gemma 4 E4B 6-bit | Local MLX (mlx-vlm) | :41961 | `~/.hermes/profiles/boot/` |
-| **Kelk** | @sir.kelk:matrix.org | Gemma 4 E4B 6-bit | Local MLX (mlx-vlm) | :41962 | `~/.hermes/profiles/kelk/` |
+| **Boot** | @boot.industries:matrix.org | Gemma-4-E4B-SABER | Local MLX (mlx_lm.server) | :41961 | `~/.hermes/profiles/boot/` |
+| **Kelk** | @sir.kelk:matrix.org | Gemma-4-E4B-SABER | Local MLX (mlx_lm.server) | :41962 | `~/.hermes/profiles/kelk/` |
 | **IG-88** | @ig88bot:matrix.org | Xiaomi Mimo-v2-Pro | Nous Portal (cloud) | N/A | `~/.hermes/profiles/ig88/` |
 
 ---
@@ -17,55 +17,126 @@
 ## Inference Topology
 
 ```
-                    ┌─────────────────────────────┐
-                    │     Whitebox (32GB M1 Max)    │
-                    │                               │
-  Boot main chat ──▶│  :41961  E4B 6-bit (mlx-vlm) │  ~7.5GB RAM
-                    │                               │
-  Kelk main chat ──▶│  :41962  E4B 6-bit (mlx-vlm) │  ~7.5GB RAM
-                    │                               │
-  Boot+Kelk aux ───▶│  :41966  26B-A4B 6-bit        │  ~3GB resident
-                    │          (flash-moe SSD stream) │  experts from SSD
-                    └─────────────────────────────┘
-
-  IG-88 ───────────▶  Nous Portal (cloud)
-                       xiaomi/mimo-v2-pro (free tier)
+                    ┌─────────────────────────────────────┐
+                    │       Whitebox (32GB M1 Max)         │
+                    │                                        │
+  Boot main chat ──▶│ :41961  SABER E4B 6bit    ~50 tok/s  │
+  Kelk main chat ──▶│ :41962  SABER E4B 6bit    ~50 tok/s  │
+                    │                                        │
+  Escalated tasks ──▶│ :41966  Ornstein35B-A3B     ~6 tok/s  │
+  (thinking/compression│        flash-moe SSD stream          │
+   vision/search)      │        ~3GB resident                │
+                    └─────────────────────────────────────┘
+  IG-88 ────────────▶  Nous Portal (cloud)
+                        xiaomi/mimo-v2-pro
 ```
 
 ### Aux Slot Routing (Boot + Kelk)
 
-All auxiliary subsystems route to the 26B on :41966:
-
-| Slot | Function | Port |
-|------|----------|------|
-| compression | Summarizes old turns when context grows | :41966 |
-| session_search | Searches past sessions for context | :41966 |
-| skills_hub | Selects skills from registry | :41966 |
-| vision | Processes images | :41966 |
-| web_extract | Extracts content from web pages | :41966 |
-| approval | Evaluates tool call safety | :41966 |
-| mcp | MCP server tool calls | :41966 |
-| flush_memories | Writes session memories | :41966 |
+| Slot | Function | Target | Model |
+|------|----------|--------|-------|
+| `approval` | Tool call safety check | :41961/:41962 | SABER |
+| `compression` | Context summarization | :41966 | Ornstein35B |
+| `flush_memories` | Write session memories | :41961/:41962 | SABER |
+| `mcp` | MCP server tool calls | :41961/:41962 | SABER |
+| `session_search` | Search past sessions | :41966 | Ornstein35B |
+| `skills_hub` | Select skills from registry | :41961/:41962 | SABER |
+| `thinking` | Deep reasoning consultant | :41966 | Ornstein35B |
+| `title_generation` | Generate conversation titles | :41961/:41962 | SABER |
+| `vision` | Image analysis | :41966 | Ornstein35B |
+| `web_extract` | Extract web content | :41961/:41962 | SABER |
 
 ### Performance
 
 | Model | Backend | tok/s | RAM |
 |-------|---------|-------|-----|
-| E4B (main chat) | mlx-vlm | ~30 | ~7.5GB |
-| 26B-A4B (aux) | flash-moe SSD | ~5.4 | ~3GB resident |
+| SABER E4B 6bit | mlx_lm.server | ~50 | ~5.5GB |
+| Ornstein35B-A3B | flash-moe SSD | ~6 | ~3GB resident |
 | Mimo Pro (IG-88) | Nous cloud | N/A | 0 (cloud) |
 
 ---
 
-## SSD Expert Streaming (flash-moe)
+## Gemma-4-E4B-SABER — Frontdoor Model
 
-The 26B-A4B model (20GB at 6-bit) is split into:
-- **Resident weights** (2.88GB): embeddings, attention, norms, routing — always in Metal GPU RAM
-- **Expert ECB files** (30 layers x 618MB): memory-mapped from internal SSD, only active experts paged in per token
+Gemma-4-E4B-SABER (GestaltLabs) is an abliterated Gemma4 fine-tune — refusal
+behaviors removed via representation engineering. Runs raw (no adapter) with
+agent-specific system prompts for Boot vs Kelk differentiation.
 
-Split model location: `/Users/nesbitt/models/gemma-4-26b-a4b-it-6bit-split/`
+### Why SABER?
+
+- 7/8 benchmark score with no adapter (identity, tool_call, autonomy, conciseness)
+- Abliterated — decisive, no refusal hedging, executes immediately
+- Multimodal — can analyze screenshots and audio
+- 5.7 GB disk, ~5.5 GB RAM per instance
+- 2× faster training than Qwen3.5-4B (standard attention, no GatedDeltaNet)
+
+### Architecture
+
+- 42 layers, hidden=2560, intermediate=10240
+- 8 attention heads, 2 KV heads (GQA)
+- 128K context window
+- 6-bit quantization (group_size=64)
+- Source: google/gemma-4-E4B-it → abliterated → MLX quantized
+
+### Memory Budget
+
+| Component | RAM |
+|-----------|-----|
+| macOS + system | ~7 GB |
+| Boot SABER (:41961) | ~5.5 GB |
+| Kelk SABER (:41962) | ~5.5 GB |
+| Ornstein 35B (:41966) | ~3 GB |
+| Hermes gateways | ~0.5 GB |
+| **Total** | **~21.5 GB** |
+| **Free** | **~10.5 GB** |
+
+### Deployment
+
+- mlx_lm.server on :41961 (Boot) and :41962 (Kelk)
+- mlx_lm 0.31.3 (brew upgrade)
+- No adapter — raw model with system prompt
+- Model path: `/Users/nesbitt/models/Gemma-4-E4B-SABER-MLX-6bit`
+
+---
+
+## Ornstein 35B — Deep Reasoning Consultant
+
+Ornstein3.6-35B-A3B (DJLougen fine-tune of Qwen3.6-35B-A3B MoE) runs on :41966
+via flash-moe. It is NOT the main chat model — it is the **thinking/consultant**
+slot that Boot and Kelk escalate complex reasoning tasks to.
+
+### Why Ornstein?
+
+- Already trained on hermes-agent-traces-filtered (3,679 tool-call traces)
+- Already knows Hermes tool format (function_calls, tool_outputs, planning)
+- Trained on DJLougen's curated reasoning data (100K samples, math/code/conversation)
+- 256 experts, 8 active per token — only ~3B params fire per token
+- 262K context window
+
+### Flash-Moe Split
+
+Ornstein35B is streamed from SSD via flash-moe:
+
+- **Resident** (~2GB): embeddings, attention, norms, routing — Metal GPU RAM
+- **Expert ECB** (~26GB): 40 layers × ~654MB, memory-mapped from internal SSD
+- Only active experts paged in per token — never loads all 256 experts
+
+Split location: `/Users/nesbitt/models/Ornstein3.6-35B-A3B-flash-moe-8bit/`
 Binary: `/Users/nesbitt/dev/vendor/flash-moe-gemma4/target/release/flash-moe`
-HTTP wrapper: `/Users/nesbitt/dev/factory/scripts/flash-moe-server.py`
+Server: `/Users/nesbitt/dev/factory/scripts/flash-moe-ornstein-server.py`
+
+### How Escalation Works
+
+Boot/Kelk (SABER) handle ~90% of requests at ~50 tok/s. Complex tasks are
+automatically routed to Ornstein35B via the `thinking` aux slot. The 35B
+responds with deep reasoning, then Boot/Kelk synthesize the answer for the user.
+
+---
+
+## Qwen3.5-2B + v4v2 Adapter (DEPRECATED)
+
+Replaced by SABER on 2026-04-29. The 2B model collapsed into repetitive loops
+with zero tool calls in Matrix sessions. See FCT083 for benchmark details.
 
 ---
 
@@ -88,7 +159,7 @@ Recovery keys and passwords are in the operator's personal vault only. Not in In
 
 Run from `~/dev/factory/scripts/matrix-cross-sign/`:
 ```bash
-MATRIX_PASSWORD='...' MATRIX_RECOVERY_KEY='...' \
+MATRIX_PASSWORD='***' MATRIX_RECOVERY_KEY='...' \
   npx tsx cross-sign.ts sign --user @ig88bot:matrix.org
 ```
 Secrets via short-lived subshell only. Nothing persisted.
@@ -109,21 +180,21 @@ Secrets via short-lived subshell only. Nothing persisted.
 
 | Script | Agent | Launches |
 |--------|-------|----------|
-| `scripts/hermes-boot.sh` | Boot | Gateway with Matrix + webhook |
-| `scripts/hermes-kelk.sh` | Kelk | Gateway with Matrix + webhook |
-| `scripts/hermes-ig88.sh` | IG-88 | Gateway with Matrix + webhook |
-| `scripts/flash-moe-server.py` | Shared | 26B aux server on :41966 |
+| `scripts/hermes-boot.sh` | Boot | Hermes gateway with Matrix + webhook |
+| `scripts/hermes-kelk.sh` | Kelk | Hermes gateway with Matrix + webhook |
+| `scripts/hermes-ig88.sh` | IG-88 | Hermes gateway with Matrix + webhook |
+| `scripts/flash-moe-ornstein-server.py` | Shared | Ornstein35B on :41966 |
 
 ## Plists (launchd)
 
 | Plist | Service |
 |-------|---------|
+| `com.bootindustries.mlx-lm-boot.plist` | SABER on :41961 |
+| `com.bootindustries.mlx-lm-kelk.plist` | SABER on :41962 |
+| `com.bootindustries.flash-moe-ornstein.plist` | Ornstein35B on :41966 |
 | `com.bootindustries.hermes-boot.plist` | Boot Hermes gateway |
 | `com.bootindustries.hermes-kelk.plist` | Kelk Hermes gateway |
 | `com.bootindustries.hermes-ig88.plist` | IG-88 Hermes gateway |
-| `com.bootindustries.mlx-vlm-boot.plist` | Boot E4B on :41961 |
-| `com.bootindustries.mlx-vlm-kelk.plist` | Kelk E4B on :41962 |
-| `com.bootindustries.flash-moe-26b.plist` | 26B aux on :41966 |
 
 ## CLI Aliases
 
