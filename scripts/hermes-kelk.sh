@@ -49,7 +49,7 @@ export HERMES_HOME="/Users/nesbitt/.hermes/profiles/kelk"
 KELK_PROFILE_CFG="${HERMES_HOME}/config.yaml"
 HERMES_AGENT_PY="/Users/nesbitt/.local/share/uv/tools/hermes-agent/bin/python3"
 KELK_MODEL_CONFIG="/Users/nesbitt/models/Gemma-4-E4B-SABER-MLX-6bit/config.json"
-MLX_VLM_HEALTH_URL="http://127.0.0.1:41961/v1/models"
+MLX_VLM_HEALTH_URL="http://127.0.0.1:41962/v1/models"
 
 # 1. Profile must exist AND pin provider: custom. See FCT055 RC-1.
 # FCT064: provider: custom may be top-level or indented under model: dict.
@@ -122,6 +122,19 @@ unset ANTHROPIC_AUTH_TOKEN
 unset OPENAI_BASE_URL
 unset OPENAI_API_BASE
 unset NOUS_MIMO_FACTORY_KEY
+
+# Ensure /opt/homebrew/bin (rg, node, etc.) is first in PATH — Python/uv
+# prepends its own bin dir at startup, pushing homebrew below it. Set PATH
+# explicitly here so tool subprocesses always find homebrew binaries first.
+export PATH="/opt/homebrew/bin:$PATH"
+
+# FCT071: Enable HTTP API server for Hermes Workspace frontend.
+# Binds localhost only — no API key needed for loopback.
+# Workspace connects here for live chat, SSE streaming, tool execution.
+export API_SERVER_ENABLED=true
+export API_SERVER_HOST=127.0.0.1
+export API_SERVER_PORT=8643
+
 
 exec /Users/nesbitt/.local/bin/hermes \
   --profile kelk \

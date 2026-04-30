@@ -141,6 +141,11 @@ unset OPENAI_BASE_URL
 unset OPENAI_API_BASE
 unset NOUS_MIMO_FACTORY_KEY
 
+# Ensure /opt/homebrew/bin (rg, node, etc.) is first in PATH — Python/uv
+# prepends its own bin dir at startup, pushing homebrew below it. Set PATH
+# explicitly here so tool subprocesses always find homebrew binaries first.
+export PATH="/opt/homebrew/bin:$PATH"
+
 # FCT071: Enable HTTP API server for Hermes Workspace frontend.
 # Binds localhost only — no API key needed for loopback.
 # Workspace connects here for live chat, SSE streaming, tool execution.
