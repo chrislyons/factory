@@ -23,75 +23,19 @@ docs/repo-commands.html
 # Plists contain BWS secret UUIDs — never commit
 plists/
 
-# Agent private files — never commit (factory/ is public-safe)
-# .env files and examples (may contain template tokens)
-agents/ig88/.env.example
-agents/ig88/.env
-
-# Legacy archive docs — written pre-secrets-hygiene, may contain embedded tokens/URLs
-agents/ig88/docs/archive/
-
-# Secrets management setup doc — contains example credential patterns
-agents/ig88/docs/ig88/IG88009 Infisical Secrets Management Setup.md
-
-# Docker compose references FALKORDB_PASSWORD env var
-agents/ig88/docker-compose.yml
-
-# Identity: personality, trading strategy, personal context
-agents/*/soul.md
-agents/*/principles.md
-agents/*/agents.md
-agents/*/environment.md
-agents/*/src/agents/
-agents/*/src/principles/
-agents/*/src/soul/
-
-# Runtime data: logs, memory, conversation history, transcripts
-agents/*/logs/
-agents/*/data/
-agents/*/memory/
-agents/ig88/evals/results/
-
-# Kelk identity foundation: personal history, trauma content, family names, transcripts.
-# PRIVATE — never commit. Local-only. chmod 600/700 on disk.
-agents/kelk/docs/klk/foundation/
-agents/kelk/docs/klk/archive/
-agents/kelk/docs/timeline/
-
 # Recovery stash: safety copies of docs that agents may damage during tool calls.
-# Populated by /Users/nesbitt/dev/factory/.stash/ig88-recovery-20260408/ etc.
 .stash/
 
 # Archive — conversation logs, operational history
 archive/
 
-# Agent configs: scoped credentials, operational parameters
-agents/ig88/config/
-
-# Session context and implementation notes
-agents/*/.claude/
-agents/*/.agent/
-agents/*/.agents/
-agents/*/.cursor/
-agents/*/.venv/
-agents/*/nan/
-
-# Build artifacts in agent src and mcp-servers
-agents/*/src/dist/
-agents/*/src/node_modules/
-agents/*/src/.lockfile-integrity-snapshot.json
-agents/*/mcp-servers/**/node_modules/
-agents/*/mcp-servers/**/.lockfile-integrity-snapshot.json
-agents/*/mcp-servers/**/pnpm-lock.yaml
-
 # Build artifacts and noise
 __pycache__/
 *.bak-*
 *.bak
+*.backup
 portal/public/**/*.draft
 portal/docs/*.html
-agents/ig88/docs/ig88/plots/
-agents/ig88/timers/
 portal-dist/
 
 # Root-level Claude Code workspace
@@ -103,17 +47,5 @@ portal-dist/
 # Obsidian workspace state (all vaults)
 **/.obsidian/
 
-# Kelk vault (local Obsidian data)
-agents/kelk/kelk-vault/
-
-# Hermes conversation archive
-archive/
-
-# Backup files
-*.backup
-
-# Agent test artifacts
-agents/*/test.*
-
-# Agent content — separate repo (agents/), synced locally
+# Agent content — separate repo (agents/), tracked independently
 agents/
