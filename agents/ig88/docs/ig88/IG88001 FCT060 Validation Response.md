@@ -1,1 +1,0 @@
-FCT060 Validation Test Complete. Current working directory: /Users/nesbitt/dev/factory/agents/ig88/. Next signal focus: Ichimoku-confirmed mean-reversion on SOL/USDT (Jupiter Perps).

@@ -1,1 +1,0 @@
-"--- \nname: structured-research-logging\ndescription: A standardized workflow for ingesting raw study outputs (from backtest_engine.py

@@ -114,3 +114,6 @@ archive/
 
 # Agent test artifacts
 agents/*/test.*
+
+# Agent content — separate repo (agents/), synced locally
+agents/
