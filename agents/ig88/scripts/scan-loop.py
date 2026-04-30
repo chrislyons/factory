@@ -91,9 +91,9 @@ def run_polymarket_scan(trader: PolymarketPaperTrader) -> dict:
             "confidence": sig.llm_confidence,
         })
     
-    # Execute top signals (up to 3 per cycle)
+    # Execute top signals (up to 2 new per cycle, respecting 5-position total cap)
     if signals and len(trader.positions) < 5:
-        opened = trader.execute_signals(signals, max_positions=3)
+        opened = trader.execute_signals(signals, max_positions=5)  # allow up to 5 total
         scan_result["positions_opened"] = len(opened)
     
     # Report open positions

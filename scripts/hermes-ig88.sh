@@ -85,12 +85,10 @@ fi
   exit 4
 }
 
-# 3. Local model weights must be present on disk. Cheap stat only — no load.
-if [[ ! -f "${IG88_MODEL_CONFIG}" ]]; then
-  echo "ERROR: local model config missing at ${IG88_MODEL_CONFIG}" >&2
-  echo "       IG-88 runs gemma-4-e4b-it-6bit (FCT054). Re-download model." >&2
-  exit 5
-fi
+# 3. IG-88 is fully cloud-based (Nous Portal), no local model needed.
+# Preflight guard removed — FCT066+ made IG-88 100% cloud. aux slots use
+# remote Nous models (compression, session_search), and main model is
+# Nous Portal. Local model check obsolete.
 
 # 4. mlx-vlm-ig88 on :41988 is now the AUX model (FCT066 — main is OpenRouter).
 #    Downgraded from hard exit to warning: a crashed aux server should not

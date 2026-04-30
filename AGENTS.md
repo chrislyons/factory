@@ -203,3 +203,40 @@ Secrets via short-lived subshell only. Nothing persisted.
 | `h-boot` | Boot CLI chat session (Infisical factory project, cloud keys scrubbed) |
 | `h-kelk` | Kelk CLI chat session (Infisical factory project, cloud keys scrubbed) |
 | `h-ig88` | IG-88 CLI chat session (Infisical factory project, Nous auth) |
+
+---
+
+## Shared Infrastructure
+
+### Machines
+
+| Machine | Address | Role |
+|---------|---------|------|
+| Whitebox | 100.88.222.111 | Mac Studio, 32GB M1 Max — primary inference host |
+| Cloudkicker | 100.86.68.16 | chrislyons@cloudkicker — remote deployment target |
+
+### SSH
+
+SSH agent is session-scoped. Must find socket manually in `~/.ssh/agent/`.
+ALWAYS `git pull` before making changes on Cloudkicker.
+
+### Secrets
+
+Managed via Infisical (factory project). Machine identity auth.
+Key variables: MATRIX_TOKEN_BOOT, MATRIX_TOKEN_KELK, MATRIX_TOKEN_IG88,
+NOUS_MIMO_FACTORY_KEY. Recovery keys in operator's personal vault only.
+
+### Launchd Conventions
+
+- `launchctl unload/load` to pick up plist ProgramArguments changes
+- `launchctl kickstart` only restarts the process, does NOT reload the plist
+- Plists at `~/Library/LaunchAgents/com.bootindustries.*`
+- Logs at `~/Library/Logs/factory/`
+
+### mlx_lm.server Conventions
+
+- `--max-tokens` MUST be in plist (server defaults to 512 without it)
+- Hermes never passes config.yaml max_tokens to the API (GitHub #4404)
+- Thinking tokens count against max_tokens budget
+- Use `--prefill-step-size 2048` for all instances
+- Model path is full absolute path (not short name)
