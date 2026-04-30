@@ -1,12 +1,15 @@
 #!/bin/bash
 # factory-startup.sh — Sequenced startup for Factory services on Whitebox
 #
-# Phase 1: Lightweight services (flash-moe-ornstein also RunAtLoad) (already RunAtLoad in their own plists)
-# Phase 2: Gemma4-E4B-SABER (:41961 Boot, :41962 Kelk)
-# Phase 2.5: Ornstein 35B consultant (flash-moe, streams from SSD)
+# Phase 0: Infrastructure services (no model dependency)
+# Phase 1: Gemma4-E4B-SABER (:41961 Boot, :41962 Kelk)
+# Phase 2: Ornstein 35B consultant (flash-moe, streams from SSD)
 # Phase 3: Hermes gateways — MLX guaranteed ready
+# Phase 4: VLM servers (optional, best-effort)
 #
-# Called by: com.bootindustries.factory-startup.plist (RunAtLoad, not KeepAlive)
+# Handles both cold start (everything bootout'ed) and partial restart.
+# Services with KeepAlive plists survive crashes but NOT launchctl bootout.
+# This script bootstraps everything to ensure a clean state.
 
 set -uo pipefail
 
@@ -14,8 +17,8 @@ LOG="/Users/nesbitt/Library/Logs/factory/factory-startup.log"
 mkdir -p "$(dirname "$LOG")"
 
 log() {
+  echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*"
   echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" >> "$LOG"
-  echo "[$(date '+%H:%M:%S')] $*"
 }
 
 wait_for_health() {
@@ -26,14 +29,14 @@ wait_for_health() {
 
   while [ $elapsed -lt $max_wait ]; do
     if curl -sf --max-time 3 "$url" >/dev/null 2>&1; then
-      log "$label: healthy after ${elapsed}s"
+      log "  $label: healthy after ${elapsed}s"
       return 0
     fi
     sleep 5
     elapsed=$((elapsed + 5))
   done
 
-  log "ERROR: $label not healthy after ${max_wait}s"
+  log "  $label: TIMEOUT after ${max_wait}s"
   return 1
 }
 
@@ -42,18 +45,24 @@ bootstrap() {
   local plist="/Users/nesbitt/Library/LaunchAgents/${label}.plist"
 
   if [ ! -f "$plist" ]; then
-    log "ERROR: plist not found: $plist"
+    log "  SKIP $label — plist not found"
     return 1
   fi
 
-  # Check if already running
-  if launchctl list "$label" 2>/dev/null | grep -q '\"PID\"'; then
-    log "$label: already running, skipping"
+  # Already registered and running?
+  if launchctl list "$label" 2>/dev/null | grep -q '"PID"'; then
+    log "  $label: already running"
     return 0
   fi
 
   launchctl bootstrap gui/$(id -u) "$plist" 2>/dev/null
-  log "$label: bootstrapped"
+  if [ $? -eq 0 ]; then
+    log "  $label: bootstrapped"
+    return 0
+  else
+    log "  $label: bootstrap FAILED"
+    return 1
+  fi
 }
 
 get_free_mb() {
@@ -75,13 +84,13 @@ require_free_memory() {
   free_mb="$(get_free_mb)"
 
   if [ -z "$free_mb" ] || [ "$free_mb" -eq 0 ]; then
-    log "WARN: could not read free memory — proceeding cautiously"
+    log "  WARN: could not read free memory — proceeding cautiously"
     return 0
   fi
 
-  log "$phase: free=${free_mb}MB, required=${required_mb}MB"
+  log "  Free memory: ${free_mb}MB (need ${required_mb}MB)"
   if [ "$free_mb" -lt "$required_mb" ]; then
-    log "ERROR: $phase — insufficient memory (${free_mb}MB < ${required_mb}MB). ABORTING phase."
+    log "  ERROR: insufficient memory (${free_mb}MB < ${required_mb}MB). SKIPPING $phase."
     return 1
   fi
   return 0
@@ -90,47 +99,50 @@ require_free_memory() {
 # =========================================================================
 log "=== Factory startup sequence begin ==="
 log "Memory: $(sysctl -n hw.memsize | awk '{printf "%.0fGB", $1/1073741824}')"
-log "Free: $(top -l 1 -s 0 2>/dev/null | grep PhysMem | sed 's/.*) //')"
+log "Free: $(top -l 1 -s 0 2>/dev/null | grep PhysMem | sed 's/.*） //')"
 
-# Phase 1: Lightweight services (flash-moe-ornstein also RunAtLoad)
-# These have RunAtLoad=true in their own plists, so they're already starting.
-log "Phase 1: Lightweight services (already launching via RunAtLoad)"
-for svc in portal-caddy gsd-sidecar factory-auth qdrant-mcp research-mcp matrix-mcp-boot hindsight-api; do
-  if launchctl list "com.bootindustries.${svc}" 2>/dev/null | grep -q 'PID'; then
-    log "  $svc: running"
-  else
-    log "  $svc: not yet running (launchd will handle)"
-  fi
+# ── Phase 0: Infrastructure (no model dependency) ──────────────────────
+log "Phase 0: Infrastructure services"
+# qdrant-server must start before qdrant-mcp
+bootstrap "com.bootindustries.qdrant-server"
+sleep 2
+for svc in portal-caddy gsd-sidecar factory-auth latch-dev hermes-dashboard hermes-workspace; do
+  bootstrap "com.bootindustries.${svc}"
 done
+# MCP servers (depend on qdrant-server being up)
+sleep 2
+for svc in qdrant-mcp research-mcp matrix-mcp-boot; do
+  bootstrap "com.bootindustries.${svc}"
+done
+# hindsight-api — known broken (exit 127), bootstrap anyway for when it's fixed
+bootstrap "com.bootindustries.hindsight-api"
 
-# Phase 2: Gemma4-E4B-SABER (:41961 Boot, :41962 Kelk)
-# SABER model: ~5.5GB resident per instance (dense, full RAM load).
-# Require 12GB free (2× 5.5GB + headroom).
-log "Phase 2: Gemma4-E4B-SABER (:41961 Boot, :41962 Kelk)"
-if require_free_memory 12000 "Phase 2"; then
+# ── Phase 1: SABER E4B (:41961 Boot, :41962 Kelk) ─────────────────────
+# ~5.5GB RAM per instance, need 12GB free.
+log "Phase 1: Gemma4-E4B-SABER (:41961 Boot, :41962 Kelk)"
+if require_free_memory 12000 "Phase 1"; then
   bootstrap "com.bootindustries.mlx-lm-boot"
-  sleep 3
+  sleep 5
   bootstrap "com.bootindustries.mlx-lm-kelk"
   wait_for_health "http://127.0.0.1:41961/v1/models" "mlx-lm-boot" 120
   wait_for_health "http://127.0.0.1:41962/v1/models" "mlx-lm-kelk" 120
 else
-  log "Phase 2 SKIPPED — not enough memory for SABER (2× 5.5 GB + headroom)"
-  log "  Manual recovery: free memory, then run factory-startup.sh again"
+  log "  SKIPPED — not enough memory for SABER (need 2× 5.5GB + headroom)"
 fi
 
-# Phase 2.5: Ornstein 35B consultant (flash-moe, streams from SSD)
-# Runs as deep reasoning consultant on :41966 — not memory-intensive (~3GB resident)
-log "Phase 2.5: Ornstein 35B flash-moe server (:41966)"
+# ── Phase 2: Ornstein 35B flash-moe (:41966) ──────────────────────────
+# ~3GB resident, streams experts from SSD.
+log "Phase 2: Ornstein 35B flash-moe (:41966)"
 SPLIT_PATH="/Users/nesbitt/models/Ornstein3.6-35B-A3B-flash-moe-8bit/resident/resident.safetensors"
 if [ ! -f "$SPLIT_PATH" ]; then
-  log "ERROR: Ornstein flash-moe split not found at $SPLIT_PATH"
-  log "  Run: flash-moe split --model-path /Users/nesbitt/models/Ornstein3.6-35B-A3B-MLX-8bit --output-path /Users/nesbitt/models/Ornstein3.6-35B-A3B-flash-moe-8bit"
+  log "  SKIPPED — split not found at $SPLIT_PATH"
 else
   bootstrap "com.bootindustries.flash-moe-ornstein"
   wait_for_health "http://127.0.0.1:41966/health" "Ornstein35B" 60
 fi
 
-# Phase 3: Hermes gateways
+# ── Phase 3: Hermes gateways ──────────────────────────────────────────
+# MLX servers guaranteed healthy from Phase 1.
 log "Phase 3: Hermes gateways"
 bootstrap "com.bootindustries.hermes-boot"
 sleep 5
@@ -138,24 +150,47 @@ bootstrap "com.bootindustries.hermes-kelk"
 sleep 5
 bootstrap "com.bootindustries.hermes-ig88"
 
-# Final health report
-log "=== Startup complete ==="
-log "Free: $(top -l 1 -s 0 2>/dev/null | grep PhysMem | sed 's/.*) //')"
+# ── Phase 4: VLM servers (best-effort) ────────────────────────────────
+log "Phase 4: VLM servers (best-effort)"
+for vlm in mlx-vlm-boot mlx-vlm-kelk mlx-vlm-whitebox; do
+  bootstrap "com.bootindustries.${vlm}" || true
+done
 
-# Check all services
-for port in 41961 41962 41966; do
-  if curl -sf --max-time 3 "http://127.0.0.1:${port}/health" >/dev/null 2>&1 || curl -sf --max-time 3 "http://127.0.0.1:${port}/v1/models" >/dev/null 2>&1; then
-    log "  :${port}: UP"
+# ── Health report ─────────────────────────────────────────────────────
+log ""
+log "=== Startup complete ==="
+log "Free: $(top -l 1 -s 0 2>/dev/null | grep PhysMem | sed 's/.*） //')"
+
+log ""
+log "--- Model servers ---"
+for port_label in "41961/mlx-lm-boot" "41962/mlx-lm-kelk" "41966/Ornstein35B"; do
+  port="${port_label%%/*}"
+  label="${port_label##*/}"
+  if curl -sf --max-time 3 "http://127.0.0.1:${port}/health" >/dev/null 2>&1 || \
+     curl -sf --max-time 3 "http://127.0.0.1:${port}/v1/models" >/dev/null 2>&1; then
+    log "  ${label} (:${port}): UP"
   else
-    log "  :${port}: DOWN"
+    log "  ${label} (:${port}): DOWN"
   fi
 done
 
+log ""
+log "--- Hermes gateways ---"
 for agent in boot kelk ig88; do
   if pgrep -f "hermes.*${agent}.*gateway" >/dev/null 2>&1; then
     log "  hermes-${agent}: UP"
   else
     log "  hermes-${agent}: DOWN"
+  fi
+done
+
+log ""
+log "--- Infrastructure ---"
+for svc in portal-caddy qdrant-server qdrant-mcp research-mcp matrix-mcp-boot factory-auth gsd-sidecar latch-dev hermes-dashboard hermes-workspace; do
+  if launchctl list "com.bootindustries.${svc}" 2>/dev/null | grep -q '"PID"'; then
+    log "  ${svc}: UP"
+  else
+    log "  ${svc}: DOWN"
   fi
 done
 
