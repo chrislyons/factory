@@ -18,7 +18,7 @@ port,service,host,bind,status,launchd_label,notes
 41920-41929,Preview slots,whitebox,,reserved,,A/B deploys and version comparison
 41930,Hindsight API,whitebox,0.0.0.0,live,com.bootindustries.hindsight-api,Agent memory daemon (pg0 + local embeddings); LLM via local mlx-vlm.server on :41961; bank=hermes-default
 41931-41939,Preview slots,whitebox,,reserved,,A/B deploys and version comparison
-41940,Hermes Workspace,whitebox,127.0.0.1,live,,Web UI for Hermes Agent (outsourc-e/hermes-workspace); connects to gateway :8642 + dashboard :9119
+41940,Hermes Workspace,whitebox,127.0.0.1,live,com.bootindustries.hermes-workspace,Web UI for Hermes Agent (outsourc-e/hermes-workspace); connects to Boot gateway :8642 + dashboard :9119; gateway URL override must stay localhost (gateway binds 127.0.0.1 only)
 41941-41949,Development,whitebox,,reserved,,Local dev servers
 8642,Boot Gateway API,whitebox,127.0.0.1,live,com.bootindustries.hermes-boot,Hermes HTTP API (OpenAI-compatible); enables Workspace chat/streaming; no auth on loopback
 41950-41959,Reserved,whitebox,,reserved,,Was coordinator HTTP API (deprecated)
