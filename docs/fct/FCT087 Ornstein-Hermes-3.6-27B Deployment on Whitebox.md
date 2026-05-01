@@ -659,3 +659,34 @@ With prefill-step-size 2048 on the 4-bit model:
 - [5] z-lab/Qwen3.6-27B-DFlash — https://huggingface.co/z-lab/Qwen3.6-27B-DFlash
 - [6] z-lab/Qwen3.5-27B-DFlash — https://huggingface.co/z-lab/Qwen3.5-27B-DFlash
 - [7] Tokenizer regex issue — https://huggingface.co/mistralai/Mistral-Small-3.1-24B-Instruct-2503/discussions/84
+
+---
+
+## Correction: mmap Behavior (Added 2026-05-01)
+
+**Previous assumption:** mmap keeps model pages as evictable file-backed pages.
+OS manages transparently, model doesn't consume full weight size in RAM.
+
+**Reality:** mmap helps with initial loading (maps file into virtual address space
+without reading all pages). But during inference, accessed model weight pages get
+**wired** (pinned) into RAM. Once wired, they cannot be evicted until process exits
+or `mx.set_wired_limit()` forces eviction.
+
+**What this means for the 27B:**
+- 6-bit model: 21.2 GB weights get pinned during inference
+- macOS: ~7 GB
+- Total wired: ~28 GB
+- Remaining for KV + Metal GPU: ~4 GB
+- This is why prefill-step-size must be 256 (small GPU buffers)
+
+**Why the 6-bit model works at all:** 21 GB + 7 GB = 28 GB, leaving 4 GB.
+Prefill-step-size 256 keeps Metal GPU buffer allocation small enough to fit
+in that 4 GB window. At 2048, Metal allocates larger buffers → OOM.
+
+**Why 4-bit model is the real fix:** 14 GB + 7 GB = 21 GB, leaving 11 GB.
+Enough headroom for prefill-step-size 2048 (8x faster prefill) and concurrent
+serving of both agents.
+
+**Why wired limits cause thrashing:** Setting `mx.set_wired_limit(20GB)` forces
+eviction of model pages beyond 20 GB. Every forward pass re-faults evicted pages
+from SSD. Result: 2 tok/s decode (vs 7-10 tok/s with no limit).
