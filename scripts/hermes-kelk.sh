@@ -42,8 +42,8 @@ export HERMES_HOME="/Users/nesbitt/.hermes/profiles/kelk"
 #   exit 3  — profile missing or not pinned to `provider: custom`
 #   exit 4  — matrix-nio not importable in hermes-agent venv
 #   exit 5  — local model file missing
-#   exit 6  — mlx-vlm-kelk not reachable on :41962
-#   exit 6  — mlx-vlm-ornstein not reachable on :41961
+#   exit 6  — mlx-lm-factory-kelk not reachable on :41962
+#   exit 6  — mlx-lm-factory-kelk not reachable on :41962
 # ---------------------------------------------------------------------------
 
 KELK_PROFILE_CFG="${HERMES_HOME}/config.yaml"
@@ -73,16 +73,16 @@ fi
 }
 
 # 3. Local model weights must be present on disk (FCT074: Kelk shares
-#    Ornstein3.6-35B-A3B via mlx-vlm-ornstein on :41961).
+#    SABER E4B via mlx-lm-factory-kelk on :41962).
 if [[ ! -f "${KELK_MODEL_CONFIG}" ]]; then
   echo "ERROR: local model config missing at ${KELK_MODEL_CONFIG}" >&2
   exit 5
 fi
 
-# 4. mlx-vlm-ornstein must be listening on :41961. 15s max.
+# 4. mlx-lm-factory-kelk must be listening on :41962. 15s max.
 if ! curl -sf --max-time 15 "${MLX_VLM_HEALTH_URL}" >/dev/null 2>&1; then
-  echo "ERROR: mlx-vlm-ornstein not reachable at ${MLX_VLM_HEALTH_URL}" >&2
-  echo "       Check: launchctl list | grep mlx-vlm-ornstein" >&2
+  echo "ERROR: mlx-lm-factory-kelk not reachable at ${MLX_VLM_HEALTH_URL}" >&2
+  echo "       Check: launchctl list | grep mlx-lm-factory-kelk" >&2
   exit 6
 fi
 

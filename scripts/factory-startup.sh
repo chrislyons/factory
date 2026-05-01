@@ -2,14 +2,11 @@
 # factory-startup.sh — Sequenced startup for Factory services on Whitebox
 #
 # Phase 0: Infrastructure services (no model dependency)
-# Phase 1: Gemma4-E4B-SABER (:41961 Boot, :41962 Kelk)
-# Phase 2: Ornstein 35B consultant (flash-moe, streams from SSD)
-# Phase 3: Hermes gateways — MLX guaranteed ready
-# Phase 4: VLM servers (optional, best-effort)
+# Phase 1: Ornstein-Hermes-3.6-27B (:41966) — serves Boot and Kelk
+# Phase 2: Hermes gateways — MLX guaranteed ready
 #
-# Handles both cold start (everything bootout'ed) and partial restart.
-# Services with KeepAlive plists survive crashes but NOT launchctl bootout.
-# This script bootstraps everything to ensure a clean state.
+# Note: Dual SABER E4B (:41961/:41962) retired 2026-05-01.
+# Single 27B instance on :41966 serves Boot and Kelk. mmap handles memory.
 
 set -uo pipefail
 
@@ -117,44 +114,26 @@ done
 # hindsight-api — known broken (exit 127), bootstrap anyway for when it's fixed
 bootstrap "com.bootindustries.hindsight-api"
 
-# ── Phase 1: SABER E4B (:41961 Boot, :41962 Kelk) ─────────────────────
-# ~5.5GB RAM per instance, need 12GB free.
-log "Phase 1: Gemma4-E4B-SABER (:41961 Boot, :41962 Kelk)"
-if require_free_memory 12000 "Phase 1"; then
-  bootstrap "com.bootindustries.mlx-lm-boot"
-  sleep 5
-  bootstrap "com.bootindustries.mlx-lm-kelk"
-  wait_for_health "http://127.0.0.1:41961/v1/models" "mlx-lm-boot" 120
-  wait_for_health "http://127.0.0.1:41962/v1/models" "mlx-lm-kelk" 120
-else
-  log "  SKIPPED — not enough memory for SABER (need 2× 5.5GB + headroom)"
+# ── Phase 1: Ornstein-Hermes-3.6-27B (:41966) ─────────────────────────
+# Single instance, mmap-based. Both agents share it.
+log "Phase 1: Ornstein-Hermes-3.6-27B (:41966)"
+if require_free_memory 8000 "Phase 1"; then
+  bootstrap "com.bootindustries.mlx-lm-factory-27b"
+  wait_for_health "http://127.0.0.1:41966/v1/models" "mlx-lm-factory-27b" 180
+  # E4B plists kept on disk for rollback but not started
+  # To revert: swap Phase 1 back to mlx-lm-factory-boot/kelk on :41961/:41962
+  # and restore hermes-boot.sh and config.yaml from backups
+  log "  SKIPPED — not enough memory for SABER"
 fi
 
-# ── Phase 2: Ornstein 35B flash-moe (:41966) ──────────────────────────
-# ~3GB resident, streams experts from SSD.
-log "Phase 2: Ornstein 35B flash-moe (:41966)"
-SPLIT_PATH="/Users/nesbitt/models/Ornstein3.6-35B-A3B-flash-moe-8bit/resident/resident.safetensors"
-if [ ! -f "$SPLIT_PATH" ]; then
-  log "  SKIPPED — split not found at $SPLIT_PATH"
-else
-  bootstrap "com.bootindustries.flash-moe-ornstein"
-  wait_for_health "http://127.0.0.1:41966/health" "Ornstein35B" 60
-fi
-
-# ── Phase 3: Hermes gateways ──────────────────────────────────────────
-# MLX servers guaranteed healthy from Phase 1.
-log "Phase 3: Hermes gateways"
+# ── Phase 2: Hermes gateways ──────────────────────────────────────────
+# MLX server guaranteed healthy from Phase 1.
+log "Phase 2: Hermes gateways"
 bootstrap "com.bootindustries.hermes-boot"
 sleep 5
 bootstrap "com.bootindustries.hermes-kelk"
 sleep 5
 bootstrap "com.bootindustries.hermes-ig88"
-
-# ── Phase 4: VLM servers (best-effort) ────────────────────────────────
-log "Phase 4: VLM servers (best-effort)"
-for vlm in mlx-vlm-boot mlx-vlm-kelk mlx-vlm-whitebox; do
-  bootstrap "com.bootindustries.${vlm}" || true
-done
 
 # ── Health report ─────────────────────────────────────────────────────
 log ""
@@ -162,12 +141,11 @@ log "=== Startup complete ==="
 log "Free: $(top -l 1 -s 0 2>/dev/null | grep PhysMem | sed 's/.*） //')"
 
 log ""
-log "--- Model servers ---"
-for port_label in "41961/mlx-lm-boot" "41962/mlx-lm-kelk" "41966/Ornstein35B"; do
+log "--- Model server ---"
+for port_label in "41966/mlx-lm-factory-27b"; do
   port="${port_label%%/*}"
   label="${port_label##*/}"
-  if curl -sf --max-time 3 "http://127.0.0.1:${port}/health" >/dev/null 2>&1 || \
-     curl -sf --max-time 3 "http://127.0.0.1:${port}/v1/models" >/dev/null 2>&1; then
+  if curl -sf --max-time 3 "http://127.0.0.1:${port}/v1/models" >/dev/null 2>&1; then
     log "  ${label} (:${port}): UP"
   else
     log "  ${label} (:${port}): DOWN"
