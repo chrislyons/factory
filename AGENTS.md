@@ -1,6 +1,6 @@
 # Factory Agents — Topology and Routing
 
-**Updated:** 2026-04-29 (SABER deployment) | **Ref:** FCT067, FCT083
+**Updated:** 2026-04-30 (dual SABER, Ornstein deprecated) | **Ref:** FCT078, FCT083
 
 ---
 
@@ -20,38 +20,38 @@
                     ┌─────────────────────────────────────┐
                     │       Whitebox (32GB M1 Max)         │
                     │                                        │
-  Boot main chat ──▶│ :41961  SABER E4B 6bit    ~50 tok/s  │
-  Kelk main chat ──▶│ :41962  SABER E4B 6bit    ~50 tok/s  │
+  Boot main chat ──▶│ :41961  SABER E4B 6bit    ~50 tok/s │
+  Kelk main chat ──▶│ :41962  SABER E4B 6bit    ~50 tok/s │
                     │                                        │
-  Escalated tasks ──▶│ :41966  Ornstein35B-A3B     ~6 tok/s  │
-  (thinking/compression│        flash-moe SSD stream          │
-   vision/search)      │        ~3GB resident                │
+                    │  All inference (main + aux) runs on    │
+                    │  SABER — Ornstein deprecated 2026-04-30│
                     └─────────────────────────────────────┘
   IG-88 ────────────▶  Nous Portal (cloud)
-                        xiaomi/mimo-v2-pro
+                        minimax/minimax-m2.7
 ```
 
 ### Aux Slot Routing (Boot + Kelk)
 
+All aux slots route to SABER on their respective ports. Ornstein 35B was deprecated — the MoE model exceeded 32GB unified memory and caused GPU abort crashes under concurrent load. SABER handles everything including thinking, compression, vision, and session_search.
+
 | Slot | Function | Target | Model |
 |------|----------|--------|-------|
 | `approval` | Tool call safety check | :41961/:41962 | SABER |
-| `compression` | Context summarization | :41966 | Ornstein35B |
+| `compression` | Context summarization | :41961/:41962 | SABER |
 | `flush_memories` | Write session memories | :41961/:41962 | SABER |
 | `mcp` | MCP server tool calls | :41961/:41962 | SABER |
-| `session_search` | Search past sessions | :41966 | Ornstein35B |
+| `session_search` | Search past sessions | :41961/:41962 | SABER |
 | `skills_hub` | Select skills from registry | :41961/:41962 | SABER |
-| `thinking` | Deep reasoning consultant | :41966 | Ornstein35B |
+| `thinking` | Deep reasoning consultant | :41961/:41962 | SABER |
 | `title_generation` | Generate conversation titles | :41961/:41962 | SABER |
-| `vision` | Image analysis | :41966 | Ornstein35B |
+| `vision` | Image analysis | :41961/:41962 | SABER |
 | `web_extract` | Extract web content | :41961/:41962 | SABER |
 
 ### Performance
 
 | Model | Backend | tok/s | RAM |
 |-------|---------|-------|-----|
-| SABER E4B 6bit | mlx_lm.server | ~50 | ~5.5GB |
-| Ornstein35B-A3B | flash-moe SSD | ~6 | ~3GB resident |
+| SABER E4B 6bit (×2) | mlx_lm.server | ~50 (short) / ~16 (25K ctx) | ~6.3 GB per instance |
 | Mimo Pro (IG-88) | Nous cloud | N/A | 0 (cloud) |
 
 ---
@@ -80,56 +80,37 @@ agent-specific system prompts for Boot vs Kelk differentiation.
 
 ### Memory Budget
 
+Per FCT078 stress tests (2026-04-30): dual SABER with 4GB cache caps, RSS flat at ~6.3GB per instance under all load conditions including concurrent 25K-token inference. Peak wired memory during concurrent load: ~20GB.
+
 | Component | RAM |
 |-----------|-----|
 | macOS + system | ~7 GB |
-| Boot SABER (:41961) | ~5.5 GB |
-| Kelk SABER (:41962) | ~5.5 GB |
-| Ornstein 35B (:41966) | ~3 GB |
+| Boot SABER (:41961) | ~6.3 GB |
+| Kelk SABER (:41962) | ~6.3 GB |
 | Hermes gateways | ~0.5 GB |
-| **Total** | **~21.5 GB** |
-| **Free** | **~10.5 GB** |
+| **Total** | **~20 GB** |
+| **Free** | **~12 GB** |
 
 ### Deployment
 
 - mlx_lm.server on :41961 (Boot) and :41962 (Kelk)
-- mlx_lm 0.31.3 (brew upgrade)
+- mlx-lm 0.31.3 (brew upgrade)
+- `--prompt-cache-bytes 4294967296` (4GB cap per server — prevents OOM under concurrent load)
+- `--prompt-concurrency 1` (prevents concurrent prefill GPU OOM on 32GB M1 Max)
 - No adapter — raw model with system prompt
 - Model path: `/Users/nesbitt/models/Gemma-4-E4B-SABER-MLX-6bit`
 
 ---
 
-## Ornstein 35B — Deep Reasoning Consultant
+## Ornstein 35B (DEPRECATED — 2026-04-30)
 
-Ornstein3.6-35B-A3B (DJLougen fine-tune of Qwen3.6-35B-A3B MoE) runs on :41966
-via flash-moe. It is NOT the main chat model — it is the **thinking/consultant**
-slot that Boot and Kelk escalate complex reasoning tasks to.
+Ornstein3.6-35B-A3B was previously used as a deep reasoning consultant via flash-moe on :41966. It was **deprecated on 2026-04-30** because the MoE model exceeded 32GB unified memory and caused GPU abort crashes during concurrent SABER+Ornstein inference.
 
-### Why Ornstein?
+See FCT078 for full stress test results. The current architecture runs all inference (including thinking, compression, vision) on SABER E4B.
 
-- Already trained on hermes-agent-traces-filtered (3,679 tool-call traces)
-- Already knows Hermes tool format (function_calls, tool_outputs, planning)
-- Trained on DJLougen's curated reasoning data (100K samples, math/code/conversation)
-- 256 experts, 8 active per token — only ~3B params fire per token
-- 262K context window
-
-### Flash-Moe Split
-
-Ornstein35B is streamed from SSD via flash-moe:
-
-- **Resident** (~2GB): embeddings, attention, norms, routing — Metal GPU RAM
-- **Expert ECB** (~26GB): 40 layers × ~654MB, memory-mapped from internal SSD
-- Only active experts paged in per token — never loads all 256 experts
-
-Split location: `/Users/nesbitt/models/Ornstein3.6-35B-A3B-flash-moe-8bit/`
-Binary: `/Users/nesbitt/dev/vendor/flash-moe-gemma4/target/release/flash-moe`
-Server: `/Users/nesbitt/dev/factory/scripts/flash-moe-ornstein-server.py`
-
-### How Escalation Works
-
-Boot/Kelk (SABER) handle ~90% of requests at ~50 tok/s. Complex tasks are
-automatically routed to Ornstein35B via the `thinking` aux slot. The 35B
-responds with deep reasoning, then Boot/Kelk synthesize the answer for the user.
+The binary and model files remain on disk but are not in use:
+- Binary: `/Users/nesbitt/dev/vendor/flash-moe-gemma4/target/release/flash-moe`
+- Model: `/Users/nesbitt/models/Ornstein3.6-35B-A3B-flash-moe-8bit/`
 
 ---
 
@@ -183,18 +164,18 @@ Secrets via short-lived subshell only. Nothing persisted.
 | `scripts/hermes-boot.sh` | Boot | Hermes gateway with Matrix + webhook |
 | `scripts/hermes-kelk.sh` | Kelk | Hermes gateway with Matrix + webhook |
 | `scripts/hermes-ig88.sh` | IG-88 | Hermes gateway with Matrix + webhook |
-| `scripts/flash-moe-ornstein-server.py` | Shared | Ornstein35B on :41966 |
 
 ## Plists (launchd)
 
 | Plist | Service |
 |-------|---------|
-| `com.bootindustries.mlx-lm-boot.plist` | SABER on :41961 |
-| `com.bootindustries.mlx-lm-kelk.plist` | SABER on :41962 |
-| `com.bootindustries.flash-moe-ornstein.plist` | Ornstein35B on :41966 |
+| `com.bootindustries.mlx-lm-factory-boot.plist` | SABER on :41961 |
+| `com.bootindustries.mlx-lm-factory-kelk.plist` | SABER on :41962 |
 | `com.bootindustries.hermes-boot.plist` | Boot Hermes gateway |
 | `com.bootindustries.hermes-kelk.plist` | Kelk Hermes gateway |
 | `com.bootindustries.hermes-ig88.plist` | IG-88 Hermes gateway |
+
+Note: `mlx-lm-boot` and `mlx-lm-kelk` (per-agent naming) were replaced by `mlx-lm-factory-boot` and `mlx-lm-factory-kelk`. Old plist names retired.
 
 ## CLI Aliases
 
