@@ -23,7 +23,7 @@ METAL_LIMIT_BYTES = 28 * 1024 * 1024 * 1024   # 28 GB
 mx.set_memory_limit(METAL_LIMIT_BYTES)
 
 # ── 2. Quantized KV cache (4-bit) ───────────────────────────────────
-_KV_BITS = 4
+_KV_BITS = 8
 _KV_GROUP_SIZE = 64
 
 from mlx_lm.models.cache import QuantizedKVCache, KVCache, ArraysCache
