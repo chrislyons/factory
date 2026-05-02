@@ -5,11 +5,16 @@ Tests speed, memory, and quality at various context lengths.
 Uses mlx_lm.server on port 41967 for isolated testing.
 """
 
+import json
+import os
+import subprocess
 import sys
 import time
-import json
-import subprocess
+
 import requests
+
+sys.path.insert(0, os.path.dirname(__file__))
+from benchmark_utils import find_mlx_python, wait_server
 
 MODEL_PATH = "/Users/nesbitt/models/Ornstein-26B-A4B-it-MLX-6bit"
 PORT = 41967
@@ -50,20 +55,6 @@ BENCHMARKS = [
 ]
 
 LONG_PROMPT = "Explain the history of computing in detail, covering the major milestones from Charles Babbage's Analytical Engine through modern AI. " * 200  # ~3500 tokens
-
-
-def wait_for_server(port, timeout=120):
-    """Wait for mlx_lm.server to be ready."""
-    start = time.time()
-    while time.time() - start < timeout:
-        try:
-            r = requests.get(f"http://localhost:{port}/health", timeout=2)
-            if r.status_code == 200:
-                return True
-        except:
-            pass
-        time.sleep(1)
-    return False
 
 
 def chat_completion(port, prompt, max_tokens=256, temperature=0.0):
@@ -114,56 +105,39 @@ def chat_completion(port, prompt, max_tokens=256, temperature=0.0):
 
 
 def main():
+    mlx_python = find_mlx_python()
+
     print("=" * 70)
     print("Ornstein-26B-A4B-it-MLX-6bit Benchmark")
     print(f"Model: {MODEL_PATH}")
     print(f"Port: {PORT}")
+    print(f"Python: {mlx_python}")
     print("=" * 70)
-    
+
     # Start the server
     print("\n[1] Starting mlx_lm.server...")
-    server_cmd = [
-        "/opt/homebrew/Cellar/mlx-lm/0.31.3/libexec/bin/python",
-        "-m", "mlx_lm", "server",
-        "--model", MODEL_PATH,
-        "--port", str(PORT),
-        "--max-tokens", "16384",
-        "--prefill-step-size", "256",
-        "--prompt-concurrency", "1",
-        "--prompt-cache-bytes", "2147483648",  # 2GB
-    ]
-    
-    env = {
-        "PYTHONPATH": "/opt/homebrew/Cellar/mlx-lm/0.31.3/libexec/lib/python3.14/site-packages",
-        "METAL_DEVICE_WRAPPER_TYPE": "1",
-        "PYTORCH_MPS_HIGH_WATERMARK_RATIO": "0.0",
-    }
-    import os
-    full_env = os.environ.copy()
-    full_env.update(env)
-    
     proc = subprocess.Popen(
-        server_cmd,
+        [mlx_python, "-m", "mlx_lm", "server",
+         "--model", MODEL_PATH,
+         "--port", str(PORT),
+         "--max-tokens", "16384",
+         "--prefill-step-size", "256",
+         "--prompt-concurrency", "1",
+         "--prompt-cache-bytes", "2147483648"],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,
-        env=full_env,
+        env=os.environ.copy(),
     )
-    
+
     print(f"   Server PID: {proc.pid}")
     print("   Waiting for server to be ready...")
-    
-    if not wait_for_server(PORT, timeout=180):
+
+    if not wait_server(PORT, timeout=180, proc=proc):
         print("   FAILED: Server did not start within 180s")
-        # Print any output
-        try:
-            out = proc.stdout.read()
-            print(f"   Server output: {out[:1000]}")
-        except:
-            pass
         proc.terminate()
         sys.exit(1)
-    
+
     print("   Server ready!")
     
     # Check memory

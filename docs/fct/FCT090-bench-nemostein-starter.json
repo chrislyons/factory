@@ -1,0 +1,342 @@
+{
+  "label": "nemostein-starter",
+  "model": "nemostein",
+  "port": 41966,
+  "ts": "2026-05-02T10:19:52",
+  "pre_mem": {
+    "free_gb": 0,
+    "active_gb": 0,
+    "wired_gb": 0
+  },
+  "pre_metrics": {
+    "all_keys_count": 40,
+    "cache_keys": {
+      "vllm_mlx_cache_type": 1.0,
+      "vllm_mlx_cache_entry_count": 0.0,
+      "vllm_mlx_cache_hits": 0.0,
+      "vllm_mlx_cache_misses": 0.0,
+      "vllm_mlx_cache_evictions": 0.0,
+      "vllm_mlx_cache_hit_rate": 0.0,
+      "vllm_mlx_cache_utilization_ratio": 0.0,
+      "vllm_mlx_cache_memory_bytes": 0.0,
+      "vllm_mlx_cache_memory_limit_bytes": 0.0,
+      "vllm_mlx_cache_tokens_saved": 0.0
+    },
+    "raw_lines": 164
+  },
+  "include": [
+    "stress",
+    "concurrency",
+    "multi-turn"
+  ],
+  "quality": [
+    {
+      "finish": "length",
+      "prompt_tokens": 28,
+      "completion_tokens": 256,
+      "elapsed_s": 4.79,
+      "tok_per_sec": 53.5,
+      "content_len": 5,
+      "reasoning_len": 140,
+      "content_preview": "Paris",
+      "has_tool_calls": false,
+      "name": "Short factual"
+    },
+    {
+      "finish": "length",
+      "prompt_tokens": 35,
+      "completion_tokens": 1024,
+      "elapsed_s": 16.88,
+      "tok_per_sec": 60.7,
+      "content_len": 120,
+      "reasoning_len": 227,
+      "content_preview": "The phrase \u201cAll but 9 die\u201d means that everything except nine of the sheep die.  \nSo the farmer is left with **9 sheep**.",
+      "has_tool_calls": false,
+      "name": "Sheep riddle"
+    },
+    {
+      "finish": "length",
+      "prompt_tokens": 37,
+      "completion_tokens": 2048,
+      "elapsed_s": 33.62,
+      "tok_per_sec": 60.9,
+      "content_len": 1734,
+      "reasoning_len": 273,
+      "content_preview": "Here is a concise, well\u2011documented implementation that follows Python\u2019s type\u2011hinting conventions:\n\n```python\ndef is_palindrome(s: str) -> bool:\n    \"\"\"\n    Check whether a given string is a palindrome.\n\n    A palindrome is a word, phrase, o",
+      "has_tool_calls": false,
+      "name": "Code: palindrome"
+    },
+    {
+      "finish": "length",
+      "prompt_tokens": 49,
+      "completion_tokens": 1024,
+      "elapsed_s": 17.07,
+      "tok_per_sec": 60.0,
+      "content_len": 990,
+      "reasoning_len": 1125,
+      "content_preview": "**Answer: 5 minutes**\n\n**Why?**\n\n1. **Find the rate of one machine**  \n   - 5 machines make 5 widgets in 5 minutes.  \n   - That means the *total* production rate of the 5 machines is  \n\n\\[\n\\frac{5\\text{ widgets}}{5\\text{ min}} = 1\\text{ wid",
+      "has_tool_calls": false,
+      "name": "Multi-step math"
+    },
+    {
+      "finish": "length",
+      "prompt_tokens": 37,
+      "completion_tokens": 1024,
+      "elapsed_s": 16.87,
+      "tok_per_sec": 60.7,
+      "content_len": 277,
+      "reasoning_len": 722,
+      "content_preview": "1. Improves cardiovascular health and reduces risk of heart disease.  \n2. Enhances muscular strength and endurance.  \n3. Boosts mental well\u2011being and reduces stress.  \n4. Supports weight management and healthy body composition.  \n5. Increas",
+      "has_tool_calls": false,
+      "name": "Instruction follow"
+    },
+    {
+      "finish": "length",
+      "prompt_tokens": 47,
+      "completion_tokens": 1024,
+      "elapsed_s": 16.93,
+      "tok_per_sec": 60.5,
+      "content_len": 68,
+      "reasoning_len": 1101,
+      "content_preview": "{\n  \"tool\": \"read_file\",\n  \"args\": {\n    \"path\": \"config.yaml\"\n  }\n}",
+      "has_tool_calls": false,
+      "name": "Tool call"
+    }
+  ],
+  "stress": [
+    {
+      "finish": "length",
+      "prompt_tokens": 1167,
+      "completion_tokens": 256,
+      "elapsed_s": 7.32,
+      "tok_per_sec": 35.0,
+      "content_len": 980,
+      "reasoning_len": 0,
+      "content_preview": "We need to answer: In one sentence, what color is mentioned most often in the reference text? The reference text includes many sentences, but colors mentioned? Let's scan: \"The quick brown fox jumps over the lazy dog.\" includes brown. \"Pack",
+      "has_tool_calls": false,
+      "target_ctx": 1000
+    },
+    {
+      "finish": "length",
+      "prompt_tokens": 4519,
+      "completion_tokens": 256,
+      "elapsed_s": 15.83,
+      "tok_per_sec": 16.2,
+      "content_len": 954,
+      "reasoning_len": 0,
+      "content_preview": "We need to answer: \"In one sentence, what color is mentioned most often in the reference text?\" The reference text includes many sentences, but the question asks: In one sentence, what color is mentioned most often in the reference text? So",
+      "has_tool_calls": false,
+      "target_ctx": 4000
+    },
+    {
+      "finish": "length",
+      "prompt_tokens": 8992,
+      "completion_tokens": 256,
+      "elapsed_s": 27.3,
+      "tok_per_sec": 9.4,
+      "content_len": 911,
+      "reasoning_len": 0,
+      "content_preview": "We need to answer: \"In one sentence, what color is mentioned most often in the reference text?\" The reference text is a repeated block containing many sentences. We need to count occurrences of color words. The colors mentioned: \"brown\", \"l",
+      "has_tool_calls": false,
+      "target_ctx": 8000
+    },
+    {
+      "finish": "length",
+      "prompt_tokens": 17943,
+      "completion_tokens": 256,
+      "elapsed_s": 51.77,
+      "tok_per_sec": 4.9,
+      "content_len": 892,
+      "reasoning_len": 0,
+      "content_preview": "We need to answer: \"In one sentence, what color is mentioned most often in the reference text?\" The reference text is a long block of text repeating many phrases. We need to count occurrences of colors mentioned. Colors mentioned: \"brown\", ",
+      "has_tool_calls": false,
+      "target_ctx": 16000
+    },
+    {
+      "finish": "length",
+      "prompt_tokens": 35841,
+      "completion_tokens": 256,
+      "elapsed_s": 106.29,
+      "tok_per_sec": 2.4,
+      "content_len": 1011,
+      "reasoning_len": 0,
+      "content_preview": "We need to answer: \"In one sentence, what color is mentioned most often in the reference text?\" The reference text is a long block of text repeating many phrases. We need to count occurrences of colors mentioned. Colors mentioned: \"brown\", ",
+      "has_tool_calls": false,
+      "target_ctx": 32000
+    },
+    {
+      "finish": "length",
+      "prompt_tokens": 71637,
+      "completion_tokens": 256,
+      "elapsed_s": 237.79,
+      "tok_per_sec": 1.1,
+      "content_len": 6,
+      "reasoning_len": 221,
+      "content_preview": "bright",
+      "has_tool_calls": false,
+      "target_ctx": 64000
+    }
+  ],
+  "concurrency": {
+    "wall_s": 17.14,
+    "per_request": [
+      {
+        "finish": "length",
+        "prompt_tokens": 36,
+        "completion_tokens": 512,
+        "elapsed_s": 17.14,
+        "tok_per_sec": 29.9,
+        "content_len": 512,
+        "reasoning_len": 158,
+        "content_preview": "A B\u2011tree stores multiple keys per node and can have many children, allowing it to remain balanced with fewer levels, while a binary search tree stores only one key per node and may become unbalanced, leading to degraded performance. Consequ",
+        "has_tool_calls": false
+      },
+      {
+        "finish": "length",
+        "prompt_tokens": 37,
+        "completion_tokens": 512,
+        "elapsed_s": 8.64,
+        "tok_per_sec": 59.3,
+        "content_len": 594,
+        "reasoning_len": 96,
+        "content_preview": "HTTP/2 multiplexes multiple requests over a single TCP connection, eliminating head\u2011of\u2011line blocking that plagued HTTP/1.1, and it adds header compression and binary framing for efficiency. Unlike HTTP/1.1, which relies on text\u2011based header",
+        "has_tool_calls": false
+      }
+    ]
+  },
+  "multi_turn": {
+    "turns": [
+      {
+        "finish": "length",
+        "prompt_tokens": 51,
+        "completion_tokens": 1024,
+        "elapsed_s": 16.93,
+        "tok_per_sec": 60.5,
+        "content_len": 3085,
+        "reasoning_len": 788,
+        "content_preview": "Below is a **practical, opinionated starter\u2011kit** for a Rust\u2011based CLI that lets you create, list, edit and delete markdown notes stored under `~/notes`.  \nI\u2019ll first sketch a **directory layout** that scales nicely, then pick the **top\u20113 c",
+        "has_tool_calls": false,
+        "turn": 1,
+        "user_chars": 159
+      },
+      {
+        "finish": "length",
+        "prompt_tokens": 141,
+        "completion_tokens": 1024,
+        "elapsed_s": 17.35,
+        "tok_per_sec": 59.0,
+        "content_len": 3481,
+        "reasoning_len": 323,
+        "content_preview": "### The **`add`** command \u2013 what it should do  \n\n`add` is the entry point for creating a new note file under `~/notes`.  \nIts job is to:\n\n1. **Validate** the supplied arguments (e.g., make sure a title is provided).  \n2. **Compose** the not",
+        "has_tool_calls": false,
+        "turn": 2,
+        "user_chars": 82
+      },
+      {
+        "finish": "length",
+        "prompt_tokens": 244,
+        "completion_tokens": 1024,
+        "elapsed_s": 17.64,
+        "tok_per_sec": 58.1,
+        "content_len": 3569,
+        "reasoning_len": 293,
+        "content_preview": "Below is a **catalog of the failure modes** that the `add` sub\u2011command can encounter, together with the **exit\u2011code** that the program should emit when the failure occurs.  \n(The exit\u2011codes follow the conventional conventions used by Unix\u2011s",
+        "has_tool_calls": false,
+        "turn": 3,
+        "user_chars": 93
+      },
+      {
+        "finish": "stop",
+        "prompt_tokens": 328,
+        "completion_tokens": 1023,
+        "elapsed_s": 17.89,
+        "tok_per_sec": 57.2,
+        "content_len": 3575,
+        "reasoning_len": 298,
+        "content_preview": "Below is a **minimal, production\u2011ready** signature for the `add` sub\u2011command that uses **Clap\u202f3\u2019s `derive` macros**.  \nIt defines the CLI arguments that `add` will accept, maps them to a struct, and exposes a single `run` method that will b",
+        "has_tool_calls": false,
+        "turn": 4,
+        "user_chars": 83
+      },
+      {
+        "finish": "length",
+        "prompt_tokens": 421,
+        "completion_tokens": 1024,
+        "elapsed_s": 18.07,
+        "tok_per_sec": 56.7,
+        "content_len": 3730,
+        "reasoning_len": 559,
+        "content_preview": "Below are **four concrete unit\u2011test scenarios** that exercise the most important edge\u2011cases of the `add` command you\u2019ll be implementing.  \nEach scenario describes:\n\n* **What the user types** (the command\u2011line arguments).  \n* **What the prog",
+        "has_tool_calls": false,
+        "turn": 5,
+        "user_chars": 76
+      },
+      {
+        "finish": "length",
+        "prompt_tokens": 508,
+        "completion_tokens": 1024,
+        "elapsed_s": 18.27,
+        "tok_per_sec": 56.0,
+        "content_len": 1768,
+        "reasoning_len": 343,
+        "content_preview": "### Where the **test fixtures** belong in the layout I suggested  \n\nIn the directory layout I sketched earlier, the project looks roughly like this:\n\n```\nmy-notes-cli/\n\u251c\u2500 Cargo.toml\n\u251c\u2500 src/\n\u2502   \u251c\u2500 cli.rs          # \u2190 the Clap\u2011derived CLI de",
+        "has_tool_calls": false,
+        "turn": 6,
+        "user_chars": 93
+      },
+      {
+        "finish": "length",
+        "prompt_tokens": 605,
+        "completion_tokens": 1024,
+        "elapsed_s": 18.57,
+        "tok_per_sec": 55.2,
+        "content_len": 2839,
+        "reasoning_len": 222,
+        "content_preview": "## `add` \u2013 Create a new note  \n\n**Purpose**  \n`add` is the entry point for creating a new Markdown note under `~/notes`.  \nIt validates the supplied arguments, creates the file, and returns a proper exit\u2011code on failure.\n\n---\n\n### Command\u2011l",
+        "has_tool_calls": false,
+        "turn": 7,
+        "user_chars": 103
+      },
+      {
+        "finish": "length",
+        "prompt_tokens": 694,
+        "completion_tokens": 1024,
+        "elapsed_s": 18.77,
+        "tok_per_sec": 54.5,
+        "content_len": 646,
+        "reasoning_len": 76,
+        "content_preview": "- **Directory layout** \u2013 a clear project root with `src/`, `tests/`, `fixtures/`, and a `README.md` that groups commands and their usage.  \n- **`add` command** \u2013 a Clap\u2011derived subcommand that accepts a title, an optional tag, and an option",
+        "has_tool_calls": false,
+        "turn": 8,
+        "user_chars": 49
+      }
+    ],
+    "gate": {
+      "all_turns_succeeded": true,
+      "all_have_content": true,
+      "later_turns_not_degenerate": true,
+      "overall": true
+    }
+  },
+  "post_mem": {
+    "free_gb": 5.2,
+    "active_gb": 15.42,
+    "wired_gb": 1.5
+  },
+  "post_metrics": {
+    "all_keys_count": 40,
+    "cache_keys": {
+      "vllm_mlx_cache_type": 1.0,
+      "vllm_mlx_cache_entry_count": 0.0,
+      "vllm_mlx_cache_hits": 0.0,
+      "vllm_mlx_cache_misses": 0.0,
+      "vllm_mlx_cache_evictions": 0.0,
+      "vllm_mlx_cache_hit_rate": 0.0,
+      "vllm_mlx_cache_utilization_ratio": 0.0,
+      "vllm_mlx_cache_memory_bytes": 0.0,
+      "vllm_mlx_cache_memory_limit_bytes": 0.0,
+      "vllm_mlx_cache_tokens_saved": 0.0
+    },
+    "raw_lines": 164
+  }
+}

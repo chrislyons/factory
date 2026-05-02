@@ -1,0 +1,316 @@
+{
+  "label": "e4b-saber-mlx-lm-bakeoff",
+  "model": "/Users/nesbitt/models/Gemma-4-E4B-SABER-MLX-6bit",
+  "port": 41961,
+  "ts": "2026-05-02T11:45:05",
+  "pre_mem": {
+    "free_gb": 0.06,
+    "active_gb": 12.71,
+    "wired_gb": 1.96
+  },
+  "pre_metrics": {
+    "error": "HTTP 404"
+  },
+  "include": [
+    "stress",
+    "concurrency",
+    "multi-turn"
+  ],
+  "quality": [
+    {
+      "finish": "stop",
+      "prompt_tokens": 28,
+      "completion_tokens": 2,
+      "elapsed_s": 0.48,
+      "tok_per_sec": 4.1,
+      "content_len": 5,
+      "reasoning_len": 0,
+      "content_preview": "Paris",
+      "has_tool_calls": false,
+      "name": "Short factual"
+    },
+    {
+      "finish": "stop",
+      "prompt_tokens": 35,
+      "completion_tokens": 193,
+      "elapsed_s": 5.55,
+      "tok_per_sec": 34.8,
+      "content_len": 11,
+      "reasoning_len": 0,
+      "content_preview": "9 are left.",
+      "has_tool_calls": false,
+      "name": "Sheep riddle"
+    },
+    {
+      "finish": "stop",
+      "prompt_tokens": 36,
+      "completion_tokens": 1008,
+      "elapsed_s": 28.21,
+      "tok_per_sec": 35.7,
+      "content_len": 1381,
+      "reasoning_len": 0,
+      "content_preview": "```python\ndef is_palindrome(s: str) -> bool:\n    \"\"\"\n    Checks if a given string is a palindrome.\n\n    A palindrome is a sequence that reads the same backward as forward.\n    This function ignores case and non-alphanumeric characters (like",
+      "has_tool_calls": false,
+      "name": "Code: palindrome"
+    },
+    {
+      "finish": "stop",
+      "prompt_tokens": 49,
+      "completion_tokens": 751,
+      "elapsed_s": 21.02,
+      "tok_per_sec": 35.7,
+      "content_len": 455,
+      "reasoning_len": 0,
+      "content_preview": "It would take **5 minutes**.\n\nHere is the breakdown:\n\n1.  **Determine the rate:** In the initial scenario, 5 machines make 5 widgets in 5 minutes. This means that each machine is responsible for making 1 widget in 5 minutes.\n2.  **Apply the",
+      "has_tool_calls": false,
+      "name": "Multi-step math"
+    },
+    {
+      "finish": "stop",
+      "prompt_tokens": 37,
+      "completion_tokens": 382,
+      "elapsed_s": 10.54,
+      "tok_per_sec": 36.2,
+      "content_len": 369,
+      "reasoning_len": 0,
+      "content_preview": "1. Exercise strengthens the cardiovascular system, leading to better heart health.\n2. It helps in maintaining a healthy weight and managing metabolic function.\n3. Regular physical activity reduces stress and improves overall mental well-bei",
+      "has_tool_calls": false,
+      "name": "Instruction follow"
+    },
+    {
+      "finish": "stop",
+      "prompt_tokens": 50,
+      "completion_tokens": 109,
+      "elapsed_s": 3.21,
+      "tok_per_sec": 34.0,
+      "content_len": 87,
+      "reasoning_len": 0,
+      "content_preview": "```json\n{\n  \"tool_name\": \"read_file\",\n  \"params\": {\n    \"path\": \"config.yaml\"\n  }\n}\n```",
+      "has_tool_calls": false,
+      "name": "Tool call"
+    }
+  ],
+  "stress": [
+    {
+      "finish": "length",
+      "prompt_tokens": 1050,
+      "completion_tokens": 256,
+      "elapsed_s": 8.96,
+      "tok_per_sec": 28.6,
+      "content_len": 0,
+      "reasoning_len": 0,
+      "content_preview": "",
+      "has_tool_calls": false,
+      "target_ctx": 1000
+    },
+    {
+      "finish": "length",
+      "prompt_tokens": 4048,
+      "completion_tokens": 256,
+      "elapsed_s": 13.77,
+      "tok_per_sec": 18.6,
+      "content_len": 0,
+      "reasoning_len": 0,
+      "content_preview": "",
+      "has_tool_calls": false,
+      "target_ctx": 4000
+    },
+    {
+      "finish": "length",
+      "prompt_tokens": 8046,
+      "completion_tokens": 256,
+      "elapsed_s": 20.07,
+      "tok_per_sec": 12.8,
+      "content_len": 0,
+      "reasoning_len": 0,
+      "content_preview": "",
+      "has_tool_calls": false,
+      "target_ctx": 8000
+    },
+    {
+      "finish": "length",
+      "prompt_tokens": 16048,
+      "completion_tokens": 256,
+      "elapsed_s": 33.46,
+      "tok_per_sec": 7.7,
+      "content_len": 0,
+      "reasoning_len": 0,
+      "content_preview": "",
+      "has_tool_calls": false,
+      "target_ctx": 16000
+    },
+    {
+      "finish": "length",
+      "prompt_tokens": 32047,
+      "completion_tokens": 256,
+      "elapsed_s": 61.72,
+      "tok_per_sec": 4.1,
+      "content_len": 0,
+      "reasoning_len": 0,
+      "content_preview": "",
+      "has_tool_calls": false,
+      "target_ctx": 32000
+    },
+    {
+      "finish": "length",
+      "prompt_tokens": 64047,
+      "completion_tokens": 256,
+      "elapsed_s": 134.57,
+      "tok_per_sec": 1.9,
+      "content_len": 0,
+      "reasoning_len": 0,
+      "content_preview": "",
+      "has_tool_calls": false,
+      "target_ctx": 64000
+    }
+  ],
+  "concurrency": {
+    "wall_s": 31.58,
+    "per_request": [
+      {
+        "finish": "length",
+        "prompt_tokens": 36,
+        "completion_tokens": 512,
+        "elapsed_s": 31.58,
+        "tok_per_sec": 16.2,
+        "content_len": 106,
+        "reasoning_len": 0,
+        "content_preview": "A Binary Search Tree (BST) is a binary structure where each node has at most two children, making it ideal",
+        "has_tool_calls": false
+      },
+      {
+        "finish": "stop",
+        "prompt_tokens": 36,
+        "completion_tokens": 410,
+        "elapsed_s": 28.69,
+        "tok_per_sec": 14.3,
+        "content_len": 533,
+        "reasoning_len": 0,
+        "content_preview": "HTTP/2 fundamentally improves upon HTTP/1.1 by introducing multiplexing, which allows multiple requests and responses to be sent concurrently over a single TCP connection, eliminating the head-of-line blocking issue. It also utilizes binary",
+        "has_tool_calls": false
+      }
+    ]
+  },
+  "multi_turn": {
+    "turns": [
+      {
+        "finish": "length",
+        "prompt_tokens": 51,
+        "completion_tokens": 1024,
+        "elapsed_s": 28.46,
+        "tok_per_sec": 36.0,
+        "content_len": 1525,
+        "reasoning_len": 0,
+        "content_preview": "This is a great starting point. Since you are using Rust, you'll likely be using a library like `clap` for argument parsing, which will make the command structure very clean.\n\nHere are suggestions for your directory layout and the initial c",
+        "has_tool_calls": false,
+        "turn": 1,
+        "user_chars": 159
+      },
+      {
+        "finish": "length",
+        "prompt_tokens": 129,
+        "completion_tokens": 1024,
+        "elapsed_s": 28.68,
+        "tok_per_sec": 35.7,
+        "content_len": 1720,
+        "reasoning_len": 0,
+        "content_preview": "This is a critical design decision, as it determines how intuitive your CLI is to use.\n\nSince notes can range from a single sentence to a 5,000-word essay, the `add` command needs to be flexible.\n\nI recommend designing the `add` command to ",
+        "has_tool_calls": false,
+        "turn": 2,
+        "user_chars": 82
+      },
+      {
+        "finish": "length",
+        "prompt_tokens": 220,
+        "completion_tokens": 1024,
+        "elapsed_s": 28.79,
+        "tok_per_sec": 35.6,
+        "content_len": 1271,
+        "reasoning_len": 0,
+        "content_preview": "This is a crucial step for building a robust and user-friendly CLI. A good CLI doesn't just crash; it tells the user *why* it failed and *how* to fix it.\n\nIn Rust, you will typically use `std::process::exit(code)` or rely on the `?` operato",
+        "has_tool_calls": false,
+        "turn": 3,
+        "user_chars": 93
+      },
+      {
+        "finish": "length",
+        "prompt_tokens": 313,
+        "completion_tokens": 1024,
+        "elapsed_s": 28.87,
+        "tok_per_sec": 35.5,
+        "content_len": 925,
+        "reasoning_len": 0,
+        "content_preview": "This is the core of your CLI structure. We will use `clap`'s derive macros to define the structure, which allows the library to automatically generate the help messages and parse the arguments for you.\n\nSince the note content can be very la",
+        "has_tool_calls": false,
+        "turn": 4,
+        "user_chars": 83
+      },
+      {
+        "finish": "length",
+        "prompt_tokens": 389,
+        "completion_tokens": 1024,
+        "elapsed_s": 29.06,
+        "tok_per_sec": 35.2,
+        "content_len": 1355,
+        "reasoning_len": 0,
+        "content_preview": "When writing tests for a function that interacts with the file system (I/O), you need to cover the \"happy path\" (success) and all the potential \"unhappy paths\" (failures).\n\nSince your function relies on external resources (the disk, the ope",
+        "has_tool_calls": false,
+        "turn": 5,
+        "user_chars": 76
+      },
+      {
+        "finish": "length",
+        "prompt_tokens": 471,
+        "completion_tokens": 1024,
+        "elapsed_s": 29.04,
+        "tok_per_sec": 35.3,
+        "content_len": 2200,
+        "reasoning_len": 0,
+        "content_preview": "This is an excellent question because it bridges the gap between the static project structure and the dynamic needs of testing.\n\nIn the standard Rust project layout, your test fixtures should live within the **`tests/`** directory, specific",
+        "has_tool_calls": false,
+        "turn": 6,
+        "user_chars": 93
+      },
+      {
+        "finish": "stop",
+        "prompt_tokens": 549,
+        "completion_tokens": 650,
+        "elapsed_s": 18.5,
+        "tok_per_sec": 35.1,
+        "content_len": 1552,
+        "reasoning_len": 0,
+        "content_preview": "## \ud83d\udcdd Add a New Note\n\nUse `notes add` to create a brand new markdown file in your notes directory (`~/notes`). This is the primary command for capturing your thoughts, meeting minutes, or project ideas.\n\n### Usage\n\n```bash\nnotes add --title ",
+        "has_tool_calls": false,
+        "turn": 7,
+        "user_chars": 103
+      },
+      {
+        "finish": "stop",
+        "prompt_tokens": 628,
+        "completion_tokens": 623,
+        "elapsed_s": 17.76,
+        "tok_per_sec": 35.1,
+        "content_len": 838,
+        "reasoning_len": 0,
+        "content_preview": "Based on our detailed discussion, here is a summary of the design decisions we have established for your Rust CLI:\n\n*   **Architectural Foundation:** We defined a clear project structure, including the `~/notes` storage location and a robus",
+        "has_tool_calls": false,
+        "turn": 8,
+        "user_chars": 49
+      }
+    ],
+    "gate": {
+      "all_turns_succeeded": true,
+      "all_have_content": true,
+      "later_turns_not_degenerate": true,
+      "overall": true
+    }
+  },
+  "post_mem": {
+    "free_gb": 3.88,
+    "active_gb": 7.9,
+    "wired_gb": 9.52
+  },
+  "post_metrics": {
+    "error": "HTTP 404"
+  }
+}

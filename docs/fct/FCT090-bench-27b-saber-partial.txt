@@ -1,0 +1,18 @@
+=== test-vllm-bench label=27b-saber-bakeoff model=ornstein-27b-saber port=41966 ===
+pre_mem: {'free_gb': 0.18, 'active_gb': 20.88, 'wired_gb': 1.71}
+pre_metrics: {'all_keys_count': 40, 'cache_keys': {'vllm_mlx_cache_type': 1.0, 'vllm_mlx_cache_entry_count': 0.0, 'vllm_mlx_cache_hits': 0.0, 'vllm_mlx_cache_misses': 0.0, 'vllm_mlx_cache_evictions': 0.0, 'vllm_mlx_cache_hit_rate': 0.0, 'vllm_mlx_cache_utilization_ratio': 0.0, 'vllm_mlx_cache_memory_bytes': 0.0, 'vllm_mlx_cache_memory_limit_bytes': 0.0, 'vllm_mlx_cache_tokens_saved': 0.0}, 'raw_lines': 164}
+
+[quality] 6-prompt suite (FCT089-comparable)
+  - Short factual          256t in 17.43s (14.7 tok/s) finish=length
+  - Sheep riddle           736t in 47.76s (15.4 tok/s) finish=stop
+  - Code: palindrome       1428t in 92.23s (15.5 tok/s) finish=stop
+  - Multi-step math        902t in 59.05s (15.3 tok/s) finish=stop
+  - Instruction follow     625t in 40.61s (15.4 tok/s) finish=stop
+  - Tool call              472t in 31.3s (15.1 tok/s) finish=stop
+
+[stress] context scaling 1K -> 64K
+  - ~ 1000t ctx prompt=1128t, decode=256t @ 7.7 tok/s, total 33.3s
+  - ~ 4000t ctx prompt=4379t, decode=256t @ 3.2 tok/s, total 81.1s
+  - ~ 8000t ctx prompt=8716t, decode=256t @ 1.7 tok/s, total 146.47s
+  - ~16000t ctx prompt=17397t, decode=256t @ 0.9 tok/s, total 280.58s
+  - ~32000t ctx 

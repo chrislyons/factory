@@ -6,24 +6,27 @@
 echo "=== Factory Service Status ==="
 echo ""
 
-# Model server
-echo "Model Server (:41961):"
-if curl -sf --max-time 3 "http://127.0.0.1:41961/v1/models" >/dev/null 2>&1; then
-  MODEL=$(curl -sf --max-time 3 "http://127.0.0.1:41961/v1/models" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['data'][0]['id'])" 2>/dev/null || echo "unknown")
-  echo "  Status: UP"
-  echo "  Model:  $MODEL"
-else
-  echo "  Status: DOWN"
-fi
-
-# Flash-moe (legacy)
-echo ""
-echo "Flash-MoE (:41966):"
-if curl -sf --max-time 3 "http://127.0.0.1:41966/v1/models" >/dev/null 2>&1; then
-  echo "  Status: UP (should be decommissioned)"
-else
-  echo "  Status: DOWN (expected)"
-fi
+# FCT091: dual-server topology — SABER on :41961 (mlx_lm wrapper),
+# Nemostein on :41966 (vllm-mlx). Either or both may be active.
+for slot in "41961:E4B-SABER (mlx_lm wrapper)" "41962:E4B-SABER alt (mlx_lm wrapper)" "41966:Nemostein (vllm-mlx)"; do
+  port="${slot%%:*}"
+  label="${slot#*:}"
+  echo "Model server :${port} — ${label}:"
+  if curl -sf --max-time 3 "http://127.0.0.1:${port}/v1/models" >/dev/null 2>&1; then
+    MODEL=$(curl -sf --max-time 3 "http://127.0.0.1:${port}/v1/models" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['data'][0]['id'])" 2>/dev/null || echo "unknown")
+    echo "  Status: UP"
+    echo "  Serving: $MODEL"
+    # FCT091: scrape /metrics for prefix-cache hit rate (vllm-mlx only)
+    METRICS=$(curl -sf --max-time 3 "http://127.0.0.1:${port}/metrics" 2>/dev/null)
+    if [ -n "$METRICS" ]; then
+      HIT=$(echo "$METRICS" | awk '/^vllm_mlx_cache_hit_rate / {print $2}')
+      [ -n "$HIT" ] && echo "  Prefix cache hit rate: ${HIT}"
+    fi
+  else
+    echo "  Status: DOWN"
+  fi
+  echo ""
+done
 
 # Hermes gateways
 echo ""

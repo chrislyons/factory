@@ -1,0 +1,335 @@
+{
+  "label": "harmonic-9b-bakeoff",
+  "model": "harmonic-9b",
+  "port": 41966,
+  "ts": "2026-05-02T11:11:28",
+  "pre_mem": {
+    "free_gb": 6.61,
+    "active_gb": 8.74,
+    "wired_gb": 1.73
+  },
+  "pre_metrics": {
+    "all_keys_count": 40,
+    "cache_keys": {
+      "vllm_mlx_cache_type": 1.0,
+      "vllm_mlx_cache_entry_count": 0.0,
+      "vllm_mlx_cache_hits": 0.0,
+      "vllm_mlx_cache_misses": 0.0,
+      "vllm_mlx_cache_evictions": 0.0,
+      "vllm_mlx_cache_hit_rate": 0.0,
+      "vllm_mlx_cache_utilization_ratio": 0.0,
+      "vllm_mlx_cache_memory_bytes": 0.0,
+      "vllm_mlx_cache_memory_limit_bytes": 0.0,
+      "vllm_mlx_cache_tokens_saved": 0.0
+    },
+    "raw_lines": 164
+  },
+  "include": [
+    "stress",
+    "concurrency",
+    "multi-turn"
+  ],
+  "quality": [
+    {
+      "finish": "stop",
+      "prompt_tokens": 22,
+      "completion_tokens": 143,
+      "elapsed_s": 3.48,
+      "tok_per_sec": 41.0,
+      "content_len": 5,
+      "reasoning_len": 576,
+      "content_preview": "Paris",
+      "has_tool_calls": false,
+      "name": "Short factual"
+    },
+    {
+      "finish": "stop",
+      "prompt_tokens": 29,
+      "completion_tokens": 833,
+      "elapsed_s": 17.8,
+      "tok_per_sec": 46.8,
+      "content_len": 240,
+      "reasoning_len": 2519,
+      "content_preview": "The answer is **9 sheep**.\n\nThe key is understanding the phrase \"all but 9 die.\" This means \"all of them except 9 die\" - in other words, 9 sheep survive.\n\nSo if the farmer starts with 17 sheep and all but 9 die, then 9 sheep are left alive.",
+      "has_tool_calls": false,
+      "name": "Sheep riddle"
+    },
+    {
+      "finish": "length",
+      "prompt_tokens": 30,
+      "completion_tokens": 2048,
+      "elapsed_s": 43.07,
+      "tok_per_sec": 47.5,
+      "content_len": 447,
+      "reasoning_len": 7522,
+      "content_preview": "```python\ndef is_palindrome(s: str) -> bool:\n    \"\"\"\n    Check if a string is a palindrome.\n    \n    A palindrome is a string that reads the same forwards and backwards.\n    This function is case-sensitive and checks the exact string provid",
+      "has_tool_calls": false,
+      "name": "Code: palindrome"
+    },
+    {
+      "finish": "length",
+      "prompt_tokens": 43,
+      "completion_tokens": 1024,
+      "elapsed_s": 21.89,
+      "tok_per_sec": 46.8,
+      "content_len": 3788,
+      "reasoning_len": 0,
+      "content_preview": "## PHASE 1: UNDERSTAND\n\nLet me parse this problem carefully.\n\nGiven:\n- 5 machines take 5 minutes to make 5 widgets\n- We want to know: how long would it take 100 machines to make 100 widgets?\n\nWhat's asked: The time required for 100 machines",
+      "has_tool_calls": false,
+      "name": "Multi-step math"
+    },
+    {
+      "finish": "length",
+      "prompt_tokens": 31,
+      "completion_tokens": 1024,
+      "elapsed_s": 21.76,
+      "tok_per_sec": 47.1,
+      "content_len": 106,
+      "reasoning_len": 4435,
+      "content_preview": "1. Cardiovascular exercise strengthens the heart and improves blood circulation.\n2. Regular movement helps",
+      "has_tool_calls": false,
+      "name": "Instruction follow"
+    },
+    {
+      "finish": "stop",
+      "prompt_tokens": 41,
+      "completion_tokens": 103,
+      "elapsed_s": 2.65,
+      "tok_per_sec": 38.8,
+      "content_len": 62,
+      "reasoning_len": 328,
+      "content_preview": "```json\n{\n  \"tool\": \"read_file\",\n  \"path\": \"config.yaml\"\n}\n```",
+      "has_tool_calls": false,
+      "name": "Tool call"
+    }
+  ],
+  "stress": [
+    {
+      "finish": "length",
+      "prompt_tokens": 1128,
+      "completion_tokens": 256,
+      "elapsed_s": 10.24,
+      "tok_per_sec": 25.0,
+      "content_len": 940,
+      "reasoning_len": 0,
+      "content_preview": "Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Input: A reference text (which appears to be a repeated pangram/alphabetic sentence).\n    *   Task: Identify the color mentioned most often in the reference text.\n    *   Constraint: A",
+      "has_tool_calls": false,
+      "target_ctx": 1000
+    },
+    {
+      "finish": "length",
+      "prompt_tokens": 4379,
+      "completion_tokens": 256,
+      "elapsed_s": 23.76,
+      "tok_per_sec": 10.8,
+      "content_len": 808,
+      "reasoning_len": 0,
+      "content_preview": "Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Input: A reference text (which appears to be a repeated pangram/alphabetic sentence).\n    *   Task: Identify the color mentioned most often in the reference text.\n    *   Constraint: A",
+      "has_tool_calls": false,
+      "target_ctx": 4000
+    },
+    {
+      "finish": "length",
+      "prompt_tokens": 8716,
+      "completion_tokens": 256,
+      "elapsed_s": 42.29,
+      "tok_per_sec": 6.1,
+      "content_len": 927,
+      "reasoning_len": 0,
+      "content_preview": "Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Input: A reference text (which appears to be a highly repetitive pangram repeated many times).\n    *   Task: Identify the color mentioned most often in the reference text.\n    *   Cons",
+      "has_tool_calls": false,
+      "target_ctx": 8000
+    },
+    {
+      "finish": "length",
+      "prompt_tokens": 17397,
+      "completion_tokens": 256,
+      "elapsed_s": 80.47,
+      "tok_per_sec": 3.2,
+      "content_len": 927,
+      "reasoning_len": 0,
+      "content_preview": "Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Input: A reference text (which appears to be a highly repetitive pangram repeated many times).\n    *   Task: Identify the color mentioned most often in the reference text.\n    *   Cons",
+      "has_tool_calls": false,
+      "target_ctx": 16000
+    },
+    {
+      "finish": "length",
+      "prompt_tokens": 34752,
+      "completion_tokens": 256,
+      "elapsed_s": 162.05,
+      "tok_per_sec": 1.6,
+      "content_len": 917,
+      "reasoning_len": 0,
+      "content_preview": "Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Input: A reference text (which appears to be a highly repetitive version of the standard pangram \"The quick brown fox jumps over the lazy dog\" etc., repeated many times).\n    *   Task:",
+      "has_tool_calls": false,
+      "target_ctx": 32000
+    },
+    {
+      "error": "HTTP 504: {\"detail\":\"Request timed out after 300.0 seconds\"}",
+      "elapsed": 348.26,
+      "target_ctx": 64000
+    }
+  ],
+  "concurrency": {
+    "wall_s": 22.01,
+    "per_request": [
+      {
+        "finish": "length",
+        "prompt_tokens": 29,
+        "completion_tokens": 512,
+        "elapsed_s": 22.0,
+        "tok_per_sec": 23.3,
+        "content_len": 2180,
+        "reasoning_len": 0,
+        "content_preview": "Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Topic: Difference between a B-tree and a binary search tree (BST).\n    *   Constraint: Exactly 3 sentences.\n    *   Goal: Provide a clear, concise summary of the key differences.\n\n2.  ",
+        "has_tool_calls": false
+      },
+      {
+        "finish": "length",
+        "prompt_tokens": 30,
+        "completion_tokens": 512,
+        "elapsed_s": 11.18,
+        "tok_per_sec": 45.8,
+        "content_len": 2279,
+        "reasoning_len": 0,
+        "content_preview": "Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Topic: Differences between HTTP/2 and HTTP/1.1.\n    *   Constraint: Exactly 3 sentences.\n    *   Goal: Provide a concise summary of the key differences.\n\n2.  **Identify Key Differences",
+        "has_tool_calls": false
+      }
+    ]
+  },
+  "multi_turn": {
+    "turns": [
+      {
+        "finish": "length",
+        "prompt_tokens": 45,
+        "completion_tokens": 1024,
+        "elapsed_s": 21.88,
+        "tok_per_sec": 46.8,
+        "content_len": 955,
+        "reasoning_len": 2738,
+        "content_preview": "# Directory Layout\n\n```\n~/.notes/\n\u251c\u2500\u2500 .config/\n\u2502   \u2514\u2500\u2500 notes.yaml          # User config (theme, default settings)\n\u251c\u2500\u2500 .local/\n\u2502   \u2514\u2500\u2500 tags.yaml           # Personal tag definitions\n\u251c\u2500\u2500 .templates/             # Note templates\n\u2502   \u251c\u2500\u2500 meeti",
+        "has_tool_calls": false,
+        "turn": 1,
+        "user_chars": 159
+      },
+      {
+        "finish": "stop",
+        "prompt_tokens": 144,
+        "completion_tokens": 942,
+        "elapsed_s": 20.6,
+        "tok_per_sec": 45.7,
+        "content_len": 1944,
+        "reasoning_len": 1460,
+        "content_preview": "# `notes add` Command Arguments\n\nHere's a practical argument structure for the `add` command:\n\n```bash\nnotes add <title> [content] [options]\n```\n\n## Required Arguments\n- **`<title>`** - The name of the note (required)\n  - Becomes the filena",
+        "has_tool_calls": false,
+        "turn": 2,
+        "user_chars": 82
+      },
+      {
+        "finish": "stop",
+        "prompt_tokens": 242,
+        "completion_tokens": 880,
+        "elapsed_s": 19.73,
+        "tok_per_sec": 44.6,
+        "content_len": 2317,
+        "reasoning_len": 973,
+        "content_preview": "# Error Cases for `notes add` Command\n\n## Exit Code 2: Usage Error (Invalid Arguments)\n- **Missing title** - No title provided\n  ```bash\n  notes add\n  # Error: missing required argument: title\n  ```\n- **Empty title** - Title is empty string",
+        "has_tool_calls": false,
+        "turn": 3,
+        "user_chars": 93
+      },
+      {
+        "finish": "length",
+        "prompt_tokens": 332,
+        "completion_tokens": 1024,
+        "elapsed_s": 23.08,
+        "tok_per_sec": 44.4,
+        "content_len": 2120,
+        "reasoning_len": 1965,
+        "content_preview": "# Rust Function Signature for `add` Command\n\n```rust\nuse clap::{Parser, Subcommand};\n\n#[derive(Parser)]\n#[command(name = \"notes\")]\n#[command(author = \"Your Name\")]\n#[command(version = \"0.1.0\")]\n#[command(about = \"A CLI for managing markdown",
+        "has_tool_calls": false,
+        "turn": 4,
+        "user_chars": 83
+      },
+      {
+        "finish": "stop",
+        "prompt_tokens": 425,
+        "completion_tokens": 823,
+        "elapsed_s": 19.32,
+        "tok_per_sec": 42.6,
+        "content_len": 2151,
+        "reasoning_len": 1033,
+        "content_preview": "# Test Cases for `add` Command\n\n## 1. Happy Path - Add Note with Title Only\n```rust\n#[test]\nfn test_add_note_with_title_only() {\n    let args = Args::parse_from(&[\"notes\", \"add\", \"my-note\"]);\n    \n    assert_eq!(args.title, \"my-note\");\n    ",
+        "has_tool_calls": false,
+        "turn": 5,
+        "user_chars": 76
+      },
+      {
+        "finish": "stop",
+        "prompt_tokens": 523,
+        "completion_tokens": 654,
+        "elapsed_s": 16.2,
+        "tok_per_sec": 40.4,
+        "content_len": 1354,
+        "reasoning_len": 1190,
+        "content_preview": "# Test Fixtures Location\n\nBased on the directory layout I suggested, test fixtures should live in:\n\n```\n~/.notes/\n\u251c\u2500\u2500 .tests/                 # Test fixtures and test data\n\u2502   \u251c\u2500\u2500 fixtures/           # Sample note files for testing\n\u2502   \u2502   ",
+        "has_tool_calls": false,
+        "turn": 6,
+        "user_chars": 93
+      },
+      {
+        "finish": "stop",
+        "prompt_tokens": 613,
+        "completion_tokens": 476,
+        "elapsed_s": 12.91,
+        "tok_per_sec": 36.9,
+        "content_len": 1538,
+        "reasoning_len": 235,
+        "content_preview": "# `notes add` Command\n\n## Description\nCreates a new markdown note file in your notes directory.\n\n## Usage\n```bash\nnotes add <title> [content] [options]\n```\n\n## Arguments\n\n| Argument | Required | Description |\n|----------|----------|--------",
+        "has_tool_calls": false,
+        "turn": 7,
+        "user_chars": 103
+      },
+      {
+        "finish": "stop",
+        "prompt_tokens": 695,
+        "completion_tokens": 294,
+        "elapsed_s": 9.37,
+        "tok_per_sec": 31.4,
+        "content_len": 419,
+        "reasoning_len": 850,
+        "content_preview": "- **Directory Structure**: Organized `~/.notes/` with `.config/` for settings, `.templates/` for note templates, and `.tests/` for test fixtures\n- **Add Command**: Implemented `notes add <title> [content] [options]` with clap derive macros,",
+        "has_tool_calls": false,
+        "turn": 8,
+        "user_chars": 49
+      }
+    ],
+    "gate": {
+      "all_turns_succeeded": true,
+      "all_have_content": true,
+      "later_turns_not_degenerate": true,
+      "overall": true
+    }
+  },
+  "post_mem": {
+    "free_gb": 10.26,
+    "active_gb": 4.05,
+    "wired_gb": 6.92
+  },
+  "post_metrics": {
+    "all_keys_count": 40,
+    "cache_keys": {
+      "vllm_mlx_cache_type": 1.0,
+      "vllm_mlx_cache_entry_count": 0.0,
+      "vllm_mlx_cache_hits": 0.0,
+      "vllm_mlx_cache_misses": 0.0,
+      "vllm_mlx_cache_evictions": 0.0,
+      "vllm_mlx_cache_hit_rate": 0.0,
+      "vllm_mlx_cache_utilization_ratio": 0.0,
+      "vllm_mlx_cache_memory_bytes": 0.0,
+      "vllm_mlx_cache_memory_limit_bytes": 0.0,
+      "vllm_mlx_cache_tokens_saved": 0.0
+    },
+    "raw_lines": 168
+  }
+}

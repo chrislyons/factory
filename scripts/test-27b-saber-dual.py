@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
-"""Dual-instance test for Ornstein-26B-A4B-it-MLX-4bit.
+"""Dual-instance test for 27B-SABER 4-bit.
 
-Tests: single instance speed → start second instance → measure both → stress test.
+Only the 4-bit variant (~14 GB) has enough headroom for dual instances.
+The 6-bit variant (~21 GB) will thrash — do NOT run this with VARIANT=6bit.
 
-Key hypothesis: mmap shares model pages between processes. 4-bit model (~13 GB)
-should allow dual instances within 32 GB RAM (vs 6-bit which thrashed).
+Tests: single instance speed -> start second instance -> measure both -> concurrent stress.
+
+Key facts (from FCT087/FCT088):
+  - 4-bit 27B: 14 GB model, ~14 GB wired, ~11 GB headroom as single
+  - Dual instances share model pages via mmap (same file)
+  - Prefill serialized (prompt-concurrency 1), decode can be parallel
 """
 
 import glob
@@ -16,24 +21,10 @@ import threading
 import time
 
 sys.path.insert(0, os.path.dirname(__file__))
-from benchmark_utils import find_mlx_python, get_mem, wait_server
+from benchmark_utils import find_mlx_python, get_mem, wait_server, write_wrapper
 
-MODEL = None  # resolved at runtime via glob
-PORT_A = 41967
-PORT_B = 41968
-
-WRAPPER = '''\
-import sys, mlx.core as mx
-
-# Memory limit only — NO wired limit
-# Let mmap manage page residency. The 4-bit model should be small enough
-# that both instances share pages without exhausting RAM.
-mx.set_memory_limit(20 * 1024 * 1024 * 1024)  # 20 GB per instance
-
-import mlx_lm.server
-sys.argv = ["mlx-lm-server"] + sys.argv[1:]
-mlx_lm.server.main()
-'''
+PORT_A = 41966
+PORT_B = 41967
 
 BENCHMARKS = [
     {"name": "Short factual", "prompt": "What is the capital of France? One word.", "max_tokens": 256},
@@ -45,10 +36,10 @@ BENCHMARKS = [
 ]
 
 
-def query(port, prompt, max_tokens=256, timeout=300):
+def query(port, model, prompt, max_tokens=256, timeout=300):
     import requests
     payload = {
-        "model": MODEL,
+        "model": model,
         "messages": [{"role": "user", "content": prompt}],
         "max_tokens": max_tokens,
         "temperature": 0.0,
@@ -78,23 +69,22 @@ def query(port, prompt, max_tokens=256, timeout=300):
         return {"error": str(e)[:100]}
 
 
-def start_server(port, mlx_python):
-    with open("/tmp/wrapper-26b-4bit.py", "w") as f:
-        f.write(WRAPPER)
-    proc = subprocess.Popen([
-        mlx_python,
-        "/tmp/wrapper-26b-4bit.py",
-        "--model", MODEL, "--port", str(port),
-        "--max-tokens", "16384", "--prefill-step-size", "256",
-        "--prompt-concurrency", "1", "--prompt-cache-bytes", "2147483648",
-    ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, env=os.environ.copy())
+def start_server(port, model, mlx_python):
+    wrapper_path = "/tmp/test-27b-dual-wrapper.py"
+    write_wrapper(wrapper_path, metal_limit_gb=20)
+    proc = subprocess.Popen(
+        [mlx_python, wrapper_path,
+         "--model", model, "--port", str(port),
+         "--max-tokens", "16384", "--prefill-step-size", "2048",
+         "--prompt-concurrency", "1", "--prompt-cache-bytes", "2147483648"],
+        stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, env=os.environ.copy())
     return proc
 
 
-def bench(port):
+def bench(port, model):
     results = []
     for b in BENCHMARKS:
-        r = query(port, b["prompt"], b["max_tokens"])
+        r = query(port, model, b["prompt"], b["max_tokens"])
         results.append({"name": b["name"], **r})
     return results
 
@@ -119,35 +109,33 @@ def avg_tok_s(results):
 
 
 def main():
-    global MODEL
-
     mlx_python = find_mlx_python()
 
-    # Find the model
-    candidates = glob.glob("/Users/nesbitt/models/*26B*A4B*4bit*")
+    # Find the 4-bit model
+    candidates = glob.glob("/Users/nesbitt/models/*27b*SABER*4bit*")
     if not candidates:
-        candidates = glob.glob("/Users/nesbitt/models/*26b*a4b*4bit*")
+        candidates = glob.glob("/Users/nesbitt/models/*Ornstein*27b*4bit*")
     if not candidates:
-        candidates = glob.glob("/Users/nesbitt/models/*Ornstein*26*4bit*")
+        candidates = glob.glob("/Users/nesbitt/models/*27b*4bit*")
 
     if not candidates:
-        print("ERROR: 4-bit 26B-A4B model not found in ~/models/")
-        print("Checked: *26B*A4B*4bit*, *26b*a4b*4bit*, *Ornstein*26*4bit*")
+        print("ERROR: 4-bit 27B-SABER model not found in ~/models/")
+        print("Checked: *27b*SABER*4bit*, *Ornstein*27b*4bit*, *27b*4bit*")
         sys.exit(1)
 
-    MODEL = candidates[0]
-    print(f"Model: {MODEL}")
+    model = candidates[0]
+    print(f"Model: {model}")
     print(f"Python: {mlx_python}")
 
     total_size = sum(
-        os.path.getsize(os.path.join(MODEL, f))
-        for f in os.listdir(MODEL)
+        os.path.getsize(os.path.join(model, f))
+        for f in os.listdir(model)
         if f.endswith(".safetensors")
     )
     print(f"Disk size: {total_size / (1024**3):.1f} GB")
 
     print(f"\n{'='*65}")
-    print("  ORNSTEIN 26B-A4B 4-BIT: DUAL INSTANCE TEST")
+    print("  ORNSTEIN-HERMES-3.6-27B-SABER 4-BIT: DUAL INSTANCE TEST")
     print(f"{'='*65}")
 
     # Phase 0: Baseline
@@ -156,20 +144,20 @@ def main():
 
     # Phase 1: Single instance
     print(f"\n[Phase 1] Starting single instance on :{PORT_A}...")
-    proc_a = start_server(PORT_A, mlx_python)
+    proc_a = start_server(PORT_A, model, mlx_python)
     if not wait_server(PORT_A, timeout=180, proc=proc_a):
         print("FAILED: Instance A did not start")
         proc_a.terminate()
         sys.exit(1)
 
-    query(PORT_A, "Hello!", 32)  # warmup
+    query(PORT_A, model, "Hello!", 32)  # warmup
     m = get_mem()
     print(f"  Loaded: Free={m['free_gb']}GB  Wired={m['wired_gb']}GB  Active={m['active_gb']}GB")
     footprint = m["wired_gb"] - m_baseline["wired_gb"]
     print(f"  Model footprint: ~{footprint:.1f} GB wired")
 
     print("\n  Running benchmarks (single instance)...")
-    results_single = bench(PORT_A)
+    results_single = bench(PORT_A, model)
     print_results(results_single, "PHASE 1: SINGLE INSTANCE")
 
     m = get_mem()
@@ -177,7 +165,7 @@ def main():
 
     # Phase 2: Dual instances
     print(f"\n[Phase 2] Starting second instance on :{PORT_B}...")
-    proc_b = start_server(PORT_B, mlx_python)
+    proc_b = start_server(PORT_B, model, mlx_python)
     if not wait_server(PORT_B, timeout=180, proc=proc_b):
         print("  FAILED: Instance B did not start")
         print("  (Expected if model is too large for dual)")
@@ -197,8 +185,8 @@ def main():
         print("  OK: sufficient headroom")
 
     print("\n  Running benchmarks (both instances)...")
-    results_a = bench(PORT_A)
-    results_b = bench(PORT_B)
+    results_a = bench(PORT_A, model)
+    results_b = bench(PORT_B, model)
 
     print_results(results_a, "PHASE 2: INSTANCE A (with B running)")
     print_results(results_b, "PHASE 2: INSTANCE B (with A running)")
@@ -206,12 +194,12 @@ def main():
     m = get_mem()
     print(f"\n  Final: Free={m['free_gb']}GB  Wired={m['wired_gb']}GB")
 
-    # Phase 3: Concurrent stress test
+    # Phase 3: Concurrent stress
     print(f"\n[Phase 3] Concurrent decode test...")
     results_concurrent = {}
 
     def run_query(port, name):
-        r = query(port, "Explain quantum entanglement in 3 sentences.", 256)
+        r = query(port, model, "Explain quantum entanglement in 3 sentences.", 256)
         results_concurrent[name] = r
 
     t0 = time.time()
@@ -246,16 +234,16 @@ def main():
         print(f"  Speed degradation:    {((avg_single - avg_a) / avg_single * 100):.0f}%")
     print(f"  Model disk:           {total_size / (1024**3):.1f} GB")
 
-    verdict = "PASS" if avg_a > 15 and avg_b > 15 and m["free_gb"] > 1.0 else "FAIL"
+    verdict = "PASS" if avg_a > 10 and avg_b > 10 and m["free_gb"] > 1.0 else "FAIL"
     print(f"\n  VERDICT: {verdict}")
     if verdict == "PASS":
         print("  Dual instances viable for production!")
     else:
         print("  Dual instances NOT viable. Stick with single instance.")
 
-    # Save results
+    # Save
     output = {
-        "model": MODEL,
+        "model": model,
         "disk_size_gb": round(total_size / (1024**3), 1),
         "single": results_single,
         "dual_a": results_a,
@@ -265,7 +253,7 @@ def main():
         "avg_dual_a_tok_s": round(avg_a, 1),
         "avg_dual_b_tok_s": round(avg_b, 1),
     }
-    out_path = "/Users/nesbitt/dev/factory/docs/fct/FCT088-26b-a4b-4bit-dual-test.json"
+    out_path = "/Users/nesbitt/dev/factory/docs/fct/FCT087-27b-saber-4bit-dual-test.json"
     with open(out_path, "w") as f:
         json.dump(output, f, indent=2)
     print(f"\n  Results: {out_path}")

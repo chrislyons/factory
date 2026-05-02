@@ -1,0 +1,146 @@
+{
+  "label": "26b-a4b-bakeoff",
+  "model": "ornstein-26b-a4b",
+  "port": 41966,
+  "ts": "2026-05-02T10:40:36",
+  "pre_mem": {
+    "free_gb": 0.48,
+    "active_gb": 12.36,
+    "wired_gb": 1.62
+  },
+  "pre_metrics": {
+    "all_keys_count": 30,
+    "cache_keys": {
+      "vllm_mlx_cache_type": 1.0,
+      "vllm_mlx_cache_entry_count": 0.0,
+      "vllm_mlx_cache_hits": 0.0,
+      "vllm_mlx_cache_misses": 0.0,
+      "vllm_mlx_cache_evictions": 0.0,
+      "vllm_mlx_cache_hit_rate": 0.0,
+      "vllm_mlx_cache_utilization_ratio": 0.0,
+      "vllm_mlx_cache_memory_bytes": 0.0,
+      "vllm_mlx_cache_memory_limit_bytes": 0.0,
+      "vllm_mlx_cache_tokens_saved": 0.0
+    },
+    "raw_lines": 115
+  },
+  "include": [
+    "stress",
+    "concurrency",
+    "multi-turn"
+  ],
+  "quality": [
+    {
+      "error": "HTTP 500: Internal Server Error",
+      "elapsed": 1.62,
+      "name": "Short factual"
+    },
+    {
+      "error": "HTTP 500: Internal Server Error",
+      "elapsed": 0.21,
+      "name": "Sheep riddle"
+    },
+    {
+      "error": "HTTP 500: Internal Server Error",
+      "elapsed": 0.2,
+      "name": "Code: palindrome"
+    },
+    {
+      "error": "HTTP 500: Internal Server Error",
+      "elapsed": 0.22,
+      "name": "Multi-step math"
+    },
+    {
+      "error": "HTTP 500: Internal Server Error",
+      "elapsed": 0.21,
+      "name": "Instruction follow"
+    },
+    {
+      "error": "HTTP 500: Internal Server Error",
+      "elapsed": 0.28,
+      "name": "Tool call"
+    }
+  ],
+  "stress": [
+    {
+      "error": "HTTP 500: Internal Server Error",
+      "elapsed": 0.64,
+      "target_ctx": 1000
+    },
+    {
+      "error": "HTTP 500: Internal Server Error",
+      "elapsed": 1.08,
+      "target_ctx": 4000
+    },
+    {
+      "error": "HTTP 500: Internal Server Error",
+      "elapsed": 1.02,
+      "target_ctx": 8000
+    },
+    {
+      "error": "HTTP 500: Internal Server Error",
+      "elapsed": 1.04,
+      "target_ctx": 16000
+    },
+    {
+      "error": "HTTP 500: Internal Server Error",
+      "elapsed": 1.11,
+      "target_ctx": 32000
+    },
+    {
+      "error": "HTTP 500: Internal Server Error",
+      "elapsed": 1.08,
+      "target_ctx": 64000
+    }
+  ],
+  "concurrency": {
+    "wall_s": 0.41,
+    "per_request": [
+      {
+        "error": "HTTP 500: Internal Server Error",
+        "elapsed": 0.32
+      },
+      {
+        "error": "HTTP 500: Internal Server Error",
+        "elapsed": 0.41
+      }
+    ]
+  },
+  "multi_turn": {
+    "turns": [
+      {
+        "error": "HTTP 500: Internal Server Error",
+        "elapsed": 0.25,
+        "turn": 1,
+        "user_chars": 159
+      }
+    ],
+    "gate": {
+      "all_turns_succeeded": false,
+      "all_have_content": false,
+      "later_turns_not_degenerate": true,
+      "overall": false
+    }
+  },
+  "post_mem": {
+    "free_gb": 0.06,
+    "active_gb": 6.2,
+    "wired_gb": 17.2
+  },
+  "post_metrics": {
+    "all_keys_count": 30,
+    "cache_keys": {
+      "vllm_mlx_cache_type": 1.0,
+      "vllm_mlx_cache_entry_count": 0.0,
+      "vllm_mlx_cache_hits": 0.0,
+      "vllm_mlx_cache_misses": 0.0,
+      "vllm_mlx_cache_evictions": 0.0,
+      "vllm_mlx_cache_hit_rate": 0.0,
+      "vllm_mlx_cache_utilization_ratio": 0.0,
+      "vllm_mlx_cache_memory_bytes": 0.0,
+      "vllm_mlx_cache_memory_limit_bytes": 0.0,
+      "vllm_mlx_cache_tokens_saved": 0.0
+    },
+    "raw_lines": 134
+  }
+}

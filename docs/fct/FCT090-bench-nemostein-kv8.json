@@ -1,0 +1,123 @@
+{
+  "label": "nemostein-kv8",
+  "model": "nemostein",
+  "port": 41966,
+  "ts": "2026-05-02T10:36:11",
+  "pre_mem": {
+    "free_gb": 0.14,
+    "active_gb": 13.17,
+    "wired_gb": 1.55
+  },
+  "pre_metrics": {
+    "all_keys_count": 30,
+    "cache_keys": {
+      "vllm_mlx_cache_type": 1.0,
+      "vllm_mlx_cache_entry_count": 0.0,
+      "vllm_mlx_cache_hits": 0.0,
+      "vllm_mlx_cache_misses": 0.0,
+      "vllm_mlx_cache_evictions": 0.0,
+      "vllm_mlx_cache_hit_rate": 0.0,
+      "vllm_mlx_cache_utilization_ratio": 0.0,
+      "vllm_mlx_cache_memory_bytes": 0.0,
+      "vllm_mlx_cache_memory_limit_bytes": 0.0,
+      "vllm_mlx_cache_tokens_saved": 0.0
+    },
+    "raw_lines": 115
+  },
+  "include": [],
+  "quality": [
+    {
+      "finish": "length",
+      "prompt_tokens": 28,
+      "completion_tokens": 256,
+      "elapsed_s": 5.21,
+      "tok_per_sec": 49.1,
+      "content_len": 5,
+      "reasoning_len": 140,
+      "content_preview": "Paris",
+      "has_tool_calls": false,
+      "name": "Short factual"
+    },
+    {
+      "finish": "length",
+      "prompt_tokens": 35,
+      "completion_tokens": 1024,
+      "elapsed_s": 16.82,
+      "tok_per_sec": 60.9,
+      "content_len": 120,
+      "reasoning_len": 227,
+      "content_preview": "The phrase \u201cAll but 9 die\u201d means that everything except nine of the sheep die.  \nSo the farmer is left with **9 sheep**.",
+      "has_tool_calls": false,
+      "name": "Sheep riddle"
+    },
+    {
+      "finish": "length",
+      "prompt_tokens": 37,
+      "completion_tokens": 2048,
+      "elapsed_s": 33.59,
+      "tok_per_sec": 61.0,
+      "content_len": 1734,
+      "reasoning_len": 273,
+      "content_preview": "Here is a concise, well\u2011documented implementation that follows Python\u2019s type\u2011hinting conventions:\n\n```python\ndef is_palindrome(s: str) -> bool:\n    \"\"\"\n    Check whether a given string is a palindrome.\n\n    A palindrome is a word, phrase, o",
+      "has_tool_calls": false,
+      "name": "Code: palindrome"
+    },
+    {
+      "finish": "length",
+      "prompt_tokens": 49,
+      "completion_tokens": 1024,
+      "elapsed_s": 16.9,
+      "tok_per_sec": 60.6,
+      "content_len": 990,
+      "reasoning_len": 1125,
+      "content_preview": "**Answer: 5 minutes**\n\n**Why?**\n\n1. **Find the rate of one machine**  \n   - 5 machines make 5 widgets in 5 minutes.  \n   - That means the *total* production rate of the 5 machines is  \n\n\\[\n\\frac{5\\text{ widgets}}{5\\text{ min}} = 1\\text{ wid",
+      "has_tool_calls": false,
+      "name": "Multi-step math"
+    },
+    {
+      "finish": "length",
+      "prompt_tokens": 37,
+      "completion_tokens": 1024,
+      "elapsed_s": 16.85,
+      "tok_per_sec": 60.8,
+      "content_len": 277,
+      "reasoning_len": 722,
+      "content_preview": "1. Improves cardiovascular health and reduces risk of heart disease.  \n2. Enhances muscular strength and endurance.  \n3. Boosts mental well\u2011being and reduces stress.  \n4. Supports weight management and healthy body composition.  \n5. Increas",
+      "has_tool_calls": false,
+      "name": "Instruction follow"
+    },
+    {
+      "finish": "length",
+      "prompt_tokens": 47,
+      "completion_tokens": 1024,
+      "elapsed_s": 16.9,
+      "tok_per_sec": 60.6,
+      "content_len": 68,
+      "reasoning_len": 1101,
+      "content_preview": "{\n  \"tool\": \"read_file\",\n  \"args\": {\n    \"path\": \"config.yaml\"\n  }\n}",
+      "has_tool_calls": false,
+      "name": "Tool call"
+    }
+  ],
+  "post_mem": {
+    "free_gb": 0.25,
+    "active_gb": 6.08,
+    "wired_gb": 14.98
+  },
+  "post_metrics": {
+    "all_keys_count": 40,
+    "cache_keys": {
+      "vllm_mlx_cache_type": 1.0,
+      "vllm_mlx_cache_entry_count": 0.0,
+      "vllm_mlx_cache_hits": 0.0,
+      "vllm_mlx_cache_misses": 0.0,
+      "vllm_mlx_cache_evictions": 0.0,
+      "vllm_mlx_cache_hit_rate": 0.0,
+      "vllm_mlx_cache_utilization_ratio": 0.0,
+      "vllm_mlx_cache_memory_bytes": 0.0,
+      "vllm_mlx_cache_memory_limit_bytes": 0.0,
+      "vllm_mlx_cache_tokens_saved": 0.0
+    },
+    "raw_lines": 164
+  }
+}

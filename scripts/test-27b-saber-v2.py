@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
-"""Benchmark v2 for Ornstein-26B-A4B-it-MLX-6bit.
+"""Benchmark v2 for Ornstein-Hermes-3.6-27b-SABER.
 
-This is a thinking model — reasoning_content must be combined with content.
-Adequate max_tokens to allow thinking + answer.
+Thinking model (Qwen3.5 hybrid): reasoning_content must be combined with content.
+Uses the 27b wrapper (4-bit KV, Metal limit, no wired limit).
+
+Variants:
+  6-bit: ~21 GB disk, ~7-10 tok/s, prefill-step-size 256 required
+  4-bit: ~14 GB disk, ~13-15 tok/s, prefill-step-size 2048 safe
 """
 
 import json
@@ -12,10 +16,25 @@ import sys
 import time
 
 sys.path.insert(0, os.path.dirname(__file__))
-from benchmark_utils import find_mlx_python, get_mem, wait_server
+from benchmark_utils import find_mlx_python, get_mem, wait_server, write_wrapper
 
-MODEL = "/Users/nesbitt/models/Ornstein-26B-A4B-it-MLX-6bit"
-PORT = 41967
+VARIANT = os.environ.get("VARIANT", "6bit")  # "6bit" or "4bit"
+WRAPPER = os.environ.get("WRAPPER", "1")      # "1" to use wrapper, "0" for raw mlx_lm
+
+if VARIANT == "4bit":
+    MODEL = "/Users/nesbitt/models/Ornstein-Hermes-3.6-27b-SABER-MLX-4bit"
+    PORT = 41966
+    PREFILL_STEP = 2048
+    METAL_LIMIT = 20  # GB
+    DISK_GB = 14
+    EXPECTED_TOK_S = "13-15"
+else:
+    MODEL = "/Users/nesbitt/models/Ornstein-Hermes-3.6-27b-MLX-6bit"
+    PORT = 41966
+    PREFILL_STEP = 256
+    METAL_LIMIT = 28  # GB
+    DISK_GB = 21
+    EXPECTED_TOK_S = "7-10"
 
 BENCHMARKS = [
     {"name": "Short factual",    "prompt": "What is the capital of France? Answer in one word.", "max_tokens": 512},
@@ -27,7 +46,7 @@ BENCHMARKS = [
 ]
 
 
-def query(port, prompt, max_tokens):
+def query_local(port, prompt, max_tokens):
     import requests
     payload = {
         "model": MODEL,
@@ -50,7 +69,6 @@ def query(port, prompt, max_tokens):
     usage = data.get("usage", {})
     pt = usage.get("prompt_tokens", 0)
     ct = usage.get("completion_tokens", 0)
-    tok_s = ct / elapsed if elapsed > 0 else 0
 
     return {
         "content_preview": content[:200] if content else "(thinking only)",
@@ -59,7 +77,7 @@ def query(port, prompt, max_tokens):
         "prompt_tokens": pt,
         "completion_tokens": ct,
         "total_time": round(elapsed, 1),
-        "tok_per_sec": round(tok_s, 1),
+        "tok_per_sec": round(ct / elapsed, 1) if elapsed > 0 else 0,
     }
 
 
@@ -67,24 +85,37 @@ def main():
     mlx_python = find_mlx_python()
 
     print("=" * 70)
-    print("Ornstein-26B-A4B-it-MLX-6bit Benchmark v2")
+    print(f"Ornstein-Hermes-3.6-27b-SABER Benchmark v2 ({VARIANT})")
     print(f"Model: {MODEL}")
-    print(f"Disk: 19 GB | Architecture: Gemma4 MoE (26B total, 4B active)")
-    print(f"128 experts, top_k=8, 30 layers (5 full_attn + 25 sliding)")
+    print(f"Disk: {DISK_GB} GB | Architecture: Qwen3.5 hybrid (64 layers: 48 GatedDeltaNet + 16 full attention)")
+    print(f"Dense 27B — all parameters active per token")
+    print(f"Expected speed: {EXPECTED_TOK_S} tok/s")
+    print(f"Wrapper: {'YES' if WRAPPER == '1' else 'NO'} (Metal limit {METAL_LIMIT} GB, prefill-step-size {PREFILL_STEP})")
     print(f"Python: {mlx_python}")
     print("=" * 70)
 
     # Start server
     print("\n[1/5] Starting server...")
-    proc = subprocess.Popen([
-        mlx_python, "-m", "mlx_lm", "server",
-        "--model", MODEL,
-        "--port", str(PORT),
-        "--max-tokens", "16384",
-        "--prefill-step-size", "256",
-        "--prompt-concurrency", "1",
-        "--prompt-cache-bytes", "4294967296",  # 4 GB
-    ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, env=os.environ.copy())
+    if WRAPPER == "1":
+        wrapper_path = "/tmp/test-27b-wrapper.py"
+        write_wrapper(wrapper_path, METAL_LIMIT)
+        proc = subprocess.Popen(
+            [mlx_python, wrapper_path,
+             "--model", MODEL, "--port", str(PORT),
+             "--max-tokens", "16384",
+             "--prefill-step-size", str(PREFILL_STEP),
+             "--prompt-concurrency", "1",
+             "--prompt-cache-bytes", "2147483648"],
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, env=os.environ.copy())
+    else:
+        proc = subprocess.Popen(
+            [mlx_python, "-m", "mlx_lm", "server",
+             "--model", MODEL, "--port", str(PORT),
+             "--max-tokens", "16384",
+             "--prefill-step-size", str(PREFILL_STEP),
+             "--prompt-concurrency", "1",
+             "--prompt-cache-bytes", "2147483648"],
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, env=os.environ.copy())
 
     if not wait_server(PORT, timeout=180, proc=proc):
         print("FAILED: Server did not start within 180s")
@@ -103,7 +134,7 @@ def main():
 
     for i, b in enumerate(BENCHMARKS):
         print(f"\n   [{i+1}/{len(BENCHMARKS)}] {b['name']}...")
-        r = query(PORT, b["prompt"], b["max_tokens"])
+        r = query_local(PORT, b["prompt"], b["max_tokens"])
         results.append({"name": b["name"], **r})
 
         if "error" in r:
@@ -131,9 +162,9 @@ def main():
             print(f"{r['name']:<22} {r['prompt_tokens']:>6} {r['completion_tokens']:>6} {r['tok_per_sec']:>7} {r['total_time']:>5}s {r['reasoning_len']:>5}c {r['content_len']:>7}c")
 
     # Save
-    out = "/Users/nesbitt/dev/factory/docs/fct/FCT088-26b-a4b-benchmark-v2.json"
+    out = f"/Users/nesbitt/dev/factory/docs/fct/FCT087-27b-saber-{VARIANT}-benchmark.json"
     with open(out, "w") as f:
-        json.dump(results, f, indent=2)
+        json.dump({"variant": VARIANT, "model": MODEL, "disk_gb": DISK_GB, "results": results}, f, indent=2)
     print(f"\n   Saved: {out}")
 
     # Cleanup
