@@ -14,8 +14,8 @@ FCT078: Created 2026-04-30 to prevent Metal OOM on dual-SABER Whitebox setup.
 import sys
 import mlx.core as mx
 
-METAL_LIMIT_BYTES = 10 * 1024 * 1024 * 1024  # 10 GB
-WIRED_LIMIT_BYTES = 10 * 1024 * 1024 * 1024  # 10 GB
+METAL_LIMIT_BYTES = 12 * 1024 * 1024 * 1024  # 12 GB (FCT093: bumped from 10 after Coord aux removal)
+WIRED_LIMIT_BYTES = 12 * 1024 * 1024 * 1024  # 12 GB (FCT093: bumped from 10 after Coord aux removal)
 _KV_BITS = 8
 _KV_GROUP_SIZE = 64
 
