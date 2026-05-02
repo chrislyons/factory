@@ -49,3 +49,9 @@ portal-dist/
 
 # Agent content — separate repo (agents/), tracked independently
 agents/
+ig88-device-reset.sh
+
+# Archives
+*.zip
+*.tar.gz
+*.tgz
