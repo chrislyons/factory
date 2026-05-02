@@ -48,7 +48,7 @@ export HERMES_HOME="/Users/nesbitt/.hermes/profiles/kelk"
 
 KELK_PROFILE_CFG="${HERMES_HOME}/config.yaml"
 HERMES_AGENT_PY="/Users/nesbitt/.local/share/uv/tools/hermes-agent/bin/python3"
-KELK_MODEL_CONFIG="/Users/nesbitt/models/Ornstein-26B-A4B-it-MLX-4bit/config.json"
+KELK_MODEL_CONFIG="/Users/nesbitt/models/Nemostein-3-Hermes-Omni-30b-a3b-MLX-mixed_3_4/config.json"
 MLX_VLM_HEALTH_URL="http://127.0.0.1:41966/v1/models"
 
 # 1. Profile must exist AND pin provider: custom. See FCT055 RC-1.
@@ -73,7 +73,7 @@ fi
 }
 
 # 3. Local model weights must be present on disk (FCT074: Kelk shares
-#    26B-A4B via mlx-lm-factory-26b-kelk on :41966).
+#    Nemostein-3-Hermes-Omni via mlx-lm-factory-26b on :41966).
 if [[ ! -f "${KELK_MODEL_CONFIG}" ]]; then
   echo "ERROR: local model config missing at ${KELK_MODEL_CONFIG}" >&2
   exit 5

@@ -114,12 +114,12 @@ done
 # hindsight-api — known broken (exit 127), bootstrap anyway for when it's fixed
 bootstrap "com.bootindustries.hindsight-api"
 
-# ── Phase 1: Ornstein-26B-A4B 4-bit (:41966) ─────────────────────────
-# FCT088/089: 26B MoE 4-bit. Single instance shared by Boot and Kelk.
-log "Phase 1: Ornstein-26B-A4B 4-bit (:41966)"
+# ── Phase 1: Nemostein-3-Hermes-Omni (:41966) ─────────────────────────
+# FCT089: Nemostein-3-Hermes-Omni mixed_3_4. Single instance shared by Boot and Kelk.
+log "Phase 1: Nemostein-3-Hermes-Omni (:41966)"
 if require_free_memory 8000 "Phase 1"; then
-  bootstrap "com.bootindustries.mlx-lm-factory-26b-boot"
-  wait_for_health "http://127.0.0.1:41966/v1/models" "mlx-lm-26b" 180
+  bootstrap "com.bootindustries.mlx-lm-factory-nemostein"
+  wait_for_health "http://127.0.0.1:41966/v1/models" "mlx-nemostein" 180
   # Old plists (.disabled) on disk for rollback:
   #   mlx-lm-factory-27b, mlx-lm-factory-boot/kelk (E4B), mlx-lm-factory-26b-kelk
 else
@@ -142,7 +142,7 @@ log "Free: $(top -l 1 -s 0 2>/dev/null | grep PhysMem | sed 's/.*） //')"
 
 log ""
 log "--- Model server ---"
-for port_label in "41966/mlx-lm-26b"; do
+for port_label in "41966/mlx-nemostein"; do
   port="${port_label%%/*}"
   label="${port_label##*/}"
   if curl -sf --max-time 3 "http://127.0.0.1:${port}/v1/models" >/dev/null 2>&1; then
