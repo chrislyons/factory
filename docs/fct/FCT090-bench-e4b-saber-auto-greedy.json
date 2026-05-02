@@ -1,0 +1,131 @@
+{
+  "label": "e4b-saber-auto-greedy",
+  "model": "/Users/nesbitt/models/Gemma-4-E4B-SABER-MLX-6bit",
+  "port": 41961,
+  "ts": "2026-05-02T12:10:39",
+  "pre_mem": {
+    "free_gb": 0.63,
+    "active_gb": 14.51,
+    "wired_gb": 1.56
+  },
+  "pre_metrics": {
+    "error": "HTTP 404"
+  },
+  "include": [
+    "autonomous"
+  ],
+  "autonomous": {
+    "trace": [
+      {
+        "iter": 1,
+        "completion_tokens": 137,
+        "elapsed_s": 4.72,
+        "tok_per_sec": 29.0,
+        "finish": "tool_calls",
+        "content_preview": "",
+        "tool_calls": [
+          {
+            "name": "list_directory",
+            "arguments": {
+              "path": "/tmp/notes/"
+            }
+          }
+        ],
+        "executed": [
+          {
+            "name": "list_directory",
+            "args": {
+              "path": "/tmp/notes/"
+            },
+            "result_preview": "meeting-q3.md\ntodo.md\nold-draft.md"
+          }
+        ]
+      },
+      {
+        "iter": 2,
+        "completion_tokens": 111,
+        "elapsed_s": 3.42,
+        "tok_per_sec": 32.5,
+        "finish": "tool_calls",
+        "content_preview": "",
+        "tool_calls": [
+          {
+            "name": "read_file",
+            "arguments": {
+              "path": "/tmp/notes/meeting-q3.md"
+            }
+          }
+        ],
+        "executed": [
+          {
+            "name": "read_file",
+            "args": {
+              "path": "/tmp/notes/meeting-q3.md"
+            },
+            "result_preview": "# Q3 Planning Meeting\n\nDate: 2026-04-15\nAttendees: Alice, Bob, Carol\n\nDecisions:\n- Hire 2 backend engineers in Q3\n- Migr"
+          }
+        ]
+      },
+      {
+        "iter": 3,
+        "completion_tokens": 49,
+        "elapsed_s": 1.77,
+        "tok_per_sec": 27.7,
+        "finish": "tool_calls",
+        "content_preview": "",
+        "tool_calls": [
+          {
+            "name": "write_file",
+            "arguments": {
+              "content": "Key Decisions:\n- Hire 2 backend engineers in Q3\n- Migrate database to Postgres 17",
+              "path": "/tmp/notes/summary.md"
+            }
+          }
+        ],
+        "executed": [
+          {
+            "name": "write_file",
+            "args": {
+              "content": "Key Decisions:\n- Hire 2 backend engineers in Q3\n- Migrate database to Postgres 17",
+              "path": "/tmp/notes/summary.md"
+            },
+            "result_preview": "OK: wrote 81 bytes to /tmp/notes/summary.md"
+          }
+        ]
+      },
+      {
+        "iter": 4,
+        "completion_tokens": 164,
+        "elapsed_s": 4.86,
+        "tok_per_sec": 33.8,
+        "finish": "stop",
+        "content_preview": "The files in `/tmp/notes/` were listed, `meeting-q3.md` was read, and a 2-line summary of the key decisions was successfully written to `/tmp/notes/summary.md`.",
+        "tool_calls": []
+      }
+    ],
+    "gate": {
+      "each_expected_tool_called": true,
+      "no_runaway_repetition": true,
+      "order_correct": true,
+      "summary_file_written": true,
+      "terminated_cleanly": true,
+      "iters_used": 4,
+      "total_tool_calls": 3,
+      "repeat_counts": {
+        "list_directory": 1,
+        "read_file": 1,
+        "write_file": 1
+      },
+      "overall": true
+    },
+    "sampling": "greedy"
+  },
+  "post_mem": {
+    "free_gb": 0.06,
+    "active_gb": 11.07,
+    "wired_gb": 8.11
+  },
+  "post_metrics": {
+    "error": "HTTP 404"
+  }
+}

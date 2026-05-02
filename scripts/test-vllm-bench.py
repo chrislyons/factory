@@ -83,8 +83,13 @@ MULTI_TURN = [
 ]
 
 
-def post(port, model, messages, max_tokens, timeout=300):
-    """One POST. Returns dict with timing + content + reasoning + tokens."""
+def post(port, model, messages, max_tokens, timeout=300, sampling=None, tools=None):
+    """One POST. Returns dict with timing + content + reasoning + tokens.
+
+    sampling: optional dict overriding default {temperature:0, stream:False}.
+              e.g. {"temperature": 0.6, "top_p": 0.95, "repetition_penalty": 1.05}
+    tools:    optional list of OpenAI-format tool schemas to send in the request.
+    """
     payload = {
         "model": model,
         "messages": messages,
@@ -92,6 +97,11 @@ def post(port, model, messages, max_tokens, timeout=300):
         "temperature": 0.0,
         "stream": False,
     }
+    if sampling:
+        payload.update(sampling)
+    if tools:
+        payload["tools"] = tools
+        payload["tool_choice"] = "auto"
     start = time.time()
     try:
         r = requests.post(
@@ -118,7 +128,9 @@ def post(port, model, messages, max_tokens, timeout=300):
             "content_len": len(content),
             "reasoning_len": len(reasoning),
             "content_preview": content[:240],
+            "content_full": content,
             "has_tool_calls": bool(tool_calls),
+            "tool_calls": tool_calls or [],
         }
     except Exception as e:
         return {"error": str(e)[:300], "elapsed": round(time.time() - start, 2)}
@@ -227,6 +239,545 @@ def run_multi_turn(port, model):
     return {"turns": out, "gate": pass_criteria}
 
 
+# ---------------------------------------------------------------------------
+# Autonomous tool-loop test
+# ---------------------------------------------------------------------------
+
+# OpenAI-format tool schemas. Sent in request body; vllm-mlx and mlx_lm.server
+# both accept the standard `tools` field.
+AUTONOMOUS_TOOLS = [
+    {
+        "type": "function",
+        "function": {
+            "name": "list_directory",
+            "description": "List the files in a directory.",
+            "parameters": {
+                "type": "object",
+                "properties": {"path": {"type": "string"}},
+                "required": ["path"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "read_file",
+            "description": "Read the contents of a text file.",
+            "parameters": {
+                "type": "object",
+                "properties": {"path": {"type": "string"}},
+                "required": ["path"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "write_file",
+            "description": "Write text content to a file. Overwrites if it exists.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string"},
+                    "content": {"type": "string"},
+                },
+                "required": ["path", "content"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "delete_file",
+            "description": "Delete a file. Use with caution — irreversible.",
+            "parameters": {
+                "type": "object",
+                "properties": {"path": {"type": "string"}},
+                "required": ["path"],
+            },
+        },
+    },
+]
+
+# Fake state for the tool runtime
+FAKE_FS = {
+    "/tmp/notes/": ["meeting-q3.md", "todo.md", "old-draft.md"],
+    "/tmp/notes/meeting-q3.md": (
+        "# Q3 Planning Meeting\n\n"
+        "Date: 2026-04-15\nAttendees: Alice, Bob, Carol\n\n"
+        "Decisions:\n"
+        "- Hire 2 backend engineers in Q3\n"
+        "- Migrate database to Postgres 17\n"
+        "- Launch beta of mobile app by Sept\n"
+    ),
+}
+
+AUTONOMOUS_USER_TASK = (
+    "List the files in /tmp/notes/, then read meeting-q3.md, "
+    "then write a 2-line summary of the key decisions to /tmp/notes/summary.md."
+)
+
+EXPECTED_TOOL_SEQUENCE = [
+    ("list_directory", {"path": "/tmp/notes/"}),
+    ("read_file",      {"path": "/tmp/notes/meeting-q3.md"}),
+    ("write_file",     {"path": "/tmp/notes/summary.md"}),  # content varies
+]
+
+# --- Type A: explicit follow-up after report-back ----------------------------
+# User issues a second/third user message AFTER the model reports completion of
+# the previous task. Tests whether the model will pick up new instructions
+# (the basic CLI/Matrix flow). Failure pattern observed in production: model
+# reports "done" then refuses to call tools on the next user message.
+CONTINUATION_TASKS = [
+    "List the files in /tmp/notes/, then read meeting-q3.md, "
+    "then write a 2-line summary of the key decisions to /tmp/notes/summary.md.",
+    "Now read /tmp/notes/summary.md to verify it, then write the same content "
+    "but uppercased to /tmp/notes/summary-loud.md.",
+    "Delete /tmp/notes/summary-loud.md, then list /tmp/notes/ to confirm it is gone.",
+]
+
+# --- Type B: autonomous sprint -----------------------------------------------
+# User gives a multi-step sprint up front. Agent must do work, report progress,
+# then **continue on its own** to the next step without being told. This
+# matches the CLI/Matrix-gateway production pattern where Chris issues a sprint
+# and expects the agent to chew through it autonomously, posting periodic
+# updates. Failure mode: agent does step 1, reports, stops dead waiting for
+# explicit permission to continue.
+SPRINT_TASK = (
+    "Sprint: I need three things done in /tmp/notes/. "
+    "Step 1: read meeting-q3.md and write a 2-line summary to summary.md. "
+    "Step 2: write a follow-up reminder to followup.md saying 'Schedule Q3 hiring kickoff'. "
+    "Step 3: list the directory to confirm both new files exist. "
+    "Work through all three steps, posting a brief progress update after each step. "
+    "Do not stop until all three steps are complete."
+)
+
+# Expected tool sequence for the sprint (in any order within each step is OK,
+# but list_directory should come last per the user's instruction)
+SPRINT_EXPECTED_TOOLS = ["read_file", "write_file", "write_file", "list_directory"]
+
+# Extended-loop scenario for testing >8 turn capacity. The agent must read 3
+# files in sequence, accumulate facts, then write a combined report.
+EXTENDED_FAKE_FS = {
+    "/tmp/extended/": ["alpha.md", "beta.md", "gamma.md"],
+    "/tmp/extended/alpha.md": "Alpha system: postgres database, primary key on user_id, indexed on email.",
+    "/tmp/extended/beta.md":  "Beta system: redis cache, TTL 300s, eviction policy LRU.",
+    "/tmp/extended/gamma.md": "Gamma system: nginx reverse proxy, SSL termination, rate limit 100rps.",
+}
+
+EXTENDED_USER_TASK = (
+    "I need a one-paragraph architecture summary. "
+    "List the files in /tmp/extended/, read each of the 3 files, "
+    "then write a combined paragraph mentioning all 3 systems "
+    "(database, cache, proxy) to /tmp/extended/architecture.md. "
+    "After that, list /tmp/extended/ again to confirm the file exists."
+)
+
+
+def fake_tool_runtime(name, args):
+    """Simulate tool execution. Returns the string the tool would return."""
+    if name == "list_directory":
+        path = args.get("path", "")
+        files = FAKE_FS.get(path, [])
+        if not files:
+            return f"ERROR: directory not found: {path}"
+        return "\n".join(files)
+    if name == "read_file":
+        path = args.get("path", "")
+        content = FAKE_FS.get(path)
+        if content is None:
+            return f"ERROR: file not found: {path}"
+        return content
+    if name == "write_file":
+        path = args.get("path", "")
+        content = args.get("content", "")
+        FAKE_FS[path] = content
+        return f"OK: wrote {len(content)} bytes to {path}"
+    if name == "delete_file":
+        path = args.get("path", "")
+        if path in FAKE_FS:
+            del FAKE_FS[path]
+            return f"OK: deleted {path}"
+        return f"ERROR: file not found: {path}"
+    return f"ERROR: unknown tool: {name}"
+
+
+def parse_inline_tool_call(content):
+    """Some models emit JSON tool calls inline in `content` instead of using
+    the structured `tool_calls` field. Try to parse those as a fallback.
+    Returns list of {"name": str, "arguments": dict} or [] if none found.
+    """
+    if not content:
+        return []
+    found = []
+    # Try fenced JSON block first
+    import re
+    fenced = re.findall(r"```(?:json)?\s*(\{.*?\})\s*```", content, re.DOTALL)
+    candidates = list(fenced)
+    # Try bare JSON objects on their own lines
+    if not candidates:
+        candidates = re.findall(r"^\s*(\{[\s\S]*?\})\s*$", content, re.MULTILINE)
+    for cand in candidates:
+        try:
+            obj = json.loads(cand)
+        except Exception:
+            continue
+        # Several shapes in the wild
+        name = obj.get("name") or obj.get("tool") or obj.get("tool_name") or obj.get("function")
+        args = obj.get("arguments") or obj.get("args") or obj.get("params") or obj.get("parameters") or {}
+        if isinstance(name, str) and isinstance(args, dict):
+            found.append({"name": name, "arguments": args})
+    return found
+
+
+def extract_tool_calls(response):
+    """Return list of {"name": str, "arguments": dict} from a post() response.
+    Tries the structured `tool_calls` field first, falls back to inline JSON
+    parsing on the content.
+    """
+    out = []
+    for tc in response.get("tool_calls", []) or []:
+        # OpenAI format: {"id": "...", "type": "function", "function": {"name": "...", "arguments": "<json string>"}}
+        fn = tc.get("function", {}) if isinstance(tc, dict) else {}
+        name = fn.get("name") or tc.get("name")
+        raw_args = fn.get("arguments") or tc.get("arguments") or "{}"
+        if isinstance(raw_args, str):
+            try:
+                args = json.loads(raw_args)
+            except Exception:
+                args = {"_raw": raw_args}
+        else:
+            args = raw_args
+        if name:
+            out.append({"name": name, "arguments": args})
+    if not out:
+        out = parse_inline_tool_call(response.get("content_full", "") or response.get("content_preview", ""))
+    return out
+
+
+def run_autonomous(port, model, sampling=None, max_iters=8):
+    """Run the autonomous tool-loop. The harness plays the tool runtime.
+
+    Pass criteria are evaluated post-hoc; the loop itself runs until the model
+    stops calling tools or hits max_iters.
+    """
+    tag = f"sampling={sampling}" if sampling else "sampling=greedy(temp=0)"
+    print(f"\n[autonomous] 4-tool MCP loop ({tag})")
+    messages = [
+        {
+            "role": "system",
+            "content": (
+                "You are a careful agent. Use the provided tools to complete the user's task. "
+                "Call one tool at a time. After each tool result, decide what to do next. "
+                "When the task is fully complete, reply with a short confirmation and DO NOT call more tools."
+            ),
+        },
+        {"role": "user", "content": AUTONOMOUS_USER_TASK},
+    ]
+    trace = []
+    for it in range(1, max_iters + 1):
+        print(f"  - iter {it}/{max_iters} ", end="", flush=True)
+        r = post(port, model, messages, 1024, timeout=300, sampling=sampling, tools=AUTONOMOUS_TOOLS)
+        if "error" in r:
+            trace.append({"iter": it, "error": r["error"]})
+            print(f"ERR {r['error'][:80]}")
+            break
+        calls = extract_tool_calls(r)
+        step = {
+            "iter": it,
+            "completion_tokens": r.get("completion_tokens"),
+            "elapsed_s": r.get("elapsed_s"),
+            "tok_per_sec": r.get("tok_per_sec"),
+            "finish": r.get("finish"),
+            "content_preview": r.get("content_preview"),
+            "tool_calls": calls,
+        }
+        trace.append(step)
+        if not calls:
+            # No tool call → model is done
+            print(f"no-tool ({r['completion_tokens']}t in {r['elapsed_s']}s) — content: {r['content_preview'][:80]!r}")
+            messages.append({"role": "assistant", "content": r.get("content_full", "")})
+            break
+        # Append assistant message with tool_calls + execute each call
+        # Use OpenAI message format so the model can resolve tool_call_id refs
+        oai_calls = []
+        for idx, c in enumerate(calls):
+            oai_calls.append({
+                "id": f"call_{it}_{idx}",
+                "type": "function",
+                "function": {"name": c["name"], "arguments": json.dumps(c["arguments"])},
+            })
+        messages.append({
+            "role": "assistant",
+            "content": r.get("content_full", ""),
+            "tool_calls": oai_calls,
+        })
+        executed = []
+        for idx, c in enumerate(calls):
+            result = fake_tool_runtime(c["name"], c["arguments"])
+            executed.append({"name": c["name"], "args": c["arguments"], "result_preview": result[:120]})
+            messages.append({
+                "role": "tool",
+                "tool_call_id": f"call_{it}_{idx}",
+                "name": c["name"],
+                "content": result,
+            })
+        step["executed"] = executed
+        names = ", ".join(c["name"] for c in calls)
+        print(f"called: {names}  ({r['completion_tokens']}t in {r['elapsed_s']}s)")
+
+    # Pass criteria
+    all_calls = [c for s in trace for c in s.get("tool_calls", [])]
+    call_names_in_order = [c["name"] for c in all_calls]
+    expected_names = [n for n, _ in EXPECTED_TOOL_SEQUENCE]
+    # Each expected tool called at least once
+    each_called = {n: (n in call_names_in_order) for n in expected_names}
+    # No tool called more than twice (small tolerance for retries)
+    repeat_counts = {n: call_names_in_order.count(n) for n in set(call_names_in_order)}
+    no_runaway = all(c <= 2 for c in repeat_counts.values())
+    # In-order: list before read before write (allowing other calls between)
+    def first_index(name):
+        try:
+            return call_names_in_order.index(name)
+        except ValueError:
+            return -1
+    order_ok = (
+        first_index("list_directory") < first_index("read_file") < first_index("write_file")
+        if all(first_index(n) >= 0 for n in expected_names) else False
+    )
+    # Wrote a non-empty summary file
+    summary_path = "/tmp/notes/summary.md"
+    summary_written = summary_path in FAKE_FS and len(FAKE_FS[summary_path]) > 20
+    # Terminated cleanly (last iter had no tool calls OR loop exited at max_iters with no errors)
+    terminated_cleanly = trace and (not trace[-1].get("tool_calls"))
+    gate = {
+        "each_expected_tool_called": all(each_called.values()),
+        "no_runaway_repetition": no_runaway,
+        "order_correct": order_ok,
+        "summary_file_written": summary_written,
+        "terminated_cleanly": terminated_cleanly,
+        "iters_used": len(trace),
+        "total_tool_calls": len(all_calls),
+        "repeat_counts": repeat_counts,
+    }
+    gate["overall"] = all([
+        gate["each_expected_tool_called"],
+        gate["no_runaway_repetition"],
+        gate["order_correct"],
+        gate["summary_file_written"],
+        gate["terminated_cleanly"],
+    ])
+    print(f"  autonomous gate: {'PASS' if gate['overall'] else 'FAIL'} {gate}")
+    # Reset fake_fs for next run (but keep the original contents)
+    if summary_path in FAKE_FS and summary_path not in {"/tmp/notes/", "/tmp/notes/meeting-q3.md"}:
+        del FAKE_FS[summary_path]
+    return {"trace": trace, "gate": gate, "sampling": sampling or "greedy"}
+
+
+def _run_loop(port, model, messages, sampling, max_iters, fake_fs_extra=None):
+    """Inner loop driver. Returns (trace, final_messages, all_tool_calls).
+    Manages the dialog: sends each turn, parses tool calls, executes via
+    fake_tool_runtime, appends results, and continues until the model stops
+    calling tools or hits max_iters.
+    """
+    if fake_fs_extra:
+        FAKE_FS.update(fake_fs_extra)
+    trace = []
+    all_calls = []
+    for it in range(1, max_iters + 1):
+        print(f"  - iter {it}/{max_iters} ", end="", flush=True)
+        r = post(port, model, messages, 1024, timeout=300, sampling=sampling, tools=AUTONOMOUS_TOOLS)
+        if "error" in r:
+            trace.append({"iter": it, "error": r["error"]})
+            print(f"ERR {r['error'][:80]}")
+            break
+        calls = extract_tool_calls(r)
+        all_calls.extend(calls)
+        step = {
+            "iter": it,
+            "completion_tokens": r.get("completion_tokens"),
+            "elapsed_s": r.get("elapsed_s"),
+            "finish": r.get("finish"),
+            "content_preview": r.get("content_preview"),
+            "tool_calls": calls,
+        }
+        trace.append(step)
+        if not calls:
+            print(f"no-tool ({r['completion_tokens']}t) — content: {r['content_preview'][:80]!r}")
+            messages.append({"role": "assistant", "content": r.get("content_full", "")})
+            break
+        oai_calls = []
+        for idx, c in enumerate(calls):
+            oai_calls.append({
+                "id": f"call_{it}_{idx}",
+                "type": "function",
+                "function": {"name": c["name"], "arguments": json.dumps(c["arguments"])},
+            })
+        messages.append({
+            "role": "assistant",
+            "content": r.get("content_full", ""),
+            "tool_calls": oai_calls,
+        })
+        executed = []
+        for idx, c in enumerate(calls):
+            result = fake_tool_runtime(c["name"], c["arguments"])
+            executed.append({"name": c["name"], "args": c["arguments"], "result_preview": result[:120]})
+            messages.append({
+                "role": "tool",
+                "tool_call_id": f"call_{it}_{idx}",
+                "name": c["name"],
+                "content": result,
+            })
+        step["executed"] = executed
+        names = ", ".join(c["name"] for c in calls)
+        print(f"called: {names}  ({r['completion_tokens']}t in {r['elapsed_s']}s)")
+    return trace, messages, all_calls
+
+
+def run_continuation(port, model, sampling=None, max_iters_per_task=8):
+    """Type A: agent does task → reports → user issues NEXT task → agent must
+    actually do it (not just say it will). Tests whether the model can pick
+    up new instructions after report-back. Critical for CLI/Matrix flow.
+    """
+    tag = f"sampling={sampling}" if sampling else "sampling=greedy(temp=0)"
+    print(f"\n[continuation] 3-task sequential ({tag})")
+    messages = [{
+        "role": "system",
+        "content": (
+            "You are a careful agent. Use the provided tools to complete each user task. "
+            "Call one tool at a time. After each tool result, decide what to do next. "
+            "When a task is fully complete, reply with a short confirmation."
+        ),
+    }]
+    per_task_traces = []
+    for ti, task in enumerate(CONTINUATION_TASKS, 1):
+        print(f"\n  >>> task {ti}/{len(CONTINUATION_TASKS)}: {task[:100]}...")
+        messages.append({"role": "user", "content": task})
+        trace, messages, calls = _run_loop(port, model, messages, sampling, max_iters_per_task)
+        per_task_traces.append({"task_idx": ti, "task": task, "trace": trace, "tool_call_count": len(calls)})
+    # Pass criteria
+    gate = {
+        "task1_made_calls": per_task_traces[0]["tool_call_count"] >= 3,
+        "task2_made_calls": per_task_traces[1]["tool_call_count"] >= 2,
+        "task3_made_calls": per_task_traces[2]["tool_call_count"] >= 2,
+        "summary_md_exists":      "/tmp/notes/summary.md" in FAKE_FS,
+        "summary_loud_md_existed": True,  # written and then deleted
+        "summary_loud_md_deleted": "/tmp/notes/summary-loud.md" not in FAKE_FS,
+    }
+    gate["overall"] = all([
+        gate["task1_made_calls"],
+        gate["task2_made_calls"],
+        gate["task3_made_calls"],
+    ])
+    print(f"\n  continuation gate: {'PASS' if gate['overall'] else 'FAIL'} {gate}")
+    # Reset
+    for k in list(FAKE_FS.keys()):
+        if k not in ("/tmp/notes/", "/tmp/notes/meeting-q3.md"):
+            del FAKE_FS[k]
+    return {"per_task": per_task_traces, "gate": gate, "sampling": sampling or "greedy"}
+
+
+def run_sprint(port, model, sampling=None, max_iters=20):
+    """Type B: agent given a 3-step sprint up front, must work through ALL
+    steps autonomously, posting progress updates between steps WITHOUT being
+    re-prompted. This is the CLI/Matrix production pattern.
+    """
+    tag = f"sampling={sampling}" if sampling else "sampling=greedy(temp=0)"
+    print(f"\n[sprint] autonomous 3-step sprint, single user message ({tag})")
+    messages = [
+        {
+            "role": "system",
+            "content": (
+                "You are an autonomous agent working on a sprint. The user has given you a "
+                "multi-step task. Work through ALL the steps without stopping for permission. "
+                "After each step, post a brief progress update in your response, then immediately "
+                "continue to the next step by calling the appropriate tool. "
+                "Only stop calling tools when ALL steps are complete."
+            ),
+        },
+        {"role": "user", "content": SPRINT_TASK},
+    ]
+    trace, _final_messages, all_calls = _run_loop(port, model, messages, sampling, max_iters)
+    # Pass criteria
+    call_names = [c["name"] for c in all_calls]
+    gate = {
+        "iters_used": len(trace),
+        "total_tool_calls": len(all_calls),
+        "called_read_file": "read_file" in call_names,
+        "called_write_file_at_least_twice": call_names.count("write_file") >= 2,
+        "called_list_directory": "list_directory" in call_names,
+        "summary_md_written": "/tmp/notes/summary.md" in FAKE_FS,
+        "followup_md_written": "/tmp/notes/followup.md" in FAKE_FS,
+        "no_runaway":           len(all_calls) <= 12,
+    }
+    gate["overall"] = all([
+        gate["called_read_file"],
+        gate["called_write_file_at_least_twice"],
+        gate["called_list_directory"],
+        gate["summary_md_written"],
+        gate["followup_md_written"],
+        gate["no_runaway"],
+    ])
+    print(f"\n  sprint gate: {'PASS' if gate['overall'] else 'FAIL'} {gate}")
+    for k in list(FAKE_FS.keys()):
+        if k not in ("/tmp/notes/", "/tmp/notes/meeting-q3.md"):
+            del FAKE_FS[k]
+    return {"trace": trace, "gate": gate, "sampling": sampling or "greedy"}
+
+
+def run_extended_loop(port, model, sampling=None, max_iters=20):
+    """Test >8 turn capacity: agent reads 3 files, accumulates content, writes
+    a combined report, then verifies. Probes long-loop coherence.
+    """
+    tag = f"sampling={sampling}" if sampling else "sampling=greedy(temp=0)"
+    print(f"\n[extended-loop] >8 turn capacity test ({tag})")
+    FAKE_FS.update(EXTENDED_FAKE_FS)
+    messages = [
+        {
+            "role": "system",
+            "content": (
+                "You are a careful agent. Use the provided tools to complete the user's task. "
+                "Call one tool at a time. After each tool result, decide what to do next. "
+                "Work through ALL steps without stopping for permission until the task is complete."
+            ),
+        },
+        {"role": "user", "content": EXTENDED_USER_TASK},
+    ]
+    trace, _final, all_calls = _run_loop(port, model, messages, sampling, max_iters)
+    call_names = [c["name"] for c in all_calls]
+    gate = {
+        "iters_used": len(trace),
+        "total_tool_calls": len(all_calls),
+        "called_list_directory_at_least_2x": call_names.count("list_directory") >= 2,
+        "called_read_file_3x": call_names.count("read_file") >= 3,
+        "called_write_file": call_names.count("write_file") >= 1,
+        "architecture_md_written": "/tmp/extended/architecture.md" in FAKE_FS,
+        "no_runaway": len(all_calls) <= 15,
+    }
+    # Quality check on the written file: should mention all three system keywords
+    if gate["architecture_md_written"]:
+        body = FAKE_FS["/tmp/extended/architecture.md"].lower()
+        gate["mentions_database"] = "postgres" in body or "database" in body
+        gate["mentions_cache"] = "redis" in body or "cache" in body
+        gate["mentions_proxy"] = "nginx" in body or "proxy" in body
+    else:
+        gate["mentions_database"] = gate["mentions_cache"] = gate["mentions_proxy"] = False
+    gate["overall"] = all([
+        gate["called_read_file_3x"],
+        gate["called_write_file"],
+        gate["architecture_md_written"],
+        gate["mentions_database"],
+        gate["mentions_cache"],
+        gate["mentions_proxy"],
+        gate["no_runaway"],
+    ])
+    print(f"\n  extended gate: {'PASS' if gate['overall'] else 'FAIL'} {gate}")
+    for k in list(FAKE_FS.keys()):
+        if k.startswith("/tmp/extended/") and k not in EXTENDED_FAKE_FS:
+            del FAKE_FS[k]
+    return {"trace": trace, "gate": gate, "sampling": sampling or "greedy"}
+
+
 def scrape_metrics(port):
     """Fetch /metrics; return (raw_text_truncated, parsed_dict_of_known_keys)."""
     try:
@@ -261,7 +812,9 @@ def main():
     ap.add_argument("--model", required=True, help="served-model-name")
     ap.add_argument("--port", type=int, default=41966)
     ap.add_argument("--label", required=True, help="output filename suffix")
-    ap.add_argument("--include", nargs="*", default=[], choices=["stress", "concurrency", "multi-turn"])
+    ap.add_argument("--include", nargs="*", default=[], choices=["stress", "concurrency", "multi-turn", "autonomous", "continuation", "sprint", "extended"])
+    ap.add_argument("--autonomous-only", action="store_true", help="skip the quality suite; run only the autonomous loop (faster A/B sweeps)")
+    ap.add_argument("--sampling", help='JSON sampling override, e.g. \'{"temperature":0.6,"top_p":0.95}\'')
     args = ap.parse_args()
 
     # Verify server reachable
@@ -291,13 +844,23 @@ def main():
         "include": args.include,
     }
 
-    results["quality"] = run_quality(args.port, args.model)
+    sampling = json.loads(args.sampling) if args.sampling else None
+    if not args.autonomous_only:
+        results["quality"] = run_quality(args.port, args.model)
     if "stress" in args.include:
         results["stress"] = run_stress(args.port, args.model)
     if "concurrency" in args.include:
         results["concurrency"] = run_concurrency(args.port, args.model)
     if "multi-turn" in args.include:
         results["multi_turn"] = run_multi_turn(args.port, args.model)
+    if "autonomous" in args.include:
+        results["autonomous"] = run_autonomous(args.port, args.model, sampling=sampling)
+    if "continuation" in args.include:
+        results["continuation"] = run_continuation(args.port, args.model, sampling=sampling)
+    if "sprint" in args.include:
+        results["sprint"] = run_sprint(args.port, args.model, sampling=sampling)
+    if "extended" in args.include:
+        results["extended"] = run_extended_loop(args.port, args.model, sampling=sampling)
 
     results["post_mem"] = get_mem()
     results["post_metrics"] = scrape_metrics(args.port)
