@@ -218,6 +218,81 @@ This is not a hot operation — it requires shutting down aux, ~2 min for Nemost
 
 ---
 
+## Hermes wiring (post-deploy, 2026-05-02)
+
+Once the tri-server topology was live, the Hermes profile configs at
+`~/.hermes/profiles/{boot,kelk}/config.yaml` were rewritten to route per the
+suitability table above. Several lessons learned the hard way:
+
+### Settings that actually work for E4B-SABER + E2B-SABER
+
+| Setting | Final value | Why |
+|---|---|---|
+| `model.context_length` | **98304** (96K) | Hermes requires ≥64K; 96K is the historic operator preference. mlx-lm accepts the declared value; coherence past ~32K degrades but Hermes won't run with less. |
+| `max_tokens` (top-level) | **8192** | Per-completion cap. Anything higher just risks runaway / single-response timeouts. |
+| `compression.threshold` | **0.67** | Compaction fires at ~65K tokens, leaving the bottom 1/3 of context for the compaction prompt itself + recent-turn tail. Earlier 0.33 was too aggressive (constant churn). |
+| `agent.max_turns` | **48** | Generous for sprints (FCT091 sprint passed at 5–7 iters; extended at 7) but bounded enough to catch runaway. |
+| `agent.tool_use_enforcement` | **none** | E4B-SABER passed all four agentic gates without enforcement. Forcing `enforce` was rejecting otherwise-valid tool calls and stalling Boot. |
+| `approvals.mode` | **deny** | `per_tool` requires interactive UI; Matrix can't render approval prompts cleanly, so the agent stalls forever waiting for an answer it can't receive. `deny` is the only sane default for Matrix-only agents. |
+
+### Routing table (live)
+
+| Hermes slot | Routes to | Model | Notes |
+|---|---|---|---|
+| `model` (primary) | :41961 / :41962 | E4B-SABER | Boot / Kelk respectively |
+| `compression` (+ summary) | :41963 | E2B-SABER (Coord) | Bounded compaction; aux tier shines here |
+| `thinking`, `session_search` | :41961 / :41962 | E4B-SABER | Heavy reasoning stays on primary |
+| `approval`, `flush_memories`, `mcp`, `skills_hub`, `title_generation`, `web_extract` | :41961 / :41962 | `default` (= primary) | Trivial slots; let them inherit primary |
+| `vision` | **REMOVED** | — | Both SABER builds are text-only (no vision tower in safetensors). Slot deleted, `vision` removed from `toolsets`. Re-enable when a multimodal SABER ships. |
+
+### Gateway preflight scripts
+
+`scripts/hermes-boot.sh` and `scripts/hermes-kelk.sh` had hardcoded preflight
+URLs pointing at the deprecated `:41966` Nemostein endpoint. Updated to
+`:41961` and `:41962` respectively (one-line URL change + comment refresh).
+Backups preserved at `*.bak-pre-tri-server`.
+
+### Things that broke things
+
+- **Stale `:41966` references** were the obvious one — both in Hermes configs
+  and gateway preflight scripts. Trip-wire: gateway exits with status 6 in
+  a 15-second restart loop until preflight URL is corrected.
+- **`approvals.mode: manual`** silently broke Matrix interaction by waiting
+  for approval prompts that no Matrix client renders. Looks like the gateway
+  is up but the agent never replies. Symptom: gateway healthy in logs,
+  zero responses to user messages.
+- **Reduced `max_turns: 24`** cut sprint workloads in half. Should be ≥48.
+- **`model.context_length: 32768`** vs Hermes's ≥64K floor will cause
+  silent rejection of long contexts. 96K matches historic operator
+  preference and works.
+
+### Recovery recipe (if Hermes wiring breaks again)
+
+```
+# 1. Restore from a known-good backup
+cp /Users/nesbitt/backups/profiles\ 260430-0920.bak/{boot,kelk}/config.yaml \
+   /Users/nesbitt/.hermes/profiles/{boot,kelk}/config.yaml
+
+# 2. Apply tri-server URL/model patches
+sed -i '' \
+  -e 's|http://127.0.0.1:41966/v1|http://127.0.0.1:41961/v1|g' \
+  -e 's|model: Ornstein.*|model: /Users/nesbitt/models/Gemma-4-E4B-SABER-MLX-6bit|g' \
+  -e 's|provider: local-ornstein|provider: custom|g' \
+  /Users/nesbitt/.hermes/profiles/boot/config.yaml
+# (same for kelk with :41962)
+
+# 3. Set context_length floor + compression threshold
+sed -i '' 's|context_length: [0-9]*|context_length: 98304|g; s|threshold: 0\.[0-9]*|threshold: 0.67|g' \
+  /Users/nesbitt/.hermes/profiles/{boot,kelk}/config.yaml
+
+# 4. Restart gateways
+launchctl bootout gui/$(id -u)/com.bootindustries.hermes-{boot,kelk}
+sleep 3
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.bootindustries.hermes-{boot,kelk}.plist
+```
+
+---
+
 ## Follow-ups
 
 - **Per-Hermes-aux-slot wiring:** identify which slots in `hermes-boot.sh` / `hermes-kelk.sh` configs should route to coord-aux vs. cloud. Compaction is the obvious first one.
