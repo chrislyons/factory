@@ -9,9 +9,9 @@
 
 ## Summary
 
-Restored the production model server on `:41966` (vllm-mlx + Nemostein-3-Hermes-Omni-30B/3B), characterized it under the FCT089-comparable benchmark suite plus a new multi-turn coherence gate, and ran a four-model bake-off across architecturally distinct candidates. Verified that **the production-validated path for Gemma-4-E4B-SABER is `mlx_lm.server` invoked through the existing `scripts/mlx-lm-factory-wrapper.py`** (FCT078 wrapper with Metal/wired memory caps and 8-bit `QuantizedKVCache` patch) — not vllm-mlx, where Gemma 4 multimodal architectures hit a SABER-quant load failure and a cross-thread stream bug.
+Ran a four-model bake-off across architecturally distinct candidates under both *dialog coherence* tests and a new *autonomous agentic-loop* suite (autonomous, continuation, sprint, extended). The agentic suite proved decisive: **E4B-SABER raw via `mlx_lm.server` + `scripts/mlx-lm-factory-wrapper.py` is the only candidate that passes all four agentic gates** including the sprint test (multi-step task in a single user message, agent must continue autonomously after report-back). Nemostein passes the basic loops but **fails sprint** because qwen3 reasoning padding consumes the token budget before any tool call is emitted. Harmonic-9B **fails sprint and extended** with runaway repetition (older model, pre-agentic-RLHF generation).
 
-**Two-server topology adopted:** vllm-mlx serves Nemostein on `:41966` for high-throughput general inference, mlx_lm.server (via wrapper) serves E4B-SABER raw on `:41961` (and optionally `:41962`) for low-latency, low-memory, terse-response workloads. Both servers can run concurrently on 32 GB.
+**Production topology adopted:** dual E4B-SABER raw on `:41961` (Boot) and `:41962` (Kelk), each served by `mlx_lm.server` via the FCT078 wrapper (Metal cap 10 GB, wired cap 10 GB, 8-bit `QuantizedKVCache` patched in-process). Nemostein remains available on `:41966` (`.disabled` plist for hot-swap) as a fallback for non-sprint heavy-reasoning workloads. Operator instruction at sprint close: leave `:41966` dormant until dual-SABER is proven solid in production. Memory profile matches FCT078's documented stable dual-instance setup (~6.3 GB RSS per server, ~16 GB wired peak under concurrent inference).
 
 ---
 
@@ -19,8 +19,8 @@ Restored the production model server on `:41966` (vllm-mlx + Nemostein-3-Hermes-
 
 | Candidate | Server | Quality 6/6 | Dialog multi-turn | Short tok/s | 4K ctx | 8K ctx | 16K ctx | RAM wired | Verdict |
 |---|---|---|---|---|---|---|---|---|---|
-| **Nemostein 30B/3B** | vllm-mlx | ✅ all `finish=length` (qwen3 reasoning padding — content correct) | ✅ PASS coherent | 60 tok/s | 16 | 9 | 5 | ~14 GB | **Production primary** |
-| **E4B-SABER raw** | mlx_lm wrapper | ✅ all `finish=stop` clean endings | ✅ PASS coherent | 35 tok/s | 19 | 13 | 8 | ~6 GB | **Production secondary / fallback** |
+| **E4B-SABER raw** | mlx_lm wrapper | ✅ all `finish=stop` clean endings | ✅ PASS coherent | 35 tok/s | 19 | 13 | 8 | ~6 GB | **Production primary (dual-instance :41961+:41962)** |
+| Nemostein 30B/3B | vllm-mlx | ✅ all `finish=length` (qwen3 reasoning padding — content correct) | ✅ PASS coherent | 60 tok/s | 16 | 9 | 5 | ~14 GB | Fallback for heavy reasoning (`:41966` `.disabled` plist) |
 | Harmonic-9B | vllm-mlx | ✅ mix stop+length | ✅ PASS coherent | 47 tok/s | 11 | 6 | 3 | ~7 GB | Validated reserve |
 | 27B-SABER (Qwen3.5) | vllm-mlx | partial (killed) | n/a | 15 tok/s | (slow) | (slow) | (slow) | ~14 GB | Shelved — too slow |
 | 26B-A4B (Gemma4 MoE) | vllm-mlx | ❌ HTTP 500 | n/a | n/a | n/a | n/a | n/a | n/a | Blocked — see §3 |
@@ -28,13 +28,78 @@ Restored the production model server on `:41966` (vllm-mlx + Nemostein-3-Hermes-
 
 (Context scaling shown in tok/s.)
 
-### Two definitions of "multi-turn" — which one this report measures
+### Two kinds of "multi-turn" measured
 
-The "multi-turn" PASS marks above measure **dialog coherence** under a fixed 8-turn user/assistant exchange (no tool use): can the model maintain context, reference earlier turns, and produce non-degenerate later turns. This is `test-vllm-bench.py --include multi-turn`.
+Initial benchmarks measured only **dialog coherence** (the table above) — model holds context across an 8-turn user/assistant exchange without tool use. All three viable candidates passed.
 
-A different and arguably more important metric is **autonomous multi-turn**: can the model run an agentic loop — pick a tool, call it, read the result, decide the next tool, call that — for >3 turns without losing the plot, repeating itself, or fabricating tool responses. **This metric has not been formally captured in this sprint.** FCT083 measured single tool-call moments (`tool_call`, `delegation`, `pushback`, `autonomy`, `no_loops`) but not a sustained loop. FCT078 measured throughput/memory under sustained load, not autonomous-loop quality.
+The decisive measurement is **autonomous agentic-loop discipline** — model picks a tool, calls it, reads the result, decides the next tool, calls that, etc. — for the durations a CLI/Matrix agent will see in production. The harness (`test-vllm-bench.py --include autonomous continuation sprint extended`) plays the tool runtime: parses model output for tool calls, executes via `fake_tool_runtime`, injects results back as `role=tool` messages.
 
-**Follow-up sprint should add `--include autonomous` to the harness** — a 4-tool fake MCP loop (read → analyze → decide → act) and a pass criterion of "model completes the loop, calls each tool exactly once, doesn't repeat itself, doesn't hallucinate tool outputs." Run across Nemostein, E4B-SABER, Harmonic-9B.
+Four tests cover the relevant failure modes:
+
+| Test | What it probes | Pass criteria |
+|---|---|---|
+| **autonomous** | Basic 4-tool MCP loop (list → read → write → confirm) | Each tool called exactly once, correct order, file written, clean termination |
+| **continuation** | 3 sequential user tasks with report-back between (Type A: explicit follow-up after report — the production failure pattern previously reported on E4B) | Each follow-up task actually executed (≥2 tool calls per task), end-state file mutations correct |
+| **sprint** | Single user message with 3 steps; agent must work through ALL autonomously (Type B: self-direction without re-prompting — the CLI/Matrix workload) | All steps' tools called, both files written, ≤12 tool calls (no runaway) |
+| **extended** | 3-file read + accumulate + write + verify, >7 iters (probes long-loop coherence) | All 3 reads, write to summary file, write contains keywords from all 3 sources, ≤15 tool calls |
+
+### Agentic suite results (2026-05-02, all greedy `temperature=0.0`)
+
+| Model | autonomous | continuation | **sprint** | extended | Verdict |
+|---|---|---|---|---|---|
+| **E4B-SABER raw** (`mlx_lm` wrapper, `:41961`) | ✅ 4 iters, 3 calls | ✅ 8 calls across 3 tasks | ✅ **5 iters, 4 calls** | ✅ 7 iters, 6 calls | **Production winner** — passes all four |
+| Nemostein 30B (`vllm-mlx`, `:41966`) | ✅ 4 iters | ✅ all 3 tasks | ❌ **iter 1 dead — 1024t reasoning padding consumed budget before any tool emission** | ✅ 7 iters, 6 calls | Production-blocking sprint failure |
+| Harmonic-9B (`vllm-mlx`) | ✅ 4 iters | (not measured) | ❌ **20/20 runaway repetition** (called list/read/write/delete in loop after task complete) | ❌ **20/20 runaway** | Older model, pre-agentic-RLHF gen — shelved for production |
+
+Per-iter throughput on the agentic loop:
+- **E4B-SABER:** ~3-5s/iter → SABER's full sprint completed in **~15s end-to-end**
+- **Nemostein:** ~19s/iter → would be ~80s end-to-end if it didn't get stuck
+- **Harmonic-9B:** ~10-16s/iter → 20-iter runaway = ~4 minutes wasted
+
+### Why E4B-SABER wins the sprint test
+
+SABER's tool-call discipline is excellent at greedy decoding: each iteration emits short content (none over 400 tokens), the tool call sits in the structured `tool_calls` field, the model knows to stop after the user's stated steps are complete. The training (abliteration + Hermes fine-tune) explicitly rewards "do work → confirm → stop". Nemostein and Harmonic-9B both lack this discipline at greedy temperatures — Nemostein over-thinks, Harmonic-9B over-acts.
+
+### Why Nemostein fails the sprint test specifically
+
+Nemostein under `--reasoning-parser qwen3` emits a long `<think>...</think>` block that vllm-mlx strips into `reasoning_content` but still counts against `max_tokens`. On a multi-step sprint user message, the model's first turn fills the entire 1024-token budget with reasoning *about* what it's going to do, never gets to the actual tool call. Capacity is there, but the parser configuration starves the action. Possible fixes (deferred to a future sprint): raise `max_tokens` to 4096+, or strip reasoning from the budget calculation, or use a different reasoning parser that's more terse.
+
+### Why Harmonic-9B fails sprint and extended
+
+Older Qwen3.5-architecture model from before agentic RLHF caught up. At greedy decoding it can't tell when a task is done — keeps calling tools to "verify" and "re-verify". Sampling at temperature 0.6 might break the loop (untested in this sprint). Not worth pursuing for production given SABER passes greedy outright. Held as a non-production reserve.
+
+### Docs-corpus-review workload mechanics (the production sprint pattern)
+
+Operator concern: Kelk's last large assignment was "review our entire docs corpus" — repeated read-doc → discuss → edit → next-doc cycles. Previous attempt choked. What the bake-off data implies for sustained workloads of this shape:
+
+**Per-doc cost at SABER:** ~6 tool calls (read → discuss → maybe edit → maybe read another → confirm) at 35 tok/s. A 5K-token doc + 1K of model dialog = ~6K added to context per doc. Throughput at 8K context is ~13 tok/s, at 16K is ~8 tok/s. Decode rate degrades gracefully but accumulates.
+
+**Context accumulation over a corpus:** 50 docs × 6K context-cost each = 300K accumulated tokens. SABER's nominal context is 128K but practical-quality drops sharply past 16K. **A naive single-conversation approach will choke around doc 5-8.** This is consistent with the previously reported failure.
+
+**Mechanisms that make sustained sprints feasible** (the actual fix is upstream of inference — at the Hermes-gateway layer):
+
+| Mechanism | Effect | Already in stack? |
+|---|---|---|
+| Per-doc session reset | Each doc starts fresh; loses cross-doc memory | Hermes-side; check current behavior |
+| Rolling summary every N turns | Drop old turns, prepend a one-paragraph summary; preserves cross-doc knowledge at fraction of cost | Not currently configured |
+| Persistent external memory (Qdrant, graphiti) | Each turn queries memory rather than re-loading prior docs | Yes — `mcp__qdrant-mcp` (projects-vault) and `mcp__graphiti` already in MCP toolchain |
+| Two-model split | Cheap loop model (SABER) for bulk turns, heavy model (Nemostein) only for actual editing decisions | Topology supports it; routing logic is Hermes-side |
+| `--prompt-cache-bytes` cap | Bounds the FCT078 wrapper's prompt cache so old session state evicts cleanly | Already set: 4 GB cap |
+
+**Bottom line:** the inference layer (E4B-SABER + wrapper) does not crush us on context for sustained sprints. The docs-corpus failure pattern is a Hermes-side context-management issue (whether/how the gateway trims accumulated dialog) and an external-memory utilization issue (whether Qdrant/graphiti is being queried instead of re-loading docs into context). Both are out-of-scope for this sprint but well-defined as next-sprint targets.
+
+### max_iters guidance for production
+
+Based on measured iter counts (SABER finished autonomous in 4, sprint in 5, extended in 7):
+
+| Workload | Recommended cap | Notes |
+|---|---|---|
+| Single discrete task ("read X, write Y") | **12** | ~70% headroom over the longest legit single-task workload measured |
+| Multi-step sprint (one user message, multiple steps) | **36** | Covers a 6-doc review @ 5 iters/doc with cushion |
+| Per-iter `max_tokens` | **1024** | Forces conciseness; reasoning padding fails fast at this cap (Nemostein sprint-fail signal) |
+| **No-progress detector** | bail after 3 consecutive iters with the same `(tool_name, args)` | Catches Harmonic-style loops far earlier than the iter cap |
+
+The no-progress detector is the most important addition — Harmonic-9B's runaway in our test would have been caught at iter ~6 instead of iter 20. The iter cap is a safety net, not a primary control.
 
 ---
 
@@ -76,24 +141,43 @@ Cold start: ~10 s. Quality 6/6 PASS, multi-turn 8/8 PASS, throughput 60 tok/s sh
 
 Cold start: ~4 s. Quality 6/6 PASS with `finish=stop` on every prompt, multi-turn 8/8 PASS coherent, throughput 35 tok/s sustained.
 
-### Topology
+### Topology — adopted 2026-05-02 sprint close
 
 ```
                       ┌───────────────────────────────────────┐
-Boot/Kelk Hermes  ──► │  :41961   E4B-SABER raw              │ low-latency, terse, multimodal-capable
+Boot Hermes      ───► │  :41961   E4B-SABER raw              │ Boot's dedicated agentic loop
                       │           mlx_lm.server + wrapper     │
-                      │           ~6 GB wired                 │
+                      │           ~6 GB RSS / ~10 GB wired    │
                       └───────────────────────────────────────┘
                       ┌───────────────────────────────────────┐
-Boot/Kelk Hermes  ──► │  :41966   Nemostein-3-Hermes-Omni 30B │ high-quality, reasoning, longer context
-                      │           vllm-mlx                    │
-                      │           ~14 GB wired                │
+Kelk Hermes      ───► │  :41962   E4B-SABER raw              │ Kelk's dedicated agentic loop
+                      │           mlx_lm.server + wrapper     │
+                      │           ~6 GB RSS / ~10 GB wired    │
+                      └───────────────────────────────────────┘
+                      ┌───────────────────────────────────────┐
+                      │  :41966   Nemostein 30B/3B           │ DORMANT (.disabled plist)
+                      │           vllm-mlx                    │ Hot-swap fallback for heavy
+                      │                                       │ reasoning if SABER not enough
                       └───────────────────────────────────────┘
 ```
 
-Optional `:41962` (a second mlx_lm wrapper instance, FCT078 dual-port pattern) when Boot and Kelk need fully independent E4B slots. FCT078 documented this dual-instance setup ran stable for days at 6.26 GB RSS each.
+Per-instance config (both `:41961` and `:41962` are identical except for port + log path):
+- Plist: `~/Library/LaunchAgents/com.bootindustries.mlx-lm-factory-{boot,kelk}.plist`
+- Wrapper: `scripts/mlx-lm-factory-wrapper.py` (Metal limit 10 GB, wired limit 10 GB, KV 8-bit `QuantizedKVCache` patched in)
+- Model: `~/models/Gemma-4-E4B-SABER-MLX-6bit` (raw, no adapter — FCT083 finding)
+- Flags: `--prompt-cache-bytes 4294967296 --prompt-concurrency 1 --prefill-step-size 2048 --max-tokens 16384`
 
-Total wired memory under both servers active + concurrent inference: ~20 GB (matches FCT078 measurements). Within 32 GB budget with 12 GB headroom for OS + Hermes + MCP servers.
+Total wired memory under both servers active + concurrent inference: **~16 GB** (matches FCT078 measurements). Within 32 GB budget with **~16 GB headroom** for OS + Hermes + MCP servers — generous, no pressure.
+
+Operator decision (sprint close): **leave `:41966` (Nemostein) `.disabled` until dual-SABER is proven solid in real production traffic.** If SABER struggles on a real workload we can hot-swap by `mv` + `launchctl bootstrap` of the Nemostein plist, no other changes.
+
+Rollback to dormant single-server (Nemostein-only on `:41966`):
+```
+launchctl bootout gui/$(id -u) ~/Library/LaunchAgents/com.bootindustries.mlx-lm-factory-{boot,kelk}.plist
+mv ~/Library/LaunchAgents/com.bootindustries.mlx-lm-factory-{boot,kelk}.plist{,.disabled}
+mv ~/Library/LaunchAgents/com.bootindustries.mlx-lm-factory-nemostein.plist{.disabled,}
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.bootindustries.mlx-lm-factory-nemostein.plist
+```
 
 ---
 

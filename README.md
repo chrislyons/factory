@@ -10,7 +10,7 @@ Operator control surface and orchestration infrastructure for the Boot Industrie
 | **Coordinator** | Agent orchestration and routing | Rust, Matrix E2EE |
 | **Job Registry** | Task tracking via YAML job files | Python build script |
 | **Hermes Agents** | Three persistent LLM agents (Boot, Kelk, IG-88) | Hermes v0.8.0, Matrix E2EE |
-| **MLX Inference** | Local model serving (2x E4B + 26B SSD streaming) | mlx-vlm, flash-moe |
+| **MLX Inference** | Local model serving (2× E4B-SABER raw, dual-instance) | `mlx_lm.server` via FCT078 wrapper |
 
 See [AGENTS.md](AGENTS.md) for the full agent topology, routing, and secrets reference.
 
@@ -55,11 +55,11 @@ Three persistent Hermes agents on Whitebox (Mac Studio M1 Max, 32GB):
 
 | Agent | Role | Main Model | Inference |
 |-------|------|------------|-----------|
-| **Boot** | Projects, dev, operations | Gemma 4 E4B (local :41961) | Fully local |
-| **Kelk** | Personal advisor, reflection | Gemma 4 E4B (local :41962) | Fully local |
+| **Boot** | Projects, dev, operations | Gemma-4-E4B-SABER raw (local :41961) | Fully local |
+| **Kelk** | Personal advisor, reflection | Gemma-4-E4B-SABER raw (local :41962) | Fully local |
 | **IG-88** | Trading, market analysis | Mimo-v2-Pro (Nous cloud) | Cloud |
 
-Aux tasks (compression, search, skills) for Boot and Kelk route to Gemma 4 26B-A4B via SSD expert streaming on :41966 (flash-moe, ~3GB resident RAM, 5.4 tok/s).
+Boot and Kelk each have a dedicated `mlx_lm.server` instance running through `scripts/mlx-lm-factory-wrapper.py` (FCT078 production wrapper: Metal+wired memory caps, 8-bit `QuantizedKVCache` patched in). E4B-SABER raw was selected by FCT091 bake-off as the only candidate that passes the full agentic-loop suite (autonomous, continuation, sprint, extended) at greedy decoding. Nemostein-3-Hermes-Omni 30B/3B is dormant on `:41966` (`.disabled` plist) as a hot-swap fallback for heavy-reasoning workloads.
 
 All agents connect to Matrix with native E2EE (python-olm). See [AGENTS.md](AGENTS.md) for details.
 
@@ -72,6 +72,7 @@ PREFIX docs live in `docs/fct/`. Key documents:
 - **FCT015** — Job registry architecture
 - **FCT017** — Topology flow, registry tables, font system, visual texture
 - **FCT067** — SSD expert streaming, E2EE migration, Gemma tool call parser fix
+- **FCT091** — vllm-mlx bake-off, agentic-loop suite, dual-SABER production selection
 
 ## License
 

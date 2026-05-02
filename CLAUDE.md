@@ -82,14 +82,15 @@ factory/
 | :41940-41949 | Development |
 | :41950-41959 | Reserved (was Coordinator HTTP API) |
 | :41960 | Reserved (no binding) |
-| :41961 | MLX inference — Boot main chat (gemma-4-e4b-it-6bit, mlx-vlm) |
-| :41962 | MLX inference — Kelk main chat (gemma-4-e4b-it-6bit, mlx-vlm) |
-| :41966 | flash-moe — Shared 26B aux (gemma-4-26b-a4b-it-6bit, SSD expert streaming, 2.88GB resident, ~5.4 tok/s) |
+| :41961 | MLX inference — Boot agentic loop (Gemma-4-E4B-SABER raw, `mlx_lm.server` via FCT078 wrapper) |
+| :41962 | MLX inference — Kelk agentic loop (Gemma-4-E4B-SABER raw, `mlx_lm.server` via FCT078 wrapper) |
+| :41966 | DORMANT (`.disabled` plist) — Nemostein-3-Hermes-Omni 30B/3B via vllm-mlx, hot-swap fallback for heavy reasoning |
 | :41988 | MLX inference — retired (IG-88 on Nous Mimo Pro) |
 
 > **Blackbox retired 2026-03-23.** RP5 serves as dumb watchdog only (cron health checks → Matrix alerts).
-> **IG-88 on Nous Mimo Pro since FCT067 (2026-04-14).** Boot + Kelk fully local (E4B main + 26B aux via SSD streaming).
+> **IG-88 on Nous Mimo Pro since FCT067 (2026-04-14).** Boot + Kelk on dual E4B-SABER raw via mlx_lm wrapper since FCT091 (2026-05-02) — chosen for full agentic-loop pass.
 > **Pantalaimon retired FCT067 (2026-04-14).** All agents use native E2EE via python-olm + matrix-nio[e2e].
+> **Nemostein 30B fallback (FCT091):** plist exists at `~/Library/LaunchAgents/com.bootindustries.mlx-lm-factory-nemostein.plist.disabled`. Hot-swap by `mv` + `launchctl bootstrap` if SABER proves insufficient on a heavy-reasoning workload; agents must be re-pointed at :41966.
 
 ## Agent Console (FCT048)
 
