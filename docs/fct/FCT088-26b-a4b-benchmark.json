@@ -1,0 +1,50 @@
+[
+  {
+    "name": "Short factual",
+    "content": "Paris",
+    "prompt_tokens": 27,
+    "completion_tokens": 54,
+    "total_time": 15.3,
+    "tok_per_sec": 3.5
+  },
+  {
+    "name": "Medium reasoning",
+    "content": "There are **9** sheep left.\n\n**Step-by-step explanation:**\n\n1.  **Start with the total:** The",
+    "prompt_tokens": 39,
+    "completion_tokens": 256,
+    "total_time": 7.8,
+    "tok_per_sec": 32.7
+  },
+  {
+    "name": "Code generation",
+    "error": "'content'"
+  },
+  {
+    "name": "Multi-step reasoning",
+    "content": "To solve this, let's break it down step by step:\n\n**Step 1: Determine the rate of a single machine**\nIf 5 machines make 5 widgets in 5 minutes, we need to find out how long it takes one machine to make one widget.\n*   5 machines $\\div$ 5 widgets = 1 widget per machine\n*   Therefore, **1 machine take",
+    "prompt_tokens": 53,
+    "completion_tokens": 512,
+    "total_time": 15.6,
+    "tok_per_sec": 32.9
+  },
+  {
+    "name": "Instruction following",
+    "error": "'content'"
+  },
+  {
+    "name": "Tool call simulation",
+    "content": "```json\n{\"name\": \"read_file\", \"arguments\": {\"path\": \"config.yaml\"}}\n```",
+    "prompt_tokens": 61,
+    "completion_tokens": 90,
+    "total_time": 3.2,
+    "tok_per_sec": 28.4
+  },
+  {
+    "name": "Long context (~3500 tok)",
+    "content": "# The History of Computing: From Babbage to AI\n\nThe history of computing is a journey from mechanical gears to silicon chips, and from simple arithmetic to artificial intelligence. This evolution can be broken down into several key eras.\n\n## 1. The Mechanical Era: The Foundations (1830s\u20131940s)\n\nThe ",
+    "prompt_tokens": 4815,
+    "completion_tokens": 512,
+    "total_time": 32.3,
+    "tok_per_sec": 15.8
+  }
+]

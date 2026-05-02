@@ -1,0 +1,62 @@
+[
+  {
+    "name": "Short factual",
+    "content_preview": "Paris",
+    "reasoning_len": 0,
+    "content_len": 5,
+    "prompt_tokens": 27,
+    "completion_tokens": 54,
+    "total_time": 13.9,
+    "tok_per_sec": 3.9
+  },
+  {
+    "name": "Sheep riddle",
+    "content_preview": "There are **9** sheep left.\n\nThe phrase \"all but 9 die\" means that 9 sheep survived, while the rest died.",
+    "reasoning_len": 0,
+    "content_len": 105,
+    "prompt_tokens": 34,
+    "completion_tokens": 170,
+    "total_time": 5.5,
+    "tok_per_sec": 30.8
+  },
+  {
+    "name": "Code: palindrome",
+    "content_preview": "Here is a clean, Pythonic implementation of a palindrome checker.\n\n```python\ndef is_palindrome(text: str) -> bool:\n    \"\"\"\n    Checks if a string is a palindrome.\n\n    A palindrome is a word, phrase, ",
+    "reasoning_len": 0,
+    "content_len": 2357,
+    "prompt_tokens": 35,
+    "completion_tokens": 1528,
+    "total_time": 46.8,
+    "tok_per_sec": 32.6
+  },
+  {
+    "name": "Multi-step math",
+    "content_preview": "It would take **5 minutes**.\n\n**Here is the breakdown:**\n\n1.  If 5 machines make 5 widgets in 5 minutes, that means **each machine takes 5 minutes to make 1 widget**.\n2.  Since all machines work simul",
+    "reasoning_len": 0,
+    "content_len": 371,
+    "prompt_tokens": 48,
+    "completion_tokens": 373,
+    "total_time": 11.4,
+    "tok_per_sec": 32.6
+  },
+  {
+    "name": "Instruction follow",
+    "content_preview": "1. Exercise helps maintain a healthy weight by burning calories.\n2. Physical activity reduces stress and improves overall mood.\n3. Regular movement strengthens the heart and improves circulation.\n4. E",
+    "reasoning_len": 0,
+    "content_len": 321,
+    "prompt_tokens": 36,
+    "completion_tokens": 363,
+    "total_time": 11.0,
+    "tok_per_sec": 33.0
+  },
+  {
+    "name": "Tool call",
+    "content_preview": "```json\n{\"name\": \"read_file\", \"arguments\": {\"path\": \"config.yaml\"}}\n```",
+    "reasoning_len": 0,
+    "content_len": 71,
+    "prompt_tokens": 49,
+    "completion_tokens": 127,
+    "total_time": 4.2,
+    "tok_per_sec": 30.2
+  }
+]

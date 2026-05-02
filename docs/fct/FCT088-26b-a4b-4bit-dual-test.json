@@ -1,0 +1,173 @@
+{
+  "model": "/Users/nesbitt/models/Ornstein-26B-A4B-it-MLX-4bit",
+  "disk_size_gb": 13.2,
+  "single": [
+    {
+      "name": "Short factual",
+      "content": "Paris",
+      "prompt_tokens": 25,
+      "completion_tokens": 57,
+      "total_time": 1.5,
+      "tok_per_sec": 37.1
+    },
+    {
+      "name": "Reasoning",
+      "content": "There are **9** sheep left.\n\nThe phrase \"all but 9 die\" means that 9 sheep survived, while the rest died.",
+      "prompt_tokens": 33,
+      "completion_tokens": 194,
+      "total_time": 4.6,
+      "tok_per_sec": 42.3
+    },
+    {
+      "name": "Code gen",
+      "content": "Here is a clean, Pythonic implementation of a palindrome checker using type hints and comprehensive docstrings.\n\n```python\ndef is_palindrome(text: str",
+      "prompt_tokens": 27,
+      "completion_tokens": 1024,
+      "total_time": 23.9,
+      "tok_per_sec": 42.9
+    },
+    {
+      "name": "Multi-step",
+      "content": "The answer is **5 minutes**.\n\nHere is the breakdown:\n\n1.  **Analyze the rate:** If 5 machines make 5 widgets in 5 minutes, that means the machines are",
+      "prompt_tokens": 42,
+      "completion_tokens": 512,
+      "total_time": 11.8,
+      "tok_per_sec": 43.2
+    },
+    {
+      "name": "Instruction",
+      "content": "1. Regular exercise helps maintain a healthy weight by burning calories.\n2. Physical activity strengthens the heart and improves cardiovascular health",
+      "prompt_tokens": 35,
+      "completion_tokens": 378,
+      "total_time": 8.8,
+      "tok_per_sec": 43.2
+    },
+    {
+      "name": "Tool call",
+      "content": "```json\n{\"name\": \"read_file\", \"arguments\": {\"path\": \"config.yaml\"}}\n```",
+      "prompt_tokens": 44,
+      "completion_tokens": 163,
+      "total_time": 4.0,
+      "tok_per_sec": 40.8
+    }
+  ],
+  "dual_a": [
+    {
+      "name": "Short factual",
+      "content": "Paris",
+      "prompt_tokens": 25,
+      "completion_tokens": 57,
+      "total_time": 1.7,
+      "tok_per_sec": 33.3
+    },
+    {
+      "name": "Reasoning",
+      "content": "There are **9** sheep left.\n\nThe phrase \"all but 9 die\" means that 9 sheep survived, while the rest died.",
+      "prompt_tokens": 33,
+      "completion_tokens": 194,
+      "total_time": 5.3,
+      "tok_per_sec": 36.4
+    },
+    {
+      "name": "Code gen",
+      "content": "Here is a clean, Pythonic implementation of a palindrome checker using type hints and comprehensive docstrings.\n\n```python\ndef is_palindrome(text: str",
+      "prompt_tokens": 27,
+      "completion_tokens": 1024,
+      "total_time": 24.1,
+      "tok_per_sec": 42.5
+    },
+    {
+      "name": "Multi-step",
+      "content": "The answer is **5 minutes**.\n\nHere is the breakdown:\n\n1.  **Analyze the rate:** If 5 machines make 5 widgets in 5 minutes, that means the machines are",
+      "prompt_tokens": 42,
+      "completion_tokens": 512,
+      "total_time": 11.7,
+      "tok_per_sec": 43.8
+    },
+    {
+      "name": "Instruction",
+      "content": "1. Regular exercise helps maintain a healthy weight by burning calories.\n2. Physical activity strengthens the heart and improves cardiovascular health",
+      "prompt_tokens": 35,
+      "completion_tokens": 378,
+      "total_time": 8.6,
+      "tok_per_sec": 44.0
+    },
+    {
+      "name": "Tool call",
+      "content": "```json\n{\"name\": \"read_file\", \"arguments\": {\"path\": \"config.yaml\"}}\n```",
+      "prompt_tokens": 44,
+      "completion_tokens": 163,
+      "total_time": 3.8,
+      "tok_per_sec": 43.0
+    }
+  ],
+  "dual_b": [
+    {
+      "name": "Short factual",
+      "content": "Paris",
+      "prompt_tokens": 25,
+      "completion_tokens": 57,
+      "total_time": 33.2,
+      "tok_per_sec": 1.7
+    },
+    {
+      "name": "Reasoning",
+      "content": "There are **9** sheep left.\n\nThe phrase \"all but 9 die\" means that 9 sheep survived, while the rest died.",
+      "prompt_tokens": 33,
+      "completion_tokens": 194,
+      "total_time": 4.8,
+      "tok_per_sec": 40.2
+    },
+    {
+      "name": "Code gen",
+      "content": "Here is a clean, Pythonic implementation of a palindrome checker using type hints and comprehensive docstrings.\n\n```python\ndef is_palindrome(text: str",
+      "prompt_tokens": 27,
+      "completion_tokens": 1024,
+      "total_time": 24.0,
+      "tok_per_sec": 42.7
+    },
+    {
+      "name": "Multi-step",
+      "content": "The answer is **5 minutes**.\n\nHere is the breakdown:\n\n1.  **Analyze the rate:** If 5 machines make 5 widgets in 5 minutes, that means the machines are",
+      "prompt_tokens": 42,
+      "completion_tokens": 512,
+      "total_time": 11.8,
+      "tok_per_sec": 43.3
+    },
+    {
+      "name": "Instruction",
+      "content": "1. Regular exercise helps maintain a healthy weight by burning calories.\n2. Physical activity strengthens the heart and improves cardiovascular health",
+      "prompt_tokens": 35,
+      "completion_tokens": 378,
+      "total_time": 8.7,
+      "tok_per_sec": 43.3
+    },
+    {
+      "name": "Tool call",
+      "content": "```json\n{\"name\": \"read_file\", \"arguments\": {\"path\": \"config.yaml\"}}\n```",
+      "prompt_tokens": 44,
+      "completion_tokens": 163,
+      "total_time": 4.1,
+      "tok_per_sec": 40.2
+    }
+  ],
+  "concurrent": {
+    "B": {
+      "content": "<|channel>\n<channel|>Quantum entanglement occurs when two or more particles become linked such that the state of one instantly influences the state of",
+      "prompt_tokens": 23,
+      "completion_tokens": 77,
+      "total_time": 1.9,
+      "tok_per_sec": 39.9
+    },
+    "A": {
+      "content": "<|channel>\n<channel|>Quantum entanglement occurs when two or more particles become linked such that the state of one instantly influences the state of",
+      "prompt_tokens": 23,
+      "completion_tokens": 77,
+      "total_time": 46.0,
+      "tok_per_sec": 1.7
+    }
+  },
+  "avg_single_tok_s": 41.6,
+  "avg_dual_a_tok_s": 40.5,
+  "avg_dual_b_tok_s": 35.2
+}
