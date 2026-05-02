@@ -2,11 +2,15 @@
 # factory-startup.sh — Sequenced startup for Factory services on Whitebox
 #
 # Phase 0: Infrastructure services (no model dependency)
-# Phase 1: Ornstein-Hermes-3.6-27B (:41966) — serves Boot and Kelk
+# Phase 1: MLX inference tier (FCT091/FCT092)
+#   :41961 E4B-SABER (Boot)   — primary agentic
+#   :41962 E4B-SABER (Kelk)   — primary agentic
+#   :41963 E2B-SABER (Coord)  — aux tier (compaction, summarization, classification)
 # Phase 2: Hermes gateways — MLX guaranteed ready
 #
-# Note: Dual SABER E4B (:41961/:41962) retired 2026-05-01.
-# Single 27B instance on :41966 serves Boot and Kelk. mmap handles memory.
+# Note: :41966 (Nemostein vllm-mlx) deprecated 2026-05-02. Plist renamed
+# to .deprecated to prevent accidental re-enable. See FCT092 for hot-swap recipe
+# if heavy-reasoning fallback ever becomes needed again.
 
 set -uo pipefail
 
@@ -114,14 +118,17 @@ done
 # hindsight-api — known broken (exit 127), bootstrap anyway for when it's fixed
 bootstrap "com.bootindustries.hindsight-api"
 
-# ── Phase 1: Nemostein-3-Hermes-Omni (:41966) ─────────────────────────
-# FCT089: Nemostein-3-Hermes-Omni mixed_3_4. Single instance shared by Boot and Kelk.
-log "Phase 1: Nemostein-3-Hermes-Omni (:41966)"
-if require_free_memory 8000 "Phase 1"; then
-  bootstrap "com.bootindustries.mlx-lm-factory-nemostein"
-  wait_for_health "http://127.0.0.1:41966/v1/models" "mlx-nemostein" 180
-  # Old plists (.disabled) on disk for rollback:
-  #   mlx-lm-factory-27b, mlx-lm-factory-boot/kelk (E4B), mlx-lm-factory-26b-kelk
+# ── Phase 1: MLX tri-server (FCT091/FCT092) ───────────────────────────
+# Boot/Kelk on E4B-SABER (:41961/:41962), Coord on E2B-SABER (:41963).
+# All via FCT078 mlx_lm wrapper. Each: ~6 GB RSS / ~10 GB wired (E4B), ~6 GB wired (E2B).
+log "Phase 1: MLX inference tier (E4B-SABER ×2 + E2B-SABER aux)"
+if require_free_memory 22000 "Phase 1"; then
+  bootstrap "com.bootindustries.mlx-lm-factory-boot"
+  bootstrap "com.bootindustries.mlx-lm-factory-kelk"
+  bootstrap "com.bootindustries.mlx-lm-factory-coord"
+  wait_for_health "http://127.0.0.1:41961/v1/models" "mlx-boot  (:41961)" 120
+  wait_for_health "http://127.0.0.1:41962/v1/models" "mlx-kelk  (:41962)" 120
+  wait_for_health "http://127.0.0.1:41963/v1/models" "mlx-coord (:41963)" 120
 else
   log "  SKIPPED — not enough memory"
 fi
@@ -141,8 +148,8 @@ log "=== Startup complete ==="
 log "Free: $(top -l 1 -s 0 2>/dev/null | grep PhysMem | sed 's/.*） //')"
 
 log ""
-log "--- Model server ---"
-for port_label in "41966/mlx-nemostein"; do
+log "--- Model servers ---"
+for port_label in "41961/mlx-boot" "41962/mlx-kelk" "41963/mlx-coord"; do
   port="${port_label%%/*}"
   label="${port_label##*/}"
   if curl -sf --max-time 3 "http://127.0.0.1:${port}/v1/models" >/dev/null 2>&1; then

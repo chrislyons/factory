@@ -1,0 +1,197 @@
+{
+  "label": "e2b-saber-stress",
+  "model": "/Users/nesbitt/models/Gemma-4-E2B-SABER-MLX-6bit",
+  "port": 41963,
+  "ts": "2026-05-02T13:17:13",
+  "pre_mem": {
+    "free_gb": 3.97,
+    "active_gb": 6.32,
+    "wired_gb": 3.54
+  },
+  "pre_metrics": {
+    "error": "HTTP 404"
+  },
+  "include": [
+    "stress"
+  ],
+  "quality": [
+    {
+      "finish": "stop",
+      "prompt_tokens": 28,
+      "completion_tokens": 148,
+      "elapsed_s": 3.53,
+      "tok_per_sec": 42.0,
+      "content_len": 5,
+      "reasoning_len": 0,
+      "content_preview": "Paris",
+      "content_full": "Paris",
+      "has_tool_calls": false,
+      "tool_calls": [],
+      "name": "Short factual"
+    },
+    {
+      "finish": "stop",
+      "prompt_tokens": 35,
+      "completion_tokens": 152,
+      "elapsed_s": 3.33,
+      "tok_per_sec": 45.7,
+      "content_len": 21,
+      "reasoning_len": 0,
+      "content_preview": "There are **9** left.",
+      "content_full": "There are **9** left.",
+      "has_tool_calls": false,
+      "tool_calls": [],
+      "name": "Sheep riddle"
+    },
+    {
+      "finish": "stop",
+      "prompt_tokens": 36,
+      "completion_tokens": 1199,
+      "elapsed_s": 25.07,
+      "tok_per_sec": 47.8,
+      "content_len": 1590,
+      "reasoning_len": 0,
+      "content_preview": "This solution provides a robust function that ignores case and non-alphanumeric characters, which is the standard expectation for a palindrome checker.\n\n```python\nimport re\n\ndef is_palindrome(s: str) -> bool:\n    \"\"\"\n    Checks if a given s",
+      "content_full": "This solution provides a robust function that ignores case and non-alphanumeric characters, which is the standard expectation for a palindrome checker.\n\n```python\nimport re\n\ndef is_palindrome(s: str) -> bool:\n    \"\"\"\n    Checks if a given string is a palindrome.\n\n    A palindrome is a sequence of characters that reads the same forwards and \n    backwards, ignoring case and non-alphanumeric characters.\n\n    Args:\n        s: The input string to check.\n\n    Returns:\n        True if the string is a palindrome, False otherwise.\n    \"\"\"\n    # 1. Normalize the string:\n    #    a. Convert to lowercase.\n    #    b. Filter out non-alphanumeric characters (keeping only letters and numbers).\n    # We use a generator expression and join for efficient filtering.\n    cleaned_s = \"\".join(char for char in s if char.isalnum()).lower()\n    \n    # 2. Check for palindrome property:\n    # Compare the cleaned string with its reverse (using slicing [::-1]).\n    return cleaned_s == cleaned_s[::-1]\n\n# --- Examples ---\n\n# Example 1: Simple palindrome\nprint(f\"'madam' is a palindrome: {is_palindrome('madam')}\")\n\n# Example 2: Case-insensitive palindrome\nprint(f\"'Racecar' is a palindrome: {is_palindrome('Racecar')}\")\n\n# Example 3: Palindrome with spaces and punctuation (Robust check)\nphrase1 = \"A man, a plan, a canal: Panama\"\nprint(f\"'{phrase1}' is a palindrome: {is_palindrome(phrase1)}\")\n\n# Example 4: Not a palindrome\nprint(f\"'hello world' is a palindrome: {is_palindrome('hello world')}\")\n\n# Example 5: Empty string (considered a palindrome)\nprint(f\"'' is a palindrome: {is_palindrome('')}\")\n```",
+      "has_tool_calls": false,
+      "tool_calls": [],
+      "name": "Code: palindrome"
+    },
+    {
+      "finish": "stop",
+      "prompt_tokens": 49,
+      "completion_tokens": 875,
+      "elapsed_s": 18.05,
+      "tok_per_sec": 48.5,
+      "content_len": 752,
+      "reasoning_len": 0,
+      "content_preview": "This is a rate problem. We need to determine the efficiency of the system.\n\n**1. Analyze the initial condition:**\n* 5 machines make 5 widgets in 5 minutes.\n\nThis means that in 5 minutes, the system produces 5 widgets.\n\n**2. Determine the ra",
+      "content_full": "This is a rate problem. We need to determine the efficiency of the system.\n\n**1. Analyze the initial condition:**\n* 5 machines make 5 widgets in 5 minutes.\n\nThis means that in 5 minutes, the system produces 5 widgets.\n\n**2. Determine the rate per machine:**\nIf 5 machines make 5 widgets in 5 minutes, then each machine is responsible for making 1 widget in that time frame.\n* **Rate:** 1 machine = 1 widget per 5 minutes.\n\n**3. Apply the rate to the new scenario:**\n* We have 100 machines.\n* We need to make 100 widgets.\n\nSince each machine can make 1 widget in 5 minutes, if you have 100 machines working simultaneously on 100 widgets, the time required is simply the time it takes for one machine to complete one widget.\n\nIt would take **5 minutes**.",
+      "has_tool_calls": false,
+      "tool_calls": [],
+      "name": "Multi-step math"
+    },
+    {
+      "finish": "stop",
+      "prompt_tokens": 37,
+      "completion_tokens": 479,
+      "elapsed_s": 10.1,
+      "tok_per_sec": 47.4,
+      "content_len": 498,
+      "reasoning_len": 0,
+      "content_preview": "1. Exercise improves cardiovascular health by strengthening the heart and lowering blood pressure.\n2. Physical activity reduces symptoms of anxiety and depression by releasing mood-boosting endorphins.\n3. Regular exercise helps regulate blo",
+      "content_full": "1. Exercise improves cardiovascular health by strengthening the heart and lowering blood pressure.\n2. Physical activity reduces symptoms of anxiety and depression by releasing mood-boosting endorphins.\n3. Regular exercise helps regulate blood sugar levels, significantly reducing the risk of type 2 diabetes.\n4. It aids in managing body weight by burning calories and building lean muscle mass.\n5. Exercise promotes better sleep quality and enhances cognitive functions, including memory and focus.",
+      "has_tool_calls": false,
+      "tool_calls": [],
+      "name": "Instruction follow"
+    },
+    {
+      "finish": "stop",
+      "prompt_tokens": 50,
+      "completion_tokens": 227,
+      "elapsed_s": 4.72,
+      "tok_per_sec": 48.1,
+      "content_len": 114,
+      "reasoning_len": 0,
+      "content_preview": "```json\n{\n  \"tool_call\": {\n    \"name\": \"read_file\",\n    \"arguments\": {\n      \"path\": \"config.yaml\"\n    }\n  }\n}\n```",
+      "content_full": "```json\n{\n  \"tool_call\": {\n    \"name\": \"read_file\",\n    \"arguments\": {\n      \"path\": \"config.yaml\"\n    }\n  }\n}\n```",
+      "has_tool_calls": false,
+      "tool_calls": [],
+      "name": "Tool call"
+    }
+  ],
+  "stress": [
+    {
+      "finish": "length",
+      "prompt_tokens": 1050,
+      "completion_tokens": 256,
+      "elapsed_s": 5.8,
+      "tok_per_sec": 44.1,
+      "content_len": 0,
+      "reasoning_len": 0,
+      "content_preview": "",
+      "content_full": "",
+      "has_tool_calls": false,
+      "tool_calls": [],
+      "target_ctx": 1000
+    },
+    {
+      "finish": "length",
+      "prompt_tokens": 4048,
+      "completion_tokens": 256,
+      "elapsed_s": 7.32,
+      "tok_per_sec": 35.0,
+      "content_len": 0,
+      "reasoning_len": 0,
+      "content_preview": "",
+      "content_full": "",
+      "has_tool_calls": false,
+      "tool_calls": [],
+      "target_ctx": 4000
+    },
+    {
+      "finish": "length",
+      "prompt_tokens": 8046,
+      "completion_tokens": 256,
+      "elapsed_s": 8.91,
+      "tok_per_sec": 28.7,
+      "content_len": 0,
+      "reasoning_len": 0,
+      "content_preview": "",
+      "content_full": "",
+      "has_tool_calls": false,
+      "tool_calls": [],
+      "target_ctx": 8000
+    },
+    {
+      "finish": "length",
+      "prompt_tokens": 16048,
+      "completion_tokens": 256,
+      "elapsed_s": 12.69,
+      "tok_per_sec": 20.2,
+      "content_len": 0,
+      "reasoning_len": 0,
+      "content_preview": "",
+      "content_full": "",
+      "has_tool_calls": false,
+      "tool_calls": [],
+      "target_ctx": 16000
+    },
+    {
+      "finish": "length",
+      "prompt_tokens": 32047,
+      "completion_tokens": 256,
+      "elapsed_s": 21.82,
+      "tok_per_sec": 11.7,
+      "content_len": 0,
+      "reasoning_len": 0,
+      "content_preview": "",
+      "content_full": "",
+      "has_tool_calls": false,
+      "tool_calls": [],
+      "target_ctx": 32000
+    },
+    {
+      "finish": "length",
+      "prompt_tokens": 64047,
+      "completion_tokens": 256,
+      "elapsed_s": 45.03,
+      "tok_per_sec": 5.7,
+      "content_len": 0,
+      "reasoning_len": 0,
+      "content_preview": "",
+      "content_full": "",
+      "has_tool_calls": false,
+      "tool_calls": [],
+      "target_ctx": 64000
+    }
+  ],
+  "post_mem": {
+    "free_gb": 2.94,
+    "active_gb": 4.8,
+    "wired_gb": 7.65
+  },
+  "post_metrics": {
+    "error": "HTTP 404"
+  }
+}

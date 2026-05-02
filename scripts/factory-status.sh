@@ -6,14 +6,15 @@
 echo "=== Factory Service Status ==="
 echo ""
 
-# FCT091: dual-server topology — SABER on :41961 (mlx_lm wrapper),
-# Nemostein on :41966 (vllm-mlx). Either or both may be active.
-for slot in "41961:E4B-SABER (mlx_lm wrapper)" "41962:E4B-SABER alt (mlx_lm wrapper)" "41966:Nemostein (vllm-mlx)"; do
+# FCT091/FCT092: tri-server topology — Boot/Kelk on E4B-SABER (:41961/:41962),
+# Coord aux tier on E2B-SABER (:41963). All via mlx_lm wrapper. :41966 deprecated.
+for slot in "41961:E4B-SABER Boot (mlx_lm wrapper)" "41962:E4B-SABER Kelk (mlx_lm wrapper)" "41963:E2B-SABER Coord aux (mlx_lm wrapper)"; do
   port="${slot%%:*}"
   label="${slot#*:}"
   echo "Model server :${port} — ${label}:"
   if curl -sf --max-time 3 "http://127.0.0.1:${port}/v1/models" >/dev/null 2>&1; then
-    MODEL=$(curl -sf --max-time 3 "http://127.0.0.1:${port}/v1/models" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['data'][0]['id'])" 2>/dev/null || echo "unknown")
+    # mlx_lm wrapper exposes nanoLLaVA placeholder as data[0]; actual loaded model is the local path entry
+    MODEL=$(curl -sf --max-time 3 "http://127.0.0.1:${port}/v1/models" | python3 -c "import sys,json; d=json.load(sys.stdin); ids=[m['id'] for m in d['data']]; local=[i for i in ids if i.startswith('/')]; print(local[0] if local else ids[0])" 2>/dev/null || echo "unknown")
     echo "  Status: UP"
     echo "  Serving: $MODEL"
     # FCT091: scrape /metrics for prefix-cache hit rate (vllm-mlx only)
