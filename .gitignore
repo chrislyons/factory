@@ -55,3 +55,12 @@ ig88-device-reset.sh
 *.zip
 *.tar.gz
 *.tgz
+
+# Model weights — should live in HuggingFace, not git
+*.safetensors
+*.bin
+*.gguf
+*.pkl
+*.pt
+*.pth
+*.onnx
